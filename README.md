@@ -49,7 +49,8 @@ mockup tersebut.
 │   ├── public/         # Static assets publik
 │   └── src/            # Source code frontend
 ├── server/             # Backend Bun/TypeScript
-│   └── index.ts        # Entry point server saat ini
+│   ├── prisma/         # Schema dan migration Prisma
+│   └── src/            # Source code backend
 └── README.md           # Dokumentasi project
 ```
 
@@ -90,7 +91,14 @@ bun run lint
 ```bash
 cd server
 bun install
-bun run index.ts
+cp .env.example .env
+bun run dev
+```
+
+Backend default berjalan di:
+
+```txt
+http://localhost:4002
 ```
 
 ## Arah Implementasi dari Mockup
