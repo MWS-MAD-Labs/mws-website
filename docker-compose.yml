@@ -1,0 +1,8 @@
+services:
+  db:
+    # THis file is used to define the database service for the application. It specifies the image to use, the container name, and the environment variables required for the database to function properly.
+  server:
+    # This file is used to define the server service for the application. It specifies the build context, the container name, and the restart policy for the server.
+
+  client:
+    # This file is used to define the client service for the application. It specifies the build context, the container name, and the restart policy for the client.
