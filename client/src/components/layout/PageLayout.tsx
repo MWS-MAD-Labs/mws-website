@@ -23,9 +23,14 @@ export default function PageLayout() {
       "(prefers-reduced-motion: reduce)",
     ).matches;
 
-    const revealItems = document.querySelectorAll(".reveal");
+    const revealItems = document.querySelectorAll(".reveal, [data-reveal]");
+    const markRevealed = (element: Element) => {
+      element.classList.add("in");
+      element.setAttribute("data-revealed", "true");
+    };
+
     if (reduceMotion || !("IntersectionObserver" in window)) {
-      revealItems.forEach((element) => element.classList.add("in"));
+      revealItems.forEach(markRevealed);
       return;
     }
 
@@ -33,7 +38,7 @@ export default function PageLayout() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.classList.add("in");
+            markRevealed(entry.target);
             observer.unobserve(entry.target);
           }
         });

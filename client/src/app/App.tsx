@@ -19,7 +19,7 @@ export default function App() {
       <Routes>
         <Route element={<PageLayout />}>
           <Route index element={<Home />} />
-          <Route path="our-school" element={<OurSchool />} />
+          {/* <Route path="our-school" element={<OurSchool />} />
           <Route path="admission" element={<Admission />} />
           <Route path="academic" element={<Academic />} />
           <Route path="academic/kindergarten" element={<Kindergarten />} />
@@ -38,7 +38,7 @@ export default function App() {
           <Route path="news-detail" element={<Navigate to="/news/detail" replace />} />
           <Route path="community-stories" element={<CommunityStories />} />
           <Route path="contact" element={<Contact />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} /> */}
         </Route>
       </Routes>
   );
