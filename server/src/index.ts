@@ -1,11 +1,14 @@
 import "dotenv/config";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { ResponseError } from "./error/response-error";
+import { adminRoute } from "./routes/admin-route";
+import { authRoute } from "./routes/auth-route";
 
 const app = new Hono();
 
 const frontendOrigin = process.env["FRONTEND_ORIGIN"] ?? "http://localhost:5173";
-const port = Number(process.env["PORT"] ?? 4002);
+const port = Number(process.env["PORT"] ?? 4004);
 
 declare global {
   // `bun run --hot` re-evaluates this module on changes. Keep one server
@@ -33,7 +36,14 @@ app.get("/health", (c) => {
   });
 });
 
+app.route("/auth", authRoute);
+app.route("/admin", adminRoute);
+
 app.onError((error, c) => {
+  if (error instanceof ResponseError) {
+    return c.json({ errors: error.message }, error.status as 400);
+  }
+
   console.error(error);
 
   return c.json(

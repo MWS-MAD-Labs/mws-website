@@ -1,5 +1,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Nunito+Sans:opsz,wght@6..12,400;6..12,500;6..12,600&family=Lora:ital,wght@0,500;1,500&display=swap");
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   /* === MWS Official Brand Palette === */
   --burgundy: #7e1518;
@@ -878,7 +882,9 @@ nav a:hover::after {
   font-weight: 500;
   color: rgba(255, 255, 255, 0.85);
   margin-bottom: 0;
-  transition: transform 0.4s ease, opacity 0.4s ease;
+  transition:
+    transform 0.4s ease,
+    opacity 0.4s ease;
 }
 
 /* Deskripsi & Link: Sembunyi Saat Normal */
@@ -888,7 +894,11 @@ nav a:hover::after {
   max-height: 0;
   overflow: hidden;
   transform: translateY(15px);
-  transition: opacity 0.3s ease, transform 0.3s ease, max-height 0.4s ease, margin 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease,
+    max-height 0.4s ease,
+    margin 0.3s ease;
 }
 
 .boxDesc {
@@ -1294,13 +1304,13 @@ nav a:hover::after {
   padding: 120px 0;
   display: flex;
   flex-direction: column;
-  align-items: center; 
+  align-items: center;
 }
 
 .affiliations-head {
   max-width: 800px;
   margin-bottom: 60px;
-  text-align: center; 
+  text-align: center;
 }
 
 .affiliations-head h2 {
@@ -1540,7 +1550,7 @@ nav a:hover::after {
 .community-header {
   max-width: 600px;
   margin: 0 auto 40px;
-  text-align: center; 
+  text-align: center;
 }
 
 .community-header h2 {
@@ -1856,23 +1866,23 @@ nav a:hover::after {
     rgba(36, 23, 24, 0.85) 100%
   );
   /* Efek blur tipis untuk menyamarkan gambar */
-  backdrop-filter: blur(4px); 
+  backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px); /* Untuk kompatibilitas Safari */
   z-index: 2;
 }
 
 .spotlight-caption {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%); /* Mengetengahkan secara presisi */
-    
-    padding: 60px 80px;
-    z-index: 3;
-    color: var(--white);
-    max-width: 960px;
-    width: 100%; /* Memastikan max-width bekerja dengan baik */
-    text-align: center; /* Mengetengahkan teks quote dan cite */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Mengetengahkan secara presisi */
+
+  padding: 60px 80px;
+  z-index: 3;
+  color: var(--white);
+  max-width: 960px;
+  width: 100%; /* Memastikan max-width bekerja dengan baik */
+  text-align: center; /* Mengetengahkan teks quote dan cite */
 }
 
 .spotlight-caption blockquote {
@@ -3223,7 +3233,9 @@ button {
   height: 2px;
   margin: 3px auto;
   background: currentColor;
-  transition: opacity 180ms ease, transform 180ms ease;
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
 }
 
 .site-header.nav-open .nav-toggle span:nth-child(1) {

@@ -51,7 +51,17 @@ export default function Footer() {
         </div>
 
         <div className="footer-bottom">
-          <p>&copy; 2026 Millennia World School. All rights reserved.</p>
+          <p>
+            &copy;{" "}
+            <Link
+              to="/admin"
+              aria-label="Admin"
+              className="inline-block cursor-pointer px-1 opacity-20 hover:opacity-60"
+            >
+              M
+            </Link>
+            illennia World School. All rights reserved.
+          </p>
           <div>
             <Link to="/#hero">Back to top</Link>
           </div>

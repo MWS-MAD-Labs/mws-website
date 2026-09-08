@@ -28,13 +28,13 @@ bun run dev
 Default server:
 
 ```txt
-http://localhost:4002
+http://localhost:4004
 ```
 
 Health check:
 
 ```txt
-http://localhost:4002/health
+http://localhost:4004/health
 ```
 
 ## Database Commands

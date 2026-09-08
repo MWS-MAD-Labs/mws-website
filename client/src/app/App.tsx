@@ -1,6 +1,6 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import PageLayout from "../components/layout/PageLayout";
-import Academic from "../pages/Academic";
+import { Navigate, Route, Routes } from "react-router-dom";
+import PageLayout from "@/components/layout/PageLayout";
+import Academic from "@/pages/Academic";
 import Admission from "../pages/admission";
 import CommunityStories from "../pages/community-stories";
 import Contact from "../pages/contact";
@@ -16,7 +16,6 @@ import SchoolNews from "../pages/news/school-news";
 
 export default function App() {
   return (
-    <BrowserRouter>
       <Routes>
         <Route element={<PageLayout />}>
           <Route index element={<Home />} />
@@ -42,6 +41,5 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
-    </BrowserRouter>
   );
 }

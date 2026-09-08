@@ -8,6 +8,6 @@ RUN
 COPY source dest
 
 USER bun
-EXPOSE 4002
+EXPOSE 4004
 
 CMD ["bun", "run", "src/index.ts"]

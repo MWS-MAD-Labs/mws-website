@@ -98,7 +98,7 @@ bun run dev
 Backend default berjalan di:
 
 ```txt
-http://localhost:4002
+http://localhost:4004
 ```
 
 ## Arah Implementasi dari Mockup
