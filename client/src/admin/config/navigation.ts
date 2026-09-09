@@ -19,12 +19,14 @@ import {
   WalletCards,
   type LucideIcon,
 } from "lucide-react";
+import type { CmsPermission } from "@/admin/types/auth";
 
-type MenuItem = {
+export type MenuItem = {
   label: string;
   href?: string;
   Icon: LucideIcon;
   enabled: boolean;
+  requiredPermission?: CmsPermission;
   children?: MenuItem[];
 };
 
@@ -46,36 +48,42 @@ const menuItems: MenuItem[] = [
         href: "/admin/pages",
         Icon: Files,
         enabled: true,
+        requiredPermission: "content:manage",
       },
       {
         label: "News",
         href: "/admin/news",
         Icon: Newspaper,
         enabled: true,
+        requiredPermission: "content:manage",
       },
       {
         label: "Programs",
         href: "/admin/programs",
         Icon: BookOpen,
         enabled: true,
+        requiredPermission: "content:manage",
       },
       {
         label: "Testimonials",
         href: "/admin/testimonials",
         Icon: MessageSquare,
         enabled: true,
+        requiredPermission: "content:manage",
       },
       {
         label: "FAQs",
         href: "/admin/faqs",
         Icon: CircleHelp,
         enabled: true,
+        requiredPermission: "content:manage",
       },
       {
         label: "Affiliations",
         href: "/admin/affiliations",
         Icon: Handshake,
         enabled: true,
+        requiredPermission: "content:manage",
       },
     ],
   },
@@ -90,18 +98,21 @@ const menuItems: MenuItem[] = [
         href: "/admin/admissions/inquiries",
         Icon: MessageSquare,
         enabled: true,
+        requiredPermission: "content:manage",
       },
       {
         label: "Applications",
         href: "/admin/admissions/applications",
         Icon: Files,
         enabled: true,
+        requiredPermission: "content:manage",
       },
       {
         label: "Applicants",
         href: "/admin/admissions/applicants",
         Icon: Users,
         enabled: true,
+        requiredPermission: "content:manage",
       },
     ],
   },
@@ -111,6 +122,7 @@ const menuItems: MenuItem[] = [
     href: "/admin/events",
     Icon: CalendarDays,
     enabled: true,
+    requiredPermission: "content:manage",
   },
 
   {
@@ -123,12 +135,14 @@ const menuItems: MenuItem[] = [
         href: "/admin/finance/tuition",
         Icon: WalletCards,
         enabled: true,
+        requiredPermission: "content:manage",
       },
       {
         label: "Invoices & Payments",
         href: "/admin/finance/payments",
         Icon: WalletCards,
         enabled: true,
+        requiredPermission: "content:manage",
       },
     ],
   },
@@ -143,12 +157,14 @@ const menuItems: MenuItem[] = [
         href: "/admin/media",
         Icon: FolderOpen,
         enabled: true,
+        requiredPermission: "content:manage",
       },
       {
         label: "Bulk Uploads",
         href: "/admin/media/uploads",
         Icon: Images,
         enabled: true,
+        requiredPermission: "content:manage",
       },
     ],
   },
@@ -158,6 +174,7 @@ const menuItems: MenuItem[] = [
     href: "/admin/navigation",
     Icon: PanelTop,
     enabled: true,
+    requiredPermission: "content:manage",
   },
 
   {
@@ -170,12 +187,14 @@ const menuItems: MenuItem[] = [
         href: "/admin/users",
         Icon: Users,
         enabled: true,
+        requiredPermission: "users:manage",
       },
       {
         label: "Roles & Permissions",
         href: "/admin/permissions",
         Icon: ShieldCheck,
         enabled: true,
+        requiredPermission: "users:manage",
       },
     ],
   },
@@ -190,12 +209,14 @@ const menuItems: MenuItem[] = [
         href: "/admin/chat/sessions",
         Icon: MessageSquare,
         enabled: true,
+        requiredPermission: "content:manage",
       },
       {
         label: "Bot Settings",
         href: "/admin/chat/settings",
         Icon: Settings,
         enabled: true,
+        requiredPermission: "content:manage",
       },
     ],
   },
@@ -210,6 +231,7 @@ const menuItems: MenuItem[] = [
         href: "/admin/logs/activity",
         Icon: Files,
         enabled: true,
+        requiredPermission: "content:manage",
       },
       {
         label: "Analytics",
@@ -222,6 +244,7 @@ const menuItems: MenuItem[] = [
         href: "/admin/logs/errors",
         Icon: Files,
         enabled: true,
+        requiredPermission: "content:manage",
       },
     ],
   },
@@ -231,6 +254,7 @@ const menuItems: MenuItem[] = [
     href: "/admin/settings",
     Icon: Settings,
     enabled: true,
+    requiredPermission: "content:manage",
   },
 
   {

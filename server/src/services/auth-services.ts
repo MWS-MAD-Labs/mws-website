@@ -2,12 +2,13 @@ import { ResponseError } from "../error/response-error";
 import { GoogleAuth } from "../lib/google-auth";
 import { resolveCentralIdentity } from "../lib/central-client";
 import { signSession } from "../lib/session";
-import type { CentralUser } from "../types/central-types";
+import type { CmsSessionUser } from "../types/cms-auth-types";
+import { CmsAuthService } from "./cms-auth-service";
 
 export class AuthService {
   static async loginWithGoogle(
     code: string,
-  ): Promise<{ token: string; user: CentralUser }> {
+  ): Promise<{ token: string; user: CmsSessionUser }> {
     const payload = await GoogleAuth.verifyCode(code);
     if (!payload) {
       throw new ResponseError(401, "Google sign-in failed.");
@@ -26,7 +27,8 @@ export class AuthService {
       );
     }
 
-    const token = await signSession(user);
-    return { token, user };
+    const cmsUser = await CmsAuthService.createSessionUserForCentralIdentity(user);
+    const token = await signSession(cmsUser);
+    return { token, user: cmsUser };
   }
 }

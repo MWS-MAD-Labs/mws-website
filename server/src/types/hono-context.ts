@@ -1,5 +1,5 @@
-import type { CentralUser } from "./central-types";
+import type { CmsSessionUser } from "./cms-auth-types";
 
 export type SessionVariables = {
-  user: CentralUser;
+  user: CmsSessionUser;
 };

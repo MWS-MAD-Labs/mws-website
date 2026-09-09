@@ -3,7 +3,8 @@ import { AuthService } from "../services/auth-services";
 import { GoogleAuth } from "../lib/google-auth";
 import * as centralClient from "../lib/central-client";
 import { verifySession } from "../lib/session";
-import { testUser } from "./test-helpers";
+import { CmsAuthService } from "../services/cms-auth-service";
+import { cmsSessionUser, testUser } from "./test-helpers";
 import type { GooglePayload } from "../types/google-types";
 
 const googlePayload: GooglePayload = {
@@ -54,11 +55,15 @@ describe("AuthService.loginWithGoogle", () => {
   });
 
   it("signs a usable session token for a Central identity", async () => {
+    const cmsUser = cmsSessionUser("SUPER_ADMIN");
     spyOn(GoogleAuth, "verifyCode").mockResolvedValue(googlePayload);
     spyOn(centralClient, "resolveCentralIdentity").mockResolvedValue(testUser);
+    spyOn(CmsAuthService, "createSessionUserForCentralIdentity").mockResolvedValue(
+      cmsUser,
+    );
 
     const { token, user } = await AuthService.loginWithGoogle("code");
-    expect(user).toEqual(testUser);
-    expect((await verifySession(token))?.user).toEqual(testUser);
+    expect(user).toEqual(cmsUser);
+    expect((await verifySession(token))?.user).toEqual(cmsUser);
   });
 });

@@ -10,18 +10,10 @@ datasource db {
 // ROLES
 // ============================================================
 
-model Role {
-  id          String    @id @default(uuid()) @db.Uuid
-  name        String    @unique @db.VarChar(50)
-  label       String?   @db.VarChar(100)
-  permissions Json?
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
-  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
-
-  users User[]
-
-  @@map("roles")
+enum CmsRole {
+  SUPER_ADMIN
+  ADMIN
+  VIEWER
 }
 
 // ============================================================
@@ -34,14 +26,13 @@ model User {
   passwordHash String?   @map("password_hash") @db.VarChar(255)
   fullName     String    @map("full_name") @db.VarChar(255)
   phone        String?   @db.VarChar(50)
-  roleId       String?   @map("role_id") @db.Uuid
+  cmsRole      CmsRole?  @map("cms_role")
   isActive     Boolean   @default(true) @map("is_active")
   metadata     Json?
   createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt    DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
   deletedAt    DateTime? @map("deleted_at") @db.Timestamptz(6)
 
-  role                 Role?         @relation(fields: [roleId], references: [id], onDelete: SetNull)
   ownedMedia           MediaAsset[]  @relation("MediaOwner")
   authoredNews         NewsPost[]    @relation("NewsAuthor")
   assignedInquiries    Inquiry[]     @relation("InquiryAssignee")

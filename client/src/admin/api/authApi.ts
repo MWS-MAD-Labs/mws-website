@@ -7,7 +7,7 @@ export const authApi = {
       const response = await apiRequest<{ data: AuthUser }>("/auth/me");
       return response?.data ?? null;
     } catch (error) {
-      if (error instanceof ApiError && error.status === 401) {
+      if (error instanceof ApiError && [401, 403].includes(error.status ?? 0)) {
         return null;
       }
       throw error;

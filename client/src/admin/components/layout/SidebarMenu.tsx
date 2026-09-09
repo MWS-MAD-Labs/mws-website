@@ -1,13 +1,29 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
-import menuItems from "@/admin/config/navigation";
+import { useAuth } from "@/admin/auth/useAuth";
+import menuItems, { type MenuItem } from "@/admin/config/navigation";
+import { hasCmsPermission } from "@/admin/types/auth";
+
+type AuthUser = ReturnType<typeof useAuth>["user"];
+
+function isMenuItemVisible(item: MenuItem, user: AuthUser): boolean {
+  if (!item.enabled) return false;
+  if (item.requiredPermission && !hasCmsPermission(user, item.requiredPermission)) {
+    return false;
+  }
+  if (!item.children?.length) return true;
+
+  return item.children.some((child) => isMenuItemVisible(child, user));
+}
 
 export function SidebarMenu() {
   const location = useLocation();
+  const { user } = useAuth();
+  const visibleMenuItems = menuItems.filter((item) => isMenuItemVisible(item, user));
 
   const [openMenus, setOpenMenus] = useState<string[]>(
-    menuItems
+    visibleMenuItems
       .filter((item) =>
         item.children?.some((child) => child.href === location.pathname),
       )
@@ -29,8 +45,7 @@ export function SidebarMenu() {
       </p>
 
       <div className="space-y-1">
-        {menuItems
-          .filter((item) => item.enabled)
+        {visibleMenuItems
           .map((item) => {
             const Icon = item.Icon;
             const hasChildren = Boolean(item.children?.length);
@@ -63,7 +78,7 @@ export function SidebarMenu() {
                   {isOpen && (
                     <div className="mt-1 space-y-1 pl-5">
                       {item.children
-                        ?.filter((child) => child.enabled)
+                        ?.filter((child) => isMenuItemVisible(child, user))
                         .map((child) => {
                           const ChildIcon = child.Icon;
 

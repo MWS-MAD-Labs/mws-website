@@ -10,7 +10,7 @@ const OAUTH_STATE_COOKIE = "mws_cms_google_oauth_state";
 
 const RESPONSE_ERROR_CODES: Record<number, string> = {
   401: "google_auth_failed",
-  403: "domain_not_allowed",
+  403: "unauthorized",
   404: "not_registered",
 };
 
@@ -61,7 +61,6 @@ export class LoginController {
       maxAge: 60 * 60 * 8,
     });
 
-    console.log("CMS user logged in:", user);
     return c.json({ data: user });
   }
 
@@ -84,7 +83,6 @@ export class LoginController {
         maxAge: 60 * 60 * 8,
       });
 
-      console.log("CMS user logged in from Google callback:", user);
       return c.redirect(`${frontendOrigin()}/admin`, 302);
     } catch (error) {
       console.error("CMS Google callback failed:", error);
@@ -101,7 +99,6 @@ export class LoginController {
   }
 
   static async me(c: Context<{ Variables: SessionVariables }>) {
-    console.log("CMS token response:", c.var.user);
     return c.json({ data: c.var.user });
   }
 

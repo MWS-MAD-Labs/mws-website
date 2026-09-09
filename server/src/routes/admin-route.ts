@@ -1,11 +1,27 @@
 import { Hono } from "hono";
+import { CmsUsersController } from "../controllers/admin/CmsUsers";
 import { DashboardController } from "../controllers/admin/Dashboard";
 import { adminAuthMiddleware } from "../middleware/admin-auth-middleware";
+import { requireCmsPermission, requireCmsRole } from "../middleware/require-cms-permission";
 import { sessionAuthMiddleware } from "../middleware/session-auth-middleware";
 import type { SessionVariables } from "../types/hono-context";
 
 export const adminRoute = new Hono<{ Variables: SessionVariables }>();
 
 adminRoute.use("*", sessionAuthMiddleware, adminAuthMiddleware);
-adminRoute.get("/", DashboardController.dashboard);
-adminRoute.get("/dashboard-data", DashboardController.dashboard);
+adminRoute.get("/", requireCmsPermission("dashboard:read"), DashboardController.dashboard);
+adminRoute.get(
+  "/dashboard-data",
+  requireCmsPermission("dashboard:read"),
+  DashboardController.dashboard,
+);
+adminRoute.get(
+  "/users",
+  requireCmsRole("SUPER_ADMIN"),
+  CmsUsersController.listUsers,
+);
+adminRoute.patch(
+  "/users/:id/role",
+  requireCmsRole("SUPER_ADMIN"),
+  CmsUsersController.updateUserRole,
+);

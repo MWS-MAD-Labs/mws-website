@@ -18,8 +18,13 @@ export async function adminAuthMiddleware(
       throw new ResponseError(403, "Central identity is no longer registered.");
     }
 
-    c.set("user", currentUser);
-    console.log("CMS Central auth user:", currentUser);
+    const { CmsAuthService } = await import("../services/cms-auth-service");
+    const freshCmsUser = await CmsAuthService.requireFreshSessionUser(
+      sessionUser,
+      currentUser,
+    );
+
+    c.set("user", freshCmsUser);
   } catch (error) {
     if (error instanceof ResponseError) throw error;
     console.error("Central lookup failed during CMS authorization:", error);

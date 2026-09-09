@@ -3,7 +3,7 @@ import { Hono } from "hono";
 import { ResponseError } from "../error/response-error";
 import { signSession } from "../lib/session";
 import { sessionAuthMiddleware } from "../middleware/session-auth-middleware";
-import { testUser } from "./test-helpers";
+import { cmsSessionUser } from "./test-helpers";
 import type { SessionVariables } from "../types/hono-context";
 
 beforeAll(() => {
@@ -42,12 +42,13 @@ describe("sessionAuthMiddleware", () => {
   });
 
   it("allows valid session tokens and exposes the user", async () => {
-    const token = await signSession(testUser);
+    const user = cmsSessionUser("VIEWER");
+    const token = await signSession(user);
     const res = await buildApp().request("/protected", {
       headers: { Cookie: `mws_cms_session=${token}` },
     });
 
     expect(res.status).toBe(200);
-    expect(((await res.json()) as { data: unknown }).data).toEqual(testUser);
+    expect(((await res.json()) as { data: unknown }).data).toEqual(user);
   });
 });

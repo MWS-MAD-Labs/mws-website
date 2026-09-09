@@ -1,10 +1,10 @@
 import { sign, verify } from "hono/jwt";
-import type { CentralUser } from "../types/central-types";
+import type { CmsSessionUser } from "../types/cms-auth-types";
 
 const SESSION_EXP_SECONDS = 60 * 60 * 8;
 
 export type SessionPayload = {
-  user: CentralUser;
+  user: CmsSessionUser;
   exp: number;
 };
 
@@ -20,7 +20,7 @@ export function sessionCookieName(): string {
   return process.env.SESSION_COOKIE_NAME || "mws_cms_session";
 }
 
-export async function signSession(user: CentralUser): Promise<string> {
+export async function signSession(user: CmsSessionUser): Promise<string> {
   const payload: SessionPayload = {
     user,
     exp: Math.floor(Date.now() / 1000) + SESSION_EXP_SECONDS,
