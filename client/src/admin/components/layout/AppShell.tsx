@@ -14,11 +14,11 @@ export default function AppShell({
   title,
 }: AppShellProps) {
   return (
-    <div className="flex min-h-screen bg-[#faf8f3]">
+    <div className="flex h-screen overflow-hidden bg-[#faf8f3]">
       <Sidebar />
 
-      <main className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-[rgba(36,23,24,0.14)] bg-white px-6 py-4">
+      <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <header className="shrink-0 flex items-center justify-between border-b border-[rgba(36,23,24,0.14)] bg-white px-6 py-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-normal text-[#625759]">
               {eyebrow}
@@ -29,7 +29,7 @@ export default function AppShell({
           {action}
         </header>
 
-        {children}
+        <div className="flex-1 overflow-y-auto">{children}</div>
       </main>
     </div>
   );

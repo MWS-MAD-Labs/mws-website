@@ -4,7 +4,7 @@ import type { AuthUser } from "@/admin/types/auth";
 export const authApi = {
   async currentUser(): Promise<AuthUser | null> {
     try {
-      const response = await apiRequest<{ data: AuthUser }>("/auth/me");
+      const response = await apiRequest<{ data: AuthUser }>("/api/me");
       return response?.data ?? null;
     } catch (error) {
       if (error instanceof ApiError && [401, 403].includes(error.status ?? 0)) {

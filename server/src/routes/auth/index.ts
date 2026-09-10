@@ -1,0 +1,14 @@
+import { Hono } from "hono";
+import { MeController } from "../../controllers/api/Me";
+import { AuthController } from "../../controllers/auth-controller";
+import { adminAuthMiddleware } from "../../middleware/admin-auth-middleware";
+import { sessionAuthMiddleware } from "../../middleware/session-auth-middleware";
+import type { SessionVariables } from "../../types/hono-context";
+
+export const authRoute = new Hono<{ Variables: SessionVariables }>();
+
+authRoute.get("/google/start", AuthController.startGoogleLogin);
+authRoute.get("/google/callback", AuthController.googleCallback);
+authRoute.post("/google", AuthController.loginWithGoogle);
+authRoute.post("/logout", AuthController.logout);
+authRoute.get("/me", sessionAuthMiddleware, adminAuthMiddleware, MeController.me);

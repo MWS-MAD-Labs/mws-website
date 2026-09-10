@@ -2,8 +2,9 @@ import "dotenv/config";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { ResponseError } from "./error/response-error";
-import { adminRoute } from "./routes/admin-route";
-import { authRoute } from "./routes/auth-route";
+import { adminRoute } from "./routes/admin";
+import { apiRoute } from "./routes/api-router";
+import { authRoute } from "./routes/auth";
 
 const app = new Hono();
 
@@ -38,6 +39,7 @@ app.get("/health", (c) => {
 
 app.route("/auth", authRoute);
 app.route("/admin", adminRoute);
+app.route("/api", apiRoute);
 
 app.onError((error, c) => {
   if (error instanceof ResponseError) {

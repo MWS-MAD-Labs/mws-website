@@ -2,10 +2,9 @@ import { useEffect, useState } from "react";
 import { adminApi, type AdminDashboardData } from "@/admin/api/adminApi";
 import { useAuth } from "@/admin/auth/useAuth";
 import AppShell from "@/admin/components/layout/AppShell";
-import Button from "@/admin/components/ui/Button";
 
 export default function Dashboard() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [dashboard, setDashboard] = useState<AdminDashboardData | null>(null);
   const [error, setError] = useState("");
 
@@ -34,11 +33,7 @@ export default function Dashboard() {
     <AppShell
       eyebrow="MWS CMS"
       title="Dashboard"
-      action={
-        <Button variant="outline" size="sm" onClick={() => void logout()}>
-          Logout
-        </Button>
-      }
+      // Badge Role, example : Madlabs = Super Admin !
     >
       <section className="flex-1 p-6">
         <div className="rounded-xl border border-[rgba(36,23,24,0.14)] bg-white p-6 shadow-sm">

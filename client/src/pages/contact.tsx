@@ -1,16 +1,47 @@
+import { useEffect, useState, type FormEvent } from "react";
+import { contactPageApi } from "@/api/contactPageApi";
+import {
+  defaultContactPageContent,
+  type ContactPageContent,
+  withContactPageFallback,
+} from "@/features/contact/contactPageData";
 import SubpageHero from "../components/ui/SubpageHero";
-import { asset } from "../data/site";
-
-const mapSrc =
-  "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3965.7314275134707!2d106.7262070747513!3d-6.300282493688862!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69fa70d8a57eb7%3A0x6b10705a6ef6c3b6!2sMillennia%20World%20School!5e0!3m2!1sen!2sid!4v1715569420000!5m2!1sen!2sid";
 
 export default function Contact() {
+  const [content, setContent] = useState<ContactPageContent>(
+    defaultContactPageContent,
+  );
+
+  const submitMessage = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    window.alert(content.form.successMessage);
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    contactPageApi
+      .publicContactPage()
+      .then((page) => {
+        if (!cancelled) {
+          setContent(withContactPageFallback(page.content));
+        }
+      })
+      .catch((error) => {
+        console.error("Contact page content request failed:", error);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <main>
       <SubpageHero
-        title="Contact Us"
-        image={asset("DSC05350.jpg")}
-        imageAlt="MWS Main Office"
+        title={content.hero.title}
+        image={content.hero.image}
+        imageAlt={content.hero.imageAlt}
         breadcrumbs={[{ label: "Home", path: "/" }, { label: "Contact" }]}
       />
 
@@ -21,12 +52,7 @@ export default function Contact() {
               <form
                 className="premium-form"
                 action="#"
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  window.alert(
-                    "Message sent successfully! Our administrative office will get back to you within 24 hours.",
-                  );
-                }}
+                onSubmit={submitMessage}
               >
                 <h2
                   style={{
@@ -35,7 +61,7 @@ export default function Contact() {
                     marginTop: 0,
                   }}
                 >
-                  Send us a message
+                  {content.form.title}
                 </h2>
 
                 <div className="form-group">
@@ -79,10 +105,11 @@ export default function Contact() {
                     <option value="" disabled>
                       Select department...
                     </option>
-                    <option value="general">General Administration</option>
-                    <option value="admissions">Admissions & Tours</option>
-                    <option value="finance">Finance Office</option>
-                    <option value="hr">Human Resources / Career</option>
+                    {content.form.categories.map((category) => (
+                      <option key={category.value} value={category.value}>
+                        {category.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div className="form-group">
@@ -101,66 +128,64 @@ export default function Contact() {
             </div>
 
             <div className="subpage-body" style={{ paddingLeft: 20 }}>
-              <p className="subpage-intro">
-                Sint velit deserunt non sit in irure primis nibh amet eiusmod.
-                Luctus exercitation reprehenderit vel suscipit laboris aliquip.
-              </p>
-              <h3 style={{ color: "var(--burgundy)" }}>Campus Address</h3>
+              <p className="subpage-intro">{content.intro}</p>
+              <h3 style={{ color: "var(--burgundy)" }}>
+                {content.address.title}
+              </h3>
               <p style={{ marginBottom: 30 }}>
-                <strong>Millennia World School</strong>
+                <strong>{content.address.name}</strong>
                 <br />
-                Jl. Merpati Raya No. 103, Sawah Lama, Ciputat,
-                <br />
-                Tangerang Selatan, Banten 15413, Indonesia
+                {content.address.lines.map((line, index) => (
+                  <span key={line}>
+                    {line}
+                    {index < content.address.lines.length - 1 && <br />}
+                  </span>
+                ))}
               </p>
 
-              <h3 style={{ color: "var(--burgundy)" }}>Direct Contacts</h3>
+              <h3 style={{ color: "var(--burgundy)" }}>
+                {content.directContacts.title}
+              </h3>
               <p style={{ marginBottom: 30 }}>
-                <strong>Administration & Admission:</strong>
+                <strong>{content.directContacts.heading}</strong>
                 <br />
-                Phone: +62 21-7463-3333
+                Phone: {content.directContacts.phone}
                 <br />
-                WhatsApp: +62 812-1111-2222
+                WhatsApp: {content.directContacts.whatsapp}
                 <br />
                 Email:{" "}
                 <a
-                  href="mailto:info@millennia21.id"
+                  href={`mailto:${content.directContacts.email}`}
                   style={{ color: "var(--burgundy)", textDecoration: "underline" }}
                 >
-                  info@millennia21.id
+                  {content.directContacts.email}
                 </a>
               </p>
 
-              <h3 style={{ color: "var(--burgundy)" }}>Office Hours</h3>
+              <h3 style={{ color: "var(--burgundy)" }}>
+                {content.officeHours.title}
+              </h3>
               <ul className="premium-list" style={{ marginTop: 12 }}>
-                <li className="premium-list-item">
-                  <div className="premium-list-title">Monday - Friday</div>
-                  <p style={{ fontSize: 14, margin: 0 }}>07:30 AM - 04:00 PM</p>
-                </li>
-                <li className="premium-list-item">
-                  <div className="premium-list-title">Saturday</div>
-                  <p style={{ fontSize: 14, margin: 0 }}>
-                    08:00 AM - 12:00 PM (Admissions office only)
-                  </p>
-                </li>
-                <li className="premium-list-item">
-                  <div className="premium-list-title">Sunday & Public Holidays</div>
-                  <p style={{ fontSize: 14, margin: 0 }}>Closed</p>
-                </li>
+                {content.officeHours.items.map((item) => (
+                  <li key={item.title} className="premium-list-item">
+                    <div className="premium-list-title">{item.title}</div>
+                    <p style={{ fontSize: 14, margin: 0 }}>{item.text}</p>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
 
           <h2 style={{ margin: "60px 0 20px", textAlign: "center" }}>
-            Our Campus Location
+            {content.map.title}
           </h2>
           <div className="contact-map-wrapper">
             <iframe
-              src={mapSrc}
+              src={content.map.src}
               allowFullScreen
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              title="Millennia World School location map"
+              title={content.map.titleAttr}
             />
           </div>
         </div>

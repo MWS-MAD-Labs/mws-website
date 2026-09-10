@@ -1,8 +1,22 @@
 services:
   db:
-    # THis file is used to define the database service for the application. It specifies the image to use, the container name, and the environment variables required for the database to function properly.
-  server:
-    # This file is used to define the server service for the application. It specifies the build context, the container name, and the restart policy for the server.
+    image: postgres:16-alpine
+    container_name: mws-website-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mws_website
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: mws_website
+    ports:
+      - "55432:5432"
+    volumes:
+      - mws_website_pgdata:/var/lib/postgresql/data
+      - ./docker/postgres/init-shadow-db.sql:/docker-entrypoint-initdb.d/10-init-shadow-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mws_website -d mws_website"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
-  client:
-    # This file is used to define the client service for the application. It specifies the build context, the container name, and the restart policy for the client.
+volumes:
+  mws_website_pgdata:

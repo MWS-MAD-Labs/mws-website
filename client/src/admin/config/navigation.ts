@@ -51,6 +51,13 @@ const menuItems: MenuItem[] = [
         requiredPermission: "content:manage",
       },
       {
+        label: "Contact Page",
+        href: "/admin/contact",
+        Icon: MessageSquare,
+        enabled: true,
+        requiredPermission: "content:manage",
+      },
+      {
         label: "News",
         href: "/admin/news",
         Icon: Newspaper,

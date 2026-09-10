@@ -1,4 +1,8 @@
 import { apiRequest } from "@/lib/api";
+import type {
+  ContactPage,
+  ContactPageContent,
+} from "@/features/contact/contactPageData";
 import type { AuthUser, CmsRoleName } from "@/admin/types/auth";
 
 export type AdminDashboardData = {
@@ -54,4 +58,22 @@ export const adminApi = {
     );
     return response!.data;
   },
+
+  async contactPage(): Promise<ContactPage> {
+    const response = await apiRequest<{ data: ContactPage }>("/admin/contact-page");
+    return response!.data;
+  },
+
+  async updateContactPage(content: ContactPageContent): Promise<ContactPage> {
+    const response = await apiRequest<{ data: ContactPage }>("/admin/contact-page", {
+      method: "PUT",
+      body: content,
+    });
+    return response!.data;
+  },
+
+  async resetContactPage(): Promise<void> {
+    await apiRequest("/admin/contact-page", { method: "DELETE" });
+  },
+
 };
