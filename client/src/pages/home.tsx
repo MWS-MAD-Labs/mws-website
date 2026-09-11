@@ -151,28 +151,22 @@ export default function Home() {
           setHeroIndex((current) => (current + 1) % heroSlides.length)
         }
       />
-
       <Philosophy
         text="Vitae pretium reprehenderit sit quis lorem luctus ultrices. Tincidunt augue suscipit fermentum qui nostrud primis."
         logoSrc={logoUrl}
       />
-
       <InfoSection
         title="Everything you need to know about joining MWS."
         filters={filters}
         cards={infoCards}
       />
-
       <ProgramCards />
-
       <CampusSpotlight slides={spotlightSlides} />
-
       <Affiliations
         title="Global partners in learning."
         text="Consectetur ullamco primis cubilia, quis aliqua irure incididunt. Feugiat reprehenderit pretium consequat, ultrices est lorem sit cupidatat."
         logos={partnerLogos}
       />
-
       <CommunityVoices />
     </main>
   );
