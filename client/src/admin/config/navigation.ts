@@ -1,24 +1,17 @@
 import {
-  BarChart3,
   BookOpen,
-  CalendarDays,
-  ChartNoAxesCombined,
   CircleHelp,
   Files,
-  FolderOpen,
   Handshake,
   Images,
   LayoutDashboard,
-  Megaphone,
   MessageSquare,
-  Newspaper,
-  PanelTop,
-  Settings,
+  School,
   ShieldCheck,
   Users,
-  WalletCards,
   type LucideIcon,
 } from "lucide-react";
+
 import type { CmsPermission } from "@/admin/types/auth";
 
 export type MenuItem = {
@@ -36,6 +29,7 @@ const menuItems: MenuItem[] = [
     href: "/admin",
     Icon: LayoutDashboard,
     enabled: true,
+    requiredPermission: "dashboard:read",
   },
 
   {
@@ -44,144 +38,110 @@ const menuItems: MenuItem[] = [
     enabled: true,
     children: [
       {
-        label: "Pages",
-        href: "/admin/pages",
-        Icon: Files,
+        label: "Our School",
+        href: "/admin/our-school",
+        Icon: School,
         enabled: true,
         requiredPermission: "content:manage",
       },
+
       {
-        label: "Contact Page",
+        label: "Contact",
         href: "/admin/contact",
         Icon: MessageSquare,
         enabled: true,
         requiredPermission: "content:manage",
       },
+
       {
-        label: "News",
-        href: "/admin/news",
-        Icon: Newspaper,
-        enabled: true,
-        requiredPermission: "content:manage",
-      },
-      {
-        label: "Programs",
-        href: "/admin/programs",
+        label: "Academic",
         Icon: BookOpen,
         enabled: true,
         requiredPermission: "content:manage",
+        children: [
+          {
+            label: "Kindergarten",
+            href: "/admin/academic/kindergarten",
+            Icon: School,
+            enabled: true,
+            requiredPermission: "content:manage",
+          },
+          {
+            label: "Elementary",
+            href: "/admin/academic/elementary",
+            Icon: School,
+            enabled: true,
+            requiredPermission: "content:manage",
+          },
+          {
+            label: "Junior High",
+            href: "/admin/academic/junior-high",
+            Icon: School,
+            enabled: true,
+            requiredPermission: "content:manage",
+          },
+        ],
       },
+
       {
-        label: "Testimonials",
-        href: "/admin/testimonials",
-        Icon: MessageSquare,
+        label: "Programs",
+        Icon: BookOpen,
         enabled: true,
         requiredPermission: "content:manage",
-      },
-      {
-        label: "FAQs",
-        href: "/admin/faqs",
-        Icon: CircleHelp,
-        enabled: true,
-        requiredPermission: "content:manage",
-      },
-      {
-        label: "Affiliations",
-        href: "/admin/affiliations",
-        Icon: Handshake,
-        enabled: true,
-        requiredPermission: "content:manage",
+        children: [
+          {
+            label: "Admissions",
+            href: "/admin/programs/admissions",
+            Icon: Files,
+            enabled: true,
+            requiredPermission: "content:manage",
+          },
+          {
+            label: "Campus Tour",
+            href: "/admin/programs/campus-tour",
+            Icon: School,
+            enabled: true,
+            requiredPermission: "content:manage",
+          },
+          {
+            label: "Curriculum",
+            href: "/admin/programs/curriculum",
+            Icon: BookOpen,
+            enabled: true,
+            requiredPermission: "content:manage",
+          },
+          {
+            label: "Affiliations",
+            href: "/admin/programs/affiliations",
+            Icon: Handshake,
+            enabled: true,
+            requiredPermission: "content:manage",
+          },
+        ],
       },
     ],
   },
 
   {
-    label: "Admissions",
-    Icon: Megaphone,
-    enabled: true,
-    children: [
-      {
-        label: "Inquiries",
-        href: "/admin/admissions/inquiries",
-        Icon: MessageSquare,
-        enabled: true,
-        requiredPermission: "content:manage",
-      },
-      {
-        label: "Applications",
-        href: "/admin/admissions/applications",
-        Icon: Files,
-        enabled: true,
-        requiredPermission: "content:manage",
-      },
-      {
-        label: "Applicants",
-        href: "/admin/admissions/applicants",
-        Icon: Users,
-        enabled: true,
-        requiredPermission: "content:manage",
-      },
-    ],
-  },
-
-  {
-    label: "Events",
-    href: "/admin/events",
-    Icon: CalendarDays,
-    enabled: true,
-    requiredPermission: "content:manage",
-  },
-
-  {
-    label: "Tuition & Finance",
-    Icon: WalletCards,
-    enabled: true,
-    children: [
-      {
-        label: "Tuition Fees",
-        href: "/admin/finance/tuition",
-        Icon: WalletCards,
-        enabled: true,
-        requiredPermission: "content:manage",
-      },
-      {
-        label: "Invoices & Payments",
-        href: "/admin/finance/payments",
-        Icon: WalletCards,
-        enabled: true,
-        requiredPermission: "content:manage",
-      },
-    ],
-  },
-
-  {
-    label: "Media",
+    label: "Gallery",
     Icon: Images,
     enabled: true,
     children: [
       {
-        label: "Media Library",
-        href: "/admin/media",
-        Icon: FolderOpen,
+        label: "Images",
+        href: "/admin/gallery/images",
+        Icon: Images,
         enabled: true,
         requiredPermission: "content:manage",
       },
       {
-        label: "Bulk Uploads",
-        href: "/admin/media/uploads",
+        label: "Videos",
+        href: "/admin/gallery/videos",
         Icon: Images,
         enabled: true,
         requiredPermission: "content:manage",
       },
     ],
-  },
-
-  {
-    label: "Site Navigation",
-    href: "/admin/navigation",
-    Icon: PanelTop,
-    enabled: true,
-    requiredPermission: "content:manage",
   },
 
   {
@@ -207,61 +167,10 @@ const menuItems: MenuItem[] = [
   },
 
   {
-    label: "Chat / AI",
-    Icon: MessageSquare,
+    label: "Audit Logs",
+    href: "/admin/audit-logs",
+    Icon: Files,
     enabled: true,
-    children: [
-      {
-        label: "Chat Sessions",
-        href: "/admin/chat/sessions",
-        Icon: MessageSquare,
-        enabled: true,
-        requiredPermission: "content:manage",
-      },
-      {
-        label: "Bot Settings",
-        href: "/admin/chat/settings",
-        Icon: Settings,
-        enabled: true,
-        requiredPermission: "content:manage",
-      },
-    ],
-  },
-
-  {
-    label: "Reports & Logs",
-    Icon: ChartNoAxesCombined,
-    enabled: true,
-    children: [
-      {
-        label: "Activity Logs",
-        href: "/admin/logs/activity",
-        Icon: Files,
-        enabled: true,
-        requiredPermission: "content:manage",
-      },
-      {
-        label: "Analytics",
-        href: "/admin/analytics",
-        Icon: BarChart3,
-        enabled: true,
-      },
-      {
-        label: "Error & Integration Logs",
-        href: "/admin/logs/errors",
-        Icon: Files,
-        enabled: true,
-        requiredPermission: "content:manage",
-      },
-    ],
-  },
-
-  {
-    label: "Settings",
-    href: "/admin/settings",
-    Icon: Settings,
-    enabled: true,
-    requiredPermission: "content:manage",
   },
 
   {
