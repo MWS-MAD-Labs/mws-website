@@ -2,7 +2,7 @@ import type { Context } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { ResponseError } from "../../error/response-error";
 import { GoogleAuth } from "../../lib/google-auth";
-import { sessionCookieName, verifySession } from "../../lib/session";
+import { sessionCookieName } from "../../lib/session";
 import { AuthService } from "../../services/auth-services";
 import type { SessionVariables } from "../../types/hono-context";
 
@@ -76,7 +76,7 @@ export class LoginController {
     }
 
     try {
-      const { token, user } = await AuthService.loginWithGoogle(code);
+      const { token } = await AuthService.loginWithGoogle(code);
 
       setCookie(c, sessionCookieName(), token, {
         ...cookieOptions(),
@@ -103,11 +103,7 @@ export class LoginController {
   }
 
   static async logout(c: Context) {
-    const token = getCookie(c, sessionCookieName());
-    const user = token ? (await verifySession(token))?.user : null;
-
     deleteCookie(c, sessionCookieName(), cookieOptions());
-    console.log("CMS user logged out:", user?.email ?? "anonymous");
 
     return c.json({ data: "Logged out successfully" });
   }

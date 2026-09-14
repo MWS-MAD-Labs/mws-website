@@ -33,15 +33,60 @@ export default function Dashboard() {
     <AppShell
       eyebrow="MWS CMS"
       title="Dashboard"
-      // Badge Role, example : Madlabs = Super Admin !
+      action={
+        user ? (
+          <span className="rounded-md border border-[rgba(36,23,24,0.14)] px-3 py-2 text-xs font-semibold text-[#625759]">
+            {user.role.label ?? user.role.name}
+          </span>
+        ) : null
+      }
     >
       <section className="flex-1 p-6">
-        <div className="rounded-xl border border-[rgba(36,23,24,0.14)] bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold">
+        <div className="rounded-lg border border-[rgba(36,23,24,0.14)] bg-white p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-[#241718]">
             {dashboard?.message ?? "Welcome to CMS"}
           </h2>
 
-          <p className="mt-1 text-sm text-[#625759]">{user?.email}</p>
+          <p className="mt-1 text-sm text-[#625759]">
+            {user?.central.email ?? "Session email unavailable"}
+          </p>
+
+          {user && (
+            <dl className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="rounded-md border border-[rgba(36,23,24,0.10)] bg-[#faf8f3] p-4">
+                <dt className="text-xs font-semibold uppercase text-[#817678]">
+                  CMS Name
+                </dt>
+                <dd className="mt-1 text-sm font-semibold text-[#241718]">
+                  {user.name}
+                </dd>
+              </div>
+              <div className="rounded-md border border-[rgba(36,23,24,0.10)] bg-[#faf8f3] p-4">
+                <dt className="text-xs font-semibold uppercase text-[#817678]">
+                  Role
+                </dt>
+                <dd className="mt-1 text-sm font-semibold text-[#241718]">
+                  {user.role.label ?? user.role.name}
+                </dd>
+              </div>
+              <div className="rounded-md border border-[rgba(36,23,24,0.10)] bg-[#faf8f3] p-4">
+                <dt className="text-xs font-semibold uppercase text-[#817678]">
+                  Unit ID
+                </dt>
+                <dd className="mt-1 break-all text-sm font-semibold text-[#241718]">
+                  {user.unitId}
+                </dd>
+              </div>
+              <div className="rounded-md border border-[rgba(36,23,24,0.10)] bg-[#faf8f3] p-4">
+                <dt className="text-xs font-semibold uppercase text-[#817678]">
+                  CMS Status
+                </dt>
+                <dd className="mt-1 text-sm font-semibold text-[#241718]">
+                  {user.isActive ? "Active" : "Inactive"}
+                </dd>
+              </div>
+            </dl>
+          )}
 
           {error && (
             <div

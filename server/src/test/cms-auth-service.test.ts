@@ -1,14 +1,15 @@
 import { afterEach, describe, expect, it, mock, spyOn } from "bun:test";
-import {
-  CmsAuthService,
-  cmsAuthRepository,
-} from "../services/cms-auth-service";
+import type { CmsRole, CmsUser } from "@prisma/client";
 import { clearMadLabsUnitIdCacheForTest } from "../lib/admin-access";
-import { cmsSessionUser, jsonResponse, testUser } from "./test-helpers";
+import {
+  CmsUserRepository,
+  type CmsUserWithRole,
+} from "../repositories/cms-user-repository";
+import { CmsAuthService } from "../services/cms-auth-service";
 import type { CentralUser } from "../types/central-types";
-import type { CmsRoleName } from "../types/cms-auth-types";
+import { jsonResponse, testUser } from "./test-helpers";
 
-const TEST_MAD_LABS_UNIT_ID = "cmsr1gmkh000akz7bzjgdv6dq";
+const TEST_MAD_LABS_UNIT_ID = "unit-mad-lab";
 const originalFetch = global.fetch;
 
 function centralEmployee(
@@ -23,22 +24,41 @@ function centralEmployee(
   };
 }
 
-function cmsUser(overrides: Partial<ReturnType<typeof baseCmsUser>> = {}) {
+function role(overrides: Partial<CmsRole> = {}): CmsRole {
+  const now = new Date("2026-01-01T00:00:00.000Z");
   return {
-    ...baseCmsUser(),
+    id: "role-super-admin",
+    name: "SUPER_ADMIN",
+    description: "Super Admin",
+    createdAt: now,
+    updatedAt: now,
     ...overrides,
   };
 }
 
-function baseCmsUser() {
+function cmsUser(overrides: Partial<CmsUser> = {}): CmsUser {
+  const now = new Date("2026-01-01T00:00:00.000Z");
   return {
     id: "cms-user-1",
-    email: testUser.email,
-    fullName: testUser.full_name,
-    phone: null,
-    cmsRole: null as CmsRoleName | null,
+    centralUserId: testUser.id,
+    name: testUser.full_name,
+    unitId: TEST_MAD_LABS_UNIT_ID,
+    cmsRoleId: "role-super-admin",
     isActive: true,
-    deletedAt: null,
+    createdAt: now,
+    updatedAt: now,
+    ...overrides,
+  };
+}
+
+function cmsUserWithRole(
+  userOverrides: Partial<CmsUser> = {},
+  roleOverrides: Partial<CmsRole> = {},
+): CmsUserWithRole {
+  const userRole = role(roleOverrides);
+  return {
+    ...cmsUser({ cmsRoleId: userRole.id, ...userOverrides }),
+    role: userRole,
   };
 }
 
@@ -73,99 +93,71 @@ afterEach(() => {
 });
 
 describe("CmsAuthService", () => {
-  it("promotes an active MAD Labs employee to SUPER_ADMIN", async () => {
-    mockCentralMadLabsDirectory();
-    spyOn(cmsAuthRepository, "provisionUserFromCentralEmployee").mockResolvedValue(
-      cmsUser({ cmsRole: "SUPER_ADMIN" }),
-    );
+  it("returns an existing active CMS user without creating or changing role", async () => {
+    const existingUser = cmsUserWithRole({}, { name: "ADMIN", id: "role-admin" });
+    const findSpy = spyOn(
+      CmsUserRepository,
+      "findByCentralUserId",
+    ).mockResolvedValue(existingUser);
+    const createSpy = spyOn(CmsUserRepository, "create");
+    const updateSpy = spyOn(CmsUserRepository, "update");
 
     const user = await CmsAuthService.createSessionUserForCentralIdentity(
       centralEmployee(),
     );
 
-    expect(user.role.name).toBe("SUPER_ADMIN");
-    expect(user.role.permissions).toContain("*");
-    expect(cmsAuthRepository.provisionUserFromCentralEmployee).toHaveBeenCalledWith(
-      expect.objectContaining({ email: testUser.email }),
-      "SUPER_ADMIN",
-    );
-  });
-
-  it("allows a non-MAD Labs employee with CMS ADMIN role", async () => {
-    mockCentralMadLabsDirectory();
-    spyOn(cmsAuthRepository, "provisionUserFromCentralEmployee").mockResolvedValue(
-      cmsUser({ cmsRole: "ADMIN" }),
-    );
-
-    const user = await CmsAuthService.createSessionUserForCentralIdentity(
-      centralEmployee({
-        unit: "Elementary",
-        unit_id: "unit-elementary",
-        unitId: "unit-elementary",
-      }),
-    );
-
+    expect(user.id).toBe(existingUser.id);
+    expect(user.centralUserId).toBe(testUser.id);
     expect(user.role.name).toBe("ADMIN");
-    expect(user.role.permissions).toContain("content:manage");
+    expect(findSpy).toHaveBeenCalledWith(testUser.id);
+    expect(createSpy).not.toHaveBeenCalled();
+    expect(updateSpy).not.toHaveBeenCalled();
   });
 
-  it("allows a non-MAD Labs employee with CMS VIEWER role", async () => {
-    mockCentralMadLabsDirectory();
-    spyOn(cmsAuthRepository, "provisionUserFromCentralEmployee").mockResolvedValue(
-      cmsUser({ cmsRole: "VIEWER" }),
+  it("rejects an existing inactive CMS user", async () => {
+    spyOn(CmsUserRepository, "findByCentralUserId").mockResolvedValue(
+      cmsUserWithRole({ isActive: false }, { name: "ADMIN", id: "role-admin" }),
     );
-
-    const user = await CmsAuthService.createSessionUserForCentralIdentity(
-      centralEmployee({
-        unit: "Elementary",
-        unit_id: "unit-elementary",
-        unitId: "unit-elementary",
-      }),
-    );
-
-    expect(user.role.name).toBe("VIEWER");
-    expect(user.role.permissions).toEqual(["dashboard:read"]);
-  });
-
-  it("rejects a non-MAD Labs employee with no CMS role", async () => {
-    mockCentralMadLabsDirectory();
-    spyOn(cmsAuthRepository, "provisionUserFromCentralEmployee").mockResolvedValue(
-      cmsUser(),
-    );
+    const createSpy = spyOn(CmsUserRepository, "create");
 
     await expect(
-      CmsAuthService.createSessionUserForCentralIdentity(
-        centralEmployee({
-          unit: "Elementary",
-          unit_id: "unit-elementary",
-          unitId: "unit-elementary",
-        }),
-      ),
-    ).rejects.toThrow("This account does not have an active CMS role.");
-    expect(cmsAuthRepository.provisionUserFromCentralEmployee).toHaveBeenCalledWith(
-      expect.objectContaining({ email: testUser.email }),
-      null,
-    );
+      CmsAuthService.createSessionUserForCentralIdentity(centralEmployee()),
+    ).rejects.toThrow("This CMS account is inactive.");
+    expect(createSpy).not.toHaveBeenCalled();
   });
 
-  it("auto-provisions a MAD Labs employee when no CMS User existed", async () => {
+  it("provisions a new active MAD Labs Central user as SUPER_ADMIN", async () => {
     mockCentralMadLabsDirectory();
-    spyOn(cmsAuthRepository, "provisionUserFromCentralEmployee").mockResolvedValue(
-      cmsUser({ cmsRole: "SUPER_ADMIN" }),
+    const superAdminRole = role();
+    spyOn(CmsUserRepository, "findByCentralUserId").mockResolvedValue(null);
+    const roleSpy = spyOn(CmsUserRepository, "findRoleByName").mockResolvedValue(
+      superAdminRole,
+    );
+    const createSpy = spyOn(CmsUserRepository, "create").mockResolvedValue(
+      cmsUser({ cmsRoleId: superAdminRole.id }),
     );
 
     const user = await CmsAuthService.createSessionUserForCentralIdentity(
       centralEmployee(),
     );
 
+    expect(roleSpy).toHaveBeenCalledWith("SUPER_ADMIN");
+    expect(createSpy).toHaveBeenCalledWith({
+      centralUserId: testUser.id,
+      name: testUser.full_name,
+      unitId: TEST_MAD_LABS_UNIT_ID,
+      cmsRoleId: superAdminRole.id,
+      isActive: true,
+    });
     expect(user.role.name).toBe("SUPER_ADMIN");
+    expect(user.role.permissions).toEqual(["*"]);
   });
 
-  it("rejects an inactive CMS User", async () => {
+  it("rejects a new active non-MAD-Labs Central user without creating CMS user", async () => {
     mockCentralMadLabsDirectory();
-    spyOn(cmsAuthRepository, "provisionUserFromCentralEmployee").mockResolvedValue(
-      cmsUser({ isActive: false, cmsRole: "ADMIN" }),
-    );
+    spyOn(CmsUserRepository, "findByCentralUserId").mockResolvedValue(null);
+    const roleSpy = spyOn(CmsUserRepository, "findRoleByName");
+    const createSpy = spyOn(CmsUserRepository, "create");
 
     await expect(
       CmsAuthService.createSessionUserForCentralIdentity(
@@ -175,78 +167,66 @@ describe("CmsAuthService", () => {
           unitId: "unit-elementary",
         }),
       ),
-    ).rejects.toThrow("This CMS account is inactive.");
+    ).rejects.toThrow("This account does not have CMS access.");
+    expect(roleSpy).not.toHaveBeenCalled();
+    expect(createSpy).not.toHaveBeenCalled();
   });
 
-  it("rejects an inactive Central employee", async () => {
+  it("rejects an inactive Central employee without creating CMS user", async () => {
+    const findSpy = spyOn(CmsUserRepository, "findByCentralUserId");
+    const createSpy = spyOn(CmsUserRepository, "create");
+
     await expect(
       CmsAuthService.createSessionUserForCentralIdentity(
         centralEmployee({ status: "INACTIVE" }),
       ),
     ).rejects.toThrow("Only active employees can access CMS.");
+    expect(findSpy).not.toHaveBeenCalled();
+    expect(createSpy).not.toHaveBeenCalled();
   });
 
-  it("rejects a Central student", async () => {
-    const student: CentralUser = {
-      source: "student",
-      id: "student-1",
-      nis: "S001",
-      nisn: null,
-      full_name: "Student User",
-      nick_name: null,
-      email: "student@millennia21.id",
-      status: "ACTIVE",
-      current_grade: "10",
-      current_class: "A",
-    };
+  it("rejects a missing Central identity", async () => {
+    const findSpy = spyOn(CmsUserRepository, "findByCentralUserId");
+    const createSpy = spyOn(CmsUserRepository, "create");
 
     await expect(
-      CmsAuthService.createSessionUserForCentralIdentity(student),
-    ).rejects.toThrow("Only active employees can access CMS.");
+      CmsAuthService.createSessionUserForCentralIdentity(null),
+    ).rejects.toThrow("Central identity was not found.");
+    expect(findSpy).not.toHaveBeenCalled();
+    expect(createSpy).not.toHaveBeenCalled();
   });
 
-  it("updates role to ADMIN or VIEWER from the SUPER_ADMIN route", async () => {
-    spyOn(cmsAuthRepository, "updateUserRole").mockResolvedValue(
-      cmsUser({ cmsRole: "ADMIN" }),
-    );
-
-    const user = await CmsAuthService.updateUserRole(
-      cmsSessionUser("SUPER_ADMIN").id,
-      "ADMIN",
-    );
-
-    expect(user.role?.name).toBe("ADMIN");
-    expect(cmsAuthRepository.updateUserRole).toHaveBeenCalledWith(
-      "cms-user-1",
-      "ADMIN",
-    );
-  });
-
-  it("does not allow manual SUPER_ADMIN assignment", async () => {
-    await expect(
-      CmsAuthService.updateUserRole("cms-user-2", "SUPER_ADMIN"),
-    ).rejects.toThrow("SUPER_ADMIN is assigned from MAD Labs unit_id.");
-  });
-
-  it("removes SUPER_ADMIN when the Central user is no longer in MAD Labs", async () => {
+  it("fails clearly when SUPER_ADMIN role is unavailable for MAD Labs provisioning", async () => {
     mockCentralMadLabsDirectory();
-    spyOn(cmsAuthRepository, "provisionUserFromCentralEmployee").mockResolvedValue(
-      cmsUser({ cmsRole: "SUPER_ADMIN" }),
-    );
-    spyOn(cmsAuthRepository, "updateUserRole").mockResolvedValue(cmsUser());
+    spyOn(CmsUserRepository, "findByCentralUserId").mockResolvedValue(null);
+    spyOn(CmsUserRepository, "findRoleByName").mockResolvedValue(null);
+    const createSpy = spyOn(CmsUserRepository, "create");
 
     await expect(
-      CmsAuthService.createSessionUserForCentralIdentity(
-        centralEmployee({
-          unit: "Elementary",
-          unit_id: "unit-elementary",
-          unitId: "unit-elementary",
-        }),
+      CmsAuthService.createSessionUserForCentralIdentity(centralEmployee()),
+    ).rejects.toThrow("SUPER_ADMIN CMS role is not configured.");
+    expect(createSpy).not.toHaveBeenCalled();
+  });
+
+  it("keeps an existing ADMIN role for a MAD Labs user", async () => {
+    mockCentralMadLabsDirectory();
+    spyOn(CmsUserRepository, "findByCentralUserId").mockResolvedValue(
+      cmsUserWithRole(
+        { cmsRoleId: "role-admin" },
+        { id: "role-admin", name: "ADMIN", description: "Admin" },
       ),
-    ).rejects.toThrow("This account does not have an active CMS role.");
-    expect(cmsAuthRepository.updateUserRole).toHaveBeenCalledWith(
-      "cms-user-1",
-      null,
     );
+    const roleSpy = spyOn(CmsUserRepository, "findRoleByName");
+    const createSpy = spyOn(CmsUserRepository, "create");
+    const updateSpy = spyOn(CmsUserRepository, "update");
+
+    const user = await CmsAuthService.createSessionUserForCentralIdentity(
+      centralEmployee(),
+    );
+
+    expect(user.role.name).toBe("ADMIN");
+    expect(roleSpy).not.toHaveBeenCalled();
+    expect(createSpy).not.toHaveBeenCalled();
+    expect(updateSpy).not.toHaveBeenCalled();
   });
 });

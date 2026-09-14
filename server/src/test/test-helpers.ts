@@ -23,18 +23,17 @@ export function cmsSessionUser(
 ): CmsSessionUser {
   return {
     id: "cms-user-1",
-    email: testUser.email,
-    fullName: testUser.full_name,
-    phone: null,
+    centralUserId: testUser.id,
+    name: testUser.full_name,
+    unitId: testUser.unitId || testUser.unit_id || "unit-mad-lab",
+    isActive: true,
     role: {
       name: roleName,
       label: roleName,
       permissions:
         roleName === "SUPER_ADMIN"
           ? ["*"]
-          : roleName === "ADMIN"
-            ? ["dashboard:read", "content:manage"]
-            : ["dashboard:read"],
+          : ["dashboard:read", "content:manage"],
     },
     central: testUser as Extract<CentralUser, { source: "employee" }>,
   };

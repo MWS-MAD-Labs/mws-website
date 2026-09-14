@@ -62,7 +62,7 @@ describe("CMS LoginController", () => {
   });
 
   it("returns current CMS user from a valid token", async () => {
-    const user = cmsSessionUser("VIEWER");
+    const user = cmsSessionUser("ADMIN");
     spyOn(centralClient, "resolveCentralIdentity").mockResolvedValue(testUser);
     spyOn(CmsAuthService, "requireFreshSessionUser").mockResolvedValue(user);
     const token = await import("../lib/session").then((session) =>

@@ -55,10 +55,16 @@ export default function LoginPage() {
 }
 function readableLoginError(errorCode: string | null): string | null {
   switch (errorCode) {
-    case "invalid_google_token":
-      return "Google token is invalid or expired. Please try again.";
+    case "google_state":
+      return "Google sign-in state is invalid. Please try again.";
+    case "google_auth_failed":
+      return "Google sign-in failed. Please try again.";
+    case "not_registered":
+      return "This account is not registered in Central yet.";
     case "unauthorized":
       return "You are not authorized to access this dashboard.";
+    case "login_failed":
+      return "Sign-in could not be completed. Please try again.";
     default:
       return null;
   }

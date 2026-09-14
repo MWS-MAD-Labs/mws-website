@@ -42,7 +42,7 @@ describe("sessionAuthMiddleware", () => {
   });
 
   it("allows valid session tokens and exposes the user", async () => {
-    const user = cmsSessionUser("VIEWER");
+    const user = cmsSessionUser("ADMIN");
     const token = await signSession(user);
     const res = await buildApp().request("/protected", {
       headers: { Cookie: `mws_cms_session=${token}` },
@@ -50,5 +50,20 @@ describe("sessionAuthMiddleware", () => {
 
     expect(res.status).toBe(200);
     expect(((await res.json()) as { data: unknown }).data).toEqual(user);
+  });
+
+  it("refuses inactive CMS users from the session", async () => {
+    const token = await signSession({
+      ...cmsSessionUser("ADMIN"),
+      isActive: false,
+    });
+    const res = await buildApp().request("/protected", {
+      headers: { Cookie: `mws_cms_session=${token}` },
+    });
+
+    expect(res.status).toBe(403);
+    expect(((await res.json()) as { errors: string }).errors).toBe(
+      "This CMS account is inactive.",
+    );
   });
 });

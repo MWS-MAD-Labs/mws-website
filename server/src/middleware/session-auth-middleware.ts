@@ -18,6 +18,10 @@ export async function sessionAuthMiddleware(
     throw new ResponseError(401, "Session expired or invalid.");
   }
 
+  if (!session.user.isActive) {
+    throw new ResponseError(403, "This CMS account is inactive.");
+  }
+
   c.set("user", session.user);
   await next();
 }

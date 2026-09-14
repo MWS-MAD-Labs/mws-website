@@ -1,0 +1,8 @@
+INSERT INTO "CmsRole" ("id", "name", "description", "updatedAt")
+VALUES
+  ('00000000-0000-4000-8000-000000000001', 'SUPER_ADMIN', 'Super Admin', CURRENT_TIMESTAMP),
+  ('00000000-0000-4000-8000-000000000002', 'ADMIN', 'Admin', CURRENT_TIMESTAMP)
+ON CONFLICT ("name") DO UPDATE
+SET
+  "description" = EXCLUDED."description",
+  "updatedAt" = CURRENT_TIMESTAMP;

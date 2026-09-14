@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "CmsUser" ALTER COLUMN "centralUserId" SET DATA TYPE TEXT,
+ALTER COLUMN "unitId" SET DATA TYPE TEXT;

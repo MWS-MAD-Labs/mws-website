@@ -12,9 +12,9 @@ export type AdminDashboardData = {
 
 export type CmsUserListItem = {
   id: string;
-  email: string;
-  fullName: string;
-  phone: string | null;
+  centralUserId: string;
+  name: string;
+  unitId: string;
   isActive: boolean;
   role: {
     name: CmsRoleName;

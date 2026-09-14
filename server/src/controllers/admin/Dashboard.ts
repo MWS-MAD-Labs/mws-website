@@ -2,7 +2,7 @@ import type { Context } from "hono";
 import type { SessionVariables } from "../../types/hono-context";
 
 function userName(user: SessionVariables["user"]): string {
-  return user.central.nick_name || user.fullName || user.email;
+  return user.central.nick_name || user.name || user.central.email;
 }
 
 export class DashboardController {

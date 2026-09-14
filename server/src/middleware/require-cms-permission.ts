@@ -26,7 +26,12 @@ export function requireCmsPermission(permission: CmsPermission) {
 
 export function requireCmsRole(roleName: CmsRoleName) {
   return async (c: Context<{ Variables: SessionVariables }>, next: Next) => {
-    if (c.var.user.role.name !== roleName) {
+    const actualRole = c.var.user.role.name;
+    const hasRole =
+      actualRole === roleName ||
+      (roleName === "ADMIN" && actualRole === "SUPER_ADMIN");
+
+    if (!hasRole) {
       throw new ResponseError(403, "You are not allowed to perform this action.");
     }
 

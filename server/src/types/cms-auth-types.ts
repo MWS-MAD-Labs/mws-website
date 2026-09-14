@@ -1,6 +1,6 @@
 import type { CentralUser } from "./central-types";
 
-export const CMS_ROLE_NAMES = ["SUPER_ADMIN", "ADMIN", "VIEWER"] as const;
+export const CMS_ROLE_NAMES = ["SUPER_ADMIN", "ADMIN"] as const;
 
 export type CmsRoleName = (typeof CMS_ROLE_NAMES)[number];
 
@@ -18,9 +18,10 @@ export type CmsSessionRole = {
 
 export type CmsSessionUser = {
   id: string;
-  email: string;
-  fullName: string;
-  phone: string | null;
+  centralUserId: string;
+  name: string;
+  unitId: string;
+  isActive: boolean;
   role: CmsSessionRole;
   central: Extract<CentralUser, { source: "employee" }>;
 };

@@ -65,8 +65,8 @@ describe("adminRoute", () => {
     expect(res.status).toBe(200);
   });
 
-  it("allows VIEWER to access dashboard data", async () => {
-    const cmsUser = cmsSessionUser("VIEWER");
+  it("allows ADMIN to access dashboard data", async () => {
+    const cmsUser = cmsSessionUser("ADMIN");
     spyOn(centralClient, "resolveCentralIdentity").mockResolvedValue(testUser);
     spyOn(CmsAuthService, "requireFreshSessionUser").mockResolvedValue(cmsUser);
     const token = await signSession(cmsUser);
@@ -116,9 +116,9 @@ describe("adminRoute", () => {
     spyOn(CmsAuthService, "requireFreshSessionUser").mockResolvedValue(cmsUser);
     spyOn(CmsAuthService, "updateUserRole").mockResolvedValue({
       id: "cms-user-2",
-      email: "target@millennia21.id",
-      fullName: "Target User",
-      phone: null,
+      centralUserId: "emp-2",
+      name: "Target User",
+      unitId: "unit-mad-lab",
       isActive: true,
       role: {
         name: "ADMIN",

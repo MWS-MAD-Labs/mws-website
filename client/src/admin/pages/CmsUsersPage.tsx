@@ -85,7 +85,8 @@ export default function CmsUsersPage() {
             <thead className="border-b border-[rgba(36,23,24,0.14)] bg-[#faf8f3] text-xs uppercase text-[#625759]">
               <tr>
                 <th className="px-4 py-3 font-semibold">Name</th>
-                <th className="px-4 py-3 font-semibold">Email</th>
+                <th className="px-4 py-3 font-semibold">Central User ID</th>
+                <th className="px-4 py-3 font-semibold">Unit ID</th>
                 <th className="px-4 py-3 font-semibold">Status</th>
                 <th className="px-4 py-3 font-semibold">Role</th>
               </tr>
@@ -97,9 +98,14 @@ export default function CmsUsersPage() {
                   className="border-b border-[rgba(36,23,24,0.08)] last:border-b-0"
                 >
                   <td className="px-4 py-3 font-medium text-[#241718]">
-                    {user.fullName}
+                    {user.name}
                   </td>
-                  <td className="px-4 py-3 text-[#625759]">{user.email}</td>
+                  <td className="px-4 py-3 text-[#625759]">
+                    {user.centralUserId}
+                  </td>
+                  <td className="px-4 py-3 text-[#625759]">
+                    {user.unitId}
+                  </td>
                   <td className="px-4 py-3 text-[#625759]">
                     {user.isActive ? "Active" : "Inactive"}
                   </td>

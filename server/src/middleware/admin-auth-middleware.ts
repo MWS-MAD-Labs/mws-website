@@ -13,7 +13,7 @@ export async function adminAuthMiddleware(
   }
 
   try {
-    const currentUser = await resolveCentralIdentity(sessionUser.email);
+    const currentUser = await resolveCentralIdentity(sessionUser.central.email);
     if (!currentUser) {
       throw new ResponseError(403, "Central identity is no longer registered.");
     }

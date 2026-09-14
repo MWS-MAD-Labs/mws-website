@@ -19,7 +19,7 @@ export type EmployeeIdentity = {
   employment_type: string | null;
 };
 
-export type CmsRoleName = "SUPER_ADMIN" | "ADMIN" | "VIEWER";
+export type CmsRoleName = "SUPER_ADMIN" | "ADMIN";
 
 export type CmsPermission =
   | "*"
@@ -35,9 +35,10 @@ export type CmsRole = {
 
 export type AuthUser = {
   id: string;
-  email: string;
-  fullName: string;
-  phone: string | null;
+  centralUserId: string;
+  name: string;
+  unitId: string;
+  isActive: boolean;
   role: CmsRole;
   central: EmployeeIdentity;
 };
