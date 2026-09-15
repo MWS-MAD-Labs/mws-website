@@ -12,6 +12,10 @@ import { sessionAuthMiddleware } from "../../middleware/session-auth-middleware"
 import { adminCrudResourceNames } from "../../models/admin-crud-model";
 import type { SessionVariables } from "../../types/hono-context";
 import { createAdminCrudRoute } from "./crud-route";
+import {
+  adminGalleryImageRoute,
+  adminGalleryRoute,
+} from "./gallery-route";
 
 export const adminRoute = new Hono<{ Variables: SessionVariables }>();
 
@@ -26,7 +30,11 @@ adminRoute.get(
   requireCmsPermission("dashboard:read"),
   DashboardController.dashboard,
 );
-adminRoute.get("/users", requireCmsRole("SUPER_ADMIN"), CmsUsersController.listUsers);
+adminRoute.get(
+  "/users",
+  requireCmsRole("SUPER_ADMIN"),
+  CmsUsersController.listUsers,
+);
 adminRoute.patch(
   "/users/:id/role",
   requireCmsRole("SUPER_ADMIN"),
@@ -54,6 +62,10 @@ adminRoute.get(
   AdminCrudController.resources,
 );
 
+adminRoute.route("/galleries", adminGalleryRoute);
+adminRoute.route("/gallery-images", adminGalleryImageRoute);
+
 for (const resource of adminCrudResourceNames) {
+  if (resource === "hero-slides") continue;
   adminRoute.route(`/${resource}`, createAdminCrudRoute(resource));
 }

@@ -15,6 +15,27 @@ enum VideoSourceType {
   UPLOAD
 }
 
+
+enum HeroSlideMediaType {
+  IMAGE
+  VIDEO
+}
+
+enum HeroSlideSourceType {
+  MANUAL
+  PROGRAM
+  ADMISSION
+  CAMPUS_TOUR
+  CURRICULUM
+  AFFILIATION
+  ACADEMIC
+  KINDERGARTEN
+  ELEMENTARY
+  JUNIOR_HIGH
+  OUR_SCHOOL
+  CONTACT
+}
+
 // =========================
 // CMS USER
 // =========================
@@ -271,4 +292,34 @@ model AuditLog {
   createdAt  DateTime @default(now())
 
   cmsUser CmsUser? @relation(fields: [cmsUserId], references: [id])
+}
+
+// heroSlides
+
+
+model HeroSlide {
+  id          String   @id @default(uuid()) @db.Uuid
+
+  sourceType  HeroSlideSourceType @default(MANUAL)
+  sourceId    String?             @db.Uuid
+
+  title       String?  @db.VarChar(255)
+  description String?
+  caption     String?
+
+  mediaType   HeroSlideMediaType?
+  mediaPath   String?  @db.VarChar(1000)
+  mediaAlt    String?  @db.VarChar(255)
+  posterPath  String?  @db.VarChar(1000)
+
+  isLooping   Boolean  @default(true)
+
+  ctaLabel    String?  @db.VarChar(100)
+  ctaUrl      String?  @db.VarChar(1000)
+
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

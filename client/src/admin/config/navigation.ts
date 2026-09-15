@@ -5,6 +5,7 @@ import {
   Handshake,
   Images,
   LayoutDashboard,
+  LucideHome,
   MessageSquare,
   School,
   ShieldCheck,
@@ -37,6 +38,14 @@ const menuItems: MenuItem[] = [
     Icon: Files,
     enabled: true,
     children: [
+      {
+        label: "Home",
+        href: "/admin/hero-slides",
+        Icon: LucideHome,
+        enabled: true,
+        requiredPermission: "content:manage",
+      },
+
       {
         label: "Our School",
         href: "/admin/our-school",
@@ -130,13 +139,6 @@ const menuItems: MenuItem[] = [
       {
         label: "Images",
         href: "/admin/gallery/images",
-        Icon: Images,
-        enabled: true,
-        requiredPermission: "content:manage",
-      },
-      {
-        label: "Videos",
-        href: "/admin/gallery/videos",
         Icon: Images,
         enabled: true,
         requiredPermission: "content:manage",

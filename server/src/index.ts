@@ -8,7 +8,8 @@ import { authRoute } from "./routes/auth";
 
 const app = new Hono();
 
-const frontendOrigin = process.env["FRONTEND_ORIGIN"] ?? "http://localhost:5173";
+const frontendOrigin =
+  process.env["FRONTEND_ORIGIN"] ?? "http://localhost:5173";
 const port = Number(process.env["PORT"] ?? 4004);
 
 declare global {
@@ -60,13 +61,17 @@ if (globalThis.__mwsWebsiteServer) {
   globalThis.__mwsWebsiteServer.reload({
     fetch: app.fetch,
   });
-  console.log(`MWS Website API reloaded on :${globalThis.__mwsWebsiteServer.port}`);
+  console.log(
+    `MWS Website API reloaded on :${globalThis.__mwsWebsiteServer.port}`,
+  );
 } else {
   globalThis.__mwsWebsiteServer = Bun.serve({
     port,
     fetch: app.fetch,
   });
-  console.log(`MWS Website API listening on :${globalThis.__mwsWebsiteServer.port}`);
+  console.log(
+    `MWS Website API listening on :${globalThis.__mwsWebsiteServer.port}`,
+  );
 }
 
 export { app };

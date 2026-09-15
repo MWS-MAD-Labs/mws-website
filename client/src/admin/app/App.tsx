@@ -12,8 +12,7 @@ import AuditLogsPage from "@/admin/features/placeholders/AuditLogsPage";
 import CampusTourPage from "@/admin/features/placeholders/CampusTourPage";
 import CurriculumPage from "@/admin/features/placeholders/CurriculumPage";
 import ElementaryPage from "@/admin/features/placeholders/ElementaryPage";
-import GalleryImagesPage from "@/admin/features/placeholders/GalleryImagesPage";
-import GalleryVideosPage from "@/admin/features/placeholders/GalleryVideosPage";
+import GalleryImagesPage from "@/admin/features/gallery/GalleryImagesPage";
 import HelpPage from "@/admin/features/placeholders/HelpPage";
 import JuniorHighPage from "@/admin/features/placeholders/JuniorHighPage";
 import KindergartenPage from "@/admin/features/placeholders/KindergartenPage";
@@ -76,7 +75,6 @@ export default function AdminApp() {
             </RequireAuth>
           }
         />
-        <Route path="hero" element={<Navigate to="/admin/pages" replace />} />
         <Route
           path="our-school"
           element={
@@ -173,16 +171,6 @@ export default function AdminApp() {
             <RequireAuth>
               <RequireContentPermission>
                 <GalleryImagesPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="gallery/videos"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <GalleryVideosPage />
               </RequireContentPermission>
             </RequireAuth>
           }

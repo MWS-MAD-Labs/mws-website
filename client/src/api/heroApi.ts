@@ -1,9 +1,10 @@
 import { apiRequest } from "@/lib/api";
-import type { HeroSlideSource } from "@/features/hero/heroData";
+import type { ResolvedHeroSlide } from "@/features/hero/heroData";
 
 export const heroApi = {
-  async publicHero(): Promise<HeroSlideSource[]> {
-    const response = await apiRequest<{ data: HeroSlideSource[] }>("/public/hero");
+  async publicHero(): Promise<ResolvedHeroSlide[]> {
+    const response =
+      await apiRequest<{ data: ResolvedHeroSlide[] }>("/api/hero-slides");
     return response?.data ?? [];
   },
 };
