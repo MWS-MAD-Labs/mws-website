@@ -12,7 +12,8 @@ import AuditLogsPage from "@/admin/features/placeholders/AuditLogsPage";
 import CampusTourPage from "@/admin/features/placeholders/CampusTourPage";
 import CurriculumPage from "@/admin/features/placeholders/CurriculumPage";
 import ElementaryPage from "@/admin/features/placeholders/ElementaryPage";
-import GalleryImagesPage from "@/admin/features/gallery/GalleryImagesPage";
+import GalleryDetailPage from "@/admin/features/gallery/GalleryDetailPage";
+import GalleryListPage from "@/admin/features/gallery/GalleryListPage";
 import HelpPage from "@/admin/features/placeholders/HelpPage";
 import JuniorHighPage from "@/admin/features/placeholders/JuniorHighPage";
 import KindergartenPage from "@/admin/features/placeholders/KindergartenPage";
@@ -166,15 +167,27 @@ export default function AdminApp() {
           }
         />
         <Route
-          path="gallery/images"
+          path="gallery"
           element={
             <RequireAuth>
               <RequireContentPermission>
-                <GalleryImagesPage />
+                <GalleryListPage />
               </RequireContentPermission>
             </RequireAuth>
           }
         />
+        <Route
+          path="gallery/:galleryId"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <GalleryDetailPage />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+        <Route path="gallery/images" element={<Navigate to="/admin/gallery" replace />} />
+        <Route path="gallery/videos" element={<Navigate to="/admin/gallery" replace />} />
         <Route
           path="users"
           element={

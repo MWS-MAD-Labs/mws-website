@@ -67,11 +67,25 @@ export type GalleryImageItem = {
   updatedAt: string;
 };
 
+export type GalleryVideoItem = {
+  id: string;
+  galleryId: string;
+  sourceType: "UPLOAD" | "YOUTUBE";
+  source: string;
+  title: string | null;
+  caption: string | null;
+  sortOrder: number;
+  previewPath: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type GalleryItem = {
   id: string;
   title: string;
   description: string | null;
   images: GalleryImageItem[];
+  videos: GalleryVideoItem[];
   createdAt: string;
   updatedAt: string;
 };
@@ -86,6 +100,8 @@ export type GalleryImageMetadataPayload = {
   caption?: string | null;
   sortOrder?: number;
 };
+
+export type GalleryVideoMetadataPayload = GalleryImageMetadataPayload;
 
 export const adminApi = {
   async dashboard(): Promise<AdminDashboardData> {
@@ -250,7 +266,68 @@ export const adminApi = {
     await apiRequest(`/admin/gallery-images/${id}`, { method: "DELETE" });
   },
 
+  async uploadGalleryVideo(
+    galleryId: string,
+    data: {
+      file: File;
+      title?: string;
+      caption?: string;
+      sortOrder?: string;
+    },
+  ): Promise<GalleryVideoItem> {
+    const body = new FormData();
+    body.append("file", data.file);
+    if (data.title) body.append("title", data.title);
+    if (data.caption) body.append("caption", data.caption);
+    if (data.sortOrder) body.append("sortOrder", data.sortOrder);
+
+    const response = await apiRequest<{ data: GalleryVideoItem }>(
+      `/admin/galleries/${galleryId}/videos/upload`,
+      {
+        method: "POST",
+        body,
+      },
+    );
+    return response!.data;
+  },
+
+  async createYoutubeGalleryVideo(
+    galleryId: string,
+    data: GalleryVideoMetadataPayload & { url: string },
+  ): Promise<GalleryVideoItem> {
+    const response = await apiRequest<{ data: GalleryVideoItem }>(
+      `/admin/galleries/${galleryId}/videos/youtube`,
+      {
+        method: "POST",
+        body: data,
+      },
+    );
+    return response!.data;
+  },
+
+  async updateGalleryVideo(
+    id: string,
+    data: GalleryVideoMetadataPayload,
+  ): Promise<GalleryVideoItem> {
+    const response = await apiRequest<{ data: GalleryVideoItem }>(
+      `/admin/gallery-videos/${id}`,
+      {
+        method: "PATCH",
+        body: data,
+      },
+    );
+    return response!.data;
+  },
+
+  async deleteGalleryVideo(id: string): Promise<void> {
+    await apiRequest(`/admin/gallery-videos/${id}`, { method: "DELETE" });
+  },
+
   galleryImageUrl(image: GalleryImageItem): string {
     return `${env.apiBaseUrl}${image.previewPath}`;
+  },
+
+  galleryVideoUrl(video: GalleryVideoItem): string {
+    return video.previewPath ? `${env.apiBaseUrl}${video.previewPath}` : video.source;
   },
 };

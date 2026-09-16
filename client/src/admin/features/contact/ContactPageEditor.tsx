@@ -37,28 +37,7 @@ export default function ContactPageEditor() {
   };
 
   return (
-    <AppShell
-      eyebrow="Content / Pages"
-      title="Edit Contact Page"
-      action={
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          <span className="rounded-md border border-[rgba(36,23,24,0.14)] px-3 py-2 text-xs font-semibold text-[#625759]">
-            {isDefault ? "Default Content" : "CMS Override"}
-          </span>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            className="inline-flex items-center gap-2"
-            disabled={isSaving || isDefault}
-            onClick={() => void resetPage()}
-          >
-            <RotateCcw size={14} />
-            <span>Reset</span>
-          </Button>
-        </div>
-      }
-    >
+    <AppShell title="Edit Contact Page">
       <section className="flex-1 p-6">
         {error && (
           <div
@@ -78,23 +57,42 @@ export default function ContactPageEditor() {
           </div>
         )}
 
-        <div className="mb-5 inline-flex rounded-lg border border-[rgba(36,23,24,0.14)] bg-white p-1 shadow-sm">
-          {editorModes.map(({ Icon, label, value }) => (
-            <button
-              key={value}
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <div className="inline-flex rounded-lg border border-[rgba(36,23,24,0.14)] bg-white p-1 shadow-sm">
+            {editorModes.map(({ Icon, label, value }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setMode(value)}
+                className={[
+                  "inline-flex h-9 items-center gap-2 rounded-md px-4 text-sm font-semibold transition-colors",
+                  mode === value
+                    ? "bg-[#7e1518] text-white"
+                    : "text-[#625759] hover:bg-[#7e1518]/5 hover:text-[#241718]",
+                ].join(" ")}
+              >
+                <Icon size={15} />
+                <span>{label}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-md border border-[rgba(36,23,24,0.14)] bg-white px-3 py-2 text-xs font-semibold text-[#625759]">
+              {isDefault ? "Default Content" : "CMS Override"}
+            </span>
+            <Button
               type="button"
-              onClick={() => setMode(value)}
-              className={[
-                "inline-flex h-9 items-center gap-2 rounded-md px-4 text-sm font-semibold transition-colors",
-                mode === value
-                  ? "bg-[#7e1518] text-white"
-                  : "text-[#625759] hover:bg-[#7e1518]/5 hover:text-[#241718]",
-              ].join(" ")}
+              size="sm"
+              variant="outline"
+              className="inline-flex items-center gap-2"
+              disabled={isSaving || isDefault}
+              onClick={() => void resetPage()}
             >
-              <Icon size={15} />
-              <span>{label}</span>
-            </button>
-          ))}
+              <RotateCcw size={14} />
+              <span>Reset</span>
+            </Button>
+          </div>
         </div>
 
         {mode === "edit" ? (

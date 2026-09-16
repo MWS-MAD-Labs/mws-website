@@ -1,4 +1,4 @@
-import type { GalleryImage } from "@prisma/client";
+import { VideoSourceType, type GalleryImage, type GalleryVideo } from "@prisma/client";
 import { z } from "zod";
 import { ResponseError } from "../error/response-error";
 import {
@@ -11,15 +11,22 @@ import {
   GalleryRepository,
   type GalleryImageUpdateData,
   type GalleryUpdateData,
+  type GalleryVideoUpdateData,
   type GalleryWithMedia,
 } from "../repositories/gallery-repository";
 
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
+const MAX_VIDEO_SIZE = 200 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = new Set([
   "image/jpeg",
   "image/png",
   "image/webp",
   "image/gif",
+]);
+const ACCEPTED_VIDEO_TYPES = new Set([
+  "video/mp4",
+  "video/webm",
+  "video/quicktime",
 ]);
 
 const galleryCreateSchema = z.object({
@@ -61,6 +68,11 @@ const imageMetadataSchema = z.object({
     .nullable()
     .optional(),
   sortOrder: z.coerce.number().int().optional(),
+});
+
+const videoMetadataSchema = imageMetadataSchema;
+const youtubeVideoSchema = videoMetadataSchema.extend({
+  url: z.string().trim().url().max(1000),
 });
 
 function requireUuid(
@@ -105,6 +117,10 @@ function imageObjectKey(fileName: string) {
   return `gallery/images/${crypto.randomUUID()}-${sanitizeFileName(fileName)}`;
 }
 
+function videoObjectKey(fileName: string) {
+  return `gallery/videos/${crypto.randomUUID()}-${sanitizeFileName(fileName)}`;
+}
+
 async function deleteImageObject(path: string) {
   await deleteMinioObject(path);
 }
@@ -116,10 +132,21 @@ function imageResponse(image: GalleryImage) {
   };
 }
 
+function videoResponse(video: GalleryVideo) {
+  return {
+    ...video,
+    previewPath:
+      video.sourceType === "UPLOAD"
+        ? `/admin/gallery-videos/${video.id}/file`
+        : null,
+  };
+}
+
 function galleryResponse(gallery: GalleryWithMedia) {
   return {
     ...gallery,
     images: gallery.images.map(imageResponse),
+    videos: gallery.videos.map(videoResponse),
   };
 }
 
@@ -135,6 +162,38 @@ function validateImageFile(file: File) {
   if (file.size > MAX_IMAGE_SIZE) {
     throw new ResponseError(400, "Image file must be 10MB or smaller.");
   }
+}
+
+function validateVideoFile(file: File) {
+  if (!ACCEPTED_VIDEO_TYPES.has(file.type)) {
+    throw new ResponseError(400, "Only MP4, WebM, or MOV videos are allowed.");
+  }
+
+  if (file.size <= 0) {
+    throw new ResponseError(400, "Video file is empty.");
+  }
+
+  if (file.size > MAX_VIDEO_SIZE) {
+    throw new ResponseError(400, "Video file must be 200MB or smaller.");
+  }
+}
+
+function parseVideoMetadata(payload: unknown): GalleryVideoUpdateData {
+  const result = videoMetadataSchema.safeParse(payload);
+  if (!result.success) throw new ResponseError(400, "Invalid video metadata.");
+  return result.data;
+}
+
+function parseYoutubeVideo(payload: unknown) {
+  const result = youtubeVideoSchema.safeParse(payload);
+  if (!result.success) throw new ResponseError(400, "Invalid YouTube video payload.");
+
+  const host = new URL(result.data.url).hostname.replace(/^www\./, "");
+  if (!["youtube.com", "youtu.be", "m.youtube.com"].includes(host)) {
+    throw new ResponseError(400, "Only YouTube URLs are allowed.");
+  }
+
+  return result.data;
 }
 
 export class GalleryService {
@@ -171,6 +230,9 @@ export class GalleryService {
 
     for (const image of gallery.images) {
       await deleteImageObject(image.path);
+    }
+    for (const video of gallery.videos) {
+      if (video.sourceType === "UPLOAD") await deleteMinioObject(video.source);
     }
 
     await GalleryRepository.deleteGallery(id);
@@ -247,5 +309,102 @@ export class GalleryService {
 
     await deleteImageObject(image.path);
     await GalleryRepository.deleteImage(id);
+  }
+
+  static async uploadVideo(
+    galleryId: string | undefined,
+    file: File,
+    metadataPayload: unknown,
+  ) {
+    requireUuid(galleryId, "galleryId");
+    validateVideoFile(file);
+
+    const gallery = await GalleryRepository.findGalleryById(galleryId);
+    if (!gallery) throw new ResponseError(404, "Gallery not found.");
+
+    const metadata = parseVideoMetadata(metadataPayload);
+    const objectName = videoObjectKey(file.name);
+    const buffer = Buffer.from(await file.arrayBuffer());
+
+    await putMinioObject(objectName, buffer, {
+      "Content-Type": file.type,
+      "Cache-Control": "private, max-age=300",
+    });
+
+    try {
+      return videoResponse(
+        await GalleryRepository.createVideo({
+          galleryId,
+          sourceType: VideoSourceType.UPLOAD,
+          source: objectName,
+          title: metadata.title,
+          caption: metadata.caption,
+          sortOrder: metadata.sortOrder,
+        }),
+      );
+    } catch (error) {
+      await deleteMinioObject(objectName).catch(() => undefined);
+      throw error;
+    }
+  }
+
+  static async createYoutubeVideo(galleryId: string | undefined, payload: unknown) {
+    requireUuid(galleryId, "galleryId");
+    const gallery = await GalleryRepository.findGalleryById(galleryId);
+    if (!gallery) throw new ResponseError(404, "Gallery not found.");
+
+    const data = parseYoutubeVideo(payload);
+    return videoResponse(
+      await GalleryRepository.createVideo({
+        galleryId,
+        sourceType: VideoSourceType.YOUTUBE,
+        source: data.url,
+        title: data.title,
+        caption: data.caption,
+        sortOrder: data.sortOrder,
+      }),
+    );
+  }
+
+  static async updateVideo(id: string | undefined, payload: unknown) {
+    requireUuid(id);
+    const video = await GalleryRepository.findVideoById(id);
+    if (!video) throw new ResponseError(404, "Gallery video not found.");
+    return videoResponse(
+      await GalleryRepository.updateVideo(id, parseVideoMetadata(payload)),
+    );
+  }
+
+  static async getVideoFile(id: string | undefined) {
+    requireUuid(id);
+    const video = await GalleryRepository.findVideoById(id);
+    if (!video) throw new ResponseError(404, "Gallery video not found.");
+    if (video.sourceType !== "UPLOAD") {
+      throw new ResponseError(400, "This gallery video is not an uploaded file.");
+    }
+
+    const [stat, buffer] = await Promise.all([
+      statMinioObject(video.source),
+      getMinioObjectBuffer(video.source),
+    ]);
+
+    return {
+      buffer,
+      contentType:
+        String(stat.metaData?.["content-type"] ?? stat.metaData?.["Content-Type"] ?? "")
+          || "application/octet-stream",
+      size: stat.size,
+    };
+  }
+
+  static async deleteVideo(id: string | undefined) {
+    requireUuid(id);
+    const video = await GalleryRepository.findVideoById(id);
+    if (!video) return;
+
+    if (video.sourceType === "UPLOAD") {
+      await deleteMinioObject(video.source);
+    }
+    await GalleryRepository.deleteVideo(id);
   }
 }

@@ -61,15 +61,7 @@ export default function CmsUsersPage() {
   };
 
   return (
-    <AppShell
-      eyebrow="MWS CMS"
-      title="CMS Users"
-      action={
-        <span className="rounded-md border border-[rgba(36,23,24,0.14)] px-3 py-2 text-xs font-semibold text-[#625759]">
-          Roles from CMS DB
-        </span>
-      }
-    >
+    <AppShell title="CMS Users">
       <section className="flex-1 p-6">
         {error && (
           <div

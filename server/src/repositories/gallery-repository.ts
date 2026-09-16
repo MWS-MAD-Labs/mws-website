@@ -1,4 +1,4 @@
-import type { Gallery, GalleryImage, Prisma } from "@prisma/client";
+import type { Gallery, GalleryImage, GalleryVideo, Prisma, VideoSourceType } from "@prisma/client";
 import { getPrisma } from "../lib/prisma";
 
 const galleryInclude = {
@@ -26,6 +26,21 @@ export type GalleryImageCreateData = {
 };
 
 export type GalleryImageUpdateData = {
+  title?: string | null;
+  caption?: string | null;
+  sortOrder?: number;
+};
+
+export type GalleryVideoCreateData = {
+  galleryId: string;
+  sourceType: VideoSourceType;
+  source: string;
+  title?: string | null;
+  caption?: string | null;
+  sortOrder?: number;
+};
+
+export type GalleryVideoUpdateData = {
   title?: string | null;
   caption?: string | null;
   sortOrder?: number;
@@ -93,5 +108,24 @@ export class GalleryRepository {
 
   static async deleteImage(id: string): Promise<GalleryImage> {
     return getPrisma().galleryImage.delete({ where: { id } });
+  }
+
+  static async createVideo(data: GalleryVideoCreateData): Promise<GalleryVideo> {
+    return getPrisma().galleryVideo.create({ data });
+  }
+
+  static async findVideoById(id: string): Promise<GalleryVideo | null> {
+    return getPrisma().galleryVideo.findUnique({ where: { id } });
+  }
+
+  static async updateVideo(
+    id: string,
+    data: GalleryVideoUpdateData,
+  ): Promise<GalleryVideo> {
+    return getPrisma().galleryVideo.update({ where: { id }, data });
+  }
+
+  static async deleteVideo(id: string): Promise<GalleryVideo> {
+    return getPrisma().galleryVideo.delete({ where: { id } });
   }
 }

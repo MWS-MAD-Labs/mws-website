@@ -15,6 +15,7 @@ import { createAdminCrudRoute } from "./crud-route";
 import {
   adminGalleryImageRoute,
   adminGalleryRoute,
+  adminGalleryVideoRoute,
 } from "./gallery-route";
 
 export const adminRoute = new Hono<{ Variables: SessionVariables }>();
@@ -64,6 +65,7 @@ adminRoute.get(
 
 adminRoute.route("/galleries", adminGalleryRoute);
 adminRoute.route("/gallery-images", adminGalleryImageRoute);
+adminRoute.route("/gallery-videos", adminGalleryVideoRoute);
 
 for (const resource of adminCrudResourceNames) {
   if (resource === "hero-slides") continue;

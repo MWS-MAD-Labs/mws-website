@@ -30,17 +30,7 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <AppShell
-      eyebrow="MWS CMS"
-      title="Dashboard"
-      action={
-        user ? (
-          <span className="rounded-md border border-[rgba(36,23,24,0.14)] px-3 py-2 text-xs font-semibold text-[#625759]">
-            {user.role.label ?? user.role.name}
-          </span>
-        ) : null
-      }
-    >
+    <AppShell title="Dashboard">
       <section className="flex-1 p-6">
         <div className="rounded-lg border border-[rgba(36,23,24,0.14)] bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-[#241718]">

@@ -133,17 +133,10 @@ const menuItems: MenuItem[] = [
 
   {
     label: "Gallery",
+    href: "/admin/gallery",
     Icon: Images,
     enabled: true,
-    children: [
-      {
-        label: "Images",
-        href: "/admin/gallery/images",
-        Icon: Images,
-        enabled: true,
-        requiredPermission: "content:manage",
-      },
-    ],
+    requiredPermission: "content:manage",
   },
 
   {
