@@ -283,7 +283,7 @@ export default function Navbar() {
                   <span className="h-[9px] w-[9px] translate-y-[-2px] rotate-45 border-b-2 border-r-2 border-current transition-transform duration-200" />
                 </button>
                 <ul className={dropdownMenuClassName("academics", true)}>
-                  {academicLinks.slice(0, 3).map((item) => (
+                  {academicLinks.map((item) => (
                     <li key={item.path}>
                       <NavLink to={item.path} className={dropdownLinkClassName}>
                         {item.label}

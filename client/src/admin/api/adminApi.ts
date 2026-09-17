@@ -95,6 +95,22 @@ export type GalleryPayload = {
   description?: string | null;
 };
 
+export type OurSchoolItem = {
+  id: string;
+  title: string;
+  description: string | null;
+  galleryId: string | null;
+  gallery: GalleryItem | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type OurSchoolPayload = {
+  title: string;
+  description?: string | null;
+  galleryId?: string | null;
+};
+
 export type GalleryImageMetadataPayload = {
   title?: string | null;
   caption?: string | null;
@@ -221,6 +237,42 @@ export const adminApi = {
 
   async deleteGallery(id: string): Promise<void> {
     await apiRequest(`/admin/galleries/${id}`, { method: "DELETE" });
+  },
+
+  async ourSchools(): Promise<OurSchoolItem[]> {
+    const response = await apiRequest<{ data: OurSchoolItem[] }>(
+      "/admin/our-school",
+    );
+    return response?.data ?? [];
+  },
+
+  async createOurSchool(data: OurSchoolPayload): Promise<OurSchoolItem> {
+    const response = await apiRequest<{ data: OurSchoolItem }>(
+      "/admin/our-school",
+      {
+        method: "POST",
+        body: data,
+      },
+    );
+    return response!.data;
+  },
+
+  async updateOurSchool(
+    id: string,
+    data: OurSchoolPayload,
+  ): Promise<OurSchoolItem> {
+    const response = await apiRequest<{ data: OurSchoolItem }>(
+      `/admin/our-school/${id}`,
+      {
+        method: "PATCH",
+        body: data,
+      },
+    );
+    return response!.data;
+  },
+
+  async deleteOurSchool(id: string): Promise<void> {
+    await apiRequest(`/admin/our-school/${id}`, { method: "DELETE" });
   },
 
   async uploadGalleryImage(

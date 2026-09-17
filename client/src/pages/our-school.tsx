@@ -1,11 +1,32 @@
-import SubpageHero from "../components/ui/SubpageHero";
-import { asset } from "../data/site";
+import SubpageHero from '../components/ui/SubpageHero';
+import ContentBreadcrumb from '../components/ui/ContentBreadcrumb';
+import EditorialSplit from '../components/ui/EditorialSplit';
+import EditorialFeature from '../components/ui/EditorialFeature';
+import EditorialText from '../components/ui/EditorialText';
+import FaqSection from '../components/ui/FaqSection';
+import { asset } from '../data/site';
 
-const values = [
-  ["Curiosity", "Id officia nisi minim a, ut aliquip in amet. Curabitur cupidatat dolor et laboris integer."],
-  ["Compassion", "Qui magna quis, anim vestibulum culpa ante consequat. Ex vel ullamco commodo dolore nibh ultrices laborum."],
-  ["Collaboration", "Aute fermentum officia aliqua ad quam luctus cubilia adipiscing pariatur primis reprehenderit fugiat occaecat."],
-  ["Mindfulness", "Excepteur eleifend sunt gravida posuere consectetur nulla odio, enim incididunt veniam voluptate."],
+const faqItems = [
+  {
+    question: 'What learning programs does MWS offer?',
+    answer:
+      'Millennia World School offers learning programs designed to support students across different stages of their educational journey. More detailed program information will be provided through the relevant academic pages.',
+  },
+  {
+    question: 'How does MWS approach student learning?',
+    answer:
+      'Our approach focuses on developing students academically while also supporting their personal, social, and practical development through meaningful learning experiences.',
+  },
+  {
+    question: 'What makes the MWS learning environment different?',
+    answer:
+      'MWS aims to create a learning environment where students are encouraged to explore ideas, collaborate with others, develop confidence, and connect their learning with the world around them.',
+  },
+  {
+    question: 'How can I learn more about MWS?',
+    answer:
+      'You can explore our academic programs, school information, and community stories through this website or contact the school directly for further information.',
+  },
 ];
 
 export default function OurSchool() {
@@ -13,134 +34,87 @@ export default function OurSchool() {
     <main>
       <SubpageHero
         title="Our School"
-        image={asset("DSC04079.jpg")}
+        image={asset('DSC04079.jpg')}
         imageAlt="Millennia World School Campus"
-        breadcrumbs={[
-          { label: "Home", path: "/" },
-          { label: "About MWS" },
-          { label: "Our School" },
-        ]}
       />
 
-      <section className="subpage-section">
-        <div className="wrap">
-          <div className="subpage-grid-2">
-            <div className="subpage-body">
-              <p className="subpage-intro">
-                Curae curabitur tincidunt duis et vitae nisi exercitation
-                nostrud posuere in aliquip vel eleifend lacus.
-              </p>
-              <p>
-                Reprehenderit feugiat ipsum officia deserunt nibh fermentum anim
-                esse sint adipiscing quis, qui dolor velit. Aute culpa ut
-                commodo elit tempor quam, ullamco fugiat irure ultrices
-                incididunt.
-              </p>
-              <p>
-                Arcu integer mollit odio a veniam pariatur occaecat cubilia
-                praesent suscipit ex odio. Consectetur quis praesent nostrud
-                curabitur ea aliqua tempor voluptate.
-              </p>
-            </div>
-            <div
-              className="subpage-body"
-              style={{
-                background: "var(--white)",
-                border: "1px solid rgba(126, 21, 24, 0.12)",
-                padding: 40,
-              }}
-            >
-              <h3 style={{ color: "var(--burgundy)", marginTop: 0 }}>
-                Quick Facts
-              </h3>
-              <ul className="premium-list" style={{ margin: "20px 0 0" }}>
-                <li className="premium-list-item">
-                  <div className="premium-list-title">Student-Teacher Ratio</div>
-                  <p style={{ fontSize: 14, margin: 0 }}>
-                    Anim pretium proident lacus pariatur tincidunt.
-                  </p>
-                </li>
-                <li className="premium-list-item">
-                  <div className="premium-list-title">Dual Pathways</div>
-                  <p style={{ fontSize: 14, margin: 0 }}>
-                    Labore vel curae enim excepteur.
-                  </p>
-                </li>
-                <li className="premium-list-item">
-                  <div className="premium-list-title">Bilingual Instruction</div>
-                  <p style={{ fontSize: 14, margin: 0 }}>
-                    Orci cillum amet dolore primis sunt luctus.
-                  </p>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Breadcrumb */}
+      <ContentBreadcrumb
+        items={[{ label: 'Home', path: '/' }, { label: 'About MWS' }, { label: 'Our School' }]}
+      />
 
-      <section
-        className="subpage-section"
-        style={{ background: "var(--charcoal)", color: "var(--warm-white)" }}
+      {/* MWS Background */}
+      <EditorialSplit
+        title="MWS Background"
+        image={asset('DSC04079.jpg')}
+        imageAlt="Millennia World School campus"
+        imagePosition="right"
       >
-        <div className="wrap">
-          <h2
-            style={{
-              color: "var(--white)",
-              marginBottom: 60,
-              textAlign: "center",
-            }}
-          >
-            Vision & Mission
-          </h2>
-          <div className="mws-card-grid">
-            <div className="mws-dark-card">
-              <h3>Our Vision</h3>
-              <p>
-                "Fermentum arcu veniam do occaecat irure minim esse, ex
-                reprehenderit eiusmod mollit ante non nulla. Exercitation qui
-                laborum ultrices ut gravida laboris."
-              </p>
-            </div>
-            <div className="mws-dark-card">
-              <h3>Our Mission</h3>
-              <ul className="premium-list" style={{ margin: 0 }}>
-                <li className="premium-list-item">
-                  <p>
-                    <strong>Feugiat duis:</strong> Nisi vitae suscipit et fugiat
-                    consequat aute magna nulla.
-                  </p>
-                </li>
-                <li className="premium-list-item">
-                  <p>
-                    <strong>Lorem cupidatat:</strong> Integer est ipsum
-                    adipiscing elit deserunt culpa velit.
-                  </p>
-                </li>
-                <li className="premium-list-item">
-                  <p>
-                    <strong>Ullamco commodo eleifend:</strong> Vestibulum nibh
-                    augue quam dolor cubilia aliquip sed sit.
-                  </p>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
+        <p>
+          In the 21st century, every educational system faces the challenge of preparing young
+          generations for a life of the future that is not only complex, but constantly changing as
+          well, and hence, mostly unknown and unpredictable. However, it is clear that intellectual
+          flexibility, creative thinking, independent judgment, moral discernment, refined written
+          and oral communication skills, and the ability to collaborate effectively are essential to
+          success in today’s ever changing world. Millennia World School(MWS) offers a
+          developmentally appropriate, experiential approach towards education. We use Science to
+          inspire artistic thinking and Art to inspire scientific thinking. Each subject is
+          interlaced with every other subject while providing nuance, context and deeper meaning for
+          each. Music, art and movement are as important to the curriculum as Math, Science and
+          Languages. Through playful and engaging learning strategies we develop and create
+          compassionate and critical thinkers. We also provide a safe, caring and nurturing
+          environment in order for children to blossom.
+        </p>
+        <p>
+          We aim to develop and inspire lifelong learners and enable them to fully develop their
+          talents, dispositions and capabilities. Millennia World School’s Education is based on the
+          principle that the subjects are not meant just to be read and tested on, but rather to be
+          experienced. Through these deep, meaningful learning experiences children develop and
+          cultivate intellectual, emotional, physical capabilities to become individuals who are
+          trailblazers and future leaders. To fulfil this dream, MIllennia World School was
+          established in 2017.
+        </p>
+      </EditorialSplit>
 
-      <section className="subpage-section">
-        <div className="wrap">
-          <h2 style={{ marginBottom: 60, textAlign: "center" }}>MWS Core Values</h2>
-          <div className="mws-value-grid">
-            {values.map(([title, text]) => (
-              <article className="mws-value-card" key={title}>
-                <h3>{title}</h3>
-                <p>{text}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Vision & Mission */}
+      <EditorialFeature
+        title="Our Vision & Mission"
+        image={asset('DSC04079.jpg')}
+        imageAlt="Students learning at Millennia World School"
+      >
+        <p>Discover and foster individual and group potential to achieve fulfilling lives.</p>
+
+        <p>
+          A globalized society based on compassion where every individual connects to others using
+          their maximum potential through the values of Truth, Beauty and Goodness to achieve
+          happiness.
+        </p>
+      </EditorialFeature>
+
+      {/* Philosophy */}
+      <EditorialText title="Our Philosophy">
+        <p>
+          Our Philosophy is based on profound understanding of human development that addresses the
+          needs of growing children and aims at developing their love of learning, sense of meaning
+          and purpose. At MWS, we emphasize the role of imagination in learning, striving to
+          integrate holistically the intellectual, practical, and artistic development of students.
+          At the heart of our philosophy lies the concept of H.A.P.P.I.N.E.S.S that covers the
+          development of following aspects:
+        </p>
+
+        <p>
+          We aim to develop and inspire lifelong learners and enable them to fully develop their
+          talents, dispositions and capabilities. Millennia World School’s Education is based on the
+          principle that the subjects are not meant just to be read and tested on, but rather to be
+          experienced. Through these deep, meaningful learning experiences children develop and
+          cultivate intellectual, emotional, physical capabilities to become individuals who are
+          trailblazers and future leaders. To fulfill this dream, Millennia World School was
+          established in 2017.
+        </p>
+      </EditorialText>
+
+      {/* FAQ */}
+      <FaqSection items={faqItems} />
     </main>
   );
 }

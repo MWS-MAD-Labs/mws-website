@@ -103,6 +103,8 @@ model GalleryImage {
   updatedAt DateTime @updatedAt
 
   gallery Gallery @relation(fields: [galleryId], references: [id])
+
+  featuredInOurSchools OurSchool[] @relation("OurSchoolFeaturedImage")
 }
 
 model GalleryVideo {
@@ -254,14 +256,16 @@ model JuniorHigh {
 // =========================
 
 model OurSchool {
-  id          String   @id @default(uuid()) @db.Uuid
-  title       String   @db.VarChar(255)
-  description String?
-  galleryId   String?  @db.Uuid
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(uuid()) @db.Uuid
+  title           String   @db.VarChar(255)
+  description     String?
+  galleryId       String?  @db.Uuid
+  featuredImageId String?  @db.Uuid
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  gallery Gallery? @relation(fields: [galleryId], references: [id])
+  gallery       Gallery?      @relation(fields: [galleryId], references: [id])
+  featuredImage GalleryImage? @relation("OurSchoolFeaturedImage", fields: [featuredImageId], references: [id])
 }
 
 model Contact {

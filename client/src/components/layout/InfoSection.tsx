@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 type InfoFilter = {
   label: string;
@@ -26,18 +26,14 @@ type InfoSectionProps = {
 const infoShape =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240'%3E%3Cpath fill='%237E1518' fill-opacity='0.08' d='M48.7,-69.6C64.6,-60.1,79.9,-48.5,86.6,-33C93.2,-17.6,91.1,1.7,84,18.5C76.9,35.2,64.8,49.4,50.1,62.4C35.3,75.3,17.6,87.1,0.5,86.4C-16.7,85.8,-33.4,72.7,-49.5,60.1C-65.6,47.5,-81.1,35.4,-85.9,19.8C-90.7,4.2,-84.7,-14.9,-75.7,-31.1C-66.6,-47.3,-54.5,-60.5,-39.5,-70.5C-24.6,-80.4,-12.3,-87.1,2,-89.9C16.4,-92.7,32.8,-79.2,48.7,-69.6Z' transform='translate(120 120)'/%3E%3C/svg%3E\")";
 
-export default function InfoSection({
-  title,
-  filters,
-  cards,
-}: InfoSectionProps) {
-  const [activeFilter, setActiveFilter] = useState(filters[0]?.value ?? "");
+export default function InfoSection({ title, filters, cards }: InfoSectionProps) {
+  const [activeFilter, setActiveFilter] = useState(filters[0]?.value ?? '');
   const slickListRef = useRef<HTMLDivElement>(null);
   const visibleCards = cards.filter((card) => card.category === activeFilter);
 
   return (
     <section
-      className="relative w-full translate-y-7 overflow-hidden py-[120px] opacity-0 transition-[opacity,transform] duration-[900ms] ease-out data-[revealed=true]:translate-y-0 data-[revealed=true]:opacity-100 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-reduce:transition-none max-[980px]:py-[76px]"
+      className="relative w-full translate-y-7 overflow-hidden bg-[var(--warm-white)] py-[120px] opacity-0 transition-[opacity,transform] duration-[900ms] ease-out data-[revealed=true]:translate-y-0 data-[revealed=true]:opacity-100 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-reduce:transition-none max-[980px]:py-[76px]"
       id="info-section"
       data-reveal
     >
@@ -56,17 +52,17 @@ export default function InfoSection({
 
         <div className="mb-8 flex w-full items-center justify-between border-b border-[var(--border)] max-[980px]:flex-col max-[980px]:items-start max-[980px]:gap-4">
           <div
-            className="flex flex-wrap items-center justify-center gap-9 max-[980px]:w-full max-[980px]:flex-nowrap max-[980px]:justify-start max-[980px]:gap-5 max-[980px]:overflow-x-auto max-[980px]:pb-0.5 max-[980px]:[scrollbar-width:none] max-[980px]:[&::-webkit-scrollbar]:hidden max-[430px]:gap-4"
+            className="flex flex-wrap items-center justify-center gap-9 max-[980px]:w-full max-[980px]:flex-nowrap max-[980px]:justify-start max-[980px]:gap-5 max-[980px]:overflow-x-auto max-[980px]:pb-0.5 max-[980px]:[scrollbar-width:none] max-[430px]:gap-4 max-[980px]:[&::-webkit-scrollbar]:hidden"
             role="tablist"
             aria-label="Information categories"
           >
             {filters.map((item) => (
               <button
                 key={item.value}
-                className={`relative cursor-pointer border-0 bg-transparent pb-4 font-[var(--f-body)] text-base font-medium text-[var(--charcoal-muted)] outline-none transition-colors duration-200 hover:text-[var(--charcoal-muted)] max-[980px]:flex-[0_0_auto] max-[980px]:text-sm ${
+                className={`relative cursor-pointer border-0 bg-transparent pb-4 text-base font-[var(--f-body)] font-medium text-[var(--charcoal-muted)] outline-none transition-colors duration-200 hover:text-[var(--charcoal-muted)] max-[980px]:flex-[0_0_auto] max-[980px]:text-sm ${
                   activeFilter === item.value
-                    ? "font-semibold text-[var(--charcoal)] hover:text-[var(--charcoal)] after:absolute after:bottom-[-1px] after:left-0 after:h-0.5 after:w-full after:rounded-t-sm after:bg-[var(--charcoal)] after:content-['']"
-                    : ""
+                    ? "font-semibold text-[var(--charcoal)] after:absolute after:bottom-[-1px] after:left-0 after:h-0.5 after:w-full after:rounded-t-sm after:bg-[var(--charcoal)] after:content-[''] hover:text-[var(--charcoal)]"
+                    : ''
                 }`}
                 type="button"
                 data-filter={item.value}
@@ -87,7 +83,7 @@ export default function InfoSection({
               onClick={() =>
                 slickListRef.current?.scrollBy({
                   left: -340,
-                  behavior: "smooth",
+                  behavior: 'smooth',
                 })
               }
             >
@@ -100,7 +96,7 @@ export default function InfoSection({
               onClick={() =>
                 slickListRef.current?.scrollBy({
                   left: 340,
-                  behavior: "smooth",
+                  behavior: 'smooth',
                 })
               }
             >
@@ -110,10 +106,10 @@ export default function InfoSection({
         </div>
       </div>
 
-      <div className="relative left-1/2 right-1/2 z-[1] w-screen -ml-[50vw] -mr-[50vw]">
+      <div className="relative left-1/2 right-1/2 z-[1] -ml-[50vw] -mr-[50vw] w-screen">
         <div>
           <div
-            className="w-full overflow-x-auto scroll-smooth pl-[max(24px,calc((100vw-1200px)/2))] pr-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-[980px]:px-5"
+            className="w-full overflow-x-auto scroll-smooth pl-[max(24px,calc((100vw-1200px)/2))] pr-6 [-ms-overflow-style:none] [scrollbar-width:none] max-[980px]:px-5 [&::-webkit-scrollbar]:hidden"
             ref={slickListRef}
           >
             <div className="flex flex-nowrap gap-0">

@@ -1,15 +1,30 @@
 import { Link } from "react-router-dom";
-import ProgramCards from "../components/ui/ProgramCards";
+import ProgramCards from "../components/ui/ProgramAcademic";
 import SubpageHero from "../components/ui/SubpageHero";
 import { asset } from "../data/site";
 
 const pillars = [
   ["Learning Design", "Inquiry blocks, guided workshops, and studio time."],
-  ["Assessment", "Frequent feedback that helps students understand their next step."],
-  ["Academic Support", "Small group guidance for language, numeracy, and confidence."],
-  ["Student Development", "Leadership, wellbeing, service, and social-emotional learning."],
-  ["Pathways", "A coherent journey from early years through secondary readiness."],
-  ["Community", "Parents, teachers, and students working from one shared language."],
+  [
+    "Assessment",
+    "Frequent feedback that helps students understand their next step.",
+  ],
+  [
+    "Academic Support",
+    "Small group guidance for language, numeracy, and confidence.",
+  ],
+  [
+    "Student Development",
+    "Leadership, wellbeing, service, and social-emotional learning.",
+  ],
+  [
+    "Pathways",
+    "A coherent journey from early years through secondary readiness.",
+  ],
+  [
+    "Community",
+    "Parents, teachers, and students working from one shared language.",
+  ],
 ];
 
 export default function Academic() {
@@ -44,10 +59,18 @@ export default function Academic() {
                 structured page data rather than hidden inside layout code.
               </p>
               <div style={{ display: "flex", gap: 14, marginTop: 30 }}>
-                <Link className="btn-submit" style={{ width: "auto" }} to="/kurikulum">
+                <Link
+                  className="btn-submit"
+                  style={{ width: "auto" }}
+                  to="/kurikulum"
+                >
                   View Curriculum
                 </Link>
-                <Link className="btn-submit" style={{ width: "auto" }} to="/school-calendar">
+                <Link
+                  className="btn-submit"
+                  style={{ width: "auto" }}
+                  to="/school-calendar"
+                >
                   School Calendar
                 </Link>
               </div>
@@ -56,16 +79,26 @@ export default function Academic() {
               <h2>Academic Rhythm</h2>
               <ul className="premium-list">
                 <li className="premium-list-item">
-                  <div className="premium-list-title">Inquiry and Foundations</div>
-                  <p>Lessons invite curiosity while keeping essential skills visible.</p>
+                  <div className="premium-list-title">
+                    Inquiry and Foundations
+                  </div>
+                  <p>
+                    Lessons invite curiosity while keeping essential skills
+                    visible.
+                  </p>
                 </li>
                 <li className="premium-list-item">
                   <div className="premium-list-title">Documentation</div>
-                  <p>Teachers collect learning evidence and share progress clearly.</p>
+                  <p>
+                    Teachers collect learning evidence and share progress
+                    clearly.
+                  </p>
                 </li>
                 <li className="premium-list-item">
                   <div className="premium-list-title">Community Context</div>
-                  <p>Projects connect classroom learning with life beyond campus.</p>
+                  <p>
+                    Projects connect classroom learning with life beyond campus.
+                  </p>
                 </li>
               </ul>
             </div>
@@ -82,9 +115,14 @@ export default function Academic() {
               <article
                 key={title}
                 className={`acad-pillar ${
-                  ["ac-navy", "ac-navy", "ac-sage", "ac-gold", "ac-rose", "ac-burgundy"][
-                    index
-                  ]
+                  [
+                    "ac-navy",
+                    "ac-navy",
+                    "ac-sage",
+                    "ac-gold",
+                    "ac-rose",
+                    "ac-burgundy",
+                  ][index]
                 }`}
               >
                 <span className="acad-pillar-tag">0{index + 1}</span>

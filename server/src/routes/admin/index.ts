@@ -17,6 +17,7 @@ import {
   adminGalleryRoute,
   adminGalleryVideoRoute,
 } from "./gallery-route";
+import { adminOurSchoolRoute } from "./our-school-route";
 
 export const adminRoute = new Hono<{ Variables: SessionVariables }>();
 
@@ -66,6 +67,7 @@ adminRoute.get(
 adminRoute.route("/galleries", adminGalleryRoute);
 adminRoute.route("/gallery-images", adminGalleryImageRoute);
 adminRoute.route("/gallery-videos", adminGalleryVideoRoute);
+adminRoute.route("/our-school", adminOurSchoolRoute);
 
 for (const resource of adminCrudResourceNames) {
   if (resource === "hero-slides") continue;

@@ -17,7 +17,7 @@ import GalleryListPage from "@/admin/features/gallery/GalleryListPage";
 import HelpPage from "@/admin/features/placeholders/HelpPage";
 import JuniorHighPage from "@/admin/features/placeholders/JuniorHighPage";
 import KindergartenPage from "@/admin/features/placeholders/KindergartenPage";
-import OurSchoolPage from "@/admin/features/placeholders/OurSchoolPage";
+import OurSchoolPage from "@/admin/features/our-school/OurSchoolPage";
 import PermissionsPage from "@/admin/features/placeholders/PermissionsPage";
 import CmsUsersPage from "@/admin/pages/CmsUsersPage";
 import Dashboard from "@/admin/pages/Dashboard";
