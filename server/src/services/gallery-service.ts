@@ -228,6 +228,11 @@ export class GalleryService {
     const gallery = await GalleryRepository.findGalleryById(id);
     if (!gallery) return;
 
+    const referenceCount = await GalleryRepository.countReferences(id);
+    if (referenceCount > 0) {
+      throw new ResponseError(409, "Cannot delete a gallery that is referenced by content.");
+    }
+
     for (const image of gallery.images) {
       await deleteImageObject(image.path);
     }

@@ -119,6 +119,69 @@ export type GalleryImageMetadataPayload = {
 
 export type GalleryVideoMetadataPayload = GalleryImageMetadataPayload;
 
+export type AdminAdmissionProgram = {
+  id: string;
+  admissionId?: string | null;
+  galleryId?: string | null;
+  title: string;
+  age: string;
+  description: string;
+  image: string;
+  imageAlt?: string | null;
+  path: string;
+  adminWhatsapp: string;
+  contactLabel?: string | null;
+  exploreLabel?: string | null;
+  sortOrder?: number;
+  isActive?: boolean;
+};
+
+export type AdminAdmissionsData = {
+  programs: AdminAdmissionProgram[];
+  galleries: GalleryItem[];
+};
+
+export type AdminCommunityStoriesPage = {
+  id: string | null;
+  title: string;
+  heroImagePath: string | null;
+  heroImageAlt: string | null;
+  introTitle: string | null;
+  introBody: string[];
+  galleryId: string | null;
+  isPublished: boolean;
+};
+
+export type AdminNewsPost = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  imagePath: string | null;
+  imageAlt: string | null;
+  galleryId: string | null;
+  isPublished: boolean;
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AdminCommunityStoriesData = {
+  page: AdminCommunityStoriesPage;
+  galleries: GalleryItem[];
+  news: AdminNewsPost[];
+};
+
+export type AdminCommunityStoriesPagePayload = Omit<
+  AdminCommunityStoriesPage,
+  "id"
+>;
+
+export type AdminNewsPayload = Omit<
+  AdminNewsPost,
+  "id" | "createdAt" | "updatedAt"
+>;
+
 export const adminApi = {
   async dashboard(): Promise<AdminDashboardData> {
     const response = await apiRequest<{ data: AdminDashboardData }>(
@@ -275,6 +338,77 @@ export const adminApi = {
     await apiRequest(`/admin/our-school/${id}`, { method: "DELETE" });
   },
 
+  async admissions(): Promise<AdminAdmissionsData> {
+    const response = await apiRequest<{ data: AdminAdmissionsData }>(
+      "/admin/admissions",
+    );
+    return response!.data;
+  },
+
+  async updateAdmissions(
+    programs: AdminAdmissionProgram[],
+  ): Promise<AdminAdmissionsData> {
+    const response = await apiRequest<{ data: AdminAdmissionsData }>(
+      "/admin/admissions",
+      {
+        method: "PUT",
+        body: { programs },
+      },
+    );
+    return response!.data;
+  },
+
+  async communityStories(): Promise<AdminCommunityStoriesData> {
+    const response = await apiRequest<{ data: AdminCommunityStoriesData }>(
+      "/admin/community-stories",
+    );
+    return response!.data;
+  },
+
+  async updateCommunityStoriesPage(
+    data: AdminCommunityStoriesPagePayload,
+  ): Promise<AdminCommunityStoriesPage> {
+    const response = await apiRequest<{ data: AdminCommunityStoriesPage }>(
+      "/admin/community-stories/page",
+      {
+        method: "PUT",
+        body: data,
+      },
+    );
+    return response!.data;
+  },
+
+  async createCommunityNews(data: AdminNewsPayload): Promise<AdminNewsPost> {
+    const response = await apiRequest<{ data: AdminNewsPost }>(
+      "/admin/community-stories/news",
+      {
+        method: "POST",
+        body: data,
+      },
+    );
+    return response!.data;
+  },
+
+  async updateCommunityNews(
+    id: string,
+    data: AdminNewsPayload,
+  ): Promise<AdminNewsPost> {
+    const response = await apiRequest<{ data: AdminNewsPost }>(
+      `/admin/community-stories/news/${id}`,
+      {
+        method: "PATCH",
+        body: data,
+      },
+    );
+    return response!.data;
+  },
+
+  async deleteCommunityNews(id: string): Promise<void> {
+    await apiRequest(`/admin/community-stories/news/${id}`, {
+      method: "DELETE",
+    });
+  },
+
   async uploadGalleryImage(
     galleryId: string,
     data: {
@@ -381,5 +515,24 @@ export const adminApi = {
 
   galleryVideoUrl(video: GalleryVideoItem): string {
     return video.previewPath ? `${env.apiBaseUrl}${video.previewPath}` : video.source;
+  },
+
+  galleryImagePublicPath(image: GalleryImageItem): string {
+    if (image.path.startsWith("/") || image.path.startsWith("http")) {
+      return image.path;
+    }
+    return `/api/gallery-images/${image.id}/file`;
+  },
+
+  galleryVideoPublicPath(video: GalleryVideoItem): string {
+    if (video.sourceType === "YOUTUBE") return video.source;
+    if (video.source.startsWith("/") || video.source.startsWith("http")) {
+      return video.source;
+    }
+    return `/api/gallery-images/videos/${video.id}/file`;
+  },
+
+  publicAssetUrl(path: string): string {
+    return path.startsWith("/api/") ? `${env.apiBaseUrl}${path}` : path;
   },
 };

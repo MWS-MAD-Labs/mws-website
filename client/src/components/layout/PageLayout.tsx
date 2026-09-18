@@ -8,9 +8,52 @@ export default function PageLayout() {
   const { hash, pathname } = useLocation();
 
   useEffect(() => {
+    const header = document.querySelector<HTMLElement>("[data-header]");
+
+    if (!header) {
+      return;
+    }
+
+    const syncNavbarHeight = () => {
+      const height = Math.ceil(header.getBoundingClientRect().height);
+      document.documentElement.style.setProperty("--navbar-height", `${height}px`);
+    };
+
+    syncNavbarHeight();
+
+    window.addEventListener("resize", syncNavbarHeight);
+
+    if (!("ResizeObserver" in window)) {
+      return () => window.removeEventListener("resize", syncNavbarHeight);
+    }
+
+    const resizeObserver = new ResizeObserver(syncNavbarHeight);
+    resizeObserver.observe(header);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", syncNavbarHeight);
+    };
+  }, []);
+
+  useEffect(() => {
     if (hash) {
       window.requestAnimationFrame(() => {
-        document.querySelector(hash)?.scrollIntoView({ block: "start" });
+        const target = document.querySelector(hash);
+
+        if (!target) {
+          return;
+        }
+
+        const navbarHeight = Number.parseFloat(
+          getComputedStyle(document.documentElement).getPropertyValue("--navbar-height"),
+        );
+        const targetTop = target.getBoundingClientRect().top + window.scrollY;
+
+        window.scrollTo({
+          top: Math.max(0, targetTop - (Number.isFinite(navbarHeight) ? navbarHeight : 0)),
+          behavior: "instant",
+        });
       });
       return;
     }
@@ -54,7 +97,10 @@ export default function PageLayout() {
   return (
     <>
       <Navbar />
-      <Outlet />
+      <div className="navbar-spacer" aria-hidden="true" />
+      <div className="site-content">
+        <Outlet />
+      </div>
       <Footer />
       <Chatbot />
     </>

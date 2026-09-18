@@ -89,6 +89,55 @@ export class GalleryRepository {
     });
   }
 
+  static async countReferences(id: string): Promise<number> {
+    const prisma = getPrisma();
+    const [
+      programs,
+      admissions,
+      campusTours,
+      curriculums,
+      affiliations,
+      academics,
+      kindergartens,
+      elementaries,
+      juniorHighs,
+      ourSchools,
+      contacts,
+      communityStoriesPages,
+      newsPosts,
+    ] = await Promise.all([
+      prisma.program.count({ where: { galleryId: id } }),
+      prisma.admission.count({ where: { galleryId: id } }),
+      prisma.campusTour.count({ where: { galleryId: id } }),
+      prisma.curriculum.count({ where: { galleryId: id } }),
+      prisma.affiliation.count({ where: { galleryId: id } }),
+      prisma.academic.count({ where: { galleryId: id } }),
+      prisma.kindergarten.count({ where: { galleryId: id } }),
+      prisma.elementary.count({ where: { galleryId: id } }),
+      prisma.juniorHigh.count({ where: { galleryId: id } }),
+      prisma.ourSchool.count({ where: { galleryId: id } }),
+      prisma.contact.count({ where: { galleryId: id } }),
+      prisma.communityStoriesPage.count({ where: { galleryId: id } }),
+      prisma.newsPost.count({ where: { galleryId: id } }),
+    ]);
+
+    return [
+      programs,
+      admissions,
+      campusTours,
+      curriculums,
+      affiliations,
+      academics,
+      kindergartens,
+      elementaries,
+      juniorHighs,
+      ourSchools,
+      contacts,
+      communityStoriesPages,
+      newsPosts,
+    ].reduce((total, count) => total + count, 0);
+  }
+
   static async createImage(
     data: GalleryImageCreateData,
   ): Promise<GalleryImage> {

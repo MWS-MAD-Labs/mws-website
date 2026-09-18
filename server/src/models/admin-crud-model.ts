@@ -414,4 +414,4 @@ export const adminCrudModels: Record<AdminCrudResource, AdminCrudModel> = {
 
 export const adminCrudResourceNames = Object.keys(
   adminCrudModels,
-) as AdminCrudResource[];
+).filter((resource) => resource !== "hero-slides") as AdminCrudResource[];

@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useMemo,
   useState,
   type ChangeEvent,
   type DragEvent,
@@ -40,22 +41,17 @@ export default function UploadVidio({
 }: UploadVidioProps) {
   const [mode, setMode] = useState<Mode>("upload");
   const [file, setFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [title, setTitle] = useState("");
   const [caption, setCaption] = useState("");
   const [sortOrder, setSortOrder] = useState("0");
 
-  useEffect(() => {
-    if (!file) {
-      setPreviewUrl(null);
-      return;
-    }
+  const previewUrl = useMemo(() => (file ? URL.createObjectURL(file) : null), [file]);
 
-    const objectUrl = URL.createObjectURL(file);
-    setPreviewUrl(objectUrl);
-    return () => URL.revokeObjectURL(objectUrl);
-  }, [file]);
+  useEffect(() => {
+    if (!previewUrl) return;
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [previewUrl]);
 
   function chooseFile(nextFile: File | null) {
     if (!nextFile) return;

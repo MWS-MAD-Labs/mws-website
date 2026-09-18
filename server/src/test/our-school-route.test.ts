@@ -16,6 +16,7 @@ const ourSchool = {
   id,
   title: "Our School",
   description: "About school",
+  content: null,
   galleryId,
   featuredImageId,
   gallery: null,

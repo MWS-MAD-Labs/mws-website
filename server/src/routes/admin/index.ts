@@ -17,6 +17,9 @@ import {
   adminGalleryRoute,
   adminGalleryVideoRoute,
 } from "./gallery-route";
+import { adminAdmissionRoute } from "./admission-route";
+import { adminCommunityStoriesRoute } from "./community-stories-route";
+import { adminHeroSlideRoute } from "./hero-slide-route";
 import { adminOurSchoolRoute } from "./our-school-route";
 
 export const adminRoute = new Hono<{ Variables: SessionVariables }>();
@@ -67,6 +70,9 @@ adminRoute.get(
 adminRoute.route("/galleries", adminGalleryRoute);
 adminRoute.route("/gallery-images", adminGalleryImageRoute);
 adminRoute.route("/gallery-videos", adminGalleryVideoRoute);
+adminRoute.route("/hero-slides", adminHeroSlideRoute);
+adminRoute.route("/admissions", adminAdmissionRoute);
+adminRoute.route("/community-stories", adminCommunityStoriesRoute);
 adminRoute.route("/our-school", adminOurSchoolRoute);
 
 for (const resource of adminCrudResourceNames) {

@@ -75,13 +75,15 @@ export function useGalleryDetail(galleryId: string | undefined) {
   }
 
   useEffect(() => {
-    loadGallery()
-      .catch((error) =>
-        setMessage(
-          error instanceof Error ? error.message : "Failed to load gallery.",
-        ),
-      )
-      .finally(() => setIsLoading(false));
+    queueMicrotask(() => {
+      loadGallery()
+        .catch((error) =>
+          setMessage(
+            error instanceof Error ? error.message : "Failed to load gallery.",
+          ),
+        )
+        .finally(() => setIsLoading(false));
+    });
   }, [galleryId]);
 
   useEffect(() => {

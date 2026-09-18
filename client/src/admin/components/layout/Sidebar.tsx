@@ -20,7 +20,7 @@ export default function Sidebar() {
           </p>
 
           <p className="mt-1 text-xs leading-none text-muted-foreground">
-            Management Web Service
+            Website Content CMS
           </p>
         </div>
       </div>

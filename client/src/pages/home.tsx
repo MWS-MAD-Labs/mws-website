@@ -8,6 +8,7 @@ import { asset, logoUrl } from '../data/site';
 import Background from '../components/layout/Background';
 import ProgramAcademic from '../components/ui/ProgramAcademic';
 import AdmissionsCta from '../components/layout/AdmissionsCta';
+import { pageApi, type HomePageData } from '@/api/pageApi';
 
 const heroSlides = [
   {
@@ -125,53 +126,99 @@ const partnerLogos = [
 ];
 
 export default function Home() {
+  const [homeData, setHomeData] = useState<HomePageData | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [heroIndex, setHeroIndex] = useState(0);
+  const slides = homeData?.heroSlides.length ? homeData.heroSlides : heroSlides;
+  const cards = homeData?.infoCards.length ? homeData.infoCards : infoCards;
+  const programs = homeData?.programs.length ? homeData.programs : undefined;
+  const voices = homeData?.communityVoices.length ? homeData.communityVoices : undefined;
+  const affiliations = homeData?.affiliations ?? {
+    title: 'Global partners in learning.',
+    text: 'Consectetur ullamco primis cubilia, quis aliqua irure incididunt. Feugiat reprehenderit pretium consequat, ultrices est lorem sit cupidatat.',
+    logos: partnerLogos,
+    logosLabel: 'In partnership with',
+  };
+  const campusSlides = homeData?.spotlightSlides.length ? homeData.spotlightSlides : spotlightSlides;
+  const activeHeroIndex = slides.length ? heroIndex % slides.length : 0;
 
   const changeHeroSlide = (nextIndex: number) => {
     setHeroIndex(nextIndex);
   };
 
   useEffect(() => {
+    let isMounted = true;
+
+    pageApi
+      .home()
+      .then((data) => {
+        if (!isMounted) return;
+        setHomeData(data);
+        setLoadError(null);
+      })
+      .catch((error) => {
+        if (!isMounted) return;
+        setLoadError(error instanceof Error ? error.message : 'Unable to load home content.');
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (slides.length <= 1) return;
+
     const timer = window.setTimeout(() => {
-      setHeroIndex((current) => (current + 1) % heroSlides.length);
+      setHeroIndex((current) => (current + 1) % slides.length);
     }, 3600);
 
     return () => window.clearTimeout(timer);
-  }, [heroIndex]);
+  }, [heroIndex, slides.length]);
 
   return (
     <main>
+      {loadError && (
+        <p className="sr-only" role="status">
+          {loadError}
+        </p>
+      )}
+
       <Hero
-        slides={heroSlides}
-        activeIndex={heroIndex}
+        slides={slides}
+        activeIndex={activeHeroIndex}
         onSelectSlide={changeHeroSlide}
-        onPrevious={() => changeHeroSlide(heroIndex === 0 ? heroSlides.length - 1 : heroIndex - 1)}
-        onNext={() => changeHeroSlide((heroIndex + 1) % heroSlides.length)}
+        onPrevious={() =>
+          changeHeroSlide(activeHeroIndex === 0 ? slides.length - 1 : activeHeroIndex - 1)
+        }
+        onNext={() => changeHeroSlide((activeHeroIndex + 1) % slides.length)}
       />
       <Background
-        headline="We develop and inspire lifelong learners."
-        body="In the 21st century, every educational system faces the challenge of preparing young generations for a life that is not only complex, but constantly changing as well. Millennia World School (MWS) offers a developmentally appropriate experiential approach towards education — enabling every student to fully develop their talents, dispositions and capabilities."
+        body={
+          homeData?.background.body ??
+          'In the 21st century, every educational system faces the challenge of preparing young generations for a life that is not only complex, but constantly changing as well. Millennia World School (MWS) offers a developmentally appropriate experiential approach towards education — enabling every student to fully develop their talents, dispositions and capabilities.'
+        }
         logoSrc={logoUrl}
       />
 
       <InfoSection
         title="Everything you need to know about joining MWS."
         filters={filters}
-        cards={infoCards}
+        cards={cards}
       />
 
-      <ProgramAcademic />
+      <ProgramAcademic programs={programs} />
 
-      <CommunityVoices />
+      <CommunityVoices voices={voices} />
 
       <Affiliations
-        title="Global partners in learning."
-        text="Consectetur ullamco primis cubilia, quis aliqua irure incididunt. Feugiat reprehenderit pretium consequat, ultrices est lorem sit cupidatat."
-        logos={partnerLogos}
-        logosLabel="In partnership with"
+        title={affiliations.title}
+        text={affiliations.text}
+        logos={affiliations.logos.length ? affiliations.logos : partnerLogos}
+        logosLabel={affiliations.logosLabel}
       />
 
-      <CampusSpotlight slides={spotlightSlides} />
+      <CampusSpotlight slides={campusSlides} />
 
       <AdmissionsCta
         headline="Ready to begin your journey at MWS?"

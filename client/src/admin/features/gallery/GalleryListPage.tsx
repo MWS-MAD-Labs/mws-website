@@ -56,13 +56,15 @@ export default function GalleryListPage() {
   }
 
   useEffect(() => {
-    loadGalleries()
-      .catch((error) =>
-        setMessage(
-          error instanceof Error ? error.message : "Failed to load galleries.",
-        ),
-      )
-      .finally(() => setIsLoading(false));
+    queueMicrotask(() => {
+      loadGalleries()
+        .catch((error) =>
+          setMessage(
+            error instanceof Error ? error.message : "Failed to load galleries.",
+          ),
+        )
+        .finally(() => setIsLoading(false));
+    });
   }, []);
 
   async function deleteGallery(id: string) {

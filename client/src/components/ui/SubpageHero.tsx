@@ -4,6 +4,7 @@ type SubpageHeroProps = {
   title: string;
   image: string;
   imageAlt: string;
+  breadcrumbs?: Array<{ label: string; path?: string }>;
 };
 
 export default function SubpageHero({

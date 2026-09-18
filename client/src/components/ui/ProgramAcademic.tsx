@@ -3,8 +3,25 @@ import { Link } from 'react-router-dom';
 import { programCards } from '../../data/site';
 import DecorativeDoodles from './DecorativeDoodles';
 
-export default function ProgramAcademic() {
+type ProgramAcademicItem = {
+  id: string;
+  title: string;
+  age: string;
+  text?: string;
+  description?: string;
+  image: string;
+  path: string;
+};
+
+type ProgramAcademicProps = {
+  programs?: ProgramAcademicItem[];
+};
+
+const defaultPrograms: ProgramAcademicItem[] = programCards;
+
+export default function ProgramAcademic({ programs = defaultPrograms }: ProgramAcademicProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const items = programs.length ? programs : defaultPrograms;
 
   return (
     <section
@@ -26,8 +43,9 @@ export default function ProgramAcademic() {
 
         {/* Programs */}
         <div className="flex h-[560px] w-full overflow-hidden border bg-[var(--charcoal)] max-[980px]:h-[500px] max-[680px]:h-auto max-[680px]:flex-col">
-          {programCards.map((program, index) => {
+          {items.map((program, index) => {
             const isActive = index === activeIndex;
+            const description = program.text ?? program.description ?? "";
 
             return (
               <article
@@ -85,7 +103,7 @@ export default function ProgramAcademic() {
                         </span>
 
                         <p className="mt-5 max-w-[500px] text-sm leading-7 text-white/85 md:text-[15px]">
-                          {program.text}
+                          {description}
                         </p>
 
                         <Link

@@ -2,12 +2,30 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { communityVoices } from "../../data/site";
 
-type Voice = (typeof communityVoices)[number];
+export type Voice = {
+  id?: string;
+  role: string;
+  name: string;
+  grade: string | null;
+  image: string;
+  quote: string;
+};
 
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-export default function CommunityVoices({ showFooterLink = true }) {
+type CommunityVoicesProps = {
+  voices?: Voice[];
+  showFooterLink?: boolean;
+};
+
+const defaultVoices: Voice[] = communityVoices;
+
+export default function CommunityVoices({
+  voices = defaultVoices,
+  showFooterLink = true,
+}: CommunityVoicesProps) {
+  const items = voices.length ? voices : defaultVoices;
   const [selectedVoice, setSelectedVoice] = useState<Voice | null>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -74,9 +92,9 @@ export default function CommunityVoices({ showFooterLink = true }) {
         </div>
 
         <div className="mb-9 grid grid-cols-4 gap-5 max-[980px]:grid-cols-2 max-[680px]:grid-cols-1">
-          {communityVoices.map((voice) => (
+          {items.map((voice) => (
             <article
-              key={voice.name}
+              key={voice.id ?? voice.name}
               role="button"
               tabIndex={0}
               aria-label={`Baca cerita ${voice.name}, ${voice.role}`}

@@ -57,11 +57,13 @@ export default function OurSchoolPage() {
   }
 
   useEffect(() => {
-    loadData()
-      .catch((error) =>
-        setMessage(error instanceof Error ? error.message : "Failed to load Our School."),
-      )
-      .finally(() => setIsLoading(false));
+    queueMicrotask(() => {
+      loadData()
+        .catch((error) =>
+          setMessage(error instanceof Error ? error.message : "Failed to load Our School."),
+        )
+        .finally(() => setIsLoading(false));
+    });
   }, []);
 
   function resetForm() {

@@ -3,10 +3,12 @@ import { AuthProvider } from "@/admin/auth/AuthProvider";
 import { RequireAuth } from "@/admin/auth/RequireAuth";
 import { useAuth } from "@/admin/auth/useAuth";
 import { hasCmsPermission } from "@/admin/types/auth";
+import AdmissionsPage from "@/admin/features/admissions/AdmissionsPage";
 import ContactPageEditor from "@/admin/features/contact/ContactPageEditor";
+import CommunityStoriesPage from "@/admin/features/community-stories/CommunityStoriesPage";
+import HeroSlidesPage from "@/admin/features/home/HeroSlidesPage";
 import PageEditorPage from "@/admin/features/page/PageEditorPage";
 import PagesManagementPage from "@/admin/features/page/PagesManagementPage";
-import AdmissionsPage from "@/admin/features/placeholders/AdmissionsPage";
 import AffiliationsPage from "@/admin/features/placeholders/AffiliationsPage";
 import AuditLogsPage from "@/admin/features/placeholders/AuditLogsPage";
 import CampusTourPage from "@/admin/features/placeholders/CampusTourPage";
@@ -77,11 +79,31 @@ export default function AdminApp() {
           }
         />
         <Route
+          path="hero-slides"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <HeroSlidesPage />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+        <Route
           path="our-school"
           element={
             <RequireAuth>
               <RequireContentPermission>
                 <OurSchoolPage />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="community-stories"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <CommunityStoriesPage />
               </RequireContentPermission>
             </RequireAuth>
           }

@@ -1,13 +1,9 @@
 type BackgroundProps = {
-  eyebrow?: string;
-  headline: string;
   body: string;
   logoSrc: string;
 };
 
 export default function Background({
-  eyebrow,
-  headline,
   body,
   logoSrc,
 }: BackgroundProps) {
@@ -21,16 +17,9 @@ export default function Background({
           className="h-auto w-12"
         />
 
-        {eyebrow && (
-          <span className="label mt-8 block text-[var(--burgundy)]">
-            {eyebrow}
-          </span>
-        )}
 
         {/* Pernyataan utama */}
-        <h2 className="mt-5 max-w-[16ch] text-balance text-center text-[clamp(30px,4.2vw,46px)] font-semibold leading-[1.15] tracking-tight text-[var(--charcoal)]">
-          {headline}
-        </h2>
+
 
         {/* Penjelasan pendukung */}
         <p className="mt-7 max-w-[62ch] text-center text-base leading-[1.75] text-[var(--charcoal-muted)]">

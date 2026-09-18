@@ -39,7 +39,17 @@ function buildApp() {
 }
 
 async function authHeaders(roleName: "SUPER_ADMIN" | "ADMIN" | "VIEWER" = "ADMIN") {
-  const user = cmsSessionUser(roleName);
+  const user =
+    roleName === "VIEWER"
+      ? {
+          ...cmsSessionUser("ADMIN"),
+          role: {
+            name: "ADMIN" as const,
+            label: "VIEWER",
+            permissions: ["dashboard:read" as const],
+          },
+        }
+      : cmsSessionUser(roleName);
   spyOn(centralClient, "resolveCentralIdentity").mockResolvedValue(testUser);
   spyOn(CmsAuthService, "requireFreshSessionUser").mockResolvedValue(user);
   const token = await signSession(user);
