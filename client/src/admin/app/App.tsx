@@ -1,34 +1,36 @@
-import { Navigate, Route, Routes } from "react-router-dom";
-import { AuthProvider } from "@/admin/auth/AuthProvider";
-import { RequireAuth } from "@/admin/auth/RequireAuth";
-import { useAuth } from "@/admin/auth/useAuth";
-import { hasCmsPermission } from "@/admin/types/auth";
-import AdmissionsPage from "@/admin/features/admissions/AdmissionsPage";
-import ContactPageEditor from "@/admin/features/contact/ContactPageEditor";
-import CommunityStoriesPage from "@/admin/features/community-stories/CommunityStoriesPage";
-import HeroSlidesPage from "@/admin/features/home/HeroSlidesPage";
-import PageEditorPage from "@/admin/features/page/PageEditorPage";
-import PagesManagementPage from "@/admin/features/page/PagesManagementPage";
-import AffiliationsPage from "@/admin/features/placeholders/AffiliationsPage";
-import AuditLogsPage from "@/admin/features/placeholders/AuditLogsPage";
-import CampusTourPage from "@/admin/features/placeholders/CampusTourPage";
-import CurriculumPage from "@/admin/features/placeholders/CurriculumPage";
-import ElementaryPage from "@/admin/features/placeholders/ElementaryPage";
-import GalleryDetailPage from "@/admin/features/gallery/GalleryDetailPage";
-import GalleryListPage from "@/admin/features/gallery/GalleryListPage";
-import HelpPage from "@/admin/features/placeholders/HelpPage";
-import JuniorHighPage from "@/admin/features/placeholders/JuniorHighPage";
-import KindergartenPage from "@/admin/features/placeholders/KindergartenPage";
-import OurSchoolPage from "@/admin/features/our-school/OurSchoolPage";
-import PermissionsPage from "@/admin/features/placeholders/PermissionsPage";
-import CmsUsersPage from "@/admin/pages/CmsUsersPage";
-import Dashboard from "@/admin/pages/Dashboard";
-import LoginPage from "@/admin/pages/LoginPage";
+import { Navigate, Route, Routes } from 'react-router-dom';
+import { AuthProvider } from '@/admin/auth/AuthProvider';
+import { RequireAuth } from '@/admin/auth/RequireAuth';
+import { useAuth } from '@/admin/auth/useAuth';
+import { hasCmsPermission } from '@/admin/types/auth';
+import AdmissionsPage from '@/admin/features/admissions/AdmissionsPage';
+import ContactPageEditor from '@/admin/features/contact/ContactPageEditor';
+import CommunityStoriesPage from '@/admin/features/community-stories/CommunityStoriesPage';
+import HeroSlidesPage from '@/admin/features/home/HeroSlidesPage';
+import PageEditorPage from '@/admin/features/page/PageEditorPage';
+import PagesManagementPage from '@/admin/features/page/PagesManagementPage';
+import AffiliationsPage from '@/admin/features/placeholders/AffiliationsPage';
+import AuditLogsPage from '@/admin/features/placeholders/AuditLogsPage';
+import CampusTourPage from '@/admin/features/placeholders/CampusTourPage';
+import CurriculumPage from '@/admin/features/placeholders/CurriculumPage';
+import ElementaryPage from '@/admin/features/placeholders/ElementaryPage';
+import GalleryDetailPage from '@/admin/features/gallery/GalleryDetailPage';
+import GalleryListPage from '@/admin/features/gallery/GalleryListPage';
+import HelpPage from '@/admin/features/placeholders/HelpPage';
+import JuniorHighPage from '@/admin/features/placeholders/JuniorHighPage';
+import KindergartenPage from '@/admin/features/placeholders/KindergartenPage';
+import OurSchoolPage from '@/admin/features/our-school/OurSchoolPage';
+import PermissionsPage from '@/admin/features/placeholders/PermissionsPage';
+import CmsUsersPage from '@/admin/pages/CmsUsersPage';
+import Dashboard from '@/admin/pages/Dashboard';
+import LoginPage from '@/admin/pages/LoginPage';
+import NewsPage from '../features/news/NewsPage';
+import CreateUpdateNews from '../features/news/components/CreateUpdateNews';
 
 function RequireUsersPermission({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
 
-  if (!hasCmsPermission(user, "users:manage")) {
+  if (!hasCmsPermission(user, 'users:manage')) {
     return <Navigate to="/admin" replace />;
   }
 
@@ -38,7 +40,7 @@ function RequireUsersPermission({ children }: { children: React.ReactNode }) {
 function RequireContentPermission({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
 
-  if (!hasCmsPermission(user, "content:manage")) {
+  if (!hasCmsPermission(user, 'content:manage')) {
     return <Navigate to="/admin" replace />;
   }
 
@@ -184,6 +186,36 @@ export default function AdminApp() {
             <RequireAuth>
               <RequireContentPermission>
                 <AffiliationsPage />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="news"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <NewsPage />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="news/new"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <CreateUpdateNews />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="news/:newsId/edit"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <CreateUpdateNews />
               </RequireContentPermission>
             </RequireAuth>
           }

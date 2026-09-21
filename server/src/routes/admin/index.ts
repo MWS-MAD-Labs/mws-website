@@ -20,6 +20,7 @@ import {
 import { adminAdmissionRoute } from "./admission-route";
 import { adminCommunityStoriesRoute } from "./community-stories-route";
 import { adminHeroSlideRoute } from "./hero-slide-route";
+import { adminNewsRoute } from "./news-route";
 import { adminOurSchoolRoute } from "./our-school-route";
 
 export const adminRoute = new Hono<{ Variables: SessionVariables }>();
@@ -74,6 +75,7 @@ adminRoute.route("/hero-slides", adminHeroSlideRoute);
 adminRoute.route("/admissions", adminAdmissionRoute);
 adminRoute.route("/community-stories", adminCommunityStoriesRoute);
 adminRoute.route("/our-school", adminOurSchoolRoute);
+adminRoute.route("/news", adminNewsRoute);
 
 for (const resource of adminCrudResourceNames) {
   if (resource === "hero-slides") continue;

@@ -182,6 +182,112 @@ export type AdminNewsPayload = Omit<
   "id" | "createdAt" | "updatedAt"
 >;
 
+export type NewsStatus = "ARCHIVED" | "DRAFT" | "PUBLISHED";
+
+export type NewsCategory = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  _count: {
+    posts: number;
+  };
+};
+
+export type NewsTag = {
+  id: string;
+  name: string;
+  slug: string;
+  createdAt: string;
+  _count: {
+    postTags: number;
+  };
+};
+
+export type NewsPostMedia = {
+  id: string;
+  newsPostId: string;
+  mediaType: "DOCUMENT" | "IMAGE" | "VIDEO";
+  url: string;
+  alt: string | null;
+  caption: string | null;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type NewsPost = {
+  id: string;
+  categoryId: string | null;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  coverImage: string | null;
+  coverImageAlt: string | null;
+  content: unknown;
+  authorName: string | null;
+  authorId: string | null;
+  status: NewsStatus;
+  isFeatured: boolean;
+  isPublished: boolean;
+  publishedAt: string | null;
+  seoTitle: string | null;
+  seoDescription: string | null;
+  readTime: number;
+  viewCount: number;
+  createdAt: string;
+  updatedAt: string;
+  category: NewsCategory | null;
+  author: {
+    id: string;
+    name: string;
+    isActive: boolean;
+  } | null;
+  media: NewsPostMedia[];
+  tags: NewsTag[];
+};
+
+export type NewsPostPayload = {
+  categoryId?: string | null;
+  title: string;
+  slug: string;
+  excerpt?: string | null;
+  coverImage?: string | null;
+  coverImageAlt?: string | null;
+  content: unknown;
+  authorName?: string | null;
+  status: NewsStatus;
+  isFeatured?: boolean;
+  publishedAt?: string | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  readTime?: number;
+  tagIds?: string[];
+};
+
+export type NewsPostFilters = {
+  page?: number;
+  pageSize?: number;
+  status?: NewsStatus;
+  categoryId?: string;
+  tagId?: string;
+  isFeatured?: boolean;
+  search?: string;
+};
+
+export type NewsPostList = {
+  items: NewsPost[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
+};
+
 export const adminApi = {
   async dashboard(): Promise<AdminDashboardData> {
     const response = await apiRequest<{ data: AdminDashboardData }>(
@@ -407,6 +513,68 @@ export const adminApi = {
     await apiRequest(`/admin/community-stories/news/${id}`, {
       method: "DELETE",
     });
+  },
+
+  async newsPosts(filters: NewsPostFilters = {}): Promise<NewsPostList> {
+    const query = new URLSearchParams();
+
+    if (filters.page) query.set("page", String(filters.page));
+    if (filters.pageSize) query.set("pageSize", String(filters.pageSize));
+    if (filters.status) query.set("status", filters.status);
+    if (filters.categoryId) query.set("categoryId", filters.categoryId);
+    if (filters.tagId) query.set("tagId", filters.tagId);
+    if (filters.isFeatured !== undefined) {
+      query.set("isFeatured", String(filters.isFeatured));
+    }
+    if (filters.search?.trim()) query.set("search", filters.search.trim());
+
+    const suffix = query.size ? `?${query.toString()}` : "";
+    const response = await apiRequest<{ data: NewsPostList }>(
+      `/admin/news/posts${suffix}`,
+    );
+    return response!.data;
+  },
+
+  async newsPost(id: string): Promise<NewsPost> {
+    const response = await apiRequest<{ data: NewsPost }>(
+      `/admin/news/posts/${id}`,
+    );
+    return response!.data;
+  },
+
+  async createNewsPost(data: NewsPostPayload): Promise<NewsPost> {
+    const response = await apiRequest<{ data: NewsPost }>("/admin/news/posts", {
+      method: "POST",
+      body: data,
+    });
+    return response!.data;
+  },
+
+  async updateNewsPost(id: string, data: NewsPostPayload): Promise<NewsPost> {
+    const response = await apiRequest<{ data: NewsPost }>(
+      `/admin/news/posts/${id}`,
+      {
+        method: "PATCH",
+        body: data,
+      },
+    );
+    return response!.data;
+  },
+
+  async deleteNewsPost(id: string): Promise<void> {
+    await apiRequest(`/admin/news/posts/${id}`, { method: "DELETE" });
+  },
+
+  async newsCategories(): Promise<NewsCategory[]> {
+    const response = await apiRequest<{ data: NewsCategory[] }>(
+      "/admin/news/categories",
+    );
+    return response?.data ?? [];
+  },
+
+  async newsTags(): Promise<NewsTag[]> {
+    const response = await apiRequest<{ data: NewsTag[] }>("/admin/news/tags");
+    return response?.data ?? [];
   },
 
   async uploadGalleryImage(

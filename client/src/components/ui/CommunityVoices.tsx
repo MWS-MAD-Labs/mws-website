@@ -101,7 +101,7 @@ export default function CommunityVoices({
               className="group relative aspect-[9/16] cursor-pointer overflow-hidden max-[980px]:aspect-[4/5] max-[680px]:aspect-[16/12] max-[680px]:min-h-[260px] max-[430px]:min-h-60"
               onClick={() => setSelectedVoice(voice)}
               onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
+                if (event.key === 'Enter' || event.key === ' ') {
                   event.preventDefault();
                   setSelectedVoice(voice);
                 }
@@ -109,7 +109,7 @@ export default function CommunityVoices({
             >
               <div className="relative h-full w-full">
                 <img
-                  className="h-full w-full object-cover brightness-[0.65] grayscale saturate-[0.65] sepia-[0.15] transition-[transform,filter] duration-500 ease-out group-hover:scale-105 group-hover:brightness-[0.85] group-hover:grayscale-0 group-hover:saturate-100 group-hover:sepia-0"
+                  className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                   src={voice.image}
                   alt={`${voice.role} Voice`}
                 />
@@ -150,9 +150,7 @@ export default function CommunityVoices({
         role="dialog"
         aria-modal="true"
         aria-label={
-          selectedVoice
-            ? `${selectedVoice.name} — ${selectedVoice.role}`
-            : "Community voice"
+          selectedVoice ? `${selectedVoice.name} — ${selectedVoice.role}` : 'Community voice'
         }
         className={`fixed inset-0 z-[9999] flex items-center justify-center px-6 py-8 transition-opacity duration-300 max-[680px]:px-3 max-[680px]:py-3 ${
           selectedVoice ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
