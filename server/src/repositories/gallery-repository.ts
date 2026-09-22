@@ -1,9 +1,19 @@
-import type { Gallery, GalleryImage, GalleryVideo, Prisma, VideoSourceType } from "@prisma/client";
+import type {
+  Gallery,
+  GalleryImage,
+  GalleryVideo,
+  Prisma,
+  VideoSourceType,
+} from "@prisma/client";
 import { getPrisma } from "../lib/prisma";
 
 const galleryInclude = {
-  images: { orderBy: [{ sortOrder: "asc" as const }, { createdAt: "desc" as const }] },
-  videos: { orderBy: [{ sortOrder: "asc" as const }, { createdAt: "desc" as const }] },
+  images: {
+    orderBy: [{ sortOrder: "asc" as const }, { createdAt: "desc" as const }],
+  },
+  videos: {
+    orderBy: [{ sortOrder: "asc" as const }, { createdAt: "desc" as const }],
+  },
 };
 
 export type GalleryWithMedia = Prisma.GalleryGetPayload<{
@@ -61,7 +71,9 @@ export class GalleryRepository {
     });
   }
 
-  static async createGallery(data: GalleryCreateData): Promise<GalleryWithMedia> {
+  static async createGallery(
+    data: GalleryCreateData,
+  ): Promise<GalleryWithMedia> {
     return getPrisma().gallery.create({
       data,
       include: galleryInclude,
@@ -104,7 +116,6 @@ export class GalleryRepository {
       ourSchools,
       contacts,
       communityStoriesPages,
-      newsPosts,
     ] = await Promise.all([
       prisma.program.count({ where: { galleryId: id } }),
       prisma.admission.count({ where: { galleryId: id } }),
@@ -118,7 +129,6 @@ export class GalleryRepository {
       prisma.ourSchool.count({ where: { galleryId: id } }),
       prisma.contact.count({ where: { galleryId: id } }),
       prisma.communityStoriesPage.count({ where: { galleryId: id } }),
-      prisma.newsPost.count({ where: { galleryId: id } }),
     ]);
 
     return [
@@ -134,7 +144,6 @@ export class GalleryRepository {
       ourSchools,
       contacts,
       communityStoriesPages,
-      newsPosts,
     ].reduce((total, count) => total + count, 0);
   }
 
@@ -159,7 +168,9 @@ export class GalleryRepository {
     return getPrisma().galleryImage.delete({ where: { id } });
   }
 
-  static async createVideo(data: GalleryVideoCreateData): Promise<GalleryVideo> {
+  static async createVideo(
+    data: GalleryVideoCreateData,
+  ): Promise<GalleryVideo> {
     return getPrisma().galleryVideo.create({ data });
   }
 

@@ -1,6 +1,12 @@
 import { z, ZodError } from "zod";
 import { ResponseError } from "../error/response-error";
 import {
+  deleteMinioObject,
+  getMinioObjectBuffer,
+  putMinioObject,
+  statMinioObject,
+} from "../lib/minio";
+import {
   newsCategorySchema,
   newsPostMediaSchema,
   newsPostSchema,
@@ -21,6 +27,19 @@ const tagUpdateSchema = newsTagSchema.partial();
 const postUpdateSchema = newsPostSchema.partial();
 const mediaCreateSchema = newsPostMediaSchema;
 const mediaUpdateSchema = newsPostMediaSchema.omit({ newsPostId: true }).partial();
+const imageUploadMetadataSchema = z.object({
+  alt: z.string().trim().max(255).optional(),
+  caption: z.string().trim().max(2000).optional(),
+  sortOrder: z.coerce.number().int().min(0).optional().default(0),
+});
+
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
+const ACCEPTED_IMAGE_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+]);
 
 const listQuerySchema = z.object({
   page: z.coerce.number().int().min(1).optional().default(1),
@@ -122,6 +141,38 @@ function handleDatabaseError(error: unknown, label: string): never {
   }
 
   throw error;
+}
+
+function sanitizeFileName(name: string) {
+  const safe = name
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 120);
+
+  return safe || "image";
+}
+
+function imageObjectKey(fileName: string) {
+  return `news/images/${crypto.randomUUID()}-${sanitizeFileName(fileName)}`;
+}
+
+function validateImageFile(file: File) {
+  if (!ACCEPTED_IMAGE_TYPES.has(file.type)) {
+    throw new ResponseError(400, "Only JPEG, PNG, WebP, or GIF images are allowed.");
+  }
+
+  if (file.size <= 0) {
+    throw new ResponseError(400, "Image file is empty.");
+  }
+
+  if (file.size > MAX_IMAGE_SIZE) {
+    throw new ResponseError(400, "Image file must be 10MB or smaller.");
+  }
+}
+
+function isUploadedNewsImage(url: string) {
+  return url.startsWith("news/images/");
 }
 
 /**
@@ -375,13 +426,20 @@ export class NewsService {
 
   static async deletePost(rawId: string | undefined) {
     const id = requireUuid(rawId, "post id");
-    await this.getPost(id);
+    const post = await NewsRepository.findPostById(id);
+    if (!post) throw new ResponseError(404, "News post not found.");
 
     try {
       await NewsRepository.deletePost(id);
     } catch (error) {
       handleDatabaseError(error, "News post");
     }
+
+    await Promise.allSettled(
+      post.media
+        .filter((media) => isUploadedNewsImage(media.url))
+        .map((media) => deleteMinioObject(media.url)),
+    );
 
     return { id, deleted: true };
   }
@@ -432,6 +490,65 @@ export class NewsService {
     }
   }
 
+  static async uploadImageMedia(
+    rawPostId: string | undefined,
+    file: File,
+    metadataPayload: unknown,
+  ) {
+    const postId = requireUuid(rawPostId, "post id");
+    await this.getPost(postId);
+    validateImageFile(file);
+
+    const metadata = parse(
+      imageUploadMetadataSchema,
+      metadataPayload,
+      "News image metadata",
+    );
+    const objectName = imageObjectKey(file.name);
+    const buffer = Buffer.from(await file.arrayBuffer());
+
+    await putMinioObject(objectName, buffer, {
+      "Content-Type": file.type,
+      "Cache-Control": "public, max-age=31536000",
+    });
+
+    try {
+      return await NewsRepository.createImageMediaAsCover({
+        newsPostId: postId,
+        mediaType: "IMAGE",
+        url: objectName,
+        alt: metadata.alt || null,
+        caption: metadata.caption || null,
+        sortOrder: metadata.sortOrder,
+      });
+    } catch (error) {
+      await deleteMinioObject(objectName).catch(() => undefined);
+      handleDatabaseError(error, "News image");
+    }
+  }
+
+  static async getMediaFile(rawMediaId: string | undefined) {
+    const mediaId = requireUuid(rawMediaId, "media id");
+    const media = await NewsRepository.findMediaById(mediaId);
+
+    if (!media || media.mediaType !== "IMAGE" || !isUploadedNewsImage(media.url)) {
+      throw new ResponseError(404, "News image not found.");
+    }
+
+    const [stat, buffer] = await Promise.all([
+      statMinioObject(media.url),
+      getMinioObjectBuffer(media.url),
+    ]);
+
+    return {
+      buffer,
+      contentType:
+        String(stat.metaData?.["content-type"] ?? stat.metaData?.["Content-Type"] ?? "") ||
+        "application/octet-stream",
+      size: stat.size,
+    };
+  }
+
   static async updateMedia(
     rawPostId: string | undefined,
     rawMediaId: string | undefined,
@@ -460,6 +577,9 @@ export class NewsService {
     const media = await this.assertMediaBelongsToPost(postId, rawMediaId);
 
     try {
+      if (isUploadedNewsImage(media.url)) {
+        await deleteMinioObject(media.url);
+      }
       await NewsRepository.deleteMedia(media.id);
     } catch (error) {
       handleDatabaseError(error, "News post media");

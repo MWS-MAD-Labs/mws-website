@@ -16,21 +16,24 @@ const defaultHeroSlides = [
     image: asset("_DSC4760.jpg"),
     alt: "Children collaborating on a classroom activity",
     headline: "Learning starts with curiosity.",
-    caption: "At Millennia World School, students learn to explore, question, and create.",
+    caption:
+      "At Millennia World School, students learn to explore, question, and create.",
   },
   {
     id: "default-hero-2",
     image: asset("Elementary.jpg"),
     alt: "Students walking through a sunlit campus courtyard",
     headline: "A place to grow together.",
-    caption: "A learning environment designed to encourage curiosity, confidence, and connection.",
+    caption:
+      "A learning environment designed to encourage curiosity, confidence, and connection.",
   },
   {
     id: "default-hero-3",
     image: asset("DSC04079.jpg"),
     alt: "View of the school's campus architecture",
     headline: "More than a classroom.",
-    caption: "Discover an environment where learning extends beyond the walls of the classroom.",
+    caption:
+      "Discover an environment where learning extends beyond the walls of the classroom.",
   },
 ];
 
@@ -225,13 +228,12 @@ function imagePath(path: string | null | undefined, fallback: string) {
 }
 
 function galleryImageUrl(image: Pick<GalleryImage, "id" | "path">) {
-  if (image.path.startsWith("/") || image.path.startsWith("http")) return image.path;
+  if (image.path.startsWith("/") || image.path.startsWith("http"))
+    return image.path;
   return `/api/gallery-images/${image.id}/file`;
 }
 
-function firstGalleryImage(
-  gallery: ProgramWithAdmissions["gallery"] | NewsPostWithGallery["gallery"] | null,
-) {
+function firstGalleryImage(gallery: ProgramWithAdmissions["gallery"] | null) {
   return gallery?.images[0] ? galleryImageUrl(gallery.images[0]) : null;
 }
 
@@ -265,12 +267,11 @@ function programResponse(program: ProgramWithAdmissions) {
 }
 
 function newsResponse(news: NewsPostWithGallery) {
-  const galleryImage = firstGalleryImage(news.gallery);
   return {
     id: news.id,
     title: news.title,
     excerpt: news.excerpt,
-    image: imagePath(news.imagePath || galleryImage, asset("DSC04079.jpg")),
+    image: imagePath(news.coverImage, asset("DSC04079.jpg")),
     path: `/news/${news.slug}`,
     publishedAt: news.publishedAt,
   };
@@ -284,7 +285,8 @@ function galleryImagesFromPage(page: CommunityStoriesPageRecord | null) {
     id: image.id,
     src: galleryImageUrl(image),
     alt: image.title || image.caption || "MWS school community",
-    size: index === 0 || index === 7 ? "large" : index === 5 ? "tall" : "normal",
+    size:
+      index === 0 || index === 7 ? "large" : index === 5 ? "tall" : "normal",
   }));
 }
 
@@ -306,11 +308,13 @@ function ourSchoolContent(record: OurSchoolPageRecord | null) {
     hero: {
       ...defaultOurSchoolContent.hero,
       ...(content.hero ?? {}),
-      title: record?.title || content.hero?.title || defaultOurSchoolContent.hero.title,
-      image:
-        record?.featuredImage
-          ? galleryImageUrl(record.featuredImage)
-          : content.hero?.image || defaultOurSchoolContent.hero.image,
+      title:
+        record?.title ||
+        content.hero?.title ||
+        defaultOurSchoolContent.hero.title,
+      image: record?.featuredImage
+        ? galleryImageUrl(record.featuredImage)
+        : content.hero?.image || defaultOurSchoolContent.hero.image,
     },
   };
 }
@@ -331,11 +335,12 @@ export class PageDataService {
     return {
       heroSlides,
       background: {
-        body:
-          "In the 21st century, every educational system faces the challenge of preparing young generations for a life that is not only complex, but constantly changing as well. Millennia World School (MWS) offers a developmentally appropriate experiential approach towards education.",
+        body: "In the 21st century, every educational system faces the challenge of preparing young generations for a life that is not only complex, but constantly changing as well. Millennia World School (MWS) offers a developmentally appropriate experiential approach towards education.",
       },
       infoCards: defaultInfoCards,
-      programs: programs.length ? programs.map(programResponse) : defaultPrograms,
+      programs: programs.length
+        ? programs.map(programResponse)
+        : defaultPrograms,
       communityVoices: voices.length
         ? voices.map((voice) => ({
             id: voice.id,
@@ -348,8 +353,7 @@ export class PageDataService {
         : defaultCommunityVoices,
       affiliations: {
         title: "Global partners in learning.",
-        text:
-          "MWS connects learning with wider communities and partners who support student growth.",
+        text: "MWS connects learning with wider communities and partners who support student growth.",
         logos: defaultPartnerLogos,
         logosLabel: "In partnership with",
       },
@@ -360,7 +364,9 @@ export class PageDataService {
   static async getAdmissions() {
     const programs = await PageDataRepository.listActivePrograms();
     return {
-      programs: programs.length ? programs.map(programResponse) : defaultPrograms,
+      programs: programs.length
+        ? programs.map(programResponse)
+        : defaultPrograms,
     };
   }
 
@@ -380,10 +386,14 @@ export class PageDataService {
         ...defaultCommunityStoriesContent.hero,
         title: page?.title || defaultCommunityStoriesContent.hero.title,
         image: page?.heroImagePath || defaultCommunityStoriesContent.hero.image,
-        imageAlt: page?.heroImageAlt || defaultCommunityStoriesContent.hero.imageAlt,
+        imageAlt:
+          page?.heroImageAlt || defaultCommunityStoriesContent.hero.imageAlt,
       },
       introTitle: page?.introTitle || defaultCommunityStoriesContent.introTitle,
-      introBody: asStringArray(page?.introBody, defaultCommunityStoriesContent.introBody),
+      introBody: asStringArray(
+        page?.introBody,
+        defaultCommunityStoriesContent.introBody,
+      ),
       galleryImages: galleryImagesFromPage(page),
       news: news.length
         ? news.map(newsResponse)

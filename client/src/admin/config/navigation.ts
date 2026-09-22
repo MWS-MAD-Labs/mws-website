@@ -2,6 +2,7 @@ import {
   BookOpen,
   CircleHelp,
   Files,
+  Folder,
   Handshake,
   Images,
   LayoutDashboard,
@@ -10,6 +11,7 @@ import {
   Newspaper,
   School,
   ShieldCheck,
+  Tags,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -143,12 +145,33 @@ const menuItems: MenuItem[] = [
 
   {
     label: 'News',
-    href: '/admin/news',
     Icon: Newspaper,
     enabled: true,
     requiredPermission: 'content:manage',
+    children: [
+      {
+        label: 'Posts',
+        href: '/admin/news',
+        Icon: Newspaper,
+        enabled: true,
+        requiredPermission: 'content:manage',
+      },
+      {
+        label: 'Categories',
+        href: '/admin/news/categories',
+        Icon: Folder,
+        enabled: true,
+        requiredPermission: 'content:manage',
+      },
+      {
+        label: 'Tags',
+        href: '/admin/news/tags',
+        Icon: Tags,
+        enabled: true,
+        requiredPermission: 'content:manage',
+      },
+    ],
   },
-
   {
     label: 'Gallery Library',
     href: '/admin/gallery',

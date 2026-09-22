@@ -4,12 +4,14 @@ import {
   type NewsCategory,
   type NewsPost,
   type NewsPostList,
+  type NewsStatus,
 } from '@/admin/api/adminApi';
 import AppShell from '@/admin/components/layout/AppShell';
-import NewsListCard, {
+import {
+  NewsListCard,
   NewsMessageBanner,
   NewsPageHeader,
-} from '@/admin/features/news/components/NewsListCard';
+} from '@/admin/features/news/components/layouts';
 import {
   buildNewsPostFilters,
   createInitialNewsFilters,
@@ -19,6 +21,7 @@ import {
   EMPTY_NEWS_RESULT,
   NEWS_LIST_RETURN_KEY,
   getErrorMessage,
+  getNewsStatusLabel,
 } from '@/admin/features/news/newsUtils';
 
 export default function NewsPage() {
@@ -29,6 +32,7 @@ export default function NewsPage() {
   const [refreshVersion, setRefreshVersion] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const lastReturnMarkerRef = useRef<string | null>(null);
 
@@ -146,6 +150,24 @@ export default function NewsPage() {
     }
   }
 
+  async function updatePostStatus(post: NewsPost, status: NewsStatus) {
+    if (post.status === status) return;
+
+    setStatusUpdatingId(post.id);
+    setMessage(null);
+
+    try {
+      await adminApi.updateNewsPostStatus(post.id, { status });
+      const nextResult = await adminApi.newsPosts(buildNewsPostFilters(filters, page));
+      setResult(nextResult);
+      setMessage(`News status updated to ${getNewsStatusLabel(status)}.`);
+    } catch (error) {
+      setMessage(getErrorMessage(error, 'Failed to update news status.'));
+    } finally {
+      setStatusUpdatingId(null);
+    }
+  }
+
   return (
     <AppShell title="News">
       <section className="space-y-5 p-6">
@@ -157,9 +179,11 @@ export default function NewsPage() {
           filters={filters}
           isLoading={isLoading}
           result={result}
+          statusUpdatingId={statusUpdatingId}
           onDelete={deletePost}
           onFilterChange={updateFilter}
           onPageChange={setPage}
+          onStatusChange={updatePostStatus}
         />
       </section>
     </AppShell>

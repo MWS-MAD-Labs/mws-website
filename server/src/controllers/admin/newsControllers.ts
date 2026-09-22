@@ -12,6 +12,36 @@ async function readJson(c: Context) {
   }
 }
 
+type MultipartValue = string | File;
+type MultipartBody = Record<string, MultipartValue | MultipartValue[]>;
+
+function firstFormValue(value: MultipartValue | MultipartValue[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+async function readImageUpload(c: Context) {
+  const body = (await c.req.parseBody()) as MultipartBody;
+  const file = firstFormValue(body.file);
+
+  if (!(file instanceof File)) {
+    throw new ResponseError(400, "Image file is required.");
+  }
+
+  const text = (key: string) => {
+    const value = firstFormValue(body[key]);
+    return typeof value === "string" ? value : undefined;
+  };
+
+  return {
+    file,
+    metadata: {
+      alt: text("alt"),
+      caption: text("caption"),
+      sortOrder: text("sortOrder"),
+    },
+  };
+}
+
 function ok(c: Context, data: unknown, status: 200 | 201 = 200) {
   return c.json({ data: toJsonSafe(data) }, status);
 }
@@ -114,6 +144,15 @@ export class NewsController {
     return ok(
       c,
       await NewsService.createMedia(c.req.param("id"), await readJson(c)),
+      201,
+    );
+  }
+
+  static async uploadImageMedia(c: Context) {
+    const { file, metadata } = await readImageUpload(c);
+    return ok(
+      c,
+      await NewsService.uploadImageMedia(c.req.param("id"), file, metadata),
       201,
     );
   }

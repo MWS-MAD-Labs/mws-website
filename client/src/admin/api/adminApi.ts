@@ -197,6 +197,13 @@ export type NewsCategory = {
   };
 };
 
+export type NewsCategoryPayload = {
+  name: string;
+  slug: string;
+  description?: string | null;
+  isActive?: boolean;
+};
+
 export type NewsTag = {
   id: string;
   name: string;
@@ -205,6 +212,11 @@ export type NewsTag = {
   _count: {
     postTags: number;
   };
+};
+
+export type NewsTagPayload = {
+  name: string;
+  slug: string;
 };
 
 export type NewsPostMedia = {
@@ -267,6 +279,8 @@ export type NewsPostPayload = {
   readTime?: number;
   tagIds?: string[];
 };
+
+export type NewsPostStatusPayload = Pick<NewsPostPayload, "status">;
 
 export type NewsPostFilters = {
   page?: number;
@@ -561,8 +575,38 @@ export const adminApi = {
     return response!.data;
   },
 
+  async updateNewsPostStatus(
+    id: string,
+    data: NewsPostStatusPayload,
+  ): Promise<NewsPost> {
+    const response = await apiRequest<{ data: NewsPost }>(
+      `/admin/news/posts/${id}`,
+      {
+        method: "PATCH",
+        body: data,
+      },
+    );
+    return response!.data;
+  },
+
   async deleteNewsPost(id: string): Promise<void> {
     await apiRequest(`/admin/news/posts/${id}`, { method: "DELETE" });
+  },
+
+  async uploadNewsImage(
+    newsPostId: string,
+    data: { file: File; alt?: string; caption?: string },
+  ): Promise<NewsPostMedia> {
+    const body = new FormData();
+    body.append("file", data.file);
+    if (data.alt) body.append("alt", data.alt);
+    if (data.caption) body.append("caption", data.caption);
+
+    const response = await apiRequest<{ data: NewsPostMedia }>(
+      `/admin/news/posts/${newsPostId}/media/images`,
+      { method: "POST", body },
+    );
+    return response!.data;
   },
 
   async newsCategories(): Promise<NewsCategory[]> {
@@ -572,9 +616,64 @@ export const adminApi = {
     return response?.data ?? [];
   },
 
+  async createNewsCategory(data: NewsCategoryPayload): Promise<NewsCategory> {
+    const response = await apiRequest<{ data: NewsCategory }>(
+      "/admin/news/categories",
+      {
+        method: "POST",
+        body: data,
+      },
+    );
+    return response!.data;
+  },
+
+  async updateNewsCategory(
+    id: string,
+    data: Partial<NewsCategoryPayload>,
+  ): Promise<NewsCategory> {
+    const response = await apiRequest<{ data: NewsCategory }>(
+      `/admin/news/categories/${id}`,
+      {
+        method: "PATCH",
+        body: data,
+      },
+    );
+    return response!.data;
+  },
+
+  async deleteNewsCategory(id: string): Promise<void> {
+    await apiRequest(`/admin/news/categories/${id}`, { method: "DELETE" });
+  },
+
   async newsTags(): Promise<NewsTag[]> {
     const response = await apiRequest<{ data: NewsTag[] }>("/admin/news/tags");
     return response?.data ?? [];
+  },
+
+  async createNewsTag(data: NewsTagPayload): Promise<NewsTag> {
+    const response = await apiRequest<{ data: NewsTag }>("/admin/news/tags", {
+      method: "POST",
+      body: data,
+    });
+    return response!.data;
+  },
+
+  async updateNewsTag(
+    id: string,
+    data: Partial<NewsTagPayload>,
+  ): Promise<NewsTag> {
+    const response = await apiRequest<{ data: NewsTag }>(
+      `/admin/news/tags/${id}`,
+      {
+        method: "PATCH",
+        body: data,
+      },
+    );
+    return response!.data;
+  },
+
+  async deleteNewsTag(id: string): Promise<void> {
+    await apiRequest(`/admin/news/tags/${id}`, { method: "DELETE" });
   },
 
   async uploadGalleryImage(

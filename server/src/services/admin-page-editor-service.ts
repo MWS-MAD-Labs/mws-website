@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { NewsPost } from "@prisma/client";
 import { ResponseError } from "../error/response-error";
 import { getPrisma } from "../lib/prisma";
 import { GalleryService } from "./gallery-service";
@@ -6,7 +7,9 @@ import { PageDataService } from "./page-data-service";
 
 const optionalText = (max?: number) => {
   const schema = z.string().trim();
-  return max ? schema.max(max).nullable().optional() : schema.nullable().optional();
+  return max
+    ? schema.max(max).nullable().optional()
+    : schema.nullable().optional();
 };
 
 const admissionProgramSchema = z.object({
@@ -42,7 +45,12 @@ const communityStoriesPayloadSchema = z.object({
 
 const newsPayloadSchema = z.object({
   title: z.string().trim().min(1).max(500),
-  slug: z.string().trim().min(1).max(500).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  slug: z
+    .string()
+    .trim()
+    .min(1)
+    .max(500)
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
   excerpt: optionalText(),
   imagePath: optionalText(1000),
   imageAlt: optionalText(255),
@@ -55,6 +63,22 @@ function nullable(value: string | null | undefined) {
   return value?.trim() ? value.trim() : null;
 }
 
+function communityNewsResponse(news: NewsPost) {
+  return {
+    id: news.id,
+    title: news.title,
+    slug: news.slug,
+    excerpt: news.excerpt,
+    imagePath: news.coverImage,
+    imageAlt: news.coverImageAlt,
+    galleryId: null,
+    isPublished: news.isPublished,
+    publishedAt: news.publishedAt,
+    createdAt: news.createdAt,
+    updatedAt: news.updatedAt,
+  };
+}
+
 function requireUuid(id: string | undefined): asserts id is string {
   if (!id || !z.string().uuid().safeParse(id).success) {
     throw new ResponseError(400, "Valid UUID id is required.");
@@ -65,10 +89,15 @@ function isUuid(id: string | null | undefined): id is string {
   return Boolean(id && z.string().uuid().safeParse(id).success);
 }
 
-async function findOrCreateProgram(data: z.infer<typeof admissionProgramSchema>, index: number) {
+async function findOrCreateProgram(
+  data: z.infer<typeof admissionProgramSchema>,
+  index: number,
+) {
   const prisma = getPrisma();
   if (isUuid(data.id)) {
-    const existing = await prisma.program.findUnique({ where: { id: data.id } });
+    const existing = await prisma.program.findUnique({
+      where: { id: data.id },
+    });
     if (existing) return existing;
   }
 
@@ -92,7 +121,9 @@ async function findOrCreateProgram(data: z.infer<typeof admissionProgramSchema>,
   });
 }
 
-function adminProgramResponse(program: Awaited<ReturnType<typeof getAdminPrograms>>[number]) {
+function adminProgramResponse(
+  program: Awaited<ReturnType<typeof getAdminPrograms>>[number],
+) {
   const admission = program.admissions[0] ?? null;
 
   return {
@@ -127,7 +158,10 @@ async function getAdminPrograms() {
 function handleDatabaseError(error: unknown): never {
   const prismaError = error as { code?: string };
   if (prismaError.code === "P2002") {
-    throw new ResponseError(409, "A record with the same unique value already exists.");
+    throw new ResponseError(
+      409,
+      "A record with the same unique value already exists.",
+    );
   }
   if (prismaError.code === "P2003") {
     throw new ResponseError(400, "Selected related data does not exist.");
@@ -168,7 +202,8 @@ export class AdminPageEditorService {
 
   static async saveAdmissions(payload: unknown) {
     const parsed = admissionsPayloadSchema.safeParse(payload);
-    if (!parsed.success) throw new ResponseError(400, "Invalid admissions payload.");
+    if (!parsed.success)
+      throw new ResponseError(400, "Invalid admissions payload.");
 
     const prisma = getPrisma();
 
@@ -192,8 +227,12 @@ export class AdminPageEditorService {
         });
 
         const existingAdmission = isUuid(programData.admissionId)
-          ? await prisma.admission.findUnique({ where: { id: programData.admissionId } })
-          : await prisma.admission.findFirst({ where: { programId: program.id } });
+          ? await prisma.admission.findUnique({
+              where: { id: programData.admissionId },
+            })
+          : await prisma.admission.findFirst({
+              where: { programId: program.id },
+            });
 
         const admissionData = {
           programId: program.id,
@@ -243,18 +282,21 @@ export class AdminPageEditorService {
         heroImagePath: record?.heroImagePath ?? publicPage.hero.image,
         heroImageAlt: record?.heroImageAlt ?? publicPage.hero.imageAlt,
         introTitle: record?.introTitle ?? publicPage.introTitle,
-        introBody: Array.isArray(record?.introBody) ? record.introBody : publicPage.introBody,
+        introBody: Array.isArray(record?.introBody)
+          ? record.introBody
+          : publicPage.introBody,
         galleryId: record?.galleryId ?? null,
         isPublished: record?.isPublished ?? true,
       },
       galleries,
-      news,
+      news: news.map(communityNewsResponse),
     };
   }
 
   static async saveCommunityStoriesPage(payload: unknown) {
     const parsed = communityStoriesPayloadSchema.safeParse(payload);
-    if (!parsed.success) throw new ResponseError(400, "Invalid community stories payload.");
+    if (!parsed.success)
+      throw new ResponseError(400, "Invalid community stories payload.");
 
     const prisma = getPrisma();
     const existing = await prisma.communityStoriesPage.findFirst({
@@ -288,18 +330,25 @@ export class AdminPageEditorService {
     const parsed = newsPayloadSchema.safeParse(payload);
     if (!parsed.success) throw new ResponseError(400, "Invalid news payload.");
     try {
-      return await getPrisma().newsPost.create({
+      const news = await getPrisma().newsPost.create({
         data: {
           title: parsed.data.title,
           slug: parsed.data.slug,
           excerpt: nullable(parsed.data.excerpt),
-          imagePath: nullable(parsed.data.imagePath),
-          imageAlt: nullable(parsed.data.imageAlt),
-          galleryId: parsed.data.galleryId ?? null,
+          coverImage: nullable(parsed.data.imagePath),
+          coverImageAlt: nullable(parsed.data.imageAlt),
+          content: {
+            format: "plain_text",
+            text: nullable(parsed.data.excerpt) ?? "",
+          },
+          status: parsed.data.isPublished ? "PUBLISHED" : "DRAFT",
           isPublished: parsed.data.isPublished ?? false,
-          publishedAt: parsed.data.publishedAt ?? null,
+          publishedAt: parsed.data.isPublished
+            ? (parsed.data.publishedAt ?? new Date())
+            : (parsed.data.publishedAt ?? null),
         },
       });
+      return communityNewsResponse(news);
     } catch (error) {
       handleDatabaseError(error);
     }
@@ -310,19 +359,22 @@ export class AdminPageEditorService {
     const parsed = newsPayloadSchema.safeParse(payload);
     if (!parsed.success) throw new ResponseError(400, "Invalid news payload.");
     try {
-      return await getPrisma().newsPost.update({
+      const news = await getPrisma().newsPost.update({
         where: { id },
         data: {
           title: parsed.data.title,
           slug: parsed.data.slug,
           excerpt: nullable(parsed.data.excerpt),
-          imagePath: nullable(parsed.data.imagePath),
-          imageAlt: nullable(parsed.data.imageAlt),
-          galleryId: parsed.data.galleryId ?? null,
+          coverImage: nullable(parsed.data.imagePath),
+          coverImageAlt: nullable(parsed.data.imageAlt),
+          status: parsed.data.isPublished ? "PUBLISHED" : "DRAFT",
           isPublished: parsed.data.isPublished ?? false,
-          publishedAt: parsed.data.publishedAt ?? null,
+          publishedAt: parsed.data.isPublished
+            ? (parsed.data.publishedAt ?? new Date())
+            : (parsed.data.publishedAt ?? null),
         },
       });
+      return communityNewsResponse(news);
     } catch (error) {
       handleDatabaseError(error);
     }

@@ -67,6 +67,15 @@ export type NewsPostFilters = {
   search?: string;
 };
 
+export type PublicNewsPostFilters = {
+  page: number;
+  pageSize: number;
+  category?: string;
+  tag?: string;
+  isFeatured?: boolean;
+  search?: string;
+};
+
 export type NewsMediaData = {
   newsPostId: string;
   mediaType?: "IMAGE" | "VIDEO" | "DOCUMENT";
@@ -92,6 +101,41 @@ function postWhere(filters: NewsPostFilters): Prisma.NewsPostWhereInput {
   }
 
   return where;
+}
+
+function publishedPostWhere(
+  now: Date,
+  filters: Partial<PublicNewsPostFilters> = {},
+): Prisma.NewsPostWhereInput {
+  return {
+    status: "PUBLISHED",
+    isPublished: true,
+    publishedAt: { not: null, lte: now },
+    ...(filters.category
+      ? { category: { slug: filters.category, isActive: true } }
+      : {}),
+    ...(filters.tag
+      ? { postTags: { some: { tag: { slug: filters.tag } } } }
+      : {}),
+    ...(filters.isFeatured !== undefined
+      ? { isFeatured: filters.isFeatured }
+      : {}),
+    ...(filters.search
+      ? {
+          OR: [
+            {
+              title: { contains: filters.search, mode: "insensitive" as const },
+            },
+            {
+              excerpt: {
+                contains: filters.search,
+                mode: "insensitive" as const,
+              },
+            },
+          ],
+        }
+      : {}),
+  };
 }
 
 export class NewsRepository {
@@ -192,10 +236,7 @@ export class NewsRepository {
       prisma.newsPost.findMany({
         where,
         include: postInclude,
-        orderBy: [
-          { publishedAt: "desc" },
-          { createdAt: "desc" },
-        ],
+        orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
         skip: (filters.page - 1) * filters.pageSize,
         take: filters.pageSize,
       }),
@@ -203,6 +244,63 @@ export class NewsRepository {
     ]);
 
     return { items, total };
+  }
+
+  static async listPublishedPosts(filters: PublicNewsPostFilters, now: Date) {
+    const prisma = getPrisma();
+    const where = publishedPostWhere(now, filters);
+    const [items, total] = await Promise.all([
+      prisma.newsPost.findMany({
+        where,
+        include: postInclude,
+        orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+        skip: (filters.page - 1) * filters.pageSize,
+        take: filters.pageSize,
+      }),
+      prisma.newsPost.count({ where }),
+    ]);
+
+    return { items, total };
+  }
+
+  static findPublishedPostBySlug(slug: string, now: Date) {
+    return getPrisma().newsPost.findFirst({
+      where: { slug, ...publishedPostWhere(now) },
+      include: postInclude,
+    });
+  }
+
+  static listRelatedPublishedPosts(
+    postId: string,
+    categoryId: string | null,
+    now: Date,
+    limit = 4,
+  ) {
+    return getPrisma().newsPost.findMany({
+      where: {
+        ...publishedPostWhere(now),
+        id: { not: postId },
+        ...(categoryId ? { categoryId } : {}),
+      },
+      include: postInclude,
+      orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+      take: limit,
+    });
+  }
+
+  static listPublicCategories(now: Date) {
+    return getPrisma().newsCategory.findMany({
+      where: { isActive: true },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        _count: {
+          select: { posts: { where: publishedPostWhere(now) } },
+        },
+      },
+      orderBy: { name: "asc" },
+    });
   }
 
   static findPostById(id: string): Promise<NewsPostWithRelations | null> {
@@ -279,7 +377,26 @@ export class NewsRepository {
     return getPrisma().newsPostMedia.create({ data });
   }
 
-  static updateMedia(id: string, data: Partial<Omit<NewsMediaData, "newsPostId">>) {
+  static createImageMediaAsCover(data: NewsMediaData) {
+    return getPrisma().$transaction(async (tx) => {
+      const media = await tx.newsPostMedia.create({ data });
+
+      await tx.newsPost.update({
+        where: { id: data.newsPostId },
+        data: {
+          coverImage: `/api/news/media/${media.id}/file`,
+          coverImageAlt: data.alt,
+        },
+      });
+
+      return media;
+    });
+  }
+
+  static updateMedia(
+    id: string,
+    data: Partial<Omit<NewsMediaData, "newsPostId">>,
+  ) {
     return getPrisma().newsPostMedia.update({ where: { id }, data });
   }
 
