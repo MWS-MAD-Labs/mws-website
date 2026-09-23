@@ -6,6 +6,14 @@ const mediaOrderBy = [
   { createdAt: "asc" as const },
 ];
 
+/**
+ * MinIO objects are only reachable through this route, so a cover image is
+ * stored as media and `NewsPost.coverImage` points at the row that owns it.
+ */
+export function newsMediaFileUrl(mediaId: string) {
+  return `/api/news/media/${mediaId}/file`;
+}
+
 const postInclude = {
   category: true,
   author: { select: { id: true, name: true, isActive: true } },
@@ -377,20 +385,39 @@ export class NewsRepository {
     return getPrisma().newsPostMedia.create({ data });
   }
 
-  static createImageMediaAsCover(data: NewsMediaData) {
+  /**
+   * Only a COVER upload touches `coverImage`. The row that used to hold the
+   * cover is dropped in the same transaction, otherwise it would stay behind
+   * as an article photo the editor never asked for.
+   */
+  static createCoverMedia(data: NewsMediaData, previousCoverMediaId?: string) {
     return getPrisma().$transaction(async (tx) => {
       const media = await tx.newsPostMedia.create({ data });
 
       await tx.newsPost.update({
         where: { id: data.newsPostId },
         data: {
-          coverImage: `/api/news/media/${media.id}/file`,
-          coverImageAlt: data.alt,
+          coverImage: newsMediaFileUrl(media.id),
+          coverImageAlt: data.alt ?? null,
         },
       });
 
+      if (previousCoverMediaId) {
+        await tx.newsPostMedia.delete({ where: { id: previousCoverMediaId } });
+      }
+
       return media;
     });
+  }
+
+  /** Article photos are appended, so they keep the order they were uploaded in. */
+  static async nextMediaSortOrder(newsPostId: string): Promise<number> {
+    const { _max } = await getPrisma().newsPostMedia.aggregate({
+      where: { newsPostId },
+      _max: { sortOrder: true },
+    });
+
+    return (_max.sortOrder ?? -1) + 1;
   }
 
   static updateMedia(

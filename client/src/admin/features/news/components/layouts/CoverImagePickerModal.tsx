@@ -22,7 +22,7 @@ type CoverImagePickerModalProps = {
   onSelectLocalFile: (file: File) => void;
 };
 
-type PickerMode = 'GALLERY' | 'UPLOAD';
+type PickerMode = 'GALLERY' | 'UPLOAD' | 'VIDEO';
 
 export default function CoverImagePickerModal({
   open,

@@ -4,34 +4,48 @@ export const logoUrl =
   "https://millenniaws.sch.id/wp-content/uploads/2021/11/Millennia-World-School-Logo-Only.svg";
 
 export const pageLinks = [
-  { label: "Our School", path: "/our-school" },
-  { label: "Admission", path: "/admission" },
-  { label: "School Calendar", path: "/school-calendar" },
-  { label: "School News", path: "/news" },
-  { label: "Community Stories", path: "/community-stories" },
-  { label: "Contact", path: "/contact" },
+  {
+    label: 'About MWS',
+    path: '/our-school',
+    description: 'Discover our school and community',
+  },
+  {
+    label: 'Our Campus',
+    path: '/our-school#campus',
+    description: 'Explore our learning environment',
+  },
+  {
+    label: 'Mission Statement',
+    path: '/our-school#mission',
+    description: 'What guides our learning community',
+  },
+  {
+    label: 'Community Stories',
+    path: '/community-stories',
+    description: 'Stories from our school community',
+  },
+  {
+    label: 'Affiliations',
+    path: '/our-school#affiliations',
+    description: 'Our educational partnerships',
+  },
 ];
 
 export const academicLinks = [
   {
-    label: "Kindergarten",
-    path: "/academic/kindergarten",
-    description: "Early years learning",
+    label: 'Kindergarten',
+    path: '/academic/kindergarten',
+    description: 'Early years learning',
   },
   {
-    label: "Elementary",
-    path: "/academic/elementary",
-    description: "Primary inquiry and foundations",
+    label: 'Elementary',
+    path: '/academic/elementary',
+    description: 'Primary inquiry and foundations',
   },
   {
-    label: "High School",
-    path: "/academic/high-school",
-    description: "Secondary readiness and leadership",
-  },
-  {
-    label: "Junior High",
-    path: "/academic/junior-high",
-    description: "Middle years exploration",
+    label: 'Junior High',
+    path: '/academic/junior-high',
+    description: 'Middle years exploration',
   },
 ];
 

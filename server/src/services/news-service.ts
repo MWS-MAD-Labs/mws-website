@@ -13,6 +13,7 @@ import {
   newsTagSchema,
 } from "../models/newsModels";
 import {
+  newsMediaFileUrl,
   NewsRepository,
   type NewsPostFilters,
   type NewsPostWithRelations,
@@ -30,7 +31,9 @@ const mediaUpdateSchema = newsPostMediaSchema.omit({ newsPostId: true }).partial
 const imageUploadMetadataSchema = z.object({
   alt: z.string().trim().max(255).optional(),
   caption: z.string().trim().max(2000).optional(),
-  sortOrder: z.coerce.number().int().min(0).optional().default(0),
+  // Left undefined an article photo is appended, so upload order is kept.
+  sortOrder: z.coerce.number().int().min(0).optional(),
+  purpose: z.enum(["COVER", "ARTICLE"]).optional().default("ARTICLE"),
 });
 
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
@@ -176,6 +179,18 @@ function isUploadedNewsImage(url: string) {
 }
 
 /**
+ * The cover is the media row `coverImage` points at, if it points at one at
+ * all: a cover picked from the gallery is a plain path and owns no media.
+ */
+function findCoverMedia<Media extends { id: string; url: string }>(post: {
+  coverImage: string | null;
+  media: Media[];
+}): Media | undefined {
+  if (!post.coverImage) return undefined;
+  return post.media.find((media) => newsMediaFileUrl(media.id) === post.coverImage);
+}
+
+/**
  * `status`, `isPublished` and `publishedAt` can contradict each other, so
  * `status` is treated as the single source of truth and the other two are
  * derived from it. Change this one function if you want different behaviour.
@@ -225,6 +240,12 @@ async function assertTagsExist(tagIds: string[] | undefined) {
   if (found !== unique.length) {
     throw new ResponseError(400, "One or more tag ids do not exist.");
   }
+}
+
+/** Best effort: a stale object left in MinIO must not fail the request. */
+async function discardCoverObject(media: { url: string } | undefined) {
+  if (!media || !isUploadedNewsImage(media.url)) return;
+  await deleteMinioObject(media.url).catch(() => undefined);
 }
 
 function postResponse(post: NewsPostWithRelations) {
@@ -418,6 +439,18 @@ export class NewsService {
 
     try {
       const post = await NewsRepository.updatePost(id, nextData, tagIds);
+
+      // A media row the post no longer points at would otherwise resurface as
+      // an article photo, so it goes away with the cover it used to serve.
+      if (post.coverImage !== existing.coverImage) {
+        const previousCover = findCoverMedia(existing);
+
+        if (previousCover) {
+          await NewsRepository.deleteMedia(previousCover.id).catch(() => undefined);
+          await discardCoverObject(previousCover);
+        }
+      }
+
       return postResponse(post);
     } catch (error) {
       handleDatabaseError(error, "News post");
@@ -490,13 +523,20 @@ export class NewsService {
     }
   }
 
+  /**
+   * `purpose` decides what an uploaded image becomes. A COVER replaces
+   * `coverImage` and nothing else; an ARTICLE photo is appended to the post
+   * media and never touches the cover. Without it every upload overwrote the
+   * cover, so the last file uploaded won and the real cover was demoted to an
+   * article photo.
+   */
   static async uploadImageMedia(
     rawPostId: string | undefined,
     file: File,
     metadataPayload: unknown,
   ) {
     const postId = requireUuid(rawPostId, "post id");
-    await this.getPost(postId);
+    const post = await this.getPost(postId);
     validateImageFile(file);
 
     const metadata = parse(
@@ -512,14 +552,32 @@ export class NewsService {
       "Cache-Control": "public, max-age=31536000",
     });
 
+    const data = {
+      newsPostId: postId,
+      mediaType: "IMAGE" as const,
+      url: objectName,
+      alt: metadata.alt || null,
+      caption: metadata.caption || null,
+    };
+
     try {
-      return await NewsRepository.createImageMediaAsCover({
-        newsPostId: postId,
-        mediaType: "IMAGE",
-        url: objectName,
-        alt: metadata.alt || null,
-        caption: metadata.caption || null,
-        sortOrder: metadata.sortOrder,
+      if (metadata.purpose === "COVER") {
+        const previousCover = findCoverMedia(post);
+
+        const media = await NewsRepository.createCoverMedia(
+          { ...data, sortOrder: metadata.sortOrder ?? 0 },
+          previousCover?.id,
+        );
+
+        await discardCoverObject(previousCover);
+
+        return media;
+      }
+
+      return await NewsRepository.createMedia({
+        ...data,
+        sortOrder:
+          metadata.sortOrder ?? (await NewsRepository.nextMediaSortOrder(postId)),
       });
     } catch (error) {
       await deleteMinioObject(objectName).catch(() => undefined);

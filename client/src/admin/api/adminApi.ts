@@ -219,6 +219,8 @@ export type NewsTagPayload = {
   slug: string;
 };
 
+export type NewsImagePurpose = "ARTICLE" | "COVER";
+
 export type NewsPostMedia = {
   id: string;
   newsPostId: string;
@@ -593,12 +595,22 @@ export const adminApi = {
     await apiRequest(`/admin/news/posts/${id}`, { method: "DELETE" });
   },
 
+  /**
+   * `purpose` tells the API whether the file becomes the post cover or another
+   * article photo; without it every upload would overwrite the cover.
+   */
   async uploadNewsImage(
     newsPostId: string,
-    data: { file: File; alt?: string; caption?: string },
+    data: {
+      file: File;
+      alt?: string;
+      caption?: string;
+      purpose: NewsImagePurpose;
+    },
   ): Promise<NewsPostMedia> {
     const body = new FormData();
     body.append("file", data.file);
+    body.append("purpose", data.purpose);
     if (data.alt) body.append("alt", data.alt);
     if (data.caption) body.append("caption", data.caption);
 
@@ -607,6 +619,13 @@ export const adminApi = {
       { method: "POST", body },
     );
     return response!.data;
+  },
+
+  /** Also removes the stored object; the cover is never reachable this way. */
+  async deleteNewsImage(newsPostId: string, mediaId: string): Promise<void> {
+    await apiRequest(`/admin/news/posts/${newsPostId}/media/${mediaId}`, {
+      method: "DELETE",
+    });
   },
 
   async newsCategories(): Promise<NewsCategory[]> {

@@ -1,40 +1,33 @@
-import { Link } from "react-router-dom";
-import ProgramCards from "../components/ui/ProgramAcademic";
-import SubpageHero from "../components/ui/SubpageHero";
-import { asset } from "../data/site";
+import { Link } from 'react-router-dom';
+import ProgramCards from '../components/ui/ProgramAcademic';
+import SupPageHeroAcademic from '@/components/ui/SupPageHeroAcademic';
+import { asset } from '../data/site';
+import ContentBreadcrumb from '@/components/ui/ContentBreadcrumb';
 
 const pillars = [
-  ["Learning Design", "Inquiry blocks, guided workshops, and studio time."],
-  [
-    "Assessment",
-    "Frequent feedback that helps students understand their next step.",
-  ],
-  [
-    "Academic Support",
-    "Small group guidance for language, numeracy, and confidence.",
-  ],
-  [
-    "Student Development",
-    "Leadership, wellbeing, service, and social-emotional learning.",
-  ],
-  [
-    "Pathways",
-    "A coherent journey from early years through secondary readiness.",
-  ],
-  [
-    "Community",
-    "Parents, teachers, and students working from one shared language.",
-  ],
+  ['Learning Design', 'Inquiry blocks, guided workshops, and studio time.'],
+  ['Assessment', 'Frequent feedback that helps students understand their next step.'],
+  ['Academic Support', 'Small group guidance for language, numeracy, and confidence.'],
+  ['Student Development', 'Leadership, wellbeing, service, and social-emotional learning.'],
+  ['Pathways', 'A coherent journey from early years through secondary readiness.'],
+  ['Community', 'Parents, teachers, and students working from one shared language.'],
 ];
 
 export default function Academic() {
   return (
     <main>
-      <SubpageHero
-        title="Academics"
-        image={asset("DSC09500.jpg")}
+      <SupPageHeroAcademic
+        image={asset('DSC09500.jpg')}
         imageAlt="MWS academic learning spaces"
-        breadcrumbs={[{ label: "Home", path: "/" }, { label: "Academics" }]}
+        title="Academic"
+        description="Hidup Jokowi"
+      />
+
+      <ContentBreadcrumb
+        items={[
+          { label: 'Home', path: '/' },
+          { label: 'Academic', path: '/academic' },
+        ]}
       />
 
       <section className="subpage-section" id="academic-overview">
@@ -42,35 +35,25 @@ export default function Academic() {
           <div className="subpage-grid-2">
             <div className="subpage-body">
               <p className="subpage-intro">
-                A connected academic pathway that helps learners build strong
-                foundations, discover interests, and practice responsible
-                independence.
+                A connected academic pathway that helps learners build strong foundations, discover
+                interests, and practice responsible independence.
               </p>
               <h2>Learning That Grows With Each Child</h2>
               <p>
-                Aliquip irure proident laborum curae nulla vestibulum gravida
-                amet praesent. Students move through routines that balance
-                explicit teaching, inquiry, collaboration, reflection, and
-                meaningful application.
+                Aliquip irure proident laborum curae nulla vestibulum gravida amet praesent.
+                Students move through routines that balance explicit teaching, inquiry,
+                collaboration, reflection, and meaningful application.
               </p>
               <p>
-                The academic program is ready for future CMS-backed content:
-                program details, calendars, and curriculum notes are kept as
-                structured page data rather than hidden inside layout code.
+                The academic program is ready for future CMS-backed content: program details,
+                calendars, and curriculum notes are kept as structured page data rather than hidden
+                inside layout code.
               </p>
-              <div style={{ display: "flex", gap: 14, marginTop: 30 }}>
-                <Link
-                  className="btn-submit"
-                  style={{ width: "auto" }}
-                  to="/kurikulum"
-                >
+              <div style={{ display: 'flex', gap: 14, marginTop: 30 }}>
+                <Link className="btn-submit" style={{ width: 'auto' }} to="/kurikulum">
                   View Curriculum
                 </Link>
-                <Link
-                  className="btn-submit"
-                  style={{ width: "auto" }}
-                  to="/school-calendar"
-                >
+                <Link className="btn-submit" style={{ width: 'auto' }} to="/school-calendar">
                   School Calendar
                 </Link>
               </div>
@@ -79,26 +62,16 @@ export default function Academic() {
               <h2>Academic Rhythm</h2>
               <ul className="premium-list">
                 <li className="premium-list-item">
-                  <div className="premium-list-title">
-                    Inquiry and Foundations
-                  </div>
-                  <p>
-                    Lessons invite curiosity while keeping essential skills
-                    visible.
-                  </p>
+                  <div className="premium-list-title">Inquiry and Foundations</div>
+                  <p>Lessons invite curiosity while keeping essential skills visible.</p>
                 </li>
                 <li className="premium-list-item">
                   <div className="premium-list-title">Documentation</div>
-                  <p>
-                    Teachers collect learning evidence and share progress
-                    clearly.
-                  </p>
+                  <p>Teachers collect learning evidence and share progress clearly.</p>
                 </li>
                 <li className="premium-list-item">
                   <div className="premium-list-title">Community Context</div>
-                  <p>
-                    Projects connect classroom learning with life beyond campus.
-                  </p>
+                  <p>Projects connect classroom learning with life beyond campus.</p>
                 </li>
               </ul>
             </div>
@@ -115,14 +88,7 @@ export default function Academic() {
               <article
                 key={title}
                 className={`acad-pillar ${
-                  [
-                    "ac-navy",
-                    "ac-navy",
-                    "ac-sage",
-                    "ac-gold",
-                    "ac-rose",
-                    "ac-burgundy",
-                  ][index]
+                  ['ac-navy', 'ac-navy', 'ac-sage', 'ac-gold', 'ac-rose', 'ac-burgundy'][index]
                 }`}
               >
                 <span className="acad-pillar-tag">0{index + 1}</span>

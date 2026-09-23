@@ -1,6 +1,7 @@
 import { z, ZodError } from "zod";
 import { ResponseError } from "../error/response-error";
 import {
+  newsMediaFileUrl,
   NewsRepository,
   type NewsPostWithRelations,
   type PublicNewsPostFilters,
@@ -57,8 +58,15 @@ function publicCategory(post: NewsPostWithRelations) {
 
 function publicMediaUrl(media: NewsPostWithRelations["media"][number]) {
   return media.url.startsWith("news/images/")
-    ? `/api/news/media/${media.id}/file`
+    ? newsMediaFileUrl(media.id)
     : media.url;
+}
+
+/** The cover is rendered from `coverImage`, so it is not an article photo. */
+function articleMedia(post: NewsPostWithRelations) {
+  return post.media.filter(
+    (media) => newsMediaFileUrl(media.id) !== post.coverImage,
+  );
 }
 
 function listItem(post: NewsPostWithRelations) {
@@ -135,7 +143,7 @@ export class PublicNewsService {
         name: tag.name,
         slug: tag.slug,
       })),
-      media: post.media.map((media) => ({
+      media: articleMedia(post).map((media) => ({
         id: media.id,
         mediaType: media.mediaType,
         url: publicMediaUrl(media),

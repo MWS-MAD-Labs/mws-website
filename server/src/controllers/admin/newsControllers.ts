@@ -38,6 +38,8 @@ async function readImageUpload(c: Context) {
       alt: text("alt"),
       caption: text("caption"),
       sortOrder: text("sortOrder"),
+      // COVER or ARTICLE; the service defaults to ARTICLE when absent.
+      purpose: text("purpose"),
     },
   };
 }

@@ -1,4 +1,20 @@
-import type { NewsCategory, NewsPost, NewsPostPayload, NewsStatus } from '@/admin/api/adminApi';
+import {
+  adminApi,
+  type NewsCategory,
+  type NewsPost,
+  type NewsPostMedia,
+  type NewsPostPayload,
+  type NewsStatus,
+} from '@/admin/api/adminApi';
+
+export type NewsArticlePhoto = {
+  id: string;
+  file: File | null;
+  previewUrl: string;
+  alt: string;
+  caption: string;
+  existingMediaId?: string;
+};
 
 export type NewsForm = {
   authorName: string;
@@ -16,6 +32,7 @@ export type NewsForm = {
   status: NewsStatus;
   tagIds: string[];
   title: string;
+  articlePhotos: NewsArticlePhoto[];
 };
 
 export type UpdateNewsForm = <Key extends keyof NewsForm>(key: Key, value: NewsForm[Key]) => void;
@@ -42,6 +59,7 @@ export function createEmptyNewsForm(): NewsForm {
     status: 'DRAFT',
     tagIds: [],
     title: '',
+    articlePhotos: [],
   };
 }
 
@@ -78,6 +96,19 @@ export function newsFormFromPost(post: NewsPost): NewsForm {
     status: post.status,
     tagIds: post.tags.map((tag) => tag.id),
     title: post.title,
+
+    articlePhotos: post.media
+      .filter((media) => media.mediaType === 'IMAGE')
+      .filter((media) => !isCoverMedia(media, post.coverImage))
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .map((media) => ({
+        id: `existing-${media.id}`,
+        file: null,
+        previewUrl: adminApi.publicAssetUrl(newsMediaUrl(media)),
+        alt: media.alt ?? '',
+        caption: media.caption ?? '',
+        existingMediaId: media.id,
+      })),
   };
 }
 
@@ -104,6 +135,20 @@ export function newsPayloadFromForm(form: NewsForm): NewsPostPayload {
   };
 }
 
+/** Mirrors the API: an uploaded object is only reachable through its media row. */
+function newsMediaUrl(media: NewsPostMedia) {
+  return media.url.startsWith('news/images/') ? `/api/news/media/${media.id}/file` : media.url;
+}
+
+/**
+ * The cover lives in `coverImage`, which points at the media row serving it —
+ * comparing the raw object key would never match and would list the cover as an
+ * article photo.
+ */
+function isCoverMedia(media: NewsPostMedia, coverImage: string | null) {
+  return Boolean(coverImage) && newsMediaUrl(media) === coverImage;
+}
+
 function optionalText(value: string) {
   const trimmed = value.trim();
   return trimmed || null;
@@ -114,6 +159,7 @@ function dateToLocalInput(value: string | null) {
 
   const date = new Date(value);
   const localTime = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+
   return localTime.toISOString().slice(0, 16);
 }
 
@@ -122,9 +168,11 @@ function contentToText(content: unknown) {
 
   if (content && typeof content === 'object' && 'text' in content) {
     const text = (content as { text?: unknown }).text;
+
     if (typeof text === 'string') return text;
   }
 
   if (!content) return '';
+
   return JSON.stringify(content, null, 2);
 }
