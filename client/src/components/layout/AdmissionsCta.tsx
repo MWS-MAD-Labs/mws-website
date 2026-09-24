@@ -1,3 +1,4 @@
+import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 type CtaAction = {
@@ -36,7 +37,7 @@ export default function AdmissionsCta({ headline, primary, secondary }: Admissio
             className="inline-flex min-h-12 items-center justify-center gap-3 bg-[var(--warm-white)] px-7 py-3.5 text-sm font-semibold text-[var(--burgundy)] transition-colors duration-200 hover:bg-white"
           >
             {primary.label}
-            <span aria-hidden="true">→</span>
+            <span aria-hidden="true"><ArrowRight/></span>
           </Link>
 
           {secondary && (

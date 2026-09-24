@@ -1,121 +1,163 @@
-import { Link } from 'react-router-dom';
+import { Download } from 'lucide-react';
 
-type TableRow = [string, string, string];
+import AdmissionsCta from '@/components/layout/AdmissionsCta';
 
-type Activity = {
+type SectionItem = {
   title: string;
+  text: string;
   image: string;
+  imageAlt: string;
+  imagePosition?: 'left' | 'right';
 };
 
 type LevelPageProps = {
-  title: string;
-  intro: string;
-  ageRange: string;
-  focus: string;
-  tableRows: TableRow[];
-  activities: Activity[];
+  introTitle: string;
+  intro: string[];
+  introImage: string;
+  introImageAlt: string;
+
+  curriculumTitle: string;
+  curriculumDescription: string[];
+  curriculumFile?: string;
+  curriculumLabel?: string;
+
+  sections: SectionItem[];
+
+  closingText?: string;
 };
 
 export default function LevelPage({
-  title,
+  introTitle,
   intro,
-  ageRange,
-  focus,
-  tableRows,
-  activities,
+  introImage,
+  introImageAlt,
+  curriculumTitle,
+  curriculumDescription,
+  curriculumFile,
+  curriculumLabel,
+  sections,
+  closingText,
 }: LevelPageProps) {
   return (
     <main>
+      {/* Intro */}
       <section className="subpage-section">
         <div className="wrap">
-          <div className="subpage-grid-2">
+          <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
+            {/* Text */}
             <div className="subpage-body">
-              <p className="subpage-intro">{intro}</p>
+              <h2>{introTitle}</h2>
 
-              <h2>{title} Learning Experience</h2>
-
-              <p>
-                Labore luctus occaecat cillum tincidunt laborum, quam gravida eleifend proident
-                mollit orci voluptate. Students learn through carefully paced routines, meaningful
-                inquiry, and warm guidance.
-              </p>
-
-              <ul className="premium-list">
-                <li className="premium-list-item">
-                  <div className="premium-list-title">Age Range</div>
-                  <p>{ageRange}</p>
-                </li>
-
-                <li className="premium-list-item">
-                  <div className="premium-list-title">Program Focus</div>
-                  <p>{focus}</p>
-                </li>
-
-                <li className="premium-list-item">
-                  <div className="premium-list-title">Family Partnership</div>
-                  <p>
-                    Teachers document progress and keep parents close to the rhythm of classroom
-                    learning.
-                  </p>
-                </li>
-              </ul>
+              {intro.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
             </div>
 
-            <div>
-              <div className="premium-table-wrapper">
-                <table className="premium-table">
-                  <thead>
-                    <tr>
-                      <th>Area</th>
-                      <th>Learning Focus</th>
-                      <th>Experience</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {tableRows.map(([area, learningFocus, experience]) => (
-                      <tr key={area}>
-                        <td>{area}</td>
-                        <td>{learningFocus}</td>
-                        <td>{experience}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <Link className="btn-submit" to="/admission">
-                Book a Tour
-              </Link>
+            {/* Image */}
+            <div className="overflow-hidden">
+              <img
+                src={introImage}
+                alt={introImageAlt}
+                className="block h-full max-h-[420px] w-full object-cover"
+              />
             </div>
           </div>
         </div>
       </section>
 
-      <section className="program-activity-section">
+      {/* Curriculum */}
+      <section className="subpage-section pt-0">
         <div className="wrap">
-          <div className="program-activity-head">
-            <h2 id={`${title.toLowerCase().replaceAll(' ', '-')}-activity-title`}>
-              A day shaped around purposeful learning.
-            </h2>
+          <div className="subpage-body max-w-none">
+            <h2>{curriculumTitle}</h2>
 
-            <p>
-              Eiusmod proident laborum curae nulla vestibulum gravida amet praesent, do dolor
-              eleifend mollit.
-            </p>
-          </div>
-
-          <div className="program-activity-grid">
-            {activities.map((activity) => (
-              <article className="program-activity-card" key={activity.title}>
-                <img src={activity.image} alt={activity.title} />
-
-                <h3>{activity.title}</h3>
-              </article>
+            {curriculumDescription.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
             ))}
+
+            {/* Download */}
+            {curriculumFile && (
+              <div className="mt-6 flex justify-end">
+                <a
+                  href={curriculumFile}
+                  download
+                  className="inline-flex items-center gap-2 border border-[var(--burgundy)] px-5 py-2.5 text-sm font-medium text-[var(--burgundy)] transition-colors duration-200 hover:bg-[var(--burgundy)] hover:text-white"
+                >
+                  <Download size={16} strokeWidth={1.8} />
+                  Download {curriculumLabel ?? 'Curriculum'}
+                </a>
+              </div>
+            )}
+
+            {/* Divider */}
+            <div className="mt-8 border-t border-gray-300" />
           </div>
         </div>
       </section>
+
+      {/* Learning sections */}
+      <section className="subpage-section pt-0">
+        <div className="wrap">
+          <div className="space-y-14">
+            {sections.map((section) => {
+              const imageRight = section.imagePosition !== 'left';
+
+              return (
+                <article
+                  key={section.title}
+                  className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12"
+                >
+                  {/* Text */}
+                  <div
+                    className={['subpage-body', imageRight ? 'lg:order-1' : 'lg:order-2'].join(' ')}
+                  >
+                    <h2>{section.title}</h2>
+
+                    <p>{section.text}</p>
+                  </div>
+
+                  {/* Image */}
+                  <div
+                    className={['overflow-hidden', imageRight ? 'lg:order-2' : 'lg:order-1'].join(
+                      ' ',
+                    )}
+                  >
+                    <img
+                      src={section.image}
+                      alt={section.imageAlt}
+                      className="block aspect-[4/3] w-full object-cover"
+                    />
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Closing */}
+      {closingText && (
+        <section className="subpage-section pt-0">
+          <div className="wrap">
+            <div className="mx-auto max-w-4xl border-t border-black/10 pt-8 text-center">
+              <p className="text-lg leading-8 text-[var(--charcoal)]">{closingText}</p>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* CTA */}
+      <AdmissionsCta
+        headline="Ready to begin your journey at MWS?"
+        primary={{
+          label: 'Start Your Application',
+          to: '/admission',
+        }}
+        secondary={{
+          label: 'Visit Our Campus',
+          to: '/contact',
+        }}
+      />
     </main>
   );
 }

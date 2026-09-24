@@ -604,10 +604,15 @@ h3 {
   opacity: 0.5;
 }
 
-/* Base Content Container */
 .subpage-section {
-  padding: 100px 0;
+  padding: 72px 0;
   position: relative;
+}
+
+@media (max-width: 768px) {
+  .subpage-section {
+    padding: 48px 0;
+  }
 }
 
 .subpage-grid-2 {

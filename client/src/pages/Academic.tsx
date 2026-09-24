@@ -1,17 +1,10 @@
 import { Link } from 'react-router-dom';
+
 import ProgramCards from '../components/ui/ProgramAcademic';
 import SupPageHeroAcademic from '@/components/ui/SupPageHeroAcademic';
 import { asset } from '../data/site';
 import ContentBreadcrumb from '@/components/ui/ContentBreadcrumb';
-
-const pillars = [
-  ['Learning Design', 'Inquiry blocks, guided workshops, and studio time.'],
-  ['Assessment', 'Frequent feedback that helps students understand their next step.'],
-  ['Academic Support', 'Small group guidance for language, numeracy, and confidence.'],
-  ['Student Development', 'Leadership, wellbeing, service, and social-emotional learning.'],
-  ['Pathways', 'A coherent journey from early years through secondary readiness.'],
-  ['Community', 'Parents, teachers, and students working from one shared language.'],
-];
+import AdmissionsCta from '@/components/layout/AdmissionsCta';
 
 export default function Academic() {
   return (
@@ -20,116 +13,104 @@ export default function Academic() {
         image={asset('DSC09500.jpg')}
         imageAlt="MWS academic learning spaces"
         title="Academic"
-        description="Hidup Jokowi"
+        description="A connected learning journey that helps students build strong foundations, explore their interests, and grow into confident independent learners."
       />
 
-      <ContentBreadcrumb
-        items={[
-          { label: 'Home', path: '/' },
-          { label: 'Academic', path: '/academic' },
-        ]}
-      />
+      <ContentBreadcrumb items={[{ label: 'Home', path: '/' }, { label: 'Academic' }]} />
 
-      <section className="subpage-section" id="academic-overview">
-        <div className="wrap">
-          <div className="subpage-grid-2">
-            <div className="subpage-body">
-              <p className="subpage-intro">
-                A connected academic pathway that helps learners build strong foundations, discover
-                interests, and practice responsible independence.
+      {/* Introduction */}
+      <section className="subpage-section pt-0">
+        <div className="wrap space-y-6">
+          {/* Full width */}
+          <div className="w-full border-y border-black/10 py-10 md:py-14">
+            <h2 className="max-w-4xl text-3xl font-medium leading-tight md:text-5xl">
+              Learning should grow with the learner.
+            </h2>
+          </div>
+
+          {/* Half width */}
+          <div className="w-full border-b border-black/10 pb-8 md:w-1/2">
+            <p className="text-lg leading-8 text-[var(--charcoal-muted)]">
+              At Millennia World School, students build strong academic foundations while gradually
+              developing the confidence and independence to take ownership of their learning.
+            </p>
+
+            <Link
+              to="#academic-programs"
+              className="mt-6 inline-flex items-center gap-3 text-sm font-medium text-[var(--burgundy)] transition-colors hover:text-[var(--charcoal)]"
+            >
+              Explore our programs
+              <span aria-hidden="true">→</span>
+            </Link>
+          </div>
+
+          {/* Two columns */}
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="border-t border-black/10 pt-6">
+              <h3 className="mb-4 text-2xl font-medium">Learning through inquiry</h3>
+
+              <p className="max-w-xl leading-7 text-[var(--charcoal-muted)]">
+                Students are encouraged to ask questions, explore ideas, collaborate with others,
+                and connect their learning with experiences beyond the classroom.
               </p>
-              <h2>Learning That Grows With Each Child</h2>
-              <p>
-                Aliquip irure proident laborum curae nulla vestibulum gravida amet praesent.
-                Students move through routines that balance explicit teaching, inquiry,
-                collaboration, reflection, and meaningful application.
-              </p>
-              <p>
-                The academic program is ready for future CMS-backed content: program details,
-                calendars, and curriculum notes are kept as structured page data rather than hidden
-                inside layout code.
-              </p>
-              <div style={{ display: 'flex', gap: 14, marginTop: 30 }}>
-                <Link className="btn-submit" style={{ width: 'auto' }} to="/kurikulum">
-                  View Curriculum
-                </Link>
-                <Link className="btn-submit" style={{ width: 'auto' }} to="/school-calendar">
-                  School Calendar
-                </Link>
-              </div>
             </div>
-            <div className="subpage-body">
-              <h2>Academic Rhythm</h2>
-              <ul className="premium-list">
-                <li className="premium-list-item">
-                  <div className="premium-list-title">Inquiry and Foundations</div>
-                  <p>Lessons invite curiosity while keeping essential skills visible.</p>
-                </li>
-                <li className="premium-list-item">
-                  <div className="premium-list-title">Documentation</div>
-                  <p>Teachers collect learning evidence and share progress clearly.</p>
-                </li>
-                <li className="premium-list-item">
-                  <div className="premium-list-title">Community Context</div>
-                  <p>Projects connect classroom learning with life beyond campus.</p>
-                </li>
-              </ul>
+
+            <div className="overflow-hidden">
+              <img
+                src={asset('_DSC7101.jpg')}
+                alt="MWS students learning together"
+                className="block aspect-[4/3] w-full object-cover"
+              />
             </div>
           </div>
         </div>
       </section>
 
+      {/* Programs */}
       <ProgramCards />
 
-      <section className="subpage-section" id="academic-ecosystem">
+      {/* Learning Experience */}
+      <section className="subpage-section">
         <div className="wrap">
-          <div className="acad-pillar-grid">
-            {pillars.map(([title, text], index) => (
-              <article
-                key={title}
-                className={`acad-pillar ${
-                  ['ac-navy', 'ac-navy', 'ac-sage', 'ac-gold', 'ac-rose', 'ac-burgundy'][index]
-                }`}
-              >
-                <span className="acad-pillar-tag">0{index + 1}</span>
-                <h3>{title}</h3>
-                <p>{text}</p>
-              </article>
-            ))}
+          <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+            <div className="overflow-hidden">
+              <img
+                src={asset('_DSC7101.jpg')}
+                alt="MWS students learning together"
+                className="block aspect-[4/3] w-full object-cover"
+              />
+            </div>
+
+            <div className="subpage-body max-w-xl">
+              <h2>From guided learning to greater independence.</h2>
+
+              <p>
+                Our classrooms give students opportunities to learn through direct instruction,
+                inquiry, discussion, projects, and collaboration. Teachers guide students closely
+                while gradually giving them more responsibility for their ideas, decisions, and
+                progress.
+              </p>
+
+              <p>
+                This balance allows students to develop strong academic foundations while also
+                becoming thoughtful, curious, and responsible learners.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="subpage-section">
-        <div className="wrap">
-          <div className="acad-pathway">
-            <div className="acad-pathway-item">
-              <span className="acad-pathway-accent" />
-              <h3>Kindergarten</h3>
-              <p className="acad-pathway-age">Age 2 - 6</p>
-              <Link className="text-link" to="/academic/kindergarten">
-                Learn More
-              </Link>
-            </div>
-            <div className="acad-pathway-item">
-              <span className="acad-pathway-accent" />
-              <h3>Elementary</h3>
-              <p className="acad-pathway-age">Age 6 - 12</p>
-              <Link className="text-link" to="/academic/elementary">
-                Learn More
-              </Link>
-            </div>
-            <div className="acad-pathway-item">
-              <span className="acad-pathway-accent" />
-              <h3>High School</h3>
-              <p className="acad-pathway-age">Age 12 - 15</p>
-              <Link className="text-link" to="/academic/high-school">
-                Learn More
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      <AdmissionsCta
+        headline="Ready to begin your journey at MWS?"
+        primary={{
+          label: 'Start Your Application',
+          to: '/admission',
+        }}
+        secondary={{
+          label: 'Visit Our Campus',
+          to: '/contact',
+        }}
+      />
     </main>
   );
 }
