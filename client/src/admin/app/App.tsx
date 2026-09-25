@@ -13,6 +13,7 @@ import { useAuth } from '@/admin/auth/useAuth';
 import AppShell from '@/admin/components/layout/AppShell';
 import { hasCmsPermission } from '@/admin/types/auth';
 import AdmissionsPage from '@/admin/features/admissions/AdmissionsPage';
+import AcademicLevelEditorPage from '@/admin/features/academic/AcademicLevelEditorPage';
 import ContactPageEditor from '@/admin/features/contact/ContactPageEditor';
 import CommunityStoriesPage from '@/admin/features/community-stories/CommunityStoriesPage';
 import HeroSlidesPage from '@/admin/features/home/HeroSlidesPage';
@@ -22,12 +23,9 @@ import AffiliationsPage from '@/admin/features/placeholders/AffiliationsPage';
 import AuditLogsPage from '@/admin/features/placeholders/AuditLogsPage';
 import CampusTourPage from '@/admin/features/placeholders/CampusTourPage';
 import CurriculumPage from '@/admin/features/placeholders/CurriculumPage';
-import ElementaryPage from '@/admin/features/placeholders/ElementaryPage';
 import GalleryDetailPage from '@/admin/features/gallery/GalleryDetailPage';
 import GalleryListPage from '@/admin/features/gallery/GalleryListPage';
 import HelpPage from '@/admin/features/placeholders/HelpPage';
-import JuniorHighPage from '@/admin/features/placeholders/JuniorHighPage';
-import KindergartenPage from '@/admin/features/placeholders/KindergartenPage';
 import OurSchoolPage from '@/admin/features/our-school/OurSchoolPage';
 import PermissionsPage from '@/admin/features/placeholders/PermissionsPage';
 import CmsUsersPage from '@/admin/pages/CmsUsersPage';
@@ -433,7 +431,7 @@ export default function AdminApp() {
           element={
             <RequireAuth>
               <RequireContentPermission>
-                <KindergartenPage />
+                <AcademicLevelEditorPage />
               </RequireContentPermission>
             </RequireAuth>
           }
@@ -443,17 +441,17 @@ export default function AdminApp() {
           element={
             <RequireAuth>
               <RequireContentPermission>
-                <ElementaryPage />
+                <AcademicLevelEditorPage />
               </RequireContentPermission>
             </RequireAuth>
           }
         />
         <Route
-          path="academic/junior-high"
+          path="academic/high-school"
           element={
             <RequireAuth>
               <RequireContentPermission>
-                <JuniorHighPage />
+                <AcademicLevelEditorPage />
               </RequireContentPermission>
             </RequireAuth>
           }

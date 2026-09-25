@@ -48,6 +48,30 @@ export async function apiRequest<T>(
   return payload as T;
 }
 
+export function publicAssetUrl(path: string | null | undefined, fallback = "") {
+  if (!path) return fallback;
+  return path.startsWith("/api/") ? `${env.apiBaseUrl}${path}` : path;
+}
+
+export function normalizePublicAssetUrls<T>(value: T): T {
+  if (typeof value === "string") {
+    return publicAssetUrl(value) as T;
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => normalizePublicAssetUrls(item)) as T;
+  }
+
+  if (!value || typeof value !== "object") return value;
+
+  return Object.fromEntries(
+    Object.entries(value).map(([key, item]) => [
+      key,
+      normalizePublicAssetUrls(item),
+    ]),
+  ) as T;
+}
+
 async function readPayload(response: Response) {
   const contentType = response.headers.get("content-type") || "";
   if (contentType.includes("application/json")) {

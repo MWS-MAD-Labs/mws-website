@@ -57,7 +57,7 @@ const mapSrc =
 
 export const defaultContactPageContent: ContactPageContent = {
   hero: {
-    title: "Contact Us",
+    title: "Discover more what MWS has to offer!",
     image: asset("DSC05350.jpg"),
     imageAlt: "MWS Main Office",
   },
@@ -83,7 +83,7 @@ export const defaultContactPageContent: ContactPageContent = {
     ],
   },
   directContacts: {
-    title: "Direct Contacts",
+    title: "Get in Touch",
     heading: "Administration & Admission:",
     phone: "+62 21-7463-3333",
     whatsapp: "+62 812-1111-2222",
@@ -101,7 +101,7 @@ export const defaultContactPageContent: ContactPageContent = {
     ],
   },
   map: {
-    title: "Our Campus Location",
+    title: "Find Us",
     src: mapSrc,
     titleAttr: "Millennia World School location map",
   },

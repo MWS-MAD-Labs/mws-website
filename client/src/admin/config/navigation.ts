@@ -1,16 +1,12 @@
 import {
   BookOpen,
-  CircleHelp,
   Files,
-  Folder,
-  Handshake,
   Images,
   LayoutDashboard,
   LucideHome,
   MessageSquare,
   Newspaper,
   School,
-  ShieldCheck,
   Tags,
   Users,
   type LucideIcon,
@@ -27,193 +23,140 @@ export type MenuItem = {
   children?: MenuItem[];
 };
 
-const menuItems: MenuItem[] = [
-  {
-    label: 'Dashboard',
-    href: '/admin',
-    Icon: LayoutDashboard,
-    enabled: true,
-    requiredPermission: 'dashboard:read',
-  },
+export type MenuSection = {
+  label: string;
+  items: MenuItem[];
+};
 
+export const menuSections: MenuSection[] = [
   {
-    label: 'Website Pages',
-    Icon: Files,
-    enabled: true,
-    children: [
+    label: "Dashboard",
+    items: [
       {
-        label: 'Home Hero',
-        href: '/admin/hero-slides',
+        label: "Dashboard",
+        href: "/admin",
+        Icon: LayoutDashboard,
+        enabled: true,
+        requiredPermission: "dashboard:read",
+      },
+    ],
+  },
+  {
+    label: "Content",
+    items: [
+      {
+        label: "Home Hero",
+        href: "/admin/hero-slides",
         Icon: LucideHome,
         enabled: true,
-        requiredPermission: 'content:manage',
+        requiredPermission: "content:manage",
       },
-
       {
-        label: 'Admissions',
-        href: '/admin/programs/admissions',
+        label: "Admissions",
+        href: "/admin/programs/admissions",
         Icon: Files,
         enabled: true,
-        requiredPermission: 'content:manage',
+        requiredPermission: "content:manage",
       },
-
       {
-        label: 'Our School',
-        href: '/admin/our-school',
+        label: "Our School",
+        href: "/admin/our-school",
         Icon: School,
         enabled: true,
-        requiredPermission: 'content:manage',
+        requiredPermission: "content:manage",
       },
-
       {
-        label: 'Community Stories',
-        href: '/admin/community-stories',
+        label: "Community Stories",
+        href: "/admin/community-stories",
         Icon: Images,
         enabled: true,
-        requiredPermission: 'content:manage',
+        requiredPermission: "content:manage",
       },
-
       {
-        label: 'Contact',
-        href: '/admin/contact',
+        label: "Contact Page",
+        href: "/admin/contact",
         Icon: MessageSquare,
         enabled: true,
-        requiredPermission: 'content:manage',
+        requiredPermission: "content:manage",
       },
     ],
   },
-
   {
-    label: 'Academic Pages',
-    Icon: BookOpen,
-    enabled: true,
-    requiredPermission: 'content:manage',
-    children: [
+    label: "Academic",
+    items: [
       {
-        label: 'Kindergarten',
-        href: '/admin/academic/kindergarten',
+        label: "Kindergarten",
+        href: "/admin/academic/kindergarten",
         Icon: School,
         enabled: true,
-        requiredPermission: 'content:manage',
+        requiredPermission: "content:manage",
       },
       {
-        label: 'Elementary',
-        href: '/admin/academic/elementary',
+        label: "Elementary",
+        href: "/admin/academic/elementary",
         Icon: School,
         enabled: true,
-        requiredPermission: 'content:manage',
+        requiredPermission: "content:manage",
       },
       {
-        label: 'Junior High',
-        href: '/admin/academic/junior-high',
-        Icon: School,
-        enabled: true,
-        requiredPermission: 'content:manage',
-      },
-    ],
-  },
-
-  {
-    label: 'Program Content',
-    Icon: BookOpen,
-    enabled: true,
-    requiredPermission: 'content:manage',
-    children: [
-      {
-        label: 'Campus Tour',
-        href: '/admin/programs/campus-tour',
-        Icon: School,
-        enabled: true,
-        requiredPermission: 'content:manage',
-      },
-      {
-        label: 'Curriculum',
-        href: '/admin/programs/curriculum',
+        label: "High School",
+        href: "/admin/academic/high-school",
         Icon: BookOpen,
         enabled: true,
-        requiredPermission: 'content:manage',
-      },
-      {
-        label: 'Affiliations',
-        href: '/admin/programs/affiliations',
-        Icon: Handshake,
-        enabled: true,
-        requiredPermission: 'content:manage',
+        requiredPermission: "content:manage",
       },
     ],
   },
-
   {
-    label: 'News',
-    Icon: Newspaper,
-    enabled: true,
-    requiredPermission: 'content:manage',
-    children: [
+    label: "News",
+    items: [
       {
-        label: 'Posts',
-        href: '/admin/news',
+        label: "Posts",
+        href: "/admin/news",
         Icon: Newspaper,
         enabled: true,
-        requiredPermission: 'content:manage',
+        requiredPermission: "content:manage",
       },
       {
-        label: 'Categories',
-        href: '/admin/news/categories',
-        Icon: Folder,
-        enabled: true,
-        requiredPermission: 'content:manage',
-      },
-      {
-        label: 'Tags',
-        href: '/admin/news/tags',
-        Icon: Tags,
-        enabled: true,
-        requiredPermission: 'content:manage',
-      },
-    ],
-  },
-  {
-    label: 'Gallery Library',
-    href: '/admin/gallery',
-    Icon: Images,
-    enabled: true,
-    requiredPermission: 'content:manage',
-  },
-
-  {
-    label: 'Administration',
-    Icon: ShieldCheck,
-    enabled: true,
-    children: [
-      {
-        label: 'CMS Users',
-        href: '/admin/users',
-        Icon: Users,
-        enabled: true,
-        requiredPermission: 'users:manage',
-      },
-      {
-        label: 'Roles & Permissions',
-        href: '/admin/permissions',
-        Icon: ShieldCheck,
-        enabled: true,
-        requiredPermission: 'users:manage',
-      },
-      {
-        label: 'Audit Logs',
-        href: '/admin/audit-logs',
+        label: "Categories",
+        href: "/admin/news/categories",
         Icon: Files,
         enabled: true,
+        requiredPermission: "content:manage",
+      },
+      {
+        label: "Tags",
+        href: "/admin/news/tags",
+        Icon: Tags,
+        enabled: true,
+        requiredPermission: "content:manage",
       },
     ],
   },
-
   {
-    label: 'Help & Docs',
-    href: '/admin/help',
-    Icon: CircleHelp,
-    enabled: true,
+    label: "Media",
+    items: [
+      {
+        label: "Gallery Library",
+        href: "/admin/gallery",
+        Icon: Images,
+        enabled: true,
+        requiredPermission: "content:manage",
+      },
+    ],
+  },
+  {
+    label: "Administration",
+    items: [
+      {
+        label: "CMS Users",
+        href: "/admin/users",
+        Icon: Users,
+        enabled: true,
+        requiredPermission: "users:manage",
+      },
+    ],
   },
 ];
 
-export default menuItems;
+export default menuSections;

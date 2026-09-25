@@ -1,8 +1,9 @@
 import { afterEach, describe, expect, it, mock, spyOn } from "bun:test";
-import type { CmsRole, CmsUser } from "@prisma/client";
+import type { CmsRole, CmsUser, CmsUserInvitation } from "@prisma/client";
 import { clearMadLabsUnitIdCacheForTest } from "../lib/admin-access";
 import {
   CmsUserRepository,
+  type CmsInvitationWithRelations,
   type CmsUserWithRole,
 } from "../repositories/cms-user-repository";
 import { CmsAuthService } from "../services/cms-auth-service";
@@ -41,10 +42,13 @@ function cmsUser(overrides: Partial<CmsUser> = {}): CmsUser {
   return {
     id: "cms-user-1",
     centralUserId: testUser.id,
+    email: testUser.email,
     name: testUser.full_name,
     unitId: TEST_MAD_LABS_UNIT_ID,
     cmsRoleId: "role-super-admin",
     isActive: true,
+    lastCentralSyncedAt: null,
+    deactivatedAt: null,
     createdAt: now,
     updatedAt: now,
     ...overrides,
@@ -59,6 +63,33 @@ function cmsUserWithRole(
   return {
     ...cmsUser({ cmsRoleId: userRole.id, ...userOverrides }),
     role: userRole,
+  };
+}
+
+function invitation(
+  overrides: Partial<CmsUserInvitation> = {},
+  roleOverrides: Partial<CmsRole> = {},
+): CmsInvitationWithRelations {
+  const now = new Date("2026-01-01T00:00:00.000Z");
+  const invitationRole = role({ id: "role-admin", name: "ADMIN", ...roleOverrides });
+  return {
+    id: "invitation-1",
+    email: testUser.email,
+    centralUserId: null,
+    name: null,
+    unitId: null,
+    cmsRoleId: invitationRole.id,
+    status: "PENDING",
+    invitedById: null,
+    acceptedUserId: null,
+    expiresAt: null,
+    acceptedAt: null,
+    createdAt: now,
+    updatedAt: now,
+    role: invitationRole,
+    invitedBy: null,
+    acceptedUser: null,
+    ...overrides,
   };
 }
 
@@ -90,6 +121,8 @@ afterEach(() => {
   mock.restore();
   clearMadLabsUnitIdCacheForTest();
   global.fetch = originalFetch;
+  delete process.env.CMS_BOOTSTRAP_SUPER_ADMIN_EMAILS;
+  delete process.env.CMS_BOOTSTRAP_SUPER_ADMIN_CENTRAL_IDS;
 });
 
 describe("CmsAuthService", () => {
@@ -126,10 +159,78 @@ describe("CmsAuthService", () => {
     expect(createSpy).not.toHaveBeenCalled();
   });
 
-  it("provisions a new active MAD Labs Central user as SUPER_ADMIN", async () => {
+  it("rejects a new active MAD Labs Central user without invitation or bootstrap policy", async () => {
+    mockCentralMadLabsDirectory();
+    spyOn(CmsUserRepository, "findByCentralUserId").mockResolvedValue(null);
+    spyOn(CmsUserRepository, "findByEmail").mockResolvedValue(null);
+    spyOn(CmsUserRepository, "findPendingInvitationForIdentity").mockResolvedValue(
+      null,
+    );
+    const roleSpy = spyOn(CmsUserRepository, "findRoleByName");
+    const createSpy = spyOn(CmsUserRepository, "create");
+
+    await expect(
+      CmsAuthService.createSessionUserForCentralIdentity(centralEmployee()),
+    ).rejects.toThrow("This account does not have CMS access.");
+
+    expect(roleSpy).not.toHaveBeenCalled();
+    expect(createSpy).not.toHaveBeenCalled();
+  });
+
+  it("accepts a pending ADMIN invitation for a new active Central user", async () => {
+    const pendingInvitation = invitation();
+    const created = cmsUser({
+      id: "cms-user-invited",
+      cmsRoleId: pendingInvitation.cmsRoleId,
+    });
+    spyOn(CmsUserRepository, "findByCentralUserId").mockResolvedValue(null);
+    spyOn(CmsUserRepository, "findByEmail").mockResolvedValue(null);
+    spyOn(CmsUserRepository, "findPendingInvitationForIdentity").mockResolvedValue(
+      pendingInvitation,
+    );
+    const createSpy = spyOn(CmsUserRepository, "create").mockResolvedValue(created);
+    const updateInvitationSpy = spyOn(
+      CmsUserRepository,
+      "updateInvitation",
+    ).mockResolvedValue({
+      ...pendingInvitation,
+      status: "ACCEPTED",
+      acceptedUserId: created.id,
+      acceptedAt: new Date("2026-01-01T00:00:00.000Z"),
+    });
+
+    const user = await CmsAuthService.createSessionUserForCentralIdentity(
+      centralEmployee(),
+    );
+
+    expect(createSpy).toHaveBeenCalledWith({
+      centralUserId: testUser.id,
+      email: testUser.email,
+      name: testUser.full_name,
+      unitId: TEST_MAD_LABS_UNIT_ID,
+      cmsRoleId: pendingInvitation.cmsRoleId,
+      isActive: true,
+      lastCentralSyncedAt: expect.any(Date),
+    });
+    expect(updateInvitationSpy).toHaveBeenCalledWith(
+      pendingInvitation.id,
+      expect.objectContaining({
+        status: "ACCEPTED",
+        acceptedUserId: created.id,
+      }),
+    );
+    expect(user.role.name).toBe("ADMIN");
+  });
+
+  it("bootstraps an explicitly allowed active MAD Labs Central user as SUPER_ADMIN", async () => {
+    process.env.CMS_BOOTSTRAP_SUPER_ADMIN_EMAILS = testUser.email;
     mockCentralMadLabsDirectory();
     const superAdminRole = role();
     spyOn(CmsUserRepository, "findByCentralUserId").mockResolvedValue(null);
+    spyOn(CmsUserRepository, "findByEmail").mockResolvedValue(null);
+    spyOn(CmsUserRepository, "findPendingInvitationForIdentity").mockResolvedValue(
+      null,
+    );
     const roleSpy = spyOn(CmsUserRepository, "findRoleByName").mockResolvedValue(
       superAdminRole,
     );
@@ -144,10 +245,12 @@ describe("CmsAuthService", () => {
     expect(roleSpy).toHaveBeenCalledWith("SUPER_ADMIN");
     expect(createSpy).toHaveBeenCalledWith({
       centralUserId: testUser.id,
+      email: testUser.email,
       name: testUser.full_name,
       unitId: TEST_MAD_LABS_UNIT_ID,
       cmsRoleId: superAdminRole.id,
       isActive: true,
+      lastCentralSyncedAt: expect.any(Date),
     });
     expect(user.role.name).toBe("SUPER_ADMIN");
     expect(user.role.permissions).toEqual(["*"]);
@@ -156,6 +259,10 @@ describe("CmsAuthService", () => {
   it("rejects a new active non-MAD-Labs Central user without creating CMS user", async () => {
     mockCentralMadLabsDirectory();
     spyOn(CmsUserRepository, "findByCentralUserId").mockResolvedValue(null);
+    spyOn(CmsUserRepository, "findByEmail").mockResolvedValue(null);
+    spyOn(CmsUserRepository, "findPendingInvitationForIdentity").mockResolvedValue(
+      null,
+    );
     const roleSpy = spyOn(CmsUserRepository, "findRoleByName");
     const createSpy = spyOn(CmsUserRepository, "create");
 
@@ -196,9 +303,14 @@ describe("CmsAuthService", () => {
     expect(createSpy).not.toHaveBeenCalled();
   });
 
-  it("fails clearly when SUPER_ADMIN role is unavailable for MAD Labs provisioning", async () => {
+  it("fails clearly when SUPER_ADMIN role is unavailable for bootstrap", async () => {
+    process.env.CMS_BOOTSTRAP_SUPER_ADMIN_EMAILS = testUser.email;
     mockCentralMadLabsDirectory();
     spyOn(CmsUserRepository, "findByCentralUserId").mockResolvedValue(null);
+    spyOn(CmsUserRepository, "findByEmail").mockResolvedValue(null);
+    spyOn(CmsUserRepository, "findPendingInvitationForIdentity").mockResolvedValue(
+      null,
+    );
     spyOn(CmsUserRepository, "findRoleByName").mockResolvedValue(null);
     const createSpy = spyOn(CmsUserRepository, "create");
 

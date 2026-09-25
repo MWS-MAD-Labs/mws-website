@@ -8,14 +8,14 @@ const galleryInclude = {
   videos: {
     orderBy: [{ sortOrder: "asc" as const }, { createdAt: "desc" as const }],
   },
-};
+} as const satisfies Prisma.GalleryInclude;
 
 const ourSchoolInclude = {
   gallery: {
     include: galleryInclude,
   },
   featuredImage: true,
-};
+} as const satisfies Prisma.OurSchoolInclude;
 
 export type OurSchoolWithGallery = Prisma.OurSchoolGetPayload<{
   include: typeof ourSchoolInclude;
@@ -24,6 +24,7 @@ export type OurSchoolWithGallery = Prisma.OurSchoolGetPayload<{
 export type OurSchoolCreateData = {
   title: string;
   description?: string | null;
+  content?: Prisma.InputJsonValue | null;
   galleryId?: string | null;
   featuredImageId?: string | null;
 };
@@ -35,6 +36,14 @@ export class OurSchoolRepository {
     return getPrisma().ourSchool.findMany({
       include: ourSchoolInclude,
       orderBy: { updatedAt: "desc" },
+    });
+  }
+
+  static async listRecent(limit = 20): Promise<OurSchoolWithGallery[]> {
+    return getPrisma().ourSchool.findMany({
+      include: ourSchoolInclude,
+      orderBy: { updatedAt: "desc" },
+      take: limit,
     });
   }
 
@@ -51,7 +60,7 @@ export class OurSchoolRepository {
 
   static async create(data: OurSchoolCreateData): Promise<OurSchoolWithGallery> {
     return getPrisma().ourSchool.create({
-      data,
+      data: data as Prisma.OurSchoolUncheckedCreateInput,
       include: ourSchoolInclude,
     });
   }
@@ -62,7 +71,7 @@ export class OurSchoolRepository {
   ): Promise<OurSchoolWithGallery> {
     return getPrisma().ourSchool.update({
       where: { id },
-      data,
+      data: data as Prisma.OurSchoolUncheckedUpdateInput,
       include: ourSchoolInclude,
     });
   }

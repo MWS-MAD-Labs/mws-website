@@ -51,23 +51,53 @@ model CmsRole {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  users CmsUser[]
+  users       CmsUser[]
+  invitations CmsUserInvitation[]
 }
 
 model CmsUser {
   id            String   @id @default(uuid()) @db.Uuid
   centralUserId String   @unique
+  email         String?  @unique @db.VarChar(255)
   name          String   @db.VarChar(255)
   unitId        String
   cmsRoleId     String   @db.Uuid
   isActive      Boolean  @default(true)
+  lastCentralSyncedAt DateTime?
+  deactivatedAt DateTime?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  role      CmsRole    @relation(fields: [cmsRoleId], references: [id])
-  auditLogs AuditLog[]
-  cmsPages  CmsPage[]
-  newsPosts NewsPost[]
+  role                CmsRole             @relation(fields: [cmsRoleId], references: [id])
+  auditLogs           AuditLog[]
+  cmsPages            CmsPage[]
+  newsPosts           NewsPost[]
+  sentInvitations     CmsUserInvitation[] @relation("CmsInvitationInviter")
+  acceptedInvitations CmsUserInvitation[] @relation("CmsInvitationAcceptedUser")
+}
+
+model CmsUserInvitation {
+  id             String    @id @default(uuid()) @db.Uuid
+  email          String    @db.VarChar(255)
+  centralUserId  String?
+  name           String?   @db.VarChar(255)
+  unitId         String?
+  cmsRoleId      String    @db.Uuid
+  status         String    @default("PENDING") @db.VarChar(30)
+  invitedById    String?   @db.Uuid
+  acceptedUserId String?   @db.Uuid
+  expiresAt      DateTime?
+  acceptedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  role         CmsRole  @relation(fields: [cmsRoleId], references: [id])
+  invitedBy    CmsUser? @relation("CmsInvitationInviter", fields: [invitedById], references: [id])
+  acceptedUser CmsUser? @relation("CmsInvitationAcceptedUser", fields: [acceptedUserId], references: [id])
+
+  @@index([email])
+  @@index([centralUserId])
+  @@index([status])
 }
 
 
@@ -93,6 +123,7 @@ model Gallery {
   kindergartens Kindergarten[]
   elementaries  Elementary[]
   juniorHighs   JuniorHigh[]
+  academicLevelPages AcademicLevelPage[]
   communityStoriesPages CommunityStoriesPage[]
 }
 
@@ -220,6 +251,7 @@ model Program {
   campusTours  CampusTour[]
   curriculums  Curriculum[]
   affiliations Affiliation[]
+  academicLevelPage AcademicLevelPage?
 }
 
 model Admission {
@@ -334,6 +366,32 @@ model JuniorHigh {
   gallery  Gallery? @relation(fields: [galleryId], references: [id])
 }
 
+model AcademicLevelPage {
+  id             String    @id @default(uuid()) @db.Uuid
+  programId      String    @unique @db.Uuid
+  levelKey       String    @unique @db.VarChar(50)
+  hero           Json
+  overview       Json
+  sections       Json
+  faq            Json?
+  galleryId      String?   @db.Uuid
+  isPublished    Boolean   @default(true)
+  status         String    @default("PUBLISHED") @db.VarChar(30)
+  publishedAt    DateTime?
+  draftProgram   Json?
+  draftHero      Json?
+  draftOverview  Json?
+  draftSections  Json?
+  draftFaq       Json?
+  draftGalleryId String?   @db.Uuid
+  draftSavedAt   DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  program Program  @relation(fields: [programId], references: [id])
+  gallery Gallery? @relation(fields: [galleryId], references: [id])
+}
+
 
 
 model OurSchool {
@@ -359,6 +417,24 @@ model Contact {
   updatedAt   DateTime @updatedAt
 
   gallery Gallery? @relation(fields: [galleryId], references: [id])
+}
+
+model ContactInquiry {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @db.VarChar(255)
+  email     String   @db.VarChar(255)
+  subject   String   @db.VarChar(255)
+  category  String?  @db.VarChar(100)
+  message   String
+  status    String   @default("NEW") @db.VarChar(30)
+  source    String?  @db.VarChar(100)
+  ipAddress String?  @db.VarChar(45)
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
 }
 
 model CmsPage {

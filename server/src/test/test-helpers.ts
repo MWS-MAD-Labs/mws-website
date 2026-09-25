@@ -24,6 +24,7 @@ export function cmsSessionUser(
   return {
     id: "cms-user-1",
     centralUserId: testUser.id,
+    email: testUser.email,
     name: testUser.full_name,
     unitId: testUser.unitId || testUser.unit_id || "unit-mad-lab",
     isActive: true,

@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { adminRoute } from "../routes/admin-route";
 import { ResponseError } from "../error/response-error";
 import { signSession } from "../lib/session";
+import { clearCentralIdentityCacheForTest } from "../middleware/admin-auth-middleware";
 import * as centralClient from "../lib/central-client";
 import { CmsAuthService } from "../services/cms-auth-service";
 import { cmsSessionUser, testUser } from "./test-helpers";
@@ -14,6 +15,7 @@ beforeAll(() => {
 
 afterEach(() => {
   mock.restore();
+  clearCentralIdentityCacheForTest();
 });
 
 function buildApp() {
@@ -117,9 +119,15 @@ describe("adminRoute", () => {
     spyOn(CmsAuthService, "updateUserRole").mockResolvedValue({
       id: "cms-user-2",
       centralUserId: "emp-2",
+      email: "target@millennia21.id",
       name: "Target User",
       unitId: "unit-mad-lab",
+      unit: "MAD Lab",
       isActive: true,
+      lastCentralSyncedAt: null,
+      deactivatedAt: null,
+      createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-01-01T00:00:00.000Z"),
       role: {
         name: "ADMIN",
         label: "Admin",
@@ -140,6 +148,7 @@ describe("adminRoute", () => {
     expect(CmsAuthService.updateUserRole).toHaveBeenCalledWith(
       "cms-user-2",
       "ADMIN",
+      cmsUser.id,
     );
   });
 });

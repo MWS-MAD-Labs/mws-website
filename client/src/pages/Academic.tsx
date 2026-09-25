@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
+import { pageApi, type AcademicLevelData } from '@/api/pageApi';
 import ProgramCards from '../components/ui/ProgramAcademic';
 import SupPageHeroAcademic from '@/components/ui/SupPageHeroAcademic';
 import { asset } from '../data/site';
@@ -7,6 +9,34 @@ import ContentBreadcrumb from '@/components/ui/ContentBreadcrumb';
 import AdmissionsCta from '@/components/layout/AdmissionsCta';
 
 export default function Academic() {
+  const [levels, setLevels] = useState<AcademicLevelData[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    pageApi
+      .academicLevels()
+      .then((items) => {
+        if (!cancelled) setLevels(items);
+      })
+      .catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const programs = levels
+    .filter((level) => level.program.isActive)
+    .map((level) => ({
+      id: level.levelKey,
+      title: level.program.title,
+      age: level.program.age ?? '',
+      description: level.program.description ?? '',
+      image: level.program.image || asset('DSC04079.jpg'),
+      path: level.program.path || `/academic/${level.levelKey}`,
+    }));
+
   return (
     <main>
       <SupPageHeroAcademic
@@ -67,7 +97,7 @@ export default function Academic() {
       </section>
 
       {/* Programs */}
-      <ProgramCards />
+      <ProgramCards programs={programs.length ? programs : undefined} />
 
       {/* Learning Experience */}
       <section className="subpage-section">

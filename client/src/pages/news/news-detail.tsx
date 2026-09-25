@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { Link, useParams } from 'react-router-dom';
+import DOMPurify from 'dompurify';
 
 import { asset } from '@/data/site';
 
@@ -49,49 +50,6 @@ export default function NewsDetails() {
 
     return () => controller.abort();
   }, [slug]);
-
-  // DEBUG
-  useEffect(() => {
-    if (!post) return;
-
-    console.group('📰 NEWS DETAIL DEBUG');
-
-    console.log('Full post:', post);
-
-    console.log('Cover:', {
-      coverImage: post.coverImage,
-      coverImageAlt: post.coverImageAlt,
-      coverUrl: publicNewsImage(post.coverImage || null, asset('_DSC4760.jpg')),
-    });
-
-    console.log('Content:', {
-      raw: post.content,
-      contentText: post.content?.text,
-    });
-
-    console.log('Media:', post.media);
-
-    console.log(
-      'Image media:',
-      post.media.filter((media) => media.mediaType === 'IMAGE'),
-    );
-
-    console.table(
-      post.media.map((media) => ({
-        id: media.id,
-        type: media.mediaType,
-        url: media.url,
-        resolvedUrl: publicNewsImage(media.url, asset('DSC04079.jpg')),
-        alt: media.alt,
-        caption: media.caption,
-        sortOrder: media.sortOrder,
-      })),
-    );
-
-    console.log('Related news:', post.relatedNews);
-
-    console.groupEnd();
-  }, [post]);
 
   useEffect(() => {
     if (!post) return;
@@ -215,12 +173,12 @@ export default function NewsDetails() {
                   </figure>
 
                   {/* Content */}
-                  <div
-                    className="prose prose-gray prose-headings:font-sans prose-headings:font-semibold prose-headings:text-[#241718] prose-p:font-sans prose-p:leading-[1.8] prose-p:text-[#241718] prose-strong:text-[#241718] prose-a:text-[#7e1518] prose-a:break-words prose-blockquote:border-l-[#7e1518] prose-blockquote:text-[#625759] prose-ul:text-[#241718] prose-ol:text-[#241718] prose-li:text-[#241718] prose-img:mx-auto prose-img:max-w-full prose-hr:border-black/10 prose-table:block prose-table:max-w-full prose-table:overflow-x-auto prose-video:max-w-full prose-iframe:max-w-full mt-10 max-w-none break-words [&_a]:[overflow-wrap:anywhere] [&_code]:break-words [&_code]:[overflow-wrap:anywhere] [&_pre]:max-w-full [&_pre]:overflow-x-auto"
-                    dangerouslySetInnerHTML={{
-                      __html: post.content?.text || '',
-                    }}
-                  />
+	                  <div
+	                    className="prose prose-gray prose-headings:font-sans prose-headings:font-semibold prose-headings:text-[#241718] prose-p:font-sans prose-p:leading-[1.8] prose-p:text-[#241718] prose-strong:text-[#241718] prose-a:text-[#7e1518] prose-a:break-words prose-blockquote:border-l-[#7e1518] prose-blockquote:text-[#625759] prose-ul:text-[#241718] prose-ol:text-[#241718] prose-li:text-[#241718] prose-img:mx-auto prose-img:max-w-full prose-hr:border-black/10 prose-table:block prose-table:max-w-full prose-table:overflow-x-auto prose-video:max-w-full prose-iframe:max-w-full mt-10 max-w-none break-words [&_a]:[overflow-wrap:anywhere] [&_code]:break-words [&_code]:[overflow-wrap:anywhere] [&_pre]:max-w-full [&_pre]:overflow-x-auto"
+	                    dangerouslySetInnerHTML={{
+	                      __html: DOMPurify.sanitize(post.content?.text || ''),
+	                    }}
+	                  />
 
                   {/* Additional Images */}
                   {post.media

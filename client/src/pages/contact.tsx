@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import { contactPageApi } from "@/api/contactPageApi";
 import ContactPageView from "@/features/contact/components/ContactPageView";
 import {
@@ -11,11 +11,6 @@ export default function Contact() {
   const [content, setContent] = useState<ContactPageContent>(
     defaultContactPageContent,
   );
-
-  const submitMessage = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    window.alert(content.form.successMessage);
-  };
 
   useEffect(() => {
     let cancelled = false;
@@ -36,7 +31,5 @@ export default function Contact() {
     };
   }, []);
 
-  return (
-    <ContactPageView content={content} onSubmit={submitMessage} />
-  );
+  return <ContactPageView content={content} />;
 }

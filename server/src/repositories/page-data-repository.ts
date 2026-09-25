@@ -58,10 +58,24 @@ export class PageDataRepository {
   }
 
   static async getLatestOurSchool(): Promise<OurSchoolPageRecord | null> {
-    return getPrisma().ourSchool.findFirst({
+    const records = await getPrisma().ourSchool.findMany({
       include: ourSchoolInclude,
       orderBy: { updatedAt: "desc" },
+      take: 20,
     });
+
+    return (
+      records.find((record) => {
+        const content = record.content;
+        return !(
+          content &&
+          typeof content === "object" &&
+          !Array.isArray(content) &&
+          "status" in content &&
+          content.status === "DRAFT"
+        );
+      }) ?? null
+    );
   }
 
   static async getCommunityStoriesPage(): Promise<CommunityStoriesPageRecord | null> {

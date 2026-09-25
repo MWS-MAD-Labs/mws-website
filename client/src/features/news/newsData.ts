@@ -1,5 +1,4 @@
-import { env } from '@/config/env';
-import { apiRequest } from '@/lib/api';
+import { apiRequest, publicAssetUrl } from '@/lib/api';
 
 export type PublicNewsCategory = {
   id: string;
@@ -122,9 +121,7 @@ export const newsApi = {
 };
 
 export function publicNewsImage(path: string | null, fallback: string) {
-  if (!path) return fallback;
-
-  return path.startsWith('/api/') ? `${env.apiBaseUrl}${path}` : path;
+  return publicAssetUrl(path, fallback);
 }
 
 export function formatNewsDate(value: string) {

@@ -6,6 +6,7 @@ import {
   type NewsPostWithRelations,
   type PublicNewsPostFilters,
 } from "../repositories/news-repository";
+import { sanitizeNewsContent } from "../lib/sanitize-html";
 
 const slugSchema = z
   .string()
@@ -137,7 +138,7 @@ export class PublicNewsService {
 
     return {
       ...listItem(post),
-      content: post.content,
+      content: sanitizeNewsContent(post.content),
       tags: post.postTags.map(({ tag }) => ({
         id: tag.id,
         name: tag.name,

@@ -1,124 +1,71 @@
 # MWS Website
 
-Website untuk Millennia World School (MWS). Project ini disiapkan sebagai
-implementasi frontend dan backend awal untuk landing page sekolah, dengan arah
-visual dan struktur konten mengikuti mockup berikut:
+Website dan CMS untuk Millennia World School.
 
-**Base mockup:** https://asroralva.github.io/mockup/mockup3/client/index.html
+## Stack
 
-## Gambaran Project
+- Client: React, TypeScript, Vite, Tailwind, Bun.
+- Server: Bun, Hono, Prisma, PostgreSQL, Zod.
+- Storage: MinIO/S3-compatible storage for gallery and news media.
+- Auth: Google OAuth plus Central identity lookup for CMS access.
 
-Mockup MWS menampilkan konsep landing page sekolah dengan beberapa area utama:
+## Local Development
 
-- Hero section dengan headline utama dan visual aktivitas siswa.
-- Shortcut informasi seperti admissions, campuses, academic, dan news.
-- Program pembelajaran untuk Kindergarten, Elementary, dan High School.
-- Section campus life, learning spaces, partner global, dan testimoni komunitas.
-- Widget sederhana bertema `Ask MWS AI`.
-
-README ini dipakai sebagai acuan awal agar pengembangan tetap mengikuti arah
-mockup tersebut.
-
-## Tech Stack
-
-### Client
-
-- React
-- TypeScript
-- Vite
-- ESLint
-- Bun lockfile tersedia untuk dependency management
-
-### Server
-
-- Bun
-- TypeScript
-- Hono
-- Prisma
-- PostgreSQL adapter
-- Zod
-
-> Catatan: server saat ini masih berupa bootstrap awal dan belum berisi endpoint
-> API lengkap.
-
-## Struktur Folder
-
-```txt
-.
-├── client/             # Aplikasi frontend React + Vite
-│   ├── public/         # Static assets publik
-│   └── src/            # Source code frontend
-├── server/             # Backend Bun/TypeScript
-│   ├── prisma/         # Schema dan migration Prisma
-│   └── src/            # Source code backend
-└── README.md           # Dokumentasi project
-```
-
-## Menjalankan Project
-
-Pastikan Bun sudah terpasang di komputer.
-
-### 1. Jalankan Frontend
+Start local services:
 
 ```bash
-cd client
-bun install
-bun run dev
+docker compose up -d db minio
 ```
 
-Vite biasanya akan berjalan di:
-
-```txt
-http://localhost:5173
-```
-
-### 2. Build Frontend
-
-```bash
-cd client
-bun run build
-```
-
-### 3. Lint Frontend
-
-```bash
-cd client
-bun run lint
-```
-
-### 4. Jalankan Server
+Run the server:
 
 ```bash
 cd server
 bun install
 cp .env.example .env
+bun run db:generate
+bun run db:migrate:dev
 bun run dev
 ```
 
-Backend default berjalan di:
+Run the client:
 
-```txt
-http://localhost:4004
+```bash
+cd client
+bun install
+bun run dev
 ```
 
-## Arah Implementasi dari Mockup
+Default URLs:
 
-Saat mengembangkan UI, gunakan mockup sebagai referensi untuk:
+- Client: `http://localhost:5173`
+- Server: `http://localhost:4004`
+- Health check: `http://localhost:4004/health`
 
-- Layout landing page MWS.
-- Urutan section halaman.
-- Gaya visual yang hangat, modern, dan edukatif.
-- Konten utama seputar admissions, campus, academic program, school life, dan
-  community stories.
-- Komponen interaktif seperti carousel/card navigation dan widget AI.
+## CMS
 
-Konten placeholder dari mockup boleh diganti dengan copy final MWS saat tersedia.
+CMS routes live under `/admin`. CMS login uses Google OAuth, then the server resolves the signed-in account against Central. Local CMS access is controlled by `CmsUser` and `CmsRole`.
 
-## Catatan Development
+Roles:
 
-- Frontend saat ini masih membawa beberapa asset/template bawaan Vite.
-- Backend belum terhubung ke flow frontend.
-- Jika nanti ada database, tambahkan konfigurasi environment seperti
-  `DATABASE_URL` di file `.env` lokal.
-- Jangan commit file environment, cache, atau hasil build seperti `dist/` dan
-  `node_modules/`.
+- `SUPER_ADMIN`: explicit MAD Labs CMS administrator, configured through bootstrap allowlist or existing CMS user records.
+- `ADMIN`: invited/approved CMS editor.
+
+Implemented CMS areas include News, Gallery Library, Home Hero, Admissions, Our School, Community Stories, Contact Page, Academic level pages, and CMS User Management.
+
+## Environment
+
+Use `server/.env.example` as the source of required server variables. Production must provide real values for JWT, Google OAuth, Central API, database, and MinIO settings.
+
+`docker-compose.yml` is local-only. Its default database and MinIO credentials are not production credentials.
+
+## Verification
+
+```bash
+cd server && bun run db:validate
+cd server && bun run typecheck
+cd server && bun test
+cd client && bun run typecheck
+cd client && bun run lint
+cd client && bun run build
+```

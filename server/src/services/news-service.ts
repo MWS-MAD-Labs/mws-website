@@ -1,4 +1,5 @@
 import { z, ZodError } from "zod";
+import type { Prisma } from "@prisma/client";
 import { ResponseError } from "../error/response-error";
 import {
   deleteMinioObject,
@@ -18,6 +19,7 @@ import {
   type NewsPostFilters,
   type NewsPostWithRelations,
 } from "../repositories/news-repository";
+import { sanitizeNewsContent } from "../lib/sanitize-html";
 
 type NewsStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
 
@@ -408,7 +410,7 @@ export class NewsService {
         {
           ...data,
           authorId,
-          content: data.content ?? {},
+          content: sanitizeNewsContent(data.content ?? {}) as Prisma.InputJsonValue,
           ...derivePublication(data),
         },
         tagIds,
@@ -430,7 +432,13 @@ export class NewsService {
 
     const nextData = {
       ...data,
-      ...(data.content !== undefined ? { content: data.content ?? {} } : {}),
+      ...(data.content !== undefined
+        ? {
+            content: sanitizeNewsContent(
+              data.content ?? {},
+            ) as Prisma.InputJsonValue,
+          }
+        : {}),
       ...derivePublication(data, {
         status: existing.status,
         publishedAt: existing.publishedAt,

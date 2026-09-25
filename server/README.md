@@ -1,118 +1,84 @@
 # MWS Website Backend
 
-Backend Bun + Hono untuk project MWS Website. Struktur ini disiapkan mengikuti
-pola backend MWS Hub/Central agar bisa langsung jalan dengan `bun run dev`.
+Bun + Hono backend for the MWS public site and CMS.
 
 ## Setup
 
-Install dependencies:
-
 ```bash
 bun install
-```
-
-Buat file `.env` lokal dari contoh:
-
-```bash
 cp .env.example .env
-```
-
-Isi `DATABASE_URL` sesuai database lokal saat mulai mengerjakan model/migration.
-
-## Development
-
-```bash
+bun run db:generate
+bun run db:migrate:dev
 bun run dev
 ```
 
-Default server:
+Default server: `http://localhost:4004`
 
-```txt
-http://localhost:4004
-```
+Health check: `GET /health`
 
-Health check:
+## Required Environment
 
-```txt
-http://localhost:4004/health
-```
+See `.env.example` for:
 
-## Database Commands
+- `DATABASE_URL`, `SHADOW_DATABASE_URL`
+- `JWT_SECRET`
+- `FRONTEND_ORIGIN`
+- `CENTRAL_API_BASE_URL`, `CENTRAL_API_TOKEN`
+- Google OAuth variables
+- `CMS_BOOTSTRAP_SUPER_ADMIN_EMAILS` or `CMS_BOOTSTRAP_SUPER_ADMIN_CENTRAL_IDS`
+- MinIO settings
 
-Schema Prisma sudah disiapkan di `prisma/schema.prisma`, tapi model dan
-migration sengaja belum dibuat.
+Do not use placeholder or local docker-compose credentials in production.
 
-```bash
-bun run db:validate
-bun run db:generate
-bun run db:migrate:dev
-bun run db:migrate
-bun run db:studio
-```
+## Auth and CMS Access
+
+CMS authentication uses Google OAuth for sign-in and Central for identity verification. Every CMS request validates the local session and refreshes Central identity with a short cache for content routes. User-management routes require a fresh Central lookup.
+
+CMS roles are:
+
+- `SUPER_ADMIN`: can manage CMS users.
+- `ADMIN`: can manage content.
+
+New admins must be invited or explicitly bootstrapped. MAD Labs membership alone does not create SUPER_ADMIN access.
+
+## Main APIs
+
+Public:
+
+- `GET /api/pages/home`
+- `GET /api/pages/admissions`
+- `GET /api/pages/academic`
+- `GET /api/pages/academic/:levelKey`
+- `GET /api/pages/our-school`
+- `GET /api/pages/community-stories`
+- `GET /api/pages/contact`
+- `POST /api/contact/inquiries`
+- `GET /api/news`
+- `GET /api/news/:slug`
+- `GET /api/gallery-images/:id/file`
+
+CMS:
+
+- `/admin/news`
+- `/admin/galleries`
+- `/admin/hero-slides`
+- `/admin/admissions`
+- `/admin/academic-levels`
+- `/admin/community-stories`
+- `/admin/our-school`
+- `/admin/contact-page`
+- `/admin/users`
+
+The legacy generic CRUD resource list is intentionally not exposed.
 
 ## Scripts
 
-- `bun run dev` - menjalankan server dengan hot reload.
-- `bun run start` - menjalankan server tanpa hot reload.
-- `bun run typecheck` - mengecek TypeScript.
-- `bun run test` - menjalankan test Bun.
-- `bun run db:*` - helper Prisma untuk validasi, generate, migration, dan studio.
-
-## Admin CRUD API
-
-Endpoint CRUD CMS tersedia di bawah `/admin` dan membutuhkan cookie session
-CMS. Semua response memakai JSON dengan envelope konsisten:
-
-```json
-{ "data": {} }
-```
-
-Error dikembalikan sebagai:
-
-```json
-{ "errors": "Pesan error." }
-```
-
-Resource yang tersedia:
-
-```txt
-/admin/hero-slides
-/admin/media-assets
-/admin/campuses
-/admin/academic-programs
-/admin/news-categories
-/admin/news-tags
-/admin/news-posts
-/admin/testimonials
-/admin/faq-items
-/admin/inquiries
-/admin/applications
-/admin/application-documents
-/admin/tuition-fees
-/admin/events
-/admin/cms-pages
-/admin/settings
-```
-
-Contoh cURL:
-
-```bash
-curl -X POST http://localhost:4004/admin/campuses \
-  -H "Content-Type: application/json" \
-  -H "Cookie: mws_cms_session=<token>" \
-  -d '{"name":"Main Campus","slug":"main-campus","email":"info@millennia21.id"}'
-
-curl http://localhost:4004/admin/campuses?page=1&pageSize=20 \
-  -H "Cookie: mws_cms_session=<token>"
-
-curl http://localhost:4004/admin/campuses/<uuid> \
-  -H "Cookie: mws_cms_session=<token>"
-
-curl -X PATCH http://localhost:4004/admin/campuses/<uuid> \
-  -H "Content-Type: application/json" \
-  -H "Cookie: mws_cms_session=<token>" \
-  -d '{"phone":"+62 21-7463-3333"}'
-
-curl -X DELETE http://localhost:4004/admin/campuses/<uuid> \
-  -H "Cookie: mws_cms_session=<token>"
-```
+- `bun run dev`
+- `bun run start`
+- `bun run typecheck`
+- `bun run test`
+- `bun run db:validate`
+- `bun run db:generate`
+- `bun run db:migrate:dev`
+- `bun run db:migrate`
+- `bun run db:studio`

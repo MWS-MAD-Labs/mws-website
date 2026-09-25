@@ -1,176 +1,152 @@
-import type { FormEvent } from "react";
-import SubpageHero from "@/components/ui/SubpageHero";
-import type { ContactPageContent } from "@/features/contact/contactPageData";
+import DOMPurify from 'dompurify';
+
+import type { ContactPageContent } from '@/features/contact/contactPageData';
 
 type ContactPageViewProps = {
   content: ContactPageContent;
   preview?: boolean;
-  onSubmit?: (event: FormEvent<HTMLFormElement>) => void;
 };
 
-export default function ContactPageView({
-  content,
-  onSubmit,
-  preview = false,
-}: ContactPageViewProps) {
+export default function ContactPageView({ content, preview = false }: ContactPageViewProps) {
   return (
-    <main className={preview ? "bg-white" : undefined}>
-      <SubpageHero
-        title={content.hero.title}
-        image={content.hero.image}
-        imageAlt={content.hero.imageAlt}
-        breadcrumbs={[{ label: "Home", path: "/" }, { label: "Contact" }]}
-      />
-
-      <section className="subpage-section">
+    <main className={preview ? 'bg-white' : undefined}>
+      <section className="subpage-section pt-16 md:pt-24">
         <div className="wrap">
-          <div className="subpage-grid-2">
-            <div>
-              <form className="premium-form" action="#" onSubmit={onSubmit}>
-                <h2
-                  style={{
-                    fontSize: "clamp(24px, 3vw, 32px)",
-                    marginBottom: 24,
-                    marginTop: 0,
-                  }}
-                >
-                  {content.form.title}
-                </h2>
-
-                <div className="form-group">
-                  <label htmlFor={preview ? "previewSenderName" : "senderName"}>
-                    Your Name
-                  </label>
-                  <input
-                    type="text"
-                    id={preview ? "previewSenderName" : "senderName"}
-                    className="form-control"
-                    placeholder="e.g. John Doe"
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor={preview ? "previewSenderEmail" : "senderEmail"}>
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    id={preview ? "previewSenderEmail" : "senderEmail"}
-                    className="form-control"
-                    placeholder="e.g. john@example.com"
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label
-                    htmlFor={preview ? "previewMessageSubject" : "messageSubject"}
-                  >
-                    Subject
-                  </label>
-                  <input
-                    type="text"
-                    id={preview ? "previewMessageSubject" : "messageSubject"}
-                    className="form-control"
-                    placeholder="e.g. Inquiry regarding extracurricular activities"
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label
-                    htmlFor={preview ? "previewContactCategory" : "contactCategory"}
-                  >
-                    Category
-                  </label>
-                  <select
-                    id={preview ? "previewContactCategory" : "contactCategory"}
-                    className="form-control"
-                    required
-                    defaultValue=""
-                  >
-                    <option value="" disabled>
-                      Select department...
-                    </option>
-                    {content.form.categories.map((category) => (
-                      <option key={category.value} value={category.value}>
-                        {category.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label
-                    htmlFor={preview ? "previewSenderMessage" : "senderMessage"}
-                  >
-                    Your Message
-                  </label>
-                  <textarea
-                    id={preview ? "previewSenderMessage" : "senderMessage"}
-                    className="form-control"
-                    placeholder="Please type your message in detail here..."
-                    required
-                  />
-                </div>
-                <button type="submit" className="btn-submit">
-                  Send Message
-                </button>
-              </form>
+          <div className="grid items-center gap-8 md:gap-12 lg:grid-cols-[0.9fr_1.1fr ] lg:gap-16">
+            <div className="overflow-hidden">
+              <img
+                src={content.hero.image}
+                alt={content.hero.imageAlt}
+                className="block h-[280px] w-full object-cover sm:h-[360px] lg:h-[460px]"
+              />
             </div>
 
-            <div className="subpage-body" style={{ paddingLeft: 20 }}>
-              <p className="subpage-intro">{content.intro}</p>
-              <h3 style={{ color: "var(--burgundy)" }}>
-                {content.address.title}
-              </h3>
-              <p style={{ marginBottom: 30 }}>
-                <strong>{content.address.name}</strong>
-                <br />
-                {content.address.lines.map((line, index) => (
-                  <span key={`${line}-${index}`}>
-                    {line}
-                    {index < content.address.lines.length - 1 && <br />}
-                  </span>
-                ))}
-              </p>
+            <div className="max-w-2xl">
+              <h1 className="text-3xl font-semibold leading-tight tracking-tight text-[var(--charcoal)] sm:text-4xl md:text-5xl">
+                {content.hero.title}
+              </h1>
 
-              <h3 style={{ color: "var(--burgundy)" }}>
-                {content.directContacts.title}
-              </h3>
-              <p style={{ marginBottom: 30 }}>
-                <strong>{content.directContacts.heading}</strong>
-                <br />
-                Phone: {content.directContacts.phone}
-                <br />
-                WhatsApp: {content.directContacts.whatsapp}
-                <br />
-                Email:{" "}
-                <a
-                  href={`mailto:${content.directContacts.email}`}
-                  style={{ color: "var(--burgundy)", textDecoration: "underline" }}
-                >
-                  {content.directContacts.email}
-                </a>
-              </p>
-
-              <h3 style={{ color: "var(--burgundy)" }}>
-                {content.officeHours.title}
-              </h3>
-              <ul className="premium-list" style={{ marginTop: 12 }}>
-                {content.officeHours.items.map((item, index) => (
-                  <li key={`${item.title}-${index}`} className="premium-list-item">
-                    <div className="premium-list-title">{item.title}</div>
-                    <p style={{ fontSize: 14, margin: 0 }}>{item.text}</p>
-                  </li>
-                ))}
-              </ul>
+              <div
+                className="mt-6 text-base leading-7 text-[var(--charcoal-muted)] sm:text-lg sm:leading-8"
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(content.intro || ''),
+                }}
+              />
             </div>
           </div>
+        </div>
+      </section>
 
-          <h2 style={{ margin: "60px 0 20px", textAlign: "center" }}>
-            {content.map.title}
-          </h2>
-          <div className="contact-map-wrapper">
+      {/* Contact Information */}
+      <section className="pb-14 md:pb-20">
+        <div className="wrap">
+          <div className="border-t border-[rgba(36,23,24,0.14)]">
+            <div className="border-b border-[rgba(36,23,24,0.14)] py-6">
+              <h2 className="text-2xl font-semibold tracking-tight text-[var(--charcoal)] sm:text-3xl">
+                {content.directContacts.title}
+              </h2>
+            </div>
+
+            <div className="grid divide-y divide-[rgba(36,23,24,0.12)] md:grid-cols-2 md:divide-x md:divide-y-0">
+              <div className="py-7 md:py-9 md:pr-10">
+                <h3 className="text-xl font-semibold text-[var(--charcoal)]">
+                  {content.directContacts.heading}
+                </h3>
+
+                <div className="mt-5 space-y-3 text-sm leading-7 text-[var(--charcoal-muted)]">
+                  <p>
+                    Phone:{' '}
+                    <a
+                      href={`tel:${content.directContacts.phone.replace(/[^\d+]/g, '')}`}
+                      className="text-[var(--charcoal)] underline decoration-[rgba(126,21,24,0.25)] underline-offset-4 hover:text-[var(--burgundy)]"
+                    >
+                      {content.directContacts.phone}
+                    </a>
+                  </p>
+
+                  <p>
+                    WhatsApp:{' '}
+                    <a
+                      href={`https://wa.me/${content.directContacts.whatsapp.replace(/\D/g, '')}`}
+                      className="text-[var(--charcoal)] underline decoration-[rgba(126,21,24,0.25)] underline-offset-4 hover:text-[var(--burgundy)]"
+                    >
+                      {content.directContacts.whatsapp}
+                    </a>
+                  </p>
+
+                  <p>
+                    Email:{' '}
+                    <a
+                      href={`mailto:${content.directContacts.email}`}
+                      className="break-words text-[var(--charcoal)] underline decoration-[rgba(126,21,24,0.25)] underline-offset-4 hover:text-[var(--burgundy)]"
+                    >
+                      {content.directContacts.email}
+                    </a>
+                  </p>
+                </div>
+              </div>
+
+              <div className="py-7 md:py-9 md:pl-10">
+                <h3 className="text-xl font-semibold text-[var(--charcoal)]">
+                  {content.address.title}
+                </h3>
+
+                <div className="mt-5 text-sm leading-7 text-[var(--charcoal-muted)]">
+                  <strong className="font-semibold text-[var(--charcoal)]">
+                    {content.address.name}
+                  </strong>
+
+                  {content.address.lines.map((line, index) => (
+                    <span key={`${line}-${index}`} className="block">
+                      {line}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Opening Hours */}
+      <section className="border-y border-[rgba(36,23,24,0.1)] bg-[#faf8f5] py-14 sm:py-16 md:py-20">
+        <div className="wrap">
+          <div className="grid gap-8 md:grid-cols-[0.7fr_1.3fr] md:gap-12 lg:gap-20">
+            <div>
+              <h2 className="text-2xl font-semibold tracking-tight text-[var(--charcoal)] sm:text-3xl">
+                {content.officeHours.title}
+              </h2>
+            </div>
+
+            <div className="border-t border-[rgba(36,23,24,0.14)]">
+              {content.officeHours.items.map((item, index) => (
+                <div
+                  key={`${item.title}-${index}`}
+                  className="grid gap-2 border-b border-[rgba(36,23,24,0.12)] py-5 sm:grid-cols-[180px_1fr] sm:gap-8"
+                >
+                  <p className="font-semibold text-[var(--charcoal)]">{item.title}</p>
+
+                  <p className="text-sm leading-6 text-[var(--charcoal-muted)]">{item.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Map */}
+      <section className="subpage-section">
+        <div className="wrap">
+          <div className="mb-6">
+            <h2 className="text-2xl font-semibold tracking-tight text-[var(--charcoal)] sm:text-3xl">
+              {content.map.title}
+            </h2>
+          </div>
+
+          <div className="contact-map-wrapper w-full overflow-hidden">
             <iframe
               src={content.map.src}
+              className="block h-[320px] w-full border-0 sm:h-[400px] md:h-[500px]"
               allowFullScreen
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"

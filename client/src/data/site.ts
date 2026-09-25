@@ -7,27 +7,18 @@ export const pageLinks = [
   {
     label: 'About MWS',
     path: '/our-school',
-    description: 'Discover our school and community',
   },
   {
-    label: 'Our Campus',
-    path: '/our-school#campus',
-    description: 'Explore our learning environment',
-  },
-  {
-    label: 'Mission Statement',
-    path: '/our-school#mission',
-    description: 'What guides our learning community',
+    label: 'Admission',
+    path: '/admission',
   },
   {
     label: 'Community Stories',
     path: '/community-stories',
-    description: 'Stories from our school community',
   },
   {
-    label: 'Affiliations',
-    path: '/our-school#affiliations',
-    description: 'Our educational partnerships',
+    label: 'FAQ',
+    path: '/our-school#faq',
   },
 ];
 

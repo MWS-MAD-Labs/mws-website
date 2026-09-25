@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import DOMPurify from 'dompurify';
 
 type FaqItem = {
   question: string;
@@ -6,14 +7,15 @@ type FaqItem = {
 };
 
 type FaqSectionProps = {
+  id?: string;
   items: FaqItem[];
 };
 
-export default function FaqSection({ items }: FaqSectionProps) {
+export default function FaqSection({ id, items }: FaqSectionProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <section className="w-full bg-[var(--warm-white)] py-[96px] md:py-[120px]">
+    <section id={id} className="w-full bg-[var(--warm-white)] py-[96px] md:py-[120px]">
       <div className="mx-auto w-full max-w-[1000px] px-6 md:px-10">
         <h2 className="mb-12 text-[clamp(32px,4vw,48px)] font-semibold leading-[1.1] tracking-[-0.025em] text-[var(--charcoal)]">
           Frequently Asked Questions
@@ -51,9 +53,12 @@ export default function FaqSection({ items }: FaqSectionProps) {
                   }`}
                 >
                   <div className="overflow-hidden">
-                    <p className="max-w-[760px] pb-6 text-[15px] leading-7 text-[var(--charcoal-muted)]">
-                      {item.answer}
-                    </p>
+                    <div
+                      className="max-w-[760px] pb-6 text-[15px] leading-7 text-[var(--charcoal-muted)]"
+                      dangerouslySetInnerHTML={{
+                        __html: DOMPurify.sanitize(item.answer || ''),
+                      }}
+                    />
                   </div>
                 </div>
               </div>

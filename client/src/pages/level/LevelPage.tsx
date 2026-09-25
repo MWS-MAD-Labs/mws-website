@@ -1,6 +1,9 @@
+import DOMPurify from 'dompurify';
 import { Download } from 'lucide-react';
 
 import AdmissionsCta from '@/components/layout/AdmissionsCta';
+
+type RichText = string | string[];
 
 type SectionItem = {
   title: string;
@@ -12,12 +15,12 @@ type SectionItem = {
 
 type LevelPageProps = {
   introTitle: string;
-  intro: string[];
+  intro: RichText;
   introImage: string;
   introImageAlt: string;
 
   curriculumTitle: string;
-  curriculumDescription: string[];
+  curriculumDescription: RichText;
   curriculumFile?: string;
   curriculumLabel?: string;
 
@@ -25,6 +28,24 @@ type LevelPageProps = {
 
   closingText?: string;
 };
+
+function RichTextContent({ content }: { content: RichText }) {
+  if (Array.isArray(content)) {
+    return (
+      <>
+        {content.map((paragraph) => (
+          <p key={paragraph}>{paragraph}</p>
+        ))}
+      </>
+    );
+  }
+
+  return (
+    <div
+      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content || '') }}
+    />
+  );
+}
 
 export default function LevelPage({
   introTitle,
@@ -48,9 +69,7 @@ export default function LevelPage({
             <div className="subpage-body">
               <h2>{introTitle}</h2>
 
-              {intro.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
-              ))}
+              <RichTextContent content={intro} />
             </div>
 
             {/* Image */}
@@ -71,9 +90,7 @@ export default function LevelPage({
           <div className="subpage-body max-w-none">
             <h2>{curriculumTitle}</h2>
 
-            {curriculumDescription.map((paragraph) => (
-              <p key={paragraph}>{paragraph}</p>
-            ))}
+            <RichTextContent content={curriculumDescription} />
 
             {/* Download */}
             {curriculumFile && (
@@ -113,7 +130,7 @@ export default function LevelPage({
                   >
                     <h2>{section.title}</h2>
 
-                    <p>{section.text}</p>
+                    <RichTextContent content={section.text} />
                   </div>
 
                   {/* Image */}
@@ -140,7 +157,7 @@ export default function LevelPage({
         <section className="subpage-section pt-0">
           <div className="wrap">
             <div className="mx-auto max-w-4xl border-t border-black/10 pt-8 text-center">
-              <p className="text-lg leading-8 text-[var(--charcoal)]">{closingText}</p>
+              <RichTextContent content={closingText} />
             </div>
           </div>
         </section>

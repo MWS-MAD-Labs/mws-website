@@ -13,6 +13,7 @@ import SchoolCalendar from '@/pages/school-calendar';
 import SchoolNews from '@/pages/news/school-news';
 import NewsDetail from '@/pages/news/news-detail';
 import CommunityStories from '@/pages/community-stories';
+import BookATour from '@/features/book-a-tour/BookATourPage';
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
         <Route index element={<Home />} />
         <Route path="our-school" element={<OurSchool />} />
         <Route path="admission" element={<Admission />} />
+        <Route path="book-a-tour" element={<BookATour />} />
         <Route path="academic" element={<Academic />} />
         <Route path="academic/kindergarten" element={<Kindergarten />} />
         <Route path="academic/elementary" element={<Elementary />} />

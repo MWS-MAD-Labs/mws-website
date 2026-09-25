@@ -95,7 +95,7 @@ export default function Footer() {
               info@millennia21.id
             </a>
             <Link
-              to="/admission"
+              to="/book-a-tour"
               className="mt-[18px] border-b border-[var(--gold)] pb-[5px] text-[14.5px] text-[var(--warm-white)] transition-colors duration-[250ms] hover:text-[var(--gold)] max-[560px]:w-full max-[560px]:text-center"
             >
               Book a Tour

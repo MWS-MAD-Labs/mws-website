@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import DOMPurify from 'dompurify';
 import { pageApi, type OurSchoolPageData } from '@/api/pageApi';
 import SubpageHero from '../components/ui/SubpageHero';
 import ContentBreadcrumb from '../components/ui/ContentBreadcrumb';
@@ -63,6 +64,17 @@ const defaultOurSchoolContent: OurSchoolPageData = {
   ],
 };
 
+
+function RichTextBlock({ content }: { content: string }) {
+  return (
+    <div
+      dangerouslySetInnerHTML={{
+        __html: DOMPurify.sanitize(content || ''),
+      }}
+    />
+  );
+}
+
 export default function OurSchool() {
   const [content, setContent] = useState<OurSchoolPageData>(defaultOurSchoolContent);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -113,8 +125,8 @@ export default function OurSchool() {
         imageAlt={content.background.imageAlt}
         imagePosition="right"
       >
-        {content.background.paragraphs.map((paragraph) => (
-          <p key={paragraph}>{paragraph}</p>
+        {content.background.paragraphs.map((paragraph, index) => (
+          <RichTextBlock key={`background-${index}`} content={paragraph} />
         ))}
       </EditorialSplit>
 
@@ -124,20 +136,20 @@ export default function OurSchool() {
         image={content.visionMission.image}
         imageAlt={content.visionMission.imageAlt}
       >
-        {content.visionMission.paragraphs.map((paragraph) => (
-          <p key={paragraph}>{paragraph}</p>
+        {content.visionMission.paragraphs.map((paragraph, index) => (
+          <RichTextBlock key={`vision-${index}`} content={paragraph} />
         ))}
       </EditorialFeature>
 
       {/* Philosophy */}
       <EditorialText title={content.philosophy.title}>
-        {content.philosophy.paragraphs.map((paragraph) => (
-          <p key={paragraph}>{paragraph}</p>
+        {content.philosophy.paragraphs.map((paragraph, index) => (
+          <RichTextBlock key={`philosophy-${index}`} content={paragraph} />
         ))}
       </EditorialText>
 
       {/* FAQ */}
-      <FaqSection items={content.faq} />
+      <FaqSection id="faq" items={content.faq} />
     </main>
   );
 }

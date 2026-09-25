@@ -1,4 +1,5 @@
 import { apiRequest } from "@/lib/api";
+import type { OurSchoolPageData } from "@/api/pageApi";
 import { env } from "@/config/env";
 import type {
   ContactPage,
@@ -19,9 +20,15 @@ export type AdminDashboardData = {
 export type CmsUserListItem = {
   id: string;
   centralUserId: string;
+  email: string | null;
   name: string;
   unitId: string;
+  unit: string;
   isActive: boolean;
+  lastCentralSyncedAt: string | null;
+  deactivatedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
   role: {
     name: CmsRoleName;
     label: string | null;
@@ -35,7 +42,28 @@ export type CmsRoleListItem = {
 
 export type CmsUsersData = {
   users: CmsUserListItem[];
+  invitations: CmsInvitationListItem[];
   roles: CmsRoleListItem[];
+};
+
+export type CmsInvitationListItem = {
+  id: string;
+  email: string;
+  centralUserId: string | null;
+  name: string | null;
+  unitId: string | null;
+  unit: string;
+  status: string;
+  expiresAt: string | null;
+  acceptedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  role: {
+    name: CmsRoleName;
+    label: string | null;
+  } | null;
+  invitedBy: { id: string; name: string; email: string | null } | null;
+  acceptedUser: { id: string; name: string; email: string | null } | null;
 };
 
 export type HeroSlideFormData = {
@@ -99,8 +127,11 @@ export type OurSchoolItem = {
   id: string;
   title: string;
   description: string | null;
+  content: OurSchoolPageData | (OurSchoolPageData & { status?: "DRAFT" | "PUBLISHED" }) | null;
   galleryId: string | null;
+  featuredImageId: string | null;
   gallery: GalleryItem | null;
+  featuredImage: GalleryImageItem | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -108,7 +139,9 @@ export type OurSchoolItem = {
 export type OurSchoolPayload = {
   title: string;
   description?: string | null;
+  content?: (OurSchoolPageData & { status?: "DRAFT" | "PUBLISHED" }) | null;
   galleryId?: string | null;
+  featuredImageId?: string | null;
 };
 
 export type GalleryImageMetadataPayload = {
@@ -139,6 +172,68 @@ export type AdminAdmissionProgram = {
 export type AdminAdmissionsData = {
   programs: AdminAdmissionProgram[];
   galleries: GalleryItem[];
+};
+
+export type AcademicLevelKey = "kindergarten" | "elementary" | "high-school";
+export type AcademicStatus = "DRAFT" | "PUBLISHED";
+export type AcademicRichText = string | string[];
+
+export type AcademicLevelData = {
+  levelKey: AcademicLevelKey;
+  status?: AcademicStatus;
+  draftSavedAt?: string | null;
+  publishedAt?: string | null;
+  program: {
+    title: string;
+    age: string | null;
+    description: string | null;
+    image: string | null;
+    imageAlt: string | null;
+    path: string | null;
+    sortOrder: number;
+    isActive: boolean;
+  };
+  page: {
+    isPublished: boolean;
+    galleryId: string | null;
+    hero: {
+      title: string;
+      description: string;
+      image: string;
+      imageAlt: string;
+    };
+    overview: {
+      introTitle: string;
+      intro: AcademicRichText;
+      introImage: string;
+      introImageAlt: string;
+      curriculumTitle: string;
+      curriculumDescription: AcademicRichText;
+      curriculumFile?: string | null;
+      curriculumLabel?: string | null;
+      closingText?: string | null;
+    };
+    sections: Array<{
+      title: string;
+      text: string;
+      image: string;
+      imageAlt: string;
+      imagePosition?: "left" | "right";
+    }>;
+    faq?: Array<{ question: string; answer: string }>;
+  };
+};
+
+export type AdminAcademicLevelData = AcademicLevelData & {
+  galleries: GalleryItem[];
+};
+
+export type AcademicAssetUploadResult = {
+  path: string;
+  objectName: string;
+  filename: string;
+  contentType: string;
+  size: number;
 };
 
 export type AdminCommunityStoriesPage = {
@@ -331,6 +426,41 @@ export const adminApi = {
     return response!.data;
   },
 
+  async updateUserStatus(
+    userId: string,
+    isActive: boolean,
+  ): Promise<CmsUserListItem> {
+    const response = await apiRequest<{ data: CmsUserListItem }>(
+      `/admin/users/${userId}/status`,
+      {
+        method: "PATCH",
+        body: { isActive },
+      },
+    );
+    return response!.data;
+  },
+
+  async inviteCmsAdmin(email: string): Promise<CmsInvitationListItem> {
+    const response = await apiRequest<{ data: CmsInvitationListItem }>(
+      "/admin/users/invitations",
+      {
+        method: "POST",
+        body: { email, roleName: "ADMIN" },
+      },
+    );
+    return response!.data;
+  },
+
+  async revokeCmsInvitation(id: string): Promise<CmsInvitationListItem> {
+    const response = await apiRequest<{ data: CmsInvitationListItem }>(
+      `/admin/users/invitations/${id}`,
+      {
+        method: "DELETE",
+      },
+    );
+    return response!.data;
+  },
+
   async contactPage(): Promise<ContactPage> {
     const response = await apiRequest<{ data: ContactPage }>(
       "/admin/contact-page",
@@ -476,6 +606,44 @@ export const adminApi = {
         method: "PUT",
         body: { programs },
       },
+    );
+    return response!.data;
+  },
+
+  async academicLevel(
+    levelKey: AcademicLevelKey,
+  ): Promise<AdminAcademicLevelData> {
+    const response = await apiRequest<{ data: AdminAcademicLevelData }>(
+      `/admin/academic-levels/${levelKey}`,
+    );
+    return response!.data;
+  },
+
+  async updateAcademicLevel(
+    levelKey: AcademicLevelKey,
+    data: AcademicLevelData,
+  ): Promise<AdminAcademicLevelData> {
+    const response = await apiRequest<{ data: AdminAcademicLevelData }>(
+      `/admin/academic-levels/${levelKey}`,
+      {
+        method: "PUT",
+        body: data,
+      },
+    );
+    return response!.data;
+  },
+
+  async uploadAcademicLevelAsset(
+    levelKey: AcademicLevelKey,
+    data: { file: File; type: "image" | "document" },
+  ): Promise<AcademicAssetUploadResult> {
+    const body = new FormData();
+    body.append("file", data.file);
+    body.append("type", data.type);
+
+    const response = await apiRequest<{ data: AcademicAssetUploadResult }>(
+      `/admin/academic-levels/${levelKey}/assets`,
+      { method: "POST", body },
     );
     return response!.data;
   },

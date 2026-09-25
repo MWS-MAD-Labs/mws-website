@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { ResponseError } from "../error/response-error";
 import {
@@ -16,6 +17,7 @@ const ourSchoolCreateSchema = z.object({
     .transform((value) => value || null)
     .nullable()
     .optional(),
+  content: z.custom<Prisma.InputJsonValue | null>().nullable().optional(),
   galleryId: z.string().uuid().nullable().optional(),
   featuredImageId: z.string().uuid().nullable().optional(),
 });

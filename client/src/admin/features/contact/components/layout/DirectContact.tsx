@@ -8,11 +8,11 @@ export default function DirectContact({
   return (
     <div className="rounded-lg border border-[rgba(36,23,24,0.14)] bg-white p-5 shadow-sm">
       <h2 className="mb-4 text-lg font-semibold text-[#241718]">
-        Direct Contacts
+        Contact Information
       </h2>
       <div className="grid gap-4 md:grid-cols-2">
         <TextField
-          label="Section Title"
+          label="Title"
           value={content.directContacts.title}
           onChange={(value) =>
             updateContent((current) => ({

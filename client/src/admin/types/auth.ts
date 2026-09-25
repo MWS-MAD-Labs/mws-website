@@ -36,6 +36,7 @@ export type CmsRole = {
 export type AuthUser = {
   id: string;
   centralUserId: string;
+  email: string | null;
   name: string;
   unitId: string;
   isActive: boolean;

@@ -1,4 +1,4 @@
-import { apiRequest } from "@/lib/api";
+import { apiRequest, normalizePublicAssetUrls } from "@/lib/api";
 
 export type HeroSlideData = {
   id: string;
@@ -111,9 +111,58 @@ export type CommunityStoriesPageData = {
   news: CommunityNewsData[];
 };
 
+export type AcademicStatus = "DRAFT" | "PUBLISHED";
+export type AcademicRichText = string | string[];
+
+export type AcademicLevelData = {
+  levelKey: "kindergarten" | "elementary" | "high-school";
+  status?: AcademicStatus;
+  draftSavedAt?: string | null;
+  publishedAt?: string | null;
+  program: {
+    title: string;
+    age: string | null;
+    description: string | null;
+    image: string | null;
+    imageAlt: string | null;
+    path: string | null;
+    sortOrder: number;
+    isActive: boolean;
+  };
+  page: {
+    isPublished: boolean;
+    galleryId: string | null;
+    hero: {
+      title: string;
+      description: string;
+      image: string;
+      imageAlt: string;
+    };
+    overview: {
+      introTitle: string;
+      intro: AcademicRichText;
+      introImage: string;
+      introImageAlt: string;
+      curriculumTitle: string;
+      curriculumDescription: AcademicRichText;
+      curriculumFile?: string | null;
+      curriculumLabel?: string | null;
+      closingText?: string | null;
+    };
+    sections: Array<{
+      title: string;
+      text: string;
+      image: string;
+      imageAlt: string;
+      imagePosition?: "left" | "right";
+    }>;
+    faq?: Array<{ question: string; answer: string }>;
+  };
+};
+
 async function getPage<T>(slug: string): Promise<T> {
   const response = await apiRequest<{ data: T }>(`/api/pages/${slug}`);
-  return response!.data;
+  return normalizePublicAssetUrls(response!.data);
 }
 
 export const pageApi = {
@@ -122,4 +171,12 @@ export const pageApi = {
   ourSchool: () => getPage<OurSchoolPageData>("our-school"),
   communityStories: () =>
     getPage<CommunityStoriesPageData>("community-stories"),
+  academicLevels: () => getPage<AcademicLevelData[]>("academic"),
+  academicLevel: (
+    levelKey: AcademicLevelData["levelKey"],
+    options: { previewDraft?: boolean } = {},
+  ) =>
+    getPage<AcademicLevelData>(
+      `academic/${levelKey}${options.previewDraft ? "?preview=draft" : ""}`,
+    ),
 };
