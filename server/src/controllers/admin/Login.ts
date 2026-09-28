@@ -15,7 +15,7 @@ const RESPONSE_ERROR_CODES: Record<number, string> = {
 };
 
 function frontendOrigin(): string {
-  return process.env.FRONTEND_ORIGIN ?? "http://localhost:5173";
+  return process.env.FRONTEND_ORIGIN ?? "http://localhost:7001";
 }
 
 function cookieOptions() {

@@ -14,7 +14,7 @@ beforeAll(() => {
 
 afterEach(() => {
   mock.restore();
-  process.env.FRONTEND_ORIGIN = "http://localhost:5173";
+  process.env.FRONTEND_ORIGIN = "http://localhost:7001";
 });
 
 function buildApp() {

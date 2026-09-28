@@ -38,7 +38,7 @@ bun run dev
 
 Default URLs:
 
-- Client: `http://localhost:5173`
+- Client: `http://localhost:7001`
 - Server: `http://localhost:4004`
 - Health check: `http://localhost:4004/health`
 

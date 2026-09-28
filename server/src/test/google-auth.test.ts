@@ -14,7 +14,7 @@ afterEach(() => {
 describe("GoogleAuth.verifyCode", () => {
   it("builds the Google auth URL with the configured callback", () => {
     process.env.GOOGLE_CLIENT_ID = "client-id.test";
-    process.env.GOOGLE_REDIRECT_URI = "http://localhost:5173/auth/google/callback";
+    process.env.GOOGLE_REDIRECT_URI = "http://localhost:7001/auth/google/callback";
 
     const url = new URL(GoogleAuth.authUrl("state-123"));
 
@@ -23,7 +23,7 @@ describe("GoogleAuth.verifyCode", () => {
     );
     expect(url.searchParams.get("client_id")).toBe("client-id.test");
     expect(url.searchParams.get("redirect_uri")).toBe(
-      "http://localhost:5173/auth/google/callback",
+      "http://localhost:7001/auth/google/callback",
     );
     expect(url.searchParams.get("state")).toBe("state-123");
   });
@@ -31,7 +31,7 @@ describe("GoogleAuth.verifyCode", () => {
   it("exchanges a Google code and validates the returned ID token", async () => {
     process.env.GOOGLE_CLIENT_ID = "client-id.test";
     process.env.GOOGLE_CLIENT_SECRET = "client-secret.test";
-    process.env.GOOGLE_REDIRECT_URI = "http://localhost:5173/auth/google/callback";
+    process.env.GOOGLE_REDIRECT_URI = "http://localhost:7001/auth/google/callback";
     const calls: string[] = [];
 
     global.fetch = (async (
@@ -46,7 +46,7 @@ describe("GoogleAuth.verifyCode", () => {
         expect(body).toContain("client_id=client-id.test");
         expect(body).toContain("client_secret=client-secret.test");
         expect(body).toContain(
-          "redirect_uri=http%3A%2F%2Flocalhost%3A5173%2Fauth%2Fgoogle%2Fcallback",
+          "redirect_uri=http%3A%2F%2Flocalhost%3A7001%2Fauth%2Fgoogle%2Fcallback",
         );
         return jsonResponse(200, { id_token: "google-id-token" });
       }

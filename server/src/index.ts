@@ -9,7 +9,7 @@ import { authRoute } from "./routes/auth";
 const app = new Hono();
 
 const frontendOrigin =
-  process.env["FRONTEND_ORIGIN"] ?? "http://localhost:5173";
+  process.env["FRONTEND_ORIGIN"] ?? "http://localhost:7001";
 const port = Number(process.env["PORT"] ?? 4004);
 
 declare global {
