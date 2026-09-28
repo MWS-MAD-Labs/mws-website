@@ -11,6 +11,12 @@ export function GoogleLoginButton() {
       `${env.apiBaseUrl}/auth/google/start`,
       window.location.origin,
     );
+    console.info("[AUTH] Google login start", {
+      apiBaseUrl: env.apiBaseUrl,
+      googleRedirectUri: env.googleRedirectUri,
+      startOrigin: startUrl.origin,
+      currentOrigin: window.location.origin,
+    });
     window.location.assign(startUrl.toString());
   }
 

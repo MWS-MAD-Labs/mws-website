@@ -45,13 +45,20 @@ function oauthStateCookieOptions() {
 export class LoginController {
   static async startGoogleLogin(c: Context) {
     const state = crypto.randomUUID();
+    const authUrl = GoogleAuth.authUrl(state);
+    console.info("[AUTH] Google login start", {
+      frontendOrigin: frontendOrigin(),
+      googleRedirectUri: process.env.GOOGLE_REDIRECT_URI || "",
+      authOrigin: new URL(authUrl).origin,
+      secureCookies: useSecureCookies(),
+    });
 
     setCookie(c, OAUTH_STATE_COOKIE, state, {
       ...oauthStateCookieOptions(),
       maxAge: 60 * 10,
     });
 
-    return c.redirect(GoogleAuth.authUrl(state), 302);
+    return c.redirect(authUrl, 302);
   }
 
   static async loginWithGoogle(c: Context) {
@@ -61,12 +68,15 @@ export class LoginController {
     }
 
     const { token, user } = await AuthService.loginWithGoogle(code);
+    console.info("[AUTH] Google token exchange success");
 
     setCookie(c, sessionCookieName(), token, {
       ...cookieOptions(),
       maxAge: 60 * 60 * 8,
     });
 
+    console.info("[AUTH] Session created");
+    console.info("[AUTH] Login success");
     return c.json({ data: user });
   }
 
@@ -74,12 +84,26 @@ export class LoginController {
     const code = c.req.query("code");
     const state = c.req.query("state");
     const expectedState = getCookie(c, OAUTH_STATE_COOKIE);
+    console.info("[AUTH] OAuth callback received", {
+      hasCode: Boolean(code),
+      hasState: Boolean(state),
+      hasExpectedState: Boolean(expectedState),
+      frontendOrigin: frontendOrigin(),
+    });
 
     deleteCookie(c, OAUTH_STATE_COOKIE, oauthStateCookieOptions());
 
     if (!code || !state || !expectedState || state !== expectedState) {
+      console.warn("[AUTH] OAuth state invalid", {
+        hasCode: Boolean(code),
+        hasState: Boolean(state),
+        hasExpectedState: Boolean(expectedState),
+        stateMatches: Boolean(state && expectedState && state === expectedState),
+      });
+      console.warn("[AUTH] Login failed");
       return c.redirect(`${frontendOrigin()}/admin/login?error=google_state`, 302);
     }
+    console.info("[AUTH] OAuth state valid");
 
     try {
       const { token } = await AuthService.loginWithGoogle(code);
@@ -88,9 +112,12 @@ export class LoginController {
         ...cookieOptions(),
         maxAge: 60 * 60 * 8,
       });
+      console.info("[AUTH] Session created");
+      console.info("[AUTH] Login success");
 
       return c.redirect(`${frontendOrigin()}/admin`, 302);
     } catch (error) {
+      console.warn("[AUTH] Login failed");
       console.error("CMS Google callback failed:", error);
       const errorCode =
         error instanceof ResponseError
@@ -109,6 +136,7 @@ export class LoginController {
   }
 
   static async logout(c: Context) {
+    console.info("[AUTH] Logout");
     deleteCookie(c, sessionCookieName(), cookieOptions());
 
     return c.json({ data: "Logged out successfully" });

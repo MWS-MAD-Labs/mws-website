@@ -9,11 +9,25 @@ function readEnv(key: string): string {
   return runtimeEnv[key] || (import.meta.env[key] as string | undefined) || "";
 }
 
+function defaultApiBaseUrl(): string {
+  if (typeof window !== "undefined") {
+    return `${window.location.protocol}//${window.location.hostname}:4004`;
+  }
+  return "http://localhost:4004";
+}
+
+function defaultGoogleRedirectUri(): string {
+  if (typeof window !== "undefined") {
+    return `${window.location.origin}/auth/google/callback`;
+  }
+  return "http://localhost:7001/auth/google/callback";
+}
+
 export const env = {
   apiBaseUrl:
     readEnv("VITE_API_BASE_URL") ||
     readEnv("VITE_HUB_API_BASE_URL") ||
-    (import.meta.env.DEV ? "http://localhost:4004" : ""),
+    defaultApiBaseUrl(),
   googleClientId: readEnv("VITE_GOOGLE_CLIENT_ID"),
-  googleRedirectUri: readEnv("VITE_GOOGLE_REDIRECT_URI"),
+  googleRedirectUri: readEnv("VITE_GOOGLE_REDIRECT_URI") || defaultGoogleRedirectUri(),
 };

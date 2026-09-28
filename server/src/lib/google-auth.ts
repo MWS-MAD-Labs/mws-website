@@ -51,11 +51,13 @@ async function exchangeCodeForIdToken(code: string): Promise<string | null> {
   });
 
   if (!res.ok) {
+    console.error("[AUTH] Google token exchange failed", { status: res.status });
     console.error("Google code exchange failed:", res.status, await res.text());
     return null;
   }
 
   const token = (await res.json()) as GoogleTokenResponse;
+  console.info(token.id_token ? "[AUTH] Google token exchange success" : "[AUTH] Google token exchange failed");
   return token.id_token || null;
 }
 

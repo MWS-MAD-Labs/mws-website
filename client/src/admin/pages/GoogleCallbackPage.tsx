@@ -15,6 +15,11 @@ export default function GoogleCallbackPage() {
       `${env.apiBaseUrl}/auth/google/callback${search}`,
       window.location.origin,
     );
+    console.info("[AUTH] OAuth callback received", {
+      apiBaseUrl: env.apiBaseUrl,
+      callbackOrigin: callbackUrl.origin,
+      currentOrigin: window.location.origin,
+    });
     window.location.replace(callbackUrl.toString());
   }, [hasCallbackPayload, search]);
 
