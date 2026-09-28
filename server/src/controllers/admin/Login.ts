@@ -18,10 +18,16 @@ function frontendOrigin(): string {
   return process.env.FRONTEND_ORIGIN ?? "http://localhost:7001";
 }
 
+function useSecureCookies(): boolean {
+  const configured = process.env.COOKIE_SECURE ?? process.env.SESSION_COOKIE_SECURE;
+  if (configured) return configured === "true";
+  return frontendOrigin().startsWith("https://");
+}
+
 function cookieOptions() {
   return {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: useSecureCookies(),
     sameSite: "Strict" as const,
     path: "/",
   };
@@ -30,7 +36,7 @@ function cookieOptions() {
 function oauthStateCookieOptions() {
   return {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: useSecureCookies(),
     sameSite: "Lax" as const,
     path: "/auth/google",
   };
