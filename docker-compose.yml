@@ -1,5 +1,4 @@
 services:
-  # Local development services only. Do not reuse these defaults in staging or production.
   db:
     image: postgres:16-alpine
     container_name: mws-website-db
@@ -9,7 +8,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-mws_website}
     ports:
-      - "55432:5432"
+      - "${POSTGRES_HOST_PORT:-55432}:5432"
     volumes:
       - mws_website_pgdata:/var/lib/postgresql/data
       - ./docker/postgres/init-shadow-db.sql:/docker-entrypoint-initdb.d/10-init-shadow-db.sql:ro
@@ -19,20 +18,96 @@ services:
       timeout: 5s
       retries: 10
 
-
   minio:
     image: minio/minio:latest
     container_name: mws-website-minio
     restart: unless-stopped
-    ports:
-      - "9100:9000"
-      - "9009:9009"
+    command: server /data --console-address ":9009"
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin123}
+    ports:
+      - "${MINIO_HOST_PORT:-9100}:9000"
+      - "${MINIO_CONSOLE_HOST_PORT:-9009}:9009"
     volumes:
       - minio_data:/data
-    command: server /data --console-address ":9009"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: mws-website-server
+    restart: unless-stopped
+    command: sh -c "bun run db:migrate && bun run start"
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 4004
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:${CLIENT_HTTP_PORT:-5173}}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-mws_website}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-mws_website}?schema=public}
+      SHADOW_DATABASE_URL: ${SHADOW_DATABASE_URL:-postgresql://${POSTGRES_USER:-mws_website}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-mws_website}_shadow?schema=public}
+      JWT_SECRET: ${JWT_SECRET:-replace-this-local-dev-secret}
+      SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-mws_cms_session}
+      ALLOWED_DOMAIN: ${ALLOWED_DOMAIN:-millennia21.id}
+      CENTRAL_API_BASE_URL: ${CENTRAL_API_BASE_URL:-}
+      CENTRAL_API_TOKEN: ${CENTRAL_API_TOKEN:-}
+      CMS_BOOTSTRAP_SUPER_ADMIN_EMAILS: ${CMS_BOOTSTRAP_SUPER_ADMIN_EMAILS:-}
+      CMS_BOOTSTRAP_SUPER_ADMIN_CENTRAL_IDS: ${CMS_BOOTSTRAP_SUPER_ADMIN_CENTRAL_IDS:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-http://localhost:${CLIENT_HTTP_PORT:-5173}/auth/google/callback}
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT:-minio}
+      MINIO_PORT: ${MINIO_PORT:-9000}
+      MINIO_USE_SSL: ${MINIO_USE_SSL:-false}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin123}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-}
+      MINIO_BUCKET: ${MINIO_BUCKET:-mws-gallery}
+      MINIO_REGION: ${MINIO_REGION:-us-east-1}
+    ports:
+      - "${SERVER_HOST_PORT:-4004}:4004"
+    depends_on:
+      db:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bun -e \"const r = await fetch('http://127.0.0.1:4004/health'); process.exit(r.ok ? 0 : 1)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:${SERVER_HOST_PORT:-4004}}
+        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID:-${GOOGLE_CLIENT_ID:-}}
+        VITE_GOOGLE_REDIRECT_URI: ${VITE_GOOGLE_REDIRECT_URI:-http://localhost:${CLIENT_HTTP_PORT:-5173}/auth/google/callback}
+    container_name: mws-website-client
+    restart: unless-stopped
+    environment:
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:${SERVER_HOST_PORT:-4004}}
+      VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID:-${GOOGLE_CLIENT_ID:-}}
+      VITE_GOOGLE_REDIRECT_URI: ${VITE_GOOGLE_REDIRECT_URI:-http://localhost:${CLIENT_HTTP_PORT:-5173}/auth/google/callback}
+    ports:
+      - "${CLIENT_HTTP_PORT:-5173}:80"
+    depends_on:
+      server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/health >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
 volumes:
   mws_website_pgdata:

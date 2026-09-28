@@ -20,4 +20,7 @@ RUN bun run db:generate
 USER bun
 EXPOSE 4004
 
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD bun -e "const r = await fetch('http://127.0.0.1:4004/health'); process.exit(r.ok ? 0 : 1)"
+
 CMD ["bun", "run", "start"]
