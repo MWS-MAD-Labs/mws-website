@@ -45,6 +45,11 @@ jobs:
   backend-tests:
     name: Backend checks
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL=postgresql://mws_website:postgres@localhost:55432/mws_website?schema=public
+      SHADOW_DATABASE_URL=postgresql://mws_website:postgres@localhost:55432/mws_website_shadow?schema=public
+      CENTRAL_API_BASE_URL=https://db-stg.mws.web.id/api/internal
+      CENTRAL_API_TOKEN=mws_a389a6ce15bf.a76b57b3170044ab17169bde44398c8ae4be5cf969ffaebe1dc8bf077b1a773f
     defaults:
       run:
         working-directory: server
