@@ -3,12 +3,17 @@ services:
     image: postgres:16-alpine
     container_name: mws-website-db
     restart: unless-stopped
+    env_file:
+      - path: ./.env
+        required: false
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-mws_website}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-mws_website}
+    expose:
+      - "5432"
     ports:
-      - "${POSTGRES_HOST_PORT:-55432}:5432"
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-55432}:5432"
     volumes:
       - mws_website_pgdata:/var/lib/postgresql/data
       - ./docker/postgres/init-shadow-db.sql:/docker-entrypoint-initdb.d/10-init-shadow-db.sql:ro
@@ -17,6 +22,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    networks:
+      - internal
 
   minio:
     # minio/minio was pulled from Docker Hub entirely - Quay.io is MinIO's
@@ -25,28 +32,38 @@ services:
     container_name: mws-website-minio
     restart: unless-stopped
     command: server /data --console-address ":9001"
+    env_file:
+      - path: ./.env
+        required: false
     environment:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
       MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin123}
+    expose:
+      - "9000"
+      - "9001"
     ports:
-      - "${MINIO_HOST_PORT:-9020}:9000"
-      - "${MINIO_CONSOLE_PORT:-9021}:9001"
+      - "127.0.0.1:${MINIO_HOST_PORT:-9020}:9000"
+      - "127.0.0.1:${MINIO_CONSOLE_PORT:-9021}:9001"
     volumes:
       - minio_data:/data
+    networks:
+      - internal
 
   server:
+    container_name: mws-website-be
     build:
       context: ./server
       dockerfile: Dockerfile
-    container_name: mws-website-server
     restart: unless-stopped
-    command: sh -c "bun run db:migrate && bun run start"
+    env_file:
+      - path: ./.env
+        required: false
+      - path: ./server/.env
+        required: false
     environment:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: 4004
       FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:${CLIENT_HTTP_PORT:-7001}}
-      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-mws_website}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-mws_website}?schema=public}
-      SHADOW_DATABASE_URL: ${SHADOW_DATABASE_URL:-postgresql://${POSTGRES_USER:-mws_website}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-mws_website}_shadow?schema=public}
       JWT_SECRET: ${JWT_SECRET:-replace-this-local-dev-secret}
       SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-mws_cms_session}
       ALLOWED_DOMAIN: ${ALLOWED_DOMAIN:-millennia21.id}
@@ -66,45 +83,81 @@ services:
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin123}
       MINIO_BUCKET: ${MINIO_BUCKET:-mws-gallery}
       MINIO_REGION: ${MINIO_REGION:-us-east-1}
-    ports:
-      - "${SERVER_HOST_PORT:-4004}:4004"
+    command: >
+      sh -c "export DATABASE_URL=\"postgresql://$${POSTGRES_USER:-mws_website}:$${POSTGRES_PASSWORD:-postgres}@db:5432/$${POSTGRES_DB:-mws_website}?schema=public\" &&
+      export SHADOW_DATABASE_URL=\"postgresql://$${POSTGRES_USER:-mws_website}:$${POSTGRES_PASSWORD:-postgres}@db:5432/$${POSTGRES_DB:-mws_website}_shadow?schema=public\" &&
+      bun run db:migrate &&
+      bun run src/index.ts"
     depends_on:
       db:
         condition: service_healthy
       minio:
         condition: service_started
+    expose:
+      - "4004"
+    ports:
+      - "127.0.0.1:${SERVER_HOST_PORT:-4004}:4004"
     healthcheck:
-      test: ["CMD-SHELL", "bun -e \"const r = await fetch('http://127.0.0.1:4004/health'); process.exit(r.ok ? 0 : 1)\""]
+      test:
+        - CMD-SHELL
+        - >-
+          bun -e 'const r = await fetch("http://127.0.0.1:4004/health"); process.exit(r.ok ? 0 : 1)'
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 20s
+    networks:
+      - internal
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   client:
+    container_name: mws-website-fe
     build:
       context: ./client
       dockerfile: Dockerfile
-      args:
-        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
-        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID:-${GOOGLE_CLIENT_ID:-}}
-        VITE_GOOGLE_REDIRECT_URI: ${VITE_GOOGLE_REDIRECT_URI:-}
-    container_name: mws-website-client
     restart: unless-stopped
+    env_file:
+      - path: ./.env
+        required: false
     environment:
       VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
       VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID:-${GOOGLE_CLIENT_ID:-}}
       VITE_GOOGLE_REDIRECT_URI: ${VITE_GOOGLE_REDIRECT_URI:-}
+    expose:
+      - "80"
     ports:
       - "${CLIENT_HTTP_PORT:-7001}:80"
-    depends_on:
-      server:
-        condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/health >/dev/null 2>&1"]
+      test:
+        - CMD-SHELL
+        - >-
+          wget -qO- --header="Host: localhost" http://127.0.0.1/health >/dev/null
       interval: 10s
-      timeout: 5s
-      retries: 10
+      timeout: 3s
+      retries: 6
       start_period: 10s
+    networks:
+      internal:
+      mws-unified:
+        aliases:
+          - mws-website-fe
+          - mws-website-client
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  internal:
+    driver: bridge
+  mws-unified:
+    external: true
+    name: mws-unified
 
 volumes:
   mws_website_pgdata:
