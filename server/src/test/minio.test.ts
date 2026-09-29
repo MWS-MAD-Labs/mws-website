@@ -25,7 +25,8 @@ mock.module("minio", () => ({
 }));
 
 const { deleteMinioObject, getMinioObjectBuffer, statMinioObject } = await import(
-  "../lib/minio"
+  // @ts-expect-error Bun supports query-string imports; this keeps this test isolated from suite-level module mocks.
+  "../lib/minio.ts?minio-helper-test"
 );
 
 function s3NotFound() {
