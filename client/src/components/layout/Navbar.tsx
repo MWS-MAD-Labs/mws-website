@@ -11,17 +11,31 @@ type MenuKey = 'pages' | 'academics';
 
 export default function Navbar() {
   const { pathname } = useLocation();
+  const isHome = pathname === '/';
 
   const [isHidden, setIsHidden] = useState(false);
+  const [isAtTop, setIsAtTop] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<MenuKey | null>(null);
 
   useEffect(() => {
+    if (!isHome) {
+      queueMicrotask(() => {
+        setIsAtTop(false);
+        setIsHidden(false);
+      });
+      return;
+    }
+
     let lastScrollY = window.scrollY;
 
     const syncHeader = () => {
       const currentY = window.scrollY;
 
+      // Detect whether the home page is back at the top.
+      setIsAtTop(currentY <= 24);
+
+      // Keep the existing hide/show behavior on home only.
       if (currentY <= 24) {
         setIsHidden(false);
       } else if (currentY > lastScrollY && currentY > 80) {
@@ -33,12 +47,13 @@ export default function Navbar() {
       lastScrollY = currentY;
     };
 
+    syncHeader();
     window.addEventListener('scroll', syncHeader, { passive: true });
 
     return () => {
       window.removeEventListener('scroll', syncHeader);
     };
-  }, []);
+  }, [isHome]);
 
   const isPagesActive = pageLinks.some(
     (item) => pathname === item.path || pathname.startsWith(`${item.path}/`),
@@ -48,29 +63,47 @@ export default function Navbar() {
     pathname === '/academic' ||
     academicLinks.some((item) => pathname === item.path || pathname.startsWith(`${item.path}/`));
 
+  const useTransparentHomeHeader = isHome && isAtTop;
+
   const headerClassName = cx(
-    'fixed left-0 top-0 z-[60] w-full bg-white',
-    'shadow-[0_8px_24px_rgba(36,23,24,0.07)]',
-    'transition-transform duration-[350ms] ease-in-out',
-    isHidden && !isOpen && '-translate-y-full',
+    isHome ? 'fixed left-0 top-0 z-[60] w-full' : 'sticky left-0 top-0 z-[60] w-full',
+    'transition-[background-color,box-shadow,transform] duration-[350ms] ease-in-out',
+
+    useTransparentHomeHeader
+      ? '!bg-transparent !shadow-none'
+      : '!bg-white shadow-[0_8px_24px_rgba(36,23,24,0.07)]',
+
+    isHome && isHidden && !isOpen && '-translate-y-full',
   );
 
   const topNavClassName = ({ isActive }: { isActive: boolean }) =>
     cx(
       'relative flex items-center',
-      'font-[var(--f-head)] text-[14.5px] font-medium',
-      'text-[var(--charcoal)]',
+      'font-[var(--f-head)] text-[14.5px]',
       'transition-colors duration-300',
 
+      // Top = white + bold
+      // Scrolled = charcoal + medium
+      useTransparentHomeHeader ? 'font-bold text-white' : 'font-medium text-[var(--charcoal)]',
+
       'after:absolute after:-bottom-1 after:left-0',
-      'after:h-[2px] after:bg-[var(--burgundy)]',
-      'after:transition-[width] after:duration-300',
+      'after:h-[2px]',
+      'after:transition-[width,background-color] after:duration-300',
       'after:content-[""]',
 
-      'hover:text-[var(--burgundy)]',
+      // Underline follows navbar state.
+      useTransparentHomeHeader ? 'after:bg-white' : 'after:bg-[var(--burgundy)]',
+
+      // Hover follows navbar state.
+      useTransparentHomeHeader ? 'hover:text-white' : 'hover:text-[var(--burgundy)]',
+
       'hover:after:w-full',
 
-      isActive ? 'font-semibold text-[var(--burgundy)] after:w-full' : 'opacity-80',
+      // Active state.
+      isActive &&
+        (useTransparentHomeHeader
+          ? 'font-bold text-white after:w-full'
+          : 'font-semibold text-[var(--burgundy)] after:w-full'),
 
       // Mobile
       'max-[980px]:min-h-11',
@@ -221,7 +254,7 @@ export default function Navbar() {
     );
 
   return (
-    <div className="h-[86px] max-[980px]:h-[58px] max-[560px]:h-[54px]">
+    <div className="h-0">
       <header className={headerClassName} data-header>
         <div
           className={cx(
@@ -277,6 +310,7 @@ export default function Navbar() {
             aria-controls="primary-navigation"
             onClick={() => {
               setIsOpen((value) => !value);
+
               if (isOpen) {
                 setOpenMenu(null);
               }

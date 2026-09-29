@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { adminApi, type GalleryItem, type NewsCategory, type NewsTag } from '@/admin/api/adminApi';
+import { apiClient } from '@/lib/api';
 
 import type { GalleryAssetSelection } from '@/admin/features/gallery/components/GalleryAssetPickerModal';
 
@@ -290,13 +291,11 @@ export default function CreateUpdateNews() {
     try {
       const imageUrl = adminApi.publicAssetUrl(selection.path);
 
-      const response = await fetch(imageUrl);
+      const response = await apiClient.get<Blob>(imageUrl, {
+        responseType: 'blob',
+      });
 
-      if (!response.ok) {
-        throw new Error('Failed to load selected gallery image.');
-      }
-
-      const blob = await response.blob();
+      const blob = response.data;
 
       const extension = blob.type.split('/')[1] || 'jpg';
 

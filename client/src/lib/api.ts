@@ -1,3 +1,4 @@
+import axios, { AxiosError, type AxiosRequestConfig, type Method } from "axios";
 import { env } from "@/config/env";
 
 export class ApiError extends Error {
@@ -15,37 +16,88 @@ export class ApiError extends Error {
   }
 }
 
-type ApiRequestOptions = Omit<RequestInit, "body"> & { body?: unknown };
+type ApiRequestOptions = Omit<
+  AxiosRequestConfig,
+  "baseURL" | "data" | "headers" | "method" | "responseType" | "url" | "withCredentials"
+> & {
+  body?: unknown;
+  headers?: HeadersInit;
+  method?: Method;
+};
+
+export const apiClient = axios.create({
+  baseURL: env.apiBaseUrl,
+  withCredentials: true,
+  headers: {
+    Accept: "application/json",
+  },
+});
+
+apiClient.interceptors.request.use((config) => {
+  if (import.meta.env.DEV) {
+    const method = (config.method ?? "GET").toUpperCase();
+    console.info(`[API][${method}] ${safeUrl(config.url)}`);
+  }
+
+  return config;
+});
+
+apiClient.interceptors.response.use(
+  (response) => {
+    if (import.meta.env.DEV) {
+      const method = (response.config.method ?? "GET").toUpperCase();
+      console.info(`[API][${response.status}] ${method} ${safeUrl(response.config.url)}`);
+    }
+
+    return response;
+  },
+  (error: AxiosError) => {
+    if (import.meta.env.DEV) {
+      const method = (error.config?.method ?? "GET").toUpperCase();
+      console.error(`[API][ERROR] ${method} ${safeUrl(error.config?.url)}`);
+      console.error(`[API][ERROR] status=${error.response?.status ?? "NETWORK"}`);
+      console.error(`[API][ERROR] message=${safeErrorMessage(error)}`);
+    }
+
+    return Promise.reject(error);
+  },
+);
 
 export async function apiRequest<T>(
   path: string,
   options: ApiRequestOptions = {},
 ): Promise<T | null> {
-  const { body, headers, ...fetchOptions } = options;
+  const { body, headers, method, ...axiosOptions } = options;
   const shouldSerialize = isJsonBody(body);
 
-  const response = await fetch(`${env.apiBaseUrl}${path}`, {
-    ...fetchOptions,
-    credentials: "include",
-    headers: {
-      Accept: "application/json",
-      ...(shouldSerialize ? { "Content-Type": "application/json" } : {}),
-      ...headers,
-    },
-    body: shouldSerialize ? JSON.stringify(body) : (body as BodyInit | undefined),
-  });
-
-  if (response.status === 204) return null;
-
-  const payload = await readPayload(response);
-  if (!response.ok) {
-    throw new ApiError(getErrorMessage(payload) || response.statusText, {
-      status: response.status,
-      payload,
+  try {
+    const response = await apiClient.request<T>({
+      ...axiosOptions,
+      data: body,
+      headers: {
+        ...(shouldSerialize ? { "Content-Type": "application/json" } : {}),
+        ...normalizeHeaders(headers),
+      },
+      method: method ?? (body === undefined ? "GET" : "POST"),
+      url: path,
     });
-  }
 
-  return payload as T;
+    if (response.status === 204) return null;
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const payload = error.response?.data;
+      throw new ApiError(
+        getErrorMessage(payload) || error.response?.statusText || error.message,
+        {
+          status: error.response?.status,
+          payload,
+        },
+      );
+    }
+
+    throw error;
+  }
 }
 
 export function publicAssetUrl(path: string | null | undefined, fallback = "") {
@@ -72,19 +124,27 @@ export function normalizePublicAssetUrls<T>(value: T): T {
   ) as T;
 }
 
-async function readPayload(response: Response) {
-  const contentType = response.headers.get("content-type") || "";
-  if (contentType.includes("application/json")) {
-    return response.json().catch(() => null);
-  }
-  return response.text().catch(() => null);
-}
-
 function isJsonBody(body: unknown): boolean {
   if (!body || typeof body !== "object") return false;
   if (body instanceof FormData) return false;
   if (body instanceof URLSearchParams) return false;
+  if (body instanceof Blob) return false;
+  if (body instanceof ArrayBuffer) return false;
   return true;
+}
+
+function normalizeHeaders(headers: HeadersInit | undefined) {
+  if (!headers) return {};
+
+  if (headers instanceof Headers) {
+    return Object.fromEntries(headers.entries());
+  }
+
+  if (Array.isArray(headers)) {
+    return Object.fromEntries(headers);
+  }
+
+  return headers;
 }
 
 function getErrorMessage(payload: unknown): string {
@@ -94,4 +154,20 @@ function getErrorMessage(payload: unknown): string {
     return String((payload as { errors: unknown }).errors);
   }
   return "";
+}
+
+function safeUrl(url: string | undefined) {
+  if (!url) return "<unknown>";
+
+  try {
+    const parsed = new URL(url, env.apiBaseUrl || window.location.origin);
+    return `${parsed.pathname}${parsed.search}`;
+  } catch {
+    return url.split("?")[0] || "<unknown>";
+  }
+}
+
+function safeErrorMessage(error: AxiosError) {
+  const payloadMessage = getErrorMessage(error.response?.data);
+  return payloadMessage || error.response?.statusText || error.message;
 }

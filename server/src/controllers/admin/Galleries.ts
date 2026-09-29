@@ -1,5 +1,6 @@
 import type { Context } from "hono";
 import { ResponseError } from "../../error/response-error";
+import { sendStoredFile } from "../../lib/file-response";
 import { toJsonSafe } from "../../lib/json-response";
 import { GalleryService } from "../../services/gallery-service";
 
@@ -133,10 +134,9 @@ export class AdminGalleryImagesController {
 
   static async file(c: Context) {
     const file = await GalleryService.getImageFile(c.req.param("id"));
-    c.header("Content-Type", file.contentType);
-    c.header("Content-Length", String(file.size));
-    c.header("Cache-Control", "private, max-age=300");
-    return c.body(file.buffer);
+    return sendStoredFile(c, file, {
+      cacheControl: "private, max-age=300",
+    });
   }
 
   static async delete(c: Context) {
@@ -156,10 +156,10 @@ export class AdminGalleryVideosController {
 
   static async file(c: Context) {
     const file = await GalleryService.getVideoFile(c.req.param("id"));
-    c.header("Content-Type", file.contentType);
-    c.header("Content-Length", String(file.size));
-    c.header("Cache-Control", "private, max-age=300");
-    return c.body(file.buffer);
+    return sendStoredFile(c, file, {
+      acceptRanges: true,
+      cacheControl: "private, max-age=300",
+    });
   }
 
   static async delete(c: Context) {

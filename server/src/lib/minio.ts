@@ -1,5 +1,6 @@
 import { Client, type ClientOptions } from "minio";
 import type { Readable } from "node:stream";
+import { ResponseError } from "../error/response-error";
 
 export type MinioConfig = {
   endPoint: string;
@@ -71,6 +72,28 @@ export function getMinioClient(): Client {
   return minioClient;
 }
 
+function isMinioNotFoundError(error: unknown) {
+  const s3Error = error as {
+    code?: string;
+    statusCode?: number;
+    message?: string;
+  };
+  const code = s3Error.code?.toLowerCase();
+  const message = s3Error.message?.toLowerCase();
+
+  return (
+    s3Error.statusCode === 404 ||
+    code === "notfound" ||
+    code === "nosuchbucket" ||
+    code === "nosuchkey" ||
+    message === "not found"
+  );
+}
+
+function toMissingObjectError(objectName: string) {
+  return new ResponseError(404, `Storage object not found: ${objectName}`);
+}
+
 export async function ensureMinioBucket(bucket = getMinioConfig().bucket) {
   const client = getMinioClient();
   const exists = await client.bucketExists(bucket);
@@ -101,20 +124,43 @@ export async function putMinioObject(
 
 export async function statMinioObject(objectName: string) {
   const config = getMinioConfig();
-  return getMinioClient().statObject(config.bucket, objectName);
+  try {
+    await ensureMinioBucket(config.bucket);
+    return await getMinioClient().statObject(config.bucket, objectName);
+  } catch (error) {
+    if (isMinioNotFoundError(error)) {
+      throw toMissingObjectError(objectName);
+    }
+    throw error;
+  }
 }
 
 export async function deleteMinioObject(objectName: string) {
   const config = getMinioConfig();
-  return getMinioClient().removeObject(config.bucket, objectName);
+  try {
+    await ensureMinioBucket(config.bucket);
+    return await getMinioClient().removeObject(config.bucket, objectName);
+  } catch (error) {
+    if (isMinioNotFoundError(error)) return;
+    throw error;
+  }
 }
 
 export async function getMinioObjectBuffer(objectName: string) {
   const config = getMinioConfig();
-  const stream = (await getMinioClient().getObject(
-    config.bucket,
-    objectName,
-  )) as Readable;
+  let stream: Readable;
+  try {
+    await ensureMinioBucket(config.bucket);
+    stream = (await getMinioClient().getObject(
+      config.bucket,
+      objectName,
+    )) as Readable;
+  } catch (error) {
+    if (isMinioNotFoundError(error)) {
+      throw toMissingObjectError(objectName);
+    }
+    throw error;
+  }
   const chunks: Buffer[] = [];
 
   for await (const chunk of stream) {

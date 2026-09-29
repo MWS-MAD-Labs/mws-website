@@ -61,7 +61,7 @@ if (globalThis.__mwsWebsiteServer) {
   globalThis.__mwsWebsiteServer.reload({
     fetch: app.fetch,
   });
-  console.log(
+  console.info(
     `MWS Website API reloaded on :${globalThis.__mwsWebsiteServer.port}`,
   );
 } else {
@@ -69,7 +69,7 @@ if (globalThis.__mwsWebsiteServer) {
     port,
     fetch: app.fetch,
   });
-  console.log(
+  console.info(
     `MWS Website API listening on :${globalThis.__mwsWebsiteServer.port}`,
   );
 }

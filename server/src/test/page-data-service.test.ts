@@ -18,7 +18,7 @@ describe("PageDataService", () => {
         description: null,
         caption: "Hero caption",
         mediaType: "IMAGE",
-        mediaPath: "/assets-mws/hero.jpg",
+        mediaPath: "/api/gallery-images/22222222-2222-4222-8222-222222222222/file",
         mediaAlt: "Hero alt",
         posterPath: null,
         isLooping: true,
@@ -36,7 +36,9 @@ describe("PageDataService", () => {
     expect(slides).toEqual([
       {
         id: "11111111-1111-4111-8111-111111111111",
-        image: "/assets-mws/hero.jpg",
+        image: "/api/gallery-images/22222222-2222-4222-8222-222222222222/file",
+        mediaType: "IMAGE",
+        isLooping: true,
         alt: "Hero alt",
         headline: "Hero title",
         caption: "Hero caption",
@@ -44,6 +46,66 @@ describe("PageDataService", () => {
         ctaHref: "/admission",
       },
     ]);
+  });
+
+  it("returns video hero slides with playable public media paths", async () => {
+    spyOn(HeroSlideRepository, "listActive").mockResolvedValue([
+      {
+        id: "77777777-7777-4777-8777-777777777777",
+        sourceType: "MANUAL",
+        sourceId: null,
+        title: "Video hero",
+        description: null,
+        caption: null,
+        mediaType: "VIDEO",
+        mediaPath: "/api/gallery-images/videos/88888888-8888-4888-8888-888888888888/file",
+        mediaAlt: "Hero video",
+        posterPath: "/api/gallery-images/99999999-9999-4999-8999-999999999999/file",
+        isLooping: true,
+        ctaLabel: null,
+        ctaUrl: null,
+        sortOrder: 0,
+        isActive: true,
+        createdAt: new Date("2026-09-18T00:00:00.000Z"),
+        updatedAt: new Date("2026-09-18T00:00:00.000Z"),
+      },
+    ]);
+
+    const slides = await PageDataService.getHeroSlides();
+
+    expect(slides[0]).toMatchObject({
+      image: "/api/gallery-images/99999999-9999-4999-8999-999999999999/file",
+      video: "/api/gallery-images/videos/88888888-8888-4888-8888-888888888888/file",
+      poster: "/api/gallery-images/99999999-9999-4999-8999-999999999999/file",
+      mediaType: "VIDEO",
+      isLooping: true,
+    });
+  });
+
+  it("does not fall back to static hero assets when no slides have media", async () => {
+    spyOn(HeroSlideRepository, "listActive").mockResolvedValue([
+      {
+        id: "33333333-3333-4333-8333-333333333333",
+        sourceType: "MANUAL",
+        sourceId: null,
+        title: "Draft",
+        description: null,
+        caption: null,
+        mediaType: "IMAGE",
+        mediaPath: null,
+        mediaAlt: null,
+        posterPath: null,
+        isLooping: true,
+        ctaLabel: null,
+        ctaUrl: null,
+        sortOrder: 0,
+        isActive: true,
+        createdAt: new Date("2026-09-18T00:00:00.000Z"),
+        updatedAt: new Date("2026-09-18T00:00:00.000Z"),
+      },
+    ]);
+
+    expect(await PageDataService.getHeroSlides()).toEqual([]);
   });
 
   it("returns admissions programs with admin contact", async () => {

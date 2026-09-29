@@ -1,6 +1,7 @@
 import { HeroSlideMediaType, HeroSlideSourceType, type HeroSlide } from "@prisma/client";
 import { z } from "zod";
 import { ResponseError } from "../error/response-error";
+import { GalleryRepository } from "../repositories/gallery-repository";
 import {
   HeroSlideRepository,
   type HeroSlideCreateData,
@@ -47,6 +48,72 @@ function parseUpdate(payload: unknown): HeroSlideUpdateData {
   return result.data;
 }
 
+const galleryImageFilePattern =
+  /^\/api\/gallery-images\/([0-9a-f-]{36})\/file$/i;
+const galleryVideoFilePattern =
+  /^\/api\/gallery-images\/videos\/([0-9a-f-]{36})\/file$/i;
+
+type HeroMediaFields = Pick<HeroSlide, "mediaType" | "mediaPath" | "posterPath">;
+
+// Hero media harus menunjuk ke file Gallery yang tersimpan di MinIO dan
+// disajikan lewat API, bukan asset statis atau URL eksternal.
+async function assertGalleryImagePath(path: string, label: string) {
+  const id = galleryImageFilePattern.exec(path)?.[1];
+  if (!id) {
+    throw new ResponseError(400, `${label} must be an image from the Gallery library.`);
+  }
+
+  const image = await GalleryRepository.findImageById(id);
+  if (!image || image.path.startsWith("/") || image.path.startsWith("http")) {
+    throw new ResponseError(400, `${label} was not found in the Gallery library.`);
+  }
+}
+
+async function assertGalleryVideoPath(path: string) {
+  const id = galleryVideoFilePattern.exec(path)?.[1];
+  if (!id) {
+    throw new ResponseError(400, "Hero video must be an uploaded video from the Gallery library.");
+  }
+
+  const video = await GalleryRepository.findVideoById(id);
+  if (!video || video.sourceType !== "UPLOAD") {
+    throw new ResponseError(400, "Hero video was not found in the Gallery library.");
+  }
+}
+
+async function normalizeHeroMedia<T extends Partial<HeroMediaFields>>(
+  data: T,
+  current?: HeroMediaFields,
+): Promise<T> {
+  const touchesMedia =
+    data.mediaType !== undefined ||
+    data.mediaPath !== undefined ||
+    data.posterPath !== undefined;
+  if (!touchesMedia) return data;
+
+  const mediaType =
+    (data.mediaType !== undefined ? data.mediaType : current?.mediaType) ?? "IMAGE";
+  const mediaPath =
+    data.mediaPath !== undefined ? data.mediaPath : current?.mediaPath ?? null;
+  const posterPath =
+    mediaType === "VIDEO"
+      ? (data.posterPath !== undefined ? data.posterPath : current?.posterPath) ?? null
+      : null;
+
+  if (mediaPath) {
+    if (mediaType === "VIDEO") {
+      await assertGalleryVideoPath(mediaPath);
+    } else {
+      await assertGalleryImagePath(mediaPath, "Hero image");
+    }
+  }
+  if (posterPath) {
+    await assertGalleryImagePath(posterPath, "Hero video poster");
+  }
+
+  return { ...data, mediaType, mediaPath: mediaPath || null, posterPath };
+}
+
 function heroSlideResponse(slide: HeroSlide) {
   return {
     id: slide.id,
@@ -90,7 +157,8 @@ export class HeroSlideService {
 
   static async create(payload: unknown) {
     try {
-      return heroSlideResponse(await HeroSlideRepository.create(parseCreate(payload)));
+      const data = await normalizeHeroMedia(parseCreate(payload));
+      return heroSlideResponse(await HeroSlideRepository.create(data));
     } catch (error) {
       handleDatabaseError(error);
     }
@@ -98,8 +166,16 @@ export class HeroSlideService {
 
   static async update(id: string | undefined, payload: unknown) {
     requireUuid(id);
+    const data = parseUpdate(payload);
+    const current = await HeroSlideRepository.findById(id);
+    if (!current) throw new ResponseError(404, "Hero slide not found.");
     try {
-      return heroSlideResponse(await HeroSlideRepository.update(id, parseUpdate(payload)));
+      return heroSlideResponse(
+        await HeroSlideRepository.update(
+          id,
+          await normalizeHeroMedia(data as Partial<HeroMediaFields>, current),
+        ),
+      );
     } catch (error) {
       handleDatabaseError(error);
     }

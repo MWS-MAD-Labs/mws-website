@@ -98,7 +98,7 @@ async function lookup<T>(path: string, email: string): Promise<T | null> {
 
   if (res.status === 404) return null;
   if (!res.ok) {
-    console.error(`Central lookup failed (${path}):`, res.status, await res.text());
+    console.error(`[AUTH] Central lookup failed (${path})`, { status: res.status });
     throw new Error(`Central lookup failed with status ${res.status}`);
   }
 
@@ -112,7 +112,7 @@ async function listPage<T>(path: string): Promise<CentralPage<T>> {
   });
 
   if (!res.ok) {
-    console.error(`Central list failed (${path}):`, res.status, await res.text());
+    console.error(`[AUTH] Central list failed (${path})`, { status: res.status });
     throw new Error(`Central list failed with status ${res.status}`);
   }
 

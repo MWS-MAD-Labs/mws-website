@@ -26,9 +26,8 @@ services:
       - internal
 
   minio:
-    # minio/minio was pulled from Docker Hub entirely - Quay.io is MinIO's
-    # actual distribution registry now (see .github/workflows/ci-cd.yml).
-    image: quay.io/minio/aistor/minio:RELEASE.2026-08-07T18-34-35Z
+    # MinIO Community storage. The old mws-website_minio_data volume is kept as backup.
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
     container_name: mws-website-minio
     restart: unless-stopped
     command: server /data --console-address ":9001"
@@ -45,7 +44,7 @@ services:
       - "127.0.0.1:${MINIO_HOST_PORT:-9020}:9000"
       - "127.0.0.1:${MINIO_CONSOLE_PORT:-9021}:9001"
     volumes:
-      - minio_data:/data
+      - minio_clean:/data
     networks:
       - internal
 
@@ -107,7 +106,9 @@ services:
       retries: 10
       start_period: 20s
     networks:
-      - internal
+      internal:
+        aliases:
+          - backend
     logging:
       driver: json-file
       options:
@@ -161,4 +162,6 @@ networks:
 
 volumes:
   mws_website_pgdata:
-  minio_data:
+  # Backup lama tetap tidak disentuh: mws-website_minio_data
+  minio_clean:
+    name: mws-website_minio_clean

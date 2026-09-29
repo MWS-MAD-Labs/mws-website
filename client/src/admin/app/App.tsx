@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
+
 import {
   adminApi,
   type NewsCategory,
@@ -7,11 +8,13 @@ import {
   type NewsTag,
   type NewsTagPayload,
 } from '@/admin/api/adminApi';
+
 import { AuthProvider } from '@/admin/auth/AuthProvider';
 import { RequireAuth } from '@/admin/auth/RequireAuth';
 import { useAuth } from '@/admin/auth/useAuth';
 import AppShell from '@/admin/components/layout/AppShell';
 import { hasCmsPermission } from '@/admin/types/auth';
+
 import AdmissionsPage from '@/admin/features/admissions/AdmissionsPage';
 import AcademicLevelEditorPage from '@/admin/features/academic/AcademicLevelEditorPage';
 import ContactPageEditor from '@/admin/features/contact/ContactPageEditor';
@@ -19,18 +22,23 @@ import CommunityStoriesPage from '@/admin/features/community-stories/CommunitySt
 import HeroSlidesPage from '@/admin/features/home/HeroSlidesPage';
 import PageEditorPage from '@/admin/features/page/PageEditorPage';
 import PagesManagementPage from '@/admin/features/page/PagesManagementPage';
+
 import AffiliationsPage from '@/admin/features/placeholders/AffiliationsPage';
 import AuditLogsPage from '@/admin/features/placeholders/AuditLogsPage';
 import CampusTourPage from '@/admin/features/placeholders/CampusTourPage';
 import CurriculumPage from '@/admin/features/placeholders/CurriculumPage';
+import HelpPage from '@/admin/features/placeholders/HelpPage';
+import PermissionsPage from '@/admin/features/placeholders/PermissionsPage';
+
 import GalleryDetailPage from '@/admin/features/gallery/GalleryDetailPage';
 import GalleryListPage from '@/admin/features/gallery/GalleryListPage';
-import HelpPage from '@/admin/features/placeholders/HelpPage';
+
 import OurSchoolPage from '@/admin/features/our-school/OurSchoolPage';
-import PermissionsPage from '@/admin/features/placeholders/PermissionsPage';
+
 import CmsUsersPage from '@/admin/pages/CmsUsersPage';
 import Dashboard from '@/admin/pages/Dashboard';
 import LoginPage from '@/admin/pages/LoginPage';
+
 import NewsPage from '../features/news/NewsPage';
 import CreateUpdateNews from '../features/news/components/CreateUpdateNews';
 import NewsCategories from '../features/news/NewsCategories';
@@ -80,6 +88,7 @@ function NewsCategoriesRoute() {
         text: getErrorMessage(error, 'Failed to load news categories.'),
         type: 'error',
       });
+
       return false;
     }
   }, []);
@@ -91,17 +100,22 @@ function NewsCategoriesRoute() {
       adminApi
         .newsCategories()
         .then((items) => {
-          if (isCurrent) setCategories(items);
+          if (isCurrent) {
+            setCategories(items);
+          }
         })
         .catch((error) => {
           if (!isCurrent) return;
+
           setMessage({
             text: getErrorMessage(error, 'Failed to load news categories.'),
             type: 'error',
           });
         })
         .finally(() => {
-          if (isCurrent) setIsLoading(false);
+          if (isCurrent) {
+            setIsLoading(false);
+          }
         });
     });
 
@@ -135,13 +149,19 @@ function NewsCategoriesRoute() {
     try {
       await adminApi.createNewsCategory(payload);
       await loadCategories();
-      setMessage({ text: 'News category created.', type: 'success' });
+
+      setMessage({
+        text: 'News category created.',
+        type: 'success',
+      });
+
       return true;
     } catch (error) {
       setMessage({
         text: getErrorMessage(error, 'Failed to create news category.'),
         type: 'error',
       });
+
       return false;
     } finally {
       setSavingId(null);
@@ -155,13 +175,19 @@ function NewsCategoriesRoute() {
     try {
       await adminApi.updateNewsCategory(category.id, payload);
       await loadCategories();
-      setMessage({ text: 'News category updated.', type: 'success' });
+
+      setMessage({
+        text: 'News category updated.',
+        type: 'success',
+      });
+
       return true;
     } catch (error) {
       setMessage({
         text: getErrorMessage(error, 'Failed to update news category.'),
         type: 'error',
       });
+
       return false;
     } finally {
       setSavingId(null);
@@ -175,7 +201,11 @@ function NewsCategoriesRoute() {
     try {
       await adminApi.deleteNewsCategory(category.id);
       await loadCategories();
-      setMessage({ text: 'News category deleted.', type: 'success' });
+
+      setMessage({
+        text: 'News category deleted.',
+        type: 'success',
+      });
     } catch (error) {
       setMessage({
         text: getErrorMessage(error, 'Failed to delete news category.'),
@@ -225,6 +255,7 @@ function NewsTagsRoute() {
         text: getErrorMessage(error, 'Failed to load news tags.'),
         type: 'error',
       });
+
       return false;
     }
   }, []);
@@ -236,17 +267,22 @@ function NewsTagsRoute() {
       adminApi
         .newsTags()
         .then((items) => {
-          if (isCurrent) setTags(items);
+          if (isCurrent) {
+            setTags(items);
+          }
         })
         .catch((error) => {
           if (!isCurrent) return;
+
           setMessage({
             text: getErrorMessage(error, 'Failed to load news tags.'),
             type: 'error',
           });
         })
         .finally(() => {
-          if (isCurrent) setIsLoading(false);
+          if (isCurrent) {
+            setIsLoading(false);
+          }
         });
     });
 
@@ -270,13 +306,19 @@ function NewsTagsRoute() {
     try {
       await adminApi.createNewsTag(payload);
       await loadTags();
-      setMessage({ text: 'News tag created.', type: 'success' });
+
+      setMessage({
+        text: 'News tag created.',
+        type: 'success',
+      });
+
       return true;
     } catch (error) {
       setMessage({
         text: getErrorMessage(error, 'Failed to create news tag.'),
         type: 'error',
       });
+
       return false;
     } finally {
       setSavingId(null);
@@ -290,13 +332,19 @@ function NewsTagsRoute() {
     try {
       await adminApi.updateNewsTag(tag.id, payload);
       await loadTags();
-      setMessage({ text: 'News tag updated.', type: 'success' });
+
+      setMessage({
+        text: 'News tag updated.',
+        type: 'success',
+      });
+
       return true;
     } catch (error) {
       setMessage({
         text: getErrorMessage(error, 'Failed to update news tag.'),
         type: 'error',
       });
+
       return false;
     } finally {
       setSavingId(null);
@@ -310,7 +358,11 @@ function NewsTagsRoute() {
     try {
       await adminApi.deleteNewsTag(tag.id);
       await loadTags();
-      setMessage({ text: 'News tag deleted.', type: 'success' });
+
+      setMessage({
+        text: 'News tag deleted.',
+        type: 'success',
+      });
     } catch (error) {
       setMessage({
         text: getErrorMessage(error, 'Failed to delete news tag.'),
@@ -357,7 +409,10 @@ export default function AdminApp() {
   return (
     <AuthProvider>
       <Routes>
+        {/* Authentication */}
         <Route path="login" element={<LoginPage />} />
+
+        {/* Dashboard */}
         <Route
           index
           element={
@@ -366,6 +421,75 @@ export default function AdminApp() {
             </RequireAuth>
           }
         />
+
+        {/* Content */}
+        <Route
+          path="content"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <PagesManagementPage />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="content/home"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <HeroSlidesPage />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="content/admissions"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <AdmissionsPage />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="content/our-school"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <OurSchoolPage />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="content/community-stories"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <CommunityStoriesPage />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="content/contact"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <ContactPageEditor />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+
+        {/* Legacy Pages */}
         <Route
           path="pages"
           element={
@@ -376,6 +500,7 @@ export default function AdminApp() {
             </RequireAuth>
           }
         />
+
         <Route
           path="pages/:pageId/edit"
           element={
@@ -386,46 +511,8 @@ export default function AdminApp() {
             </RequireAuth>
           }
         />
-        <Route
-          path="hero-slides"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <HeroSlidesPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="our-school"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <OurSchoolPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="community-stories"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <CommunityStoriesPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="contact"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <ContactPageEditor />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+
+        {/* Academic */}
         <Route
           path="academic/kindergarten"
           element={
@@ -436,6 +523,7 @@ export default function AdminApp() {
             </RequireAuth>
           }
         />
+
         <Route
           path="academic/elementary"
           element={
@@ -446,6 +534,7 @@ export default function AdminApp() {
             </RequireAuth>
           }
         />
+
         <Route
           path="academic/high-school"
           element={
@@ -456,46 +545,8 @@ export default function AdminApp() {
             </RequireAuth>
           }
         />
-        <Route
-          path="programs/admissions"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <AdmissionsPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="programs/campus-tour"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <CampusTourPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="programs/curriculum"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <CurriculumPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="programs/affiliations"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <AffiliationsPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+
+        {/* News */}
         <Route
           path="news"
           element={
@@ -506,6 +557,7 @@ export default function AdminApp() {
             </RequireAuth>
           }
         />
+
         <Route
           path="news/categories"
           element={
@@ -516,6 +568,7 @@ export default function AdminApp() {
             </RequireAuth>
           }
         />
+
         <Route
           path="news/tags"
           element={
@@ -526,6 +579,7 @@ export default function AdminApp() {
             </RequireAuth>
           }
         />
+
         <Route
           path="news/new"
           element={
@@ -536,6 +590,7 @@ export default function AdminApp() {
             </RequireAuth>
           }
         />
+
         <Route
           path="news/:newsId/edit"
           element={
@@ -546,6 +601,8 @@ export default function AdminApp() {
             </RequireAuth>
           }
         />
+
+        {/* Gallery */}
         <Route
           path="gallery"
           element={
@@ -556,6 +613,7 @@ export default function AdminApp() {
             </RequireAuth>
           }
         />
+
         <Route
           path="gallery/:galleryId"
           element={
@@ -566,8 +624,12 @@ export default function AdminApp() {
             </RequireAuth>
           }
         />
+
         <Route path="gallery/images" element={<Navigate to="/admin/gallery" replace />} />
+
         <Route path="gallery/videos" element={<Navigate to="/admin/gallery" replace />} />
+
+        {/* Users */}
         <Route
           path="users"
           element={
@@ -578,6 +640,7 @@ export default function AdminApp() {
             </RequireAuth>
           }
         />
+
         <Route
           path="permissions"
           element={
@@ -588,6 +651,8 @@ export default function AdminApp() {
             </RequireAuth>
           }
         />
+
+        {/* System */}
         <Route
           path="audit-logs"
           element={
@@ -596,6 +661,7 @@ export default function AdminApp() {
             </RequireAuth>
           }
         />
+
         <Route
           path="help"
           element={
@@ -604,6 +670,42 @@ export default function AdminApp() {
             </RequireAuth>
           }
         />
+
+        {/* Existing program routes */}
+        <Route
+          path="programs/campus-tour"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <CampusTourPage />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="programs/curriculum"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <CurriculumPage />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="programs/affiliations"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <AffiliationsPage />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+
+        {/* Fallback */}
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>
     </AuthProvider>

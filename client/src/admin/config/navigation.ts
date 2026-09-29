@@ -10,9 +10,9 @@ import {
   Tags,
   Users,
   type LucideIcon,
-} from "lucide-react";
+} from 'lucide-react';
 
-import type { CmsPermission } from "@/admin/types/auth";
+import type { CmsPermission } from '@/admin/types/auth';
 
 export type MenuItem = {
   label: string;
@@ -24,136 +24,139 @@ export type MenuItem = {
 };
 
 export type MenuSection = {
-  label: string;
   items: MenuItem[];
 };
 
 export const menuSections: MenuSection[] = [
   {
-    label: "Dashboard",
     items: [
       {
-        label: "Dashboard",
-        href: "/admin",
+        label: 'Dashboard',
+        href: '/admin',
         Icon: LayoutDashboard,
         enabled: true,
-        requiredPermission: "dashboard:read",
+        requiredPermission: 'dashboard:read',
       },
     ],
   },
+
   {
-    label: "Content",
     items: [
       {
-        label: "Home Hero",
-        href: "/admin/hero-slides",
-        Icon: LucideHome,
-        enabled: true,
-        requiredPermission: "content:manage",
-      },
-      {
-        label: "Admissions",
-        href: "/admin/programs/admissions",
+        label: 'Content',
+        href: '/admin/content',
         Icon: Files,
         enabled: true,
-        requiredPermission: "content:manage",
+        requiredPermission: 'content:manage',
+        children: [
+          {
+            label: 'Home',
+            href: '/admin/content/home',
+            Icon: LucideHome,
+            enabled: true,
+            requiredPermission: 'content:manage',
+          },
+          {
+            label: 'Admissions',
+            href: '/admin/content/admissions',
+            Icon: Files,
+            enabled: true,
+            requiredPermission: 'content:manage',
+          },
+          {
+            label: 'Our School',
+            href: '/admin/content/our-school',
+            Icon: School,
+            enabled: true,
+            requiredPermission: 'content:manage',
+          },
+          {
+            label: 'Community Stories',
+            href: '/admin/content/community-stories',
+            Icon: Images,
+            enabled: true,
+            requiredPermission: 'content:manage',
+          },
+          {
+            label: 'Contact',
+            href: '/admin/content/contact',
+            Icon: MessageSquare,
+            enabled: true,
+            requiredPermission: 'content:manage',
+          },
+        ],
       },
       {
-        label: "Our School",
-        href: "/admin/our-school",
+        label: 'Academic',
         Icon: School,
         enabled: true,
-        requiredPermission: "content:manage",
+        requiredPermission: 'content:manage',
+        children: [
+          {
+            label: 'Kindergarten',
+            href: '/admin/academic/kindergarten',
+            Icon: School,
+            enabled: true,
+            requiredPermission: 'content:manage',
+          },
+          {
+            label: 'Elementary',
+            href: '/admin/academic/elementary',
+            Icon: School,
+            enabled: true,
+            requiredPermission: 'content:manage',
+          },
+          {
+            label: 'High School',
+            href: '/admin/academic/high-school',
+            Icon: BookOpen,
+            enabled: true,
+            requiredPermission: 'content:manage',
+          },
+        ],
       },
       {
-        label: "Community Stories",
-        href: "/admin/community-stories",
-        Icon: Images,
-        enabled: true,
-        requiredPermission: "content:manage",
-      },
-      {
-        label: "Contact Page",
-        href: "/admin/contact",
-        Icon: MessageSquare,
-        enabled: true,
-        requiredPermission: "content:manage",
-      },
-    ],
-  },
-  {
-    label: "Academic",
-    items: [
-      {
-        label: "Kindergarten",
-        href: "/admin/academic/kindergarten",
-        Icon: School,
-        enabled: true,
-        requiredPermission: "content:manage",
-      },
-      {
-        label: "Elementary",
-        href: "/admin/academic/elementary",
-        Icon: School,
-        enabled: true,
-        requiredPermission: "content:manage",
-      },
-      {
-        label: "High School",
-        href: "/admin/academic/high-school",
-        Icon: BookOpen,
-        enabled: true,
-        requiredPermission: "content:manage",
-      },
-    ],
-  },
-  {
-    label: "News",
-    items: [
-      {
-        label: "Posts",
-        href: "/admin/news",
+        label: 'News',
         Icon: Newspaper,
         enabled: true,
-        requiredPermission: "content:manage",
+        requiredPermission: 'content:manage',
+        children: [
+          {
+            label: 'Posts',
+            href: '/admin/news',
+            Icon: Newspaper,
+            enabled: true,
+            requiredPermission: 'content:manage',
+          },
+          {
+            label: 'Categories',
+            href: '/admin/news/categories',
+            Icon: Files,
+            enabled: true,
+            requiredPermission: 'content:manage',
+          },
+          {
+            label: 'Tags',
+            href: '/admin/news/tags',
+            Icon: Tags,
+            enabled: true,
+            requiredPermission: 'content:manage',
+          },
+        ],
       },
       {
-        label: "Categories",
-        href: "/admin/news/categories",
-        Icon: Files,
-        enabled: true,
-        requiredPermission: "content:manage",
-      },
-      {
-        label: "Tags",
-        href: "/admin/news/tags",
-        Icon: Tags,
-        enabled: true,
-        requiredPermission: "content:manage",
-      },
-    ],
-  },
-  {
-    label: "Media",
-    items: [
-      {
-        label: "Gallery Library",
-        href: "/admin/gallery",
+        label: 'Gallery Library',
+        href: '/admin/gallery',
         Icon: Images,
         enabled: true,
-        requiredPermission: "content:manage",
+        requiredPermission: 'content:manage',
       },
-    ],
-  },
-  {
-    label: "Administration",
-    items: [
       {
-        label: "CMS Users",
-        href: "/admin/users",
+        label: 'CMS Users',
+        href: '/admin/users',
         Icon: Users,
         enabled: true,
-        requiredPermission: "users:manage",
+        requiredPermission: 'users:manage',
       },
     ],
   },

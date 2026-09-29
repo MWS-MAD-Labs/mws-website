@@ -10,26 +10,6 @@ import ProgramAcademic from '../components/ui/ProgramAcademic';
 import AdmissionsCta from '../components/layout/AdmissionsCta';
 import { pageApi, type HomePageData } from '@/api/pageApi';
 
-const heroSlides = [
-  {
-    image: asset('_DSC4760.jpg'),
-    alt: 'Children collaborating on a classroom activity',
-    headline: 'Learning starts with curiosity.',
-    caption: 'At Millennia World School, students learn to explore, question, and create.',
-  },
-  {
-    image: asset('Elementary.jpg'),
-    alt: 'Students walking through a sunlit campus courtyard',
-    headline: 'A place to grow together.',
-    caption: 'A learning environment designed to encourage curiosity, confidence, and connection.',
-  },
-  {
-    image: asset('DSC04079.jpg'),
-    alt: "View of the school's campus architecture",
-    headline: 'More than a classroom.',
-    caption: 'Discover an environment where learning extends beyond the walls of the classroom.',
-  },
-];
 const infoCards = [
   {
     category: 'admissions',
@@ -129,7 +109,7 @@ export default function Home() {
   const [homeData, setHomeData] = useState<HomePageData | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [heroIndex, setHeroIndex] = useState(0);
-  const slides = homeData?.heroSlides.length ? homeData.heroSlides : heroSlides;
+  const slides = homeData?.heroSlides ?? [];
   const cards = homeData?.infoCards.length ? homeData.infoCards : infoCards;
   const programs = homeData?.programs.length ? homeData.programs : undefined;
   const voices = homeData?.communityVoices.length ? homeData.communityVoices : undefined;

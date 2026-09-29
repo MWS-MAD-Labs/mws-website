@@ -198,7 +198,6 @@ export default function CmsUsersPage() {
                 </thead>
                 <tbody>
                   {data.users.map((user) => {
-                    console.log('USER DATA:', user);
 
                     return (
                       <tr

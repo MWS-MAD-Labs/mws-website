@@ -10,33 +10,6 @@ import {
 
 const asset = (fileName: string) => `/assets-mws/${fileName}`;
 
-const defaultHeroSlides = [
-  {
-    id: "default-hero-1",
-    image: asset("_DSC4760.jpg"),
-    alt: "Children collaborating on a classroom activity",
-    headline: "Learning starts with curiosity.",
-    caption:
-      "At Millennia World School, students learn to explore, question, and create.",
-  },
-  {
-    id: "default-hero-2",
-    image: asset("Elementary.jpg"),
-    alt: "Students walking through a sunlit campus courtyard",
-    headline: "A place to grow together.",
-    caption:
-      "A learning environment designed to encourage curiosity, confidence, and connection.",
-  },
-  {
-    id: "default-hero-3",
-    image: asset("DSC04079.jpg"),
-    alt: "View of the school's campus architecture",
-    headline: "More than a classroom.",
-    caption:
-      "Discover an environment where learning extends beyond the walls of the classroom.",
-  },
-];
-
 const defaultPrograms = [
   {
     id: "kindergarten",
@@ -227,9 +200,12 @@ function imagePath(path: string | null | undefined, fallback: string) {
   return path || fallback;
 }
 
+function isPublicAssetPath(path: string) {
+  return path.startsWith("/") || path.startsWith("http");
+}
+
 function galleryImageUrl(image: Pick<GalleryImage, "id" | "path">) {
-  if (image.path.startsWith("/") || image.path.startsWith("http"))
-    return image.path;
+  if (isPublicAssetPath(image.path)) return image.path;
   return `/api/gallery-images/${image.id}/file`;
 }
 
@@ -238,9 +214,18 @@ function firstGalleryImage(gallery: ProgramWithAdmissions["gallery"] | null) {
 }
 
 function heroSlideResponse(slide: HeroSlide) {
+  if (!slide.mediaPath) return null;
+
+  const isVideo = slide.mediaType === "VIDEO";
+  const posterPath = isVideo ? slide.posterPath || null : null;
+
   return {
     id: slide.id,
-    image: imagePath(slide.mediaPath, asset("_DSC4760.jpg")),
+    image: isVideo ? posterPath || "" : slide.mediaPath,
+    ...(isVideo ? { video: slide.mediaPath } : {}),
+    ...(posterPath ? { poster: posterPath } : {}),
+    mediaType: slide.mediaType || "IMAGE",
+    isLooping: slide.isLooping,
     alt: slide.mediaAlt || slide.title || "MWS hero image",
     headline: slide.title || undefined,
     caption: slide.caption || slide.description || undefined,
@@ -322,7 +307,9 @@ function ourSchoolContent(record: OurSchoolPageRecord | null) {
 export class PageDataService {
   static async getHeroSlides() {
     const slides = await HeroSlideRepository.listActive();
-    return slides.length ? slides.map(heroSlideResponse) : defaultHeroSlides;
+    return slides
+      .map(heroSlideResponse)
+      .filter((slide): slide is NonNullable<typeof slide> => slide !== null);
   }
 
   static async getHome() {

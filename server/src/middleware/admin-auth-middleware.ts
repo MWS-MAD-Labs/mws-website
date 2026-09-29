@@ -74,7 +74,9 @@ export async function adminAuthMiddleware(
     c.set("user", freshCmsUser);
   } catch (error) {
     if (error instanceof ResponseError) throw error;
-    console.error("Central lookup failed during CMS authorization:", error);
+    console.error("[AUTH] Central lookup failed during CMS authorization", {
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
     throw new ResponseError(503, "Cannot verify Central identity right now.");
   }
 

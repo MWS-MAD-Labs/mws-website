@@ -3,6 +3,10 @@ import { apiRequest, normalizePublicAssetUrls } from "@/lib/api";
 export type HeroSlideData = {
   id: string;
   image: string;
+  video?: string;
+  poster?: string;
+  mediaType?: "IMAGE" | "VIDEO";
+  isLooping?: boolean;
   alt: string;
   headline?: string;
   caption?: string;

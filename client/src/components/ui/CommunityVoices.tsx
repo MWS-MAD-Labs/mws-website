@@ -145,77 +145,65 @@ export default function CommunityVoices({
         )}
       </section>
 
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-label={
-          selectedVoice ? `${selectedVoice.name} — ${selectedVoice.role}` : 'Community voice'
-        }
-        className={`fixed inset-0 z-[9999] flex items-center justify-center px-6 py-8 transition-opacity duration-300 max-[680px]:px-3 max-[680px]:py-3 ${
-          selectedVoice ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
-        }`}
-        aria-hidden={!selectedVoice}
-        inert={!selectedVoice}
-      >
-        {/* Backdrop */}
+      {selectedVoice && (
         <div
-          className="absolute inset-0 bg-[rgba(36,23,24,0.76)] backdrop-blur-md"
-          onClick={() => setSelectedVoice(null)}
-        />
-
-        {/* Modal */}
-        <div
-          className={`relative z-[2] flex max-h-[calc(100dvh-64px)] w-full max-w-[1100px] overflow-hidden bg-[var(--warm-white)] shadow-[0_30px_100px_rgba(36,23,24,0.35)] transition-all duration-300 ${
-            selectedVoice
-              ? 'translate-y-0 scale-100 opacity-100'
-              : 'translate-y-5 scale-[0.97] opacity-0'
-          } max-[768px]:max-h-[calc(100dvh-24px)] max-[768px]:flex-col`}
+          ref={dialogRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${selectedVoice.name} — ${selectedVoice.role}`}
+          className="fixed inset-0 z-[9999] flex items-center justify-center px-6 py-8 transition-opacity duration-300 max-[680px]:px-3 max-[680px]:py-3"
         >
-          {/* Close */}
-          <button
-            ref={closeButtonRef}
-            type="button"
-            aria-label="Close modal"
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-[rgba(36,23,24,0.76)]"
             onClick={() => setSelectedVoice(null)}
-            className="absolute right-5 top-5 z-20 flex h-9 w-9 items-center justify-center border border-black/10 bg-white/90 text-xl leading-none text-[var(--charcoal)] backdrop-blur-sm transition-colors duration-200 hover:bg-[var(--charcoal)] hover:text-white max-[680px]:right-3 max-[680px]:top-3"
-          >
-            &times;
-          </button>
+          />
 
-          {/* Image — 9:16 */}
-          <div className="relative aspect-[9/16] h-[min(82vh,720px)] shrink-0 bg-[var(--charcoal)] max-[768px]:aspect-[9/16] max-[768px]:h-auto max-[768px]:max-h-[55vh] max-[768px]:w-full">
-            {selectedVoice && (
+          {/* Modal */}
+          <div className="relative z-[2] flex max-h-[calc(100dvh-64px)] w-full max-w-[1100px] translate-y-0 scale-100 overflow-hidden bg-[var(--warm-white)] opacity-100 shadow-[0_30px_100px_rgba(36,23,24,0.35)] transition-all duration-300 max-[768px]:max-h-[calc(100dvh-24px)] max-[768px]:flex-col">
+            {/* Close */}
+            <button
+              ref={closeButtonRef}
+              type="button"
+              aria-label="Close modal"
+              onClick={() => setSelectedVoice(null)}
+              className="absolute right-5 top-5 z-20 flex h-9 w-9 items-center justify-center border border-black/10 bg-white/90 text-xl leading-none text-[var(--charcoal)] transition-colors duration-200 hover:bg-[var(--charcoal)] hover:text-white max-[680px]:right-3 max-[680px]:top-3"
+            >
+              &times;
+            </button>
+
+            {/* Image — 9:16 */}
+            <div className="relative aspect-[9/16] h-[min(82vh,720px)] shrink-0 bg-[var(--charcoal)] max-[768px]:aspect-[9/16] max-[768px]:h-auto max-[768px]:max-h-[55vh] max-[768px]:w-full">
               <img
                 className="h-full w-full object-cover"
                 src={selectedVoice.image}
                 alt={`${selectedVoice.role} Voice`}
               />
-            )}
 
-            <div className="absolute inset-0 bg-[rgba(36,23,24,0.08)]" />
-          </div>
+              <div className="absolute inset-0 bg-[rgba(36,23,24,0.08)]" />
+            </div>
 
-          {/* Content */}
-          <div className="flex min-w-0 flex-1 flex-col justify-center px-14 py-14 max-[900px]:px-10 max-[768px]:px-8 max-[768px]:py-10 max-[520px]:px-6 max-[520px]:py-8">
-            {/* Quote */}
-            <blockquote className="m-0 max-w-[600px] text-[clamp(22px,2.3vw,32px)] font-[var(--f-voice)] italic leading-[1.45] text-[var(--charcoal)]">
-              {selectedVoice ? `"${selectedVoice.quote}"` : '"Quote text goes here..."'}
-            </blockquote>
+            {/* Content */}
+            <div className="flex min-w-0 flex-1 flex-col justify-center px-14 py-14 max-[900px]:px-10 max-[768px]:px-8 max-[768px]:py-10 max-[520px]:px-6 max-[520px]:py-8">
+              {/* Quote */}
+              <blockquote className="m-0 max-w-[600px] text-[clamp(22px,2.3vw,32px)] font-[var(--f-voice)] italic leading-[1.45] text-[var(--charcoal)]">
+                {`"${selectedVoice.quote}"`}
+              </blockquote>
 
-            {/* Name + Unit */}
-            <div className="mt-10 border-t border-[var(--border)] pt-5">
-              <h3 className="m-0 text-lg font-semibold text-[var(--charcoal)]">
-                {selectedVoice?.name ?? 'Author Name'}
-              </h3>
+              {/* Name + Unit */}
+              <div className="mt-10 border-t border-[var(--border)] pt-5">
+                <h3 className="m-0 text-lg font-semibold text-[var(--charcoal)]">
+                  {selectedVoice.name}
+                </h3>
 
-              <p className="mt-1 text-sm text-[var(--charcoal-muted)]">
-                {selectedVoice?.grade ?? 'Unit'}
-              </p>
+                <p className="mt-1 text-sm text-[var(--charcoal-muted)]">
+                  {selectedVoice.grade ?? 'Unit'}
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   );
 }

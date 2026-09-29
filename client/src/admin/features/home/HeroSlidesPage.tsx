@@ -42,6 +42,7 @@ type FormState = {
 
 type PreviewSlide = {
   caption: string;
+  posterPath: string;
   ctaLabel: string;
   mediaAlt: string;
   mediaPath: string;
@@ -113,6 +114,7 @@ function previewFromForm(form: FormState): PreviewSlide {
     mediaAlt: form.mediaAlt.trim() || form.title.trim() || "Home hero slide",
     mediaPath: form.mediaPath,
     mediaType: form.mediaType,
+    posterPath: form.posterPath,
     title: form.title.trim() || "Untitled home slide",
   };
 }
@@ -124,6 +126,7 @@ function previewFromSlide(slide: ResolvedHeroSlide): PreviewSlide {
     mediaAlt: slide.mediaAlt ?? slide.title ?? "Home hero slide",
     mediaPath: slide.mediaPath ?? "",
     mediaType: slide.mediaType ?? "IMAGE",
+    posterPath: slide.posterPath ?? "",
     title: slide.title ?? "Untitled home slide",
   };
 }
@@ -152,6 +155,7 @@ function HomeHeroPreview({
             <video
               className="absolute inset-0 h-full w-full object-cover"
               src={mediaUrl}
+              poster={slide.posterPath ? adminApi.publicAssetUrl(slide.posterPath) : undefined}
               muted
               playsInline
             />
@@ -223,7 +227,9 @@ export default function HeroSlidesPage() {
   const [galleries, setGalleries] = useState<GalleryItem[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
-  const [isAssetPickerOpen, setIsAssetPickerOpen] = useState(false);
+  const [assetPickerTarget, setAssetPickerTarget] = useState<
+    "media" | "poster" | null
+  >(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -547,7 +553,7 @@ export default function HeroSlidesPage() {
                     className="inline-flex items-center gap-2"
                     type="button"
                     variant="outline"
-                    onClick={() => setIsAssetPickerOpen(true)}
+                    onClick={() => setAssetPickerTarget("media")}
                   >
                     <ImagePlus size={15} />
                     Choose
@@ -560,6 +566,7 @@ export default function HeroSlidesPage() {
                       <video
                         className="aspect-video w-full object-cover"
                         src={adminApi.publicAssetUrl(form.mediaPath)}
+                        poster={form.posterPath ? adminApi.publicAssetUrl(form.posterPath) : undefined}
                         muted
                       />
                     ) : (
@@ -572,6 +579,55 @@ export default function HeroSlidesPage() {
                   </div>
                 ) : null}
               </div>
+
+              {form.mediaType === "VIDEO" ? (
+                <div className="rounded-lg border border-gray-200 p-4">
+                  <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <h3 className="text-sm font-semibold text-gray-900">
+                        Video Poster
+                      </h3>
+                      <p className="text-sm text-gray-500">
+                        {form.posterPath
+                          ? "Poster selected from Gallery Library."
+                          : "No poster selected."}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {form.posterPath ? (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          onClick={() =>
+                            setForm((current) => ({ ...current, posterPath: "" }))
+                          }
+                        >
+                          Remove
+                        </Button>
+                      ) : null}
+                      <Button
+                        className="inline-flex items-center gap-2"
+                        type="button"
+                        variant="outline"
+                        onClick={() => setAssetPickerTarget("poster")}
+                      >
+                        <ImagePlus size={15} />
+                        Choose
+                      </Button>
+                    </div>
+                  </div>
+
+                  {form.posterPath ? (
+                    <div className="overflow-hidden rounded-lg bg-gray-100">
+                      <img
+                        className="aspect-video w-full object-cover"
+                        src={adminApi.publicAssetUrl(form.posterPath)}
+                        alt="Hero video poster"
+                      />
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
 
               <Field label="Image Description">
                 <input
@@ -644,17 +700,24 @@ export default function HeroSlidesPage() {
         </div>
 
         <GalleryAssetPickerModal
+          allowedKinds={assetPickerTarget === "poster" ? ["IMAGE"] : undefined}
           galleries={galleries}
-          open={isAssetPickerOpen}
-          title="Choose Hero Media"
-          onClose={() => setIsAssetPickerOpen(false)}
+          key={assetPickerTarget ?? "closed"}
+          open={assetPickerTarget !== null}
+          title={assetPickerTarget === "poster" ? "Choose Video Poster" : "Choose Hero Media"}
+          onClose={() => setAssetPickerTarget(null)}
           onSelect={(asset) =>
-            setForm((current) => ({
-              ...current,
-              mediaAlt: asset.alt,
-              mediaPath: asset.path,
-              mediaType: asset.kind,
-            }))
+            setForm((current) =>
+              assetPickerTarget === "poster"
+                ? { ...current, posterPath: asset.path }
+                : {
+                    ...current,
+                    mediaAlt: asset.alt,
+                    mediaPath: asset.path,
+                    mediaType: asset.kind,
+                    posterPath: asset.kind === "VIDEO" ? current.posterPath : "",
+                  },
+            )
           }
         />
       </section>

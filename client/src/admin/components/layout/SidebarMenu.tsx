@@ -1,85 +1,145 @@
-import { useState } from "react";
-import { ChevronDown } from "lucide-react";
-import { NavLink, useLocation } from "react-router-dom";
-import { useAuth } from "@/admin/auth/useAuth";
-import menuSections, { type MenuItem, type MenuSection } from "@/admin/config/navigation";
-import { hasCmsPermission } from "@/admin/types/auth";
+import { useEffect, useMemo, useState, type FocusEvent, type MouseEvent } from 'react';
+import { ChevronDown } from 'lucide-react';
+import { NavLink, useLocation } from 'react-router-dom';
 
-type AuthUser = ReturnType<typeof useAuth>["user"];
+import { useAuth } from '@/admin/auth/useAuth';
+import menuSections, { type MenuItem, type MenuSection } from '@/admin/config/navigation';
+import { hasCmsPermission } from '@/admin/types/auth';
+import SidebarFlyout, { type SidebarFlyoutPosition } from '@/admin/components/ui/SidebarFlyout';
+
+type AuthUser = ReturnType<typeof useAuth>['user'];
+
+type FlyoutState = {
+  label: string;
+  position: SidebarFlyoutPosition;
+} | null;
 
 function isMenuItemVisible(item: MenuItem, user: AuthUser): boolean {
   if (!item.enabled) return false;
+
   if (item.requiredPermission && !hasCmsPermission(user, item.requiredPermission)) {
     return false;
   }
-  if (!item.children?.length) return true;
+
+  if (!item.children?.length) {
+    return true;
+  }
 
   return item.children.some((child) => isMenuItemVisible(child, user));
 }
 
 function hasActiveChild(item: MenuItem, pathname: string): boolean {
   return Boolean(
-    item.children?.some(
-      (child) => child.href === pathname || hasActiveChild(child, pathname),
-    ),
+    item.children?.some((child) => child.href === pathname || hasActiveChild(child, pathname)),
   );
 }
 
 function visibleSection(section: MenuSection, user: AuthUser) {
   const items = section.items.filter((item) => isMenuItemVisible(item, user));
-  return items.length ? { ...section, items } : null;
+
+  return items.length
+    ? {
+        ...section,
+        items,
+      }
+    : null;
 }
 
 export function SidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
   const location = useLocation();
   const { user } = useAuth();
+
+  const activeParentLabels = useMemo(
+    () =>
+      menuSections
+        .flatMap((section) => section.items)
+        .filter((item) => hasActiveChild(item, location.pathname))
+        .map((item) => item.label),
+    [location.pathname],
+  );
+
+  const [openMenus, setOpenMenus] = useState<string[]>(activeParentLabels);
+
+  const [flyout, setFlyout] = useState<FlyoutState>(null);
+
   const visibleMenuSections = menuSections
     .map((section) => visibleSection(section, user))
     .filter(Boolean) as MenuSection[];
 
-  const [openMenus, setOpenMenus] = useState<string[]>(
-    visibleMenuSections
-      .flatMap((section) => section.items)
-      .filter((item) => hasActiveChild(item, location.pathname))
-      .map((item) => item.label),
-  );
+  useEffect(() => {
+    if (!activeParentLabels.length) return;
+
+    queueMicrotask(() => {
+      setOpenMenus((current) => Array.from(new Set([...current, ...activeParentLabels])));
+    });
+  }, [activeParentLabels]);
+
+  useEffect(() => {
+    if (!collapsed) {
+      queueMicrotask(() => setFlyout(null));
+    }
+  }, [collapsed]);
+
+  useEffect(() => {
+    queueMicrotask(() => setFlyout(null));
+  }, [location.pathname]);
 
   const toggleMenu = (label: string) => {
     setOpenMenus((current) =>
-      current.includes(label)
-        ? current.filter((item) => item !== label)
-        : [...current, label],
+      current.includes(label) ? current.filter((item) => item !== label) : [...current, label],
     );
   };
 
-  return (
-    <nav className="flex-1 overflow-y-auto px-3 py-5">
-      <div className="space-y-5">
-        {visibleMenuSections.map((section) => (
-          <div key={section.label}>
-            {!collapsed ? (
-              <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-black/35">
-                {section.label}
-              </p>
-            ) : null}
+  const openFlyout = (
+    event: MouseEvent<HTMLButtonElement> | FocusEvent<HTMLButtonElement>,
+    label: string,
+  ) => {
+    const rect = event.currentTarget.getBoundingClientRect();
 
-            <div className="space-y-1">
-              {section.items.map((item) => (
-                <SidebarMenuItem
-                  collapsed={collapsed}
-                  item={item}
-                  key={item.href ?? item.label}
-                  level={0}
-                  openMenus={openMenus}
-                  toggleMenu={toggleMenu}
-                  user={user}
-                />
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </nav>
+    setFlyout({
+      label,
+      position: {
+        top: rect.top,
+        left: rect.right + 8,
+      },
+    });
+  };
+
+  const closeFlyout = () => {
+    setFlyout(null);
+  };
+
+  const flyoutItem = flyout
+    ? visibleMenuSections
+        .flatMap((section) => section.items)
+        .find((item) => item.label === flyout.label)
+    : null;
+
+  return (
+    <div className="relative z-10 h-full">
+      <nav className="h-full overflow-y-auto px-3 py-5">
+        <div className="space-y-1">
+          {visibleMenuSections.map((section) =>
+            section.items.map((item) => (
+              <SidebarMenuItem
+                key={item.href ?? item.label}
+                collapsed={collapsed}
+                item={item}
+                level={0}
+                openMenus={openMenus}
+                toggleMenu={toggleMenu}
+                user={user}
+                openFlyout={openFlyout}
+              />
+            )),
+          )}
+        </div>
+      </nav>
+
+      {collapsed && flyout && flyoutItem ? (
+        <SidebarFlyout item={flyoutItem} position={flyout.position} onClose={closeFlyout} />
+      ) : null}
+    </div>
   );
 }
 
@@ -90,6 +150,7 @@ function SidebarMenuItem({
   openMenus,
   toggleMenu,
   user,
+  openFlyout,
 }: {
   collapsed: boolean;
   item: MenuItem;
@@ -97,58 +158,123 @@ function SidebarMenuItem({
   openMenus: string[];
   toggleMenu: (label: string) => void;
   user: AuthUser;
+  openFlyout: (
+    event: MouseEvent<HTMLButtonElement> | FocusEvent<HTMLButtonElement>,
+    label: string,
+  ) => void;
 }) {
+  const location = useLocation();
   const Icon = item.Icon;
-  const visibleChildren = item.children?.filter((child) =>
-    isMenuItemVisible(child, user),
-  );
-  const hasChildren = Boolean(visibleChildren?.length);
-  const isOpen = openMenus.includes(item.label);
-  const leftPadding = collapsed
-    ? "px-0 justify-center"
-    : level === 0
-      ? "px-3"
-      : level === 1
-        ? "pl-8 pr-3"
-        : "pl-11 pr-3";
 
+  const visibleChildren = item.children?.filter((child) => isMenuItemVisible(child, user));
+
+  const hasChildren = Boolean(visibleChildren?.length);
+
+  const isOpen = openMenus.includes(item.label);
+
+  const isActiveParent = item.href === location.pathname || hasActiveChild(item, location.pathname);
+
+  const leftPadding = collapsed
+    ? 'px-0 justify-center'
+    : level === 0
+      ? 'px-3'
+      : level === 1
+        ? 'pl-8 pr-3'
+        : 'pl-11 pr-3';
+
+  /*
+   * Parent menu with children
+   */
   if (hasChildren) {
     return (
-      <div>
-        <button
-          type="button"
-          title={collapsed ? item.label : undefined}
-          onClick={() => toggleMenu(item.label)}
+      <div className="relative">
+        <div
           className={[
-            "flex h-9 w-full items-center gap-2 rounded-md text-sm font-medium text-black/60 transition-colors hover:bg-black/5 hover:text-black",
-            leftPadding,
-          ].join(" ")}
+            'flex h-9 w-full items-center rounded-md',
+            'text-sm font-medium text-white',
+            'transition-colors',
+            isActiveParent ? 'bg-white/15' : 'hover:bg-white/10',
+          ].join(' ')}
         >
-          <Icon size={level === 0 ? 17 : 16} strokeWidth={1.8} />
+          {/* Parent navigation */}
+          {item.href ? (
+            <NavLink
+              to={item.href}
+              title={collapsed ? item.label : undefined}
+              className={[
+                'flex h-full min-w-0 flex-1 items-center gap-2',
+                collapsed ? 'justify-center' : 'justify-start',
+                leftPadding,
+              ].join(' ')}
+            >
+              <Icon size={level === 0 ? 17 : 16} strokeWidth={1.8} />
 
+              {!collapsed ? <span className="truncate">{item.label}</span> : null}
+            </NavLink>
+          ) : (
+            <button
+              type="button"
+              title={collapsed ? item.label : undefined}
+              onClick={() => {
+                if (!collapsed) {
+                  toggleMenu(item.label);
+                }
+              }}
+              className={[
+                'flex h-full min-w-0 flex-1 items-center gap-2',
+                collapsed ? 'justify-center' : 'justify-start',
+                leftPadding,
+              ].join(' ')}
+            >
+              <Icon size={level === 0 ? 17 : 16} strokeWidth={1.8} />
+
+              {!collapsed ? <span className="truncate">{item.label}</span> : null}
+            </button>
+          )}
+
+          {/* Expanded sidebar toggle */}
           {!collapsed ? (
-            <>
-              <span className="flex-1 text-left">{item.label}</span>
+            <button
+              type="button"
+              aria-label={isOpen ? `Collapse ${item.label}` : `Expand ${item.label}`}
+              onClick={() => toggleMenu(item.label)}
+              className="flex h-full w-8 shrink-0 items-center justify-center rounded-r-md text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+            >
               <ChevronDown
                 size={15}
                 strokeWidth={1.8}
-                className={`transition-transform ${isOpen ? "rotate-180" : ""}`}
+                className={['transition-transform duration-200', isOpen ? 'rotate-180' : ''].join(
+                  ' ',
+                )}
               />
-            </>
-          ) : null}
-        </button>
+            </button>
+          ) : (
+            <button
+              type="button"
+              aria-label={`Open ${item.label} menu`}
+              onMouseEnter={(event) => openFlyout(event, item.label)}
+              onClick={(event) => openFlyout(event, item.label)}
+              onFocus={(event) => openFlyout(event, item.label)}
+              className="absolute inset-0 z-10 rounded-md focus:outline-none focus:ring-2 focus:ring-white/30"
+            >
+              <span className="sr-only">Open {item.label} menu</span>
+            </button>
+          )}
+        </div>
 
+        {/* Expanded sidebar submenu */}
         {!collapsed && isOpen ? (
           <div className="mt-1 space-y-1">
             {visibleChildren?.map((child) => (
               <SidebarMenuItem
-                collapsed={collapsed}
-                item={child}
                 key={child.href ?? child.label}
+                collapsed={false}
+                item={child}
                 level={level + 1}
                 openMenus={openMenus}
                 toggleMenu={toggleMenu}
                 user={user}
+                openFlyout={openFlyout}
               />
             ))}
           </div>
@@ -157,7 +283,12 @@ function SidebarMenuItem({
     );
   }
 
-  if (!item.href) return null;
+  /*
+   * Leaf menu item
+   */
+  if (!item.href) {
+    return null;
+  }
 
   return (
     <NavLink
@@ -165,17 +296,19 @@ function SidebarMenuItem({
       title={collapsed ? item.label : undefined}
       className={({ isActive }) =>
         [
-          "flex h-9 items-center gap-2 rounded-md text-sm transition-colors",
-          level === 0 ? "font-medium" : "",
+          'flex h-9 items-center gap-2 rounded-md',
+          'text-sm transition-colors',
+          level === 0 ? 'font-medium' : '',
           leftPadding,
           isActive
-            ? "bg-black/8 font-medium text-black"
-            : "text-black/60 hover:bg-black/5 hover:text-black",
-        ].join(" ")
+            ? 'bg-white/15 font-semibold text-white'
+            : 'text-white hover:bg-white/10 hover:text-white',
+        ].join(' ')
       }
     >
       <Icon size={level === 0 ? 17 : 16} strokeWidth={1.8} />
-      {!collapsed ? <span>{item.label}</span> : null}
+
+      {!collapsed ? <span className="truncate">{item.label}</span> : null}
     </NavLink>
   );
 }

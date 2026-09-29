@@ -118,7 +118,10 @@ export class LoginController {
       return c.redirect(`${frontendOrigin()}/admin`, 302);
     } catch (error) {
       console.warn("[AUTH] Login failed");
-      console.error("CMS Google callback failed:", error);
+      console.error("[AUTH] CMS Google callback failed", {
+        message: error instanceof Error ? error.message : "Unknown error",
+        status: error instanceof ResponseError ? error.status : undefined,
+      });
       const errorCode =
         error instanceof ResponseError
           ? RESPONSE_ERROR_CODES[error.status]

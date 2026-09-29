@@ -52,7 +52,6 @@ async function exchangeCodeForIdToken(code: string): Promise<string | null> {
 
   if (!res.ok) {
     console.error("[AUTH] Google token exchange failed", { status: res.status });
-    console.error("Google code exchange failed:", res.status, await res.text());
     return null;
   }
 
@@ -67,7 +66,7 @@ async function verifyIdToken(idToken: string): Promise<GoogleTokenPayload | null
   );
 
   if (!res.ok) {
-    console.error("Google ID token validation failed:", res.status, await res.text());
+    console.error("[AUTH] Google ID token validation failed", { status: res.status });
     return null;
   }
 
@@ -106,7 +105,9 @@ export class GoogleAuth {
       if (!idToken) return null;
       return payloadFromGoogleToken(await verifyIdToken(idToken));
     } catch (error) {
-      console.error("Google code verification failed:", error);
+      console.error("[AUTH] Google code verification failed", {
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
       return null;
     }
   }

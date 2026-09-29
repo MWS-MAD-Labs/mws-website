@@ -163,7 +163,9 @@ function handleDatabaseError(error: unknown, model: AdminCrudModel): never {
     throw new ResponseError(404, `${model.label} not found.`);
   }
 
-  console.error(`${model.label} database error:`, error);
+  console.error(`[CMS] ${model.label} database error`, {
+    code: prismaError.code ?? "unknown",
+  });
   throw new ResponseError(500, `Database error while processing ${model.label}.`);
 }
 
