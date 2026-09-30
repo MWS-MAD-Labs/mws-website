@@ -13,7 +13,8 @@
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",
     "db:validate": "prisma validate",
-    "db:seed:cms-roles": "bun run src/scripts/seed-cms-roles.ts"
+    "db:seed:cms-roles": "bun run src/scripts/seed-cms-roles.ts",
+    "db:seed:madlabs-super-admins": "bun run src/scripts/seed-madlabs-super-admins.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
