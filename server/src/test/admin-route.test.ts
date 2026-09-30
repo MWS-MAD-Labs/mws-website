@@ -6,6 +6,7 @@ import { signSession } from "../lib/session";
 import { clearCentralIdentityCacheForTest } from "../middleware/admin-auth-middleware";
 import * as centralClient from "../lib/central-client";
 import { CmsAuthService } from "../services/cms-auth-service";
+import { DashboardService } from "../services/dashboard-service";
 import { cmsSessionUser, testUser } from "./test-helpers";
 import type { SessionVariables } from "../types/hono-context";
 
@@ -30,6 +31,19 @@ function buildApp() {
   return app;
 }
 
+const dashboardSummary = {
+  news: { published: 0, scheduled: 0, drafts: 0, archived: 0 },
+  hero: { total: 0, active: 0, missingMedia: 0 },
+  gallery: { galleries: 0, images: 0, videos: 0 },
+  academic: [],
+  users: null,
+  recentUpdates: [],
+} satisfies Awaited<ReturnType<typeof DashboardService.contentSummary>>;
+
+function mockDashboardSummary() {
+  return spyOn(DashboardService, "contentSummary").mockResolvedValue(dashboardSummary);
+}
+
 describe("adminRoute", () => {
   it("redirect is handled by frontend, while backend refuses unauthenticated admin API access", async () => {
     const res = await buildApp().request("/admin/dashboard-data");
@@ -42,6 +56,7 @@ describe("adminRoute", () => {
     const cmsUser = cmsSessionUser("ADMIN");
     spyOn(centralClient, "resolveCentralIdentity").mockResolvedValue(testUser);
     spyOn(CmsAuthService, "requireFreshSessionUser").mockResolvedValue(cmsUser);
+    const contentSummary = mockDashboardSummary();
     const token = await signSession(cmsUser);
 
     const res = await buildApp().request("/admin/dashboard-data", {
@@ -52,12 +67,14 @@ describe("adminRoute", () => {
     const body = (await res.json()) as { data: { message: string; user: unknown } };
     expect(body.data.message).toBe("Halo, Test Employee");
     expect(body.data.user).toEqual(cmsUser);
+    expect(contentSummary).toHaveBeenCalledWith({ includeUsers: false });
   });
 
   it("allows SUPER_ADMIN to access dashboard data", async () => {
     const cmsUser = cmsSessionUser("SUPER_ADMIN");
     spyOn(centralClient, "resolveCentralIdentity").mockResolvedValue(testUser);
     spyOn(CmsAuthService, "requireFreshSessionUser").mockResolvedValue(cmsUser);
+    const contentSummary = mockDashboardSummary();
     const token = await signSession(cmsUser);
 
     const res = await buildApp().request("/admin/dashboard-data", {
@@ -65,12 +82,14 @@ describe("adminRoute", () => {
     });
 
     expect(res.status).toBe(200);
+    expect(contentSummary).toHaveBeenCalledWith({ includeUsers: true });
   });
 
   it("allows ADMIN to access dashboard data", async () => {
     const cmsUser = cmsSessionUser("ADMIN");
     spyOn(centralClient, "resolveCentralIdentity").mockResolvedValue(testUser);
     spyOn(CmsAuthService, "requireFreshSessionUser").mockResolvedValue(cmsUser);
+    const contentSummary = mockDashboardSummary();
     const token = await signSession(cmsUser);
 
     const res = await buildApp().request("/admin/dashboard-data", {
@@ -78,6 +97,7 @@ describe("adminRoute", () => {
     });
 
     expect(res.status).toBe(200);
+    expect(contentSummary).toHaveBeenCalledWith({ includeUsers: false });
   });
 
   it("refuses access when Central no longer recognizes the session identity", async () => {
