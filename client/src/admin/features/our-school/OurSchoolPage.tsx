@@ -144,23 +144,13 @@ function InlineInput({
 
 export default function OurSchoolPage() {
   const [pageId, setPageId] = useState<string | null>(null);
-
   const [content, setContent] = useState<EditableContent>(defaultContent);
-
-  const [status, setStatus] = useState<PageStatus>('DRAFT');
-
   const [galleries, setGalleries] = useState<GalleryItem[]>([]);
-
   const [galleryId, setGalleryId] = useState<string | null>(null);
-
   const [featuredImageId, setFeaturedImageId] = useState<string | null>(null);
-
   const [isPickerOpen, setIsPickerOpen] = useState(false);
-
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
-
   const [isLoading, setIsLoading] = useState(true);
-
   const [isSaving, setIsSaving] = useState(false);
 
   function updateContent(updater: (current: EditableContent) => EditableContent) {
@@ -176,7 +166,6 @@ export default function OurSchoolPage() {
 
     setPageId(item?.id ?? null);
     setContent(nextContent);
-    setStatus(nextContent.status ?? 'PUBLISHED');
 
     setGalleryId(item?.galleryId ?? null);
     setFeaturedImageId(item?.featuredImageId ?? null);
@@ -234,7 +223,6 @@ export default function OurSchoolPage() {
 
       setPageId(saved.id);
       setContent(savedContent);
-      setStatus(nextStatus);
 
       setGalleryId(saved.galleryId);
       setFeaturedImageId(saved.featuredImageId);

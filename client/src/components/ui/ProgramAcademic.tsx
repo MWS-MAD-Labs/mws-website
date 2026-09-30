@@ -32,7 +32,6 @@ export default function ProgramAcademic({ programs = defaultPrograms }: ProgramA
 
   const items = programs.length ? programs : defaultPrograms;
   const selectedIndex = activeIndex < items.length ? activeIndex : 0;
-  const activeProgram = items[selectedIndex] ?? items[0];
 
   return (
     <section
