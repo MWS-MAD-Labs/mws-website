@@ -50,10 +50,14 @@ export default function ArticleSection({
           />
         </Field>
 
-        <Field label="Article content">
-          <div className="overflow-hidden rounded-lg border border-gray-200 bg-white focus-within:border-[#7e1518] focus-within:ring-2 focus-within:ring-[#7e1518]/10">
-            <Tiptap value={form.content} onChange={onContentChange} />
-          </div>
+        <Field as="div" label="Article content">
+          <Tiptap
+            ariaLabel="Article content"
+            placeholder="Write the story…"
+            size="article"
+            value={form.content}
+            onChange={onContentChange}
+          />
         </Field>
 
         <div className="border-t border-gray-200 pt-5">

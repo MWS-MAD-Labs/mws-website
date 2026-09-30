@@ -35,6 +35,11 @@ adminRoute.get(
   DashboardController.dashboard,
 );
 adminRoute.get(
+  "/analytics",
+  requireCmsPermission("dashboard:read"),
+  DashboardController.analytics,
+);
+adminRoute.get(
   "/users",
   requireCmsRole("SUPER_ADMIN"),
   CmsUsersController.listUsers,
@@ -58,6 +63,11 @@ adminRoute.delete(
   "/users/invitations/:id",
   requireCmsRole("SUPER_ADMIN"),
   CmsUsersController.revokeInvitation,
+);
+adminRoute.post(
+  "/users/invitations/:id/resend",
+  requireCmsRole("SUPER_ADMIN"),
+  CmsUsersController.resendInvitation,
 );
 adminRoute.get(
   "/contact-page",

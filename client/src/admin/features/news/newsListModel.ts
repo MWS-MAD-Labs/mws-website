@@ -13,12 +13,17 @@ export type UpdateNewsFilter = <Key extends keyof NewsFilters>(
   value: NewsFilters[Key],
 ) => void;
 
-export function createInitialNewsFilters(): NewsFilters {
+const NEWS_STATUSES: NewsStatus[] = ['DRAFT', 'PUBLISHED', 'ARCHIVED'];
+
+/** `?status=DRAFT` preselects the status filter, e.g. from a dashboard link. */
+export function createInitialNewsFilters(search = ''): NewsFilters {
+  const status = new URLSearchParams(search).get('status')?.toUpperCase() as NewsStatus | undefined;
+
   return {
     categoryId: '',
     featuredOnly: false,
     search: '',
-    status: '',
+    status: status && NEWS_STATUSES.includes(status) ? status : '',
   };
 }
 

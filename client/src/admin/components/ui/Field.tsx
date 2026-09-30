@@ -1,13 +1,23 @@
 type FieldProps = {
   children: React.ReactNode;
   label: string;
+  hint?: string;
+  /**
+   * Use "div" for controls that are not a single input, such as the rich-text
+   * editor. A <label> forwards clicks inside it to its first button, which
+   * would fire a toolbar button whenever the editor text is clicked.
+   */
+  as?: 'label' | 'div';
 };
 
-export default function Field({ children, label }: FieldProps) {
+export default function Field({ children, label, hint, as = 'label' }: FieldProps) {
+  const Wrapper = as;
+
   return (
-    <label className="grid gap-1 text-sm font-medium">
-      {label}
+    <Wrapper className="grid gap-1 text-sm font-medium">
+      <span>{label}</span>
       {children}
-    </label>
+      {hint ? <span className="text-xs font-normal text-gray-500">{hint}</span> : null}
+    </Wrapper>
   );
 }

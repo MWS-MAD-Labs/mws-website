@@ -5,6 +5,7 @@ import Chatbot from './Chatbot';
 import Footer from './Footer';
 import Navbar from './Navbar';
 import { refreshPublicAos, syncPublicAos, watchPublicAos } from './publicAos';
+import { trackPageView } from '@/lib/analytics';
 
 const ANNOUNCEMENT_SESSION_KEY = 'mws-public-announcement-dismissed';
 
@@ -120,6 +121,10 @@ export default function PageLayout() {
       pathname === '/'
         ? 'Millennia World School'
         : `${pageName ?? 'Page'} - Millennia World School`;
+  }, [pathname]);
+
+  useEffect(() => {
+    trackPageView(pathname);
   }, [pathname]);
 
   // Layout effect: AOS attributes must be in place before the browser paints

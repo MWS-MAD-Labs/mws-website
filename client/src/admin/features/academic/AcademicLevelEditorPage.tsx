@@ -602,7 +602,7 @@ export default function AcademicLevelEditorPage() {
           <section className="subpage-section pt-0">
             <div className="wrap">
               <div className="mx-auto max-w-4xl border-t border-black/10 pt-8 text-center">
-                <Tiptap value={closingText} onChange={setClosingText} />
+                <Tiptap size="compact" value={closingText} onChange={setClosingText} />
               </div>
             </div>
           </section>

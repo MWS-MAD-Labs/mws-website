@@ -19,6 +19,7 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/node": "^26.4.1",
+    "@types/nodemailer": "^8.0.2",
     "prisma": "^7.10.0",
     "typescript": "^5.6.3"
   },
@@ -29,6 +30,7 @@
     "hono": "^4.13.5",
     "ioredis": "^6.0.0",
     "minio": "^8.0.7",
+    "nodemailer": "^10.0.13",
     "pg": "^8.23.0",
     "rate-limiter-flexible": "^11.2.0",
     "zod": "^4.5.4"

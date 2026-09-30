@@ -1,89 +1,109 @@
+import { ImagePlus, LayoutPanelTop, PenLine } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { adminApi, type AdminDashboardData } from '@/admin/api/adminApi';
 import { useAuth } from '@/admin/auth/useAuth';
 import AppShell from '@/admin/components/layout/AppShell';
 import ContentPageHeader from '@/admin/components/ui/ContentPageHeader';
+import Notice from '@/admin/components/ui/Notice';
+import AttentionList from '@/admin/features/dashboard/AttentionList';
+import ContentOverview from '@/admin/features/dashboard/ContentOverview';
+import RecentUpdates from '@/admin/features/dashboard/RecentUpdates';
+import TrafficSection from '@/admin/features/dashboard/TrafficSection';
+import { hasCmsPermission } from '@/admin/types/auth';
+
+const quickActionClass =
+  'inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-[#241718] transition-colors hover:border-[#7e1518]/40 hover:text-[#7e1518]';
 
 export default function Dashboard() {
   const { user } = useAuth();
   const [dashboard, setDashboard] = useState<AdminDashboardData | null>(null);
   const [error, setError] = useState('');
+  const [reloadKey, setReloadKey] = useState(0);
+  const canManageContent = hasCmsPermission(user, 'content:manage');
 
   useEffect(() => {
     let cancelled = false;
 
-    adminApi
-      .dashboard()
-      .then((data) => {
-        if (cancelled) return;
-        setDashboard(data);
-      })
-      .catch((dashboardError) => {
-        console.error('CMS dashboard request failed:', dashboardError);
-        if (!cancelled) {
-          setError('Dashboard data could not be loaded.');
-        }
-      });
+    queueMicrotask(() => {
+      if (cancelled) return;
+      setError('');
+
+      adminApi
+        .dashboard()
+        .then((data) => {
+          if (!cancelled) setDashboard(data);
+        })
+        .catch((dashboardError) => {
+          if (!cancelled) {
+            setError(
+              dashboardError instanceof Error
+                ? dashboardError.message
+                : 'Dashboard data could not be loaded.',
+            );
+          }
+        });
+    });
 
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [reloadKey]);
+
+  const firstName = user?.central.nick_name || user?.name?.split(' ')[0];
 
   return (
     <AppShell title="Dashboard">
-      <section className="flex-1 space-y-5 p-6">
+      <section className="flex-1 space-y-6 p-6">
         <ContentPageHeader
           breadcrumbs={[{ label: 'Admin' }]}
-          title="Dashboard"
-          description="Overview of your CMS account and current access."
+          title={firstName ? `Welcome back, ${firstName}` : 'Dashboard'}
+          description="What is on the website today and what needs your attention."
+          action={
+            canManageContent ? (
+              <div className="flex flex-wrap gap-2">
+                <Link to="/admin/news/new" className={quickActionClass}>
+                  <PenLine size={16} aria-hidden="true" />
+                  Write news
+                </Link>
+                <Link to="/admin/content/home" className={quickActionClass}>
+                  <LayoutPanelTop size={16} aria-hidden="true" />
+                  Home hero
+                </Link>
+                <Link to="/admin/gallery" className={quickActionClass}>
+                  <ImagePlus size={16} aria-hidden="true" />
+                  Upload photos
+                </Link>
+              </div>
+            ) : null
+          }
         />
 
-        <div className="rounded-lg border border-[rgba(36,23,24,0.14)] bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-[#241718]">
-            {dashboard?.message ?? 'Welcome to CMS'}
-          </h2>
+        {error ? (
+          <Notice
+            tone="error"
+            action={{ label: 'Try again', onClick: () => setReloadKey((key) => key + 1) }}
+          >
+            {error}
+          </Notice>
+        ) : null}
 
-          <p className="mt-1 text-sm text-[#625759]">
-            {user?.central.email ?? 'Session email unavailable'}
-          </p>
+        {dashboard ? (
+          <>
+            <ContentOverview content={dashboard.content} />
+            <AttentionList content={dashboard.content} />
+          </>
+        ) : !error ? (
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-busy="true">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="h-[112px] animate-pulse rounded-lg bg-gray-100" />
+            ))}
+          </div>
+        ) : null}
 
-          {user && (
-            <dl className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="rounded-md border border-[rgba(36,23,24,0.10)] bg-[#faf8f3] p-4">
-                <dt className="text-xs font-semibold uppercase text-[#817678]">CMS Name</dt>
-                <dd className="mt-1 text-sm font-semibold text-[#241718]">{user.name}</dd>
-              </div>
-              <div className="rounded-md border border-[rgba(36,23,24,0.10)] bg-[#faf8f3] p-4">
-                <dt className="text-xs font-semibold uppercase text-[#817678]">Role</dt>
-                <dd className="mt-1 text-sm font-semibold text-[#241718]">
-                  {user.role.label ?? user.role.name}
-                </dd>
-              </div>
-              <div className="rounded-md border border-[rgba(36,23,24,0.10)] bg-[#faf8f3] p-4">
-                <dt className="text-xs font-semibold uppercase text-[#817678]">Unit ID</dt>
-                <dd className="mt-1 break-all text-sm font-semibold text-[#241718]">
-                  {user.unitId}
-                </dd>
-              </div>
-              <div className="rounded-md border border-[rgba(36,23,24,0.10)] bg-[#faf8f3] p-4">
-                <dt className="text-xs font-semibold uppercase text-[#817678]">CMS Status</dt>
-                <dd className="mt-1 text-sm font-semibold text-[#241718]">
-                  {user.isActive ? 'Active' : 'Inactive'}
-                </dd>
-              </div>
-            </dl>
-          )}
+        <TrafficSection />
 
-          {error && (
-            <div
-              role="alert"
-              className="mt-4 rounded-lg border border-[#7e1518]/20 bg-[#7e1518]/10 px-4 py-3 text-sm text-[#7e1518]"
-            >
-              <span>{error}</span>
-            </div>
-          )}
-        </div>
+        {dashboard ? <RecentUpdates updates={dashboard.content.recentUpdates} /> : null}
       </section>
     </AppShell>
   );

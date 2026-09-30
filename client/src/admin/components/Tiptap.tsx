@@ -1,17 +1,49 @@
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import { Placeholder } from '@tiptap/extensions';
 import { useEffect } from 'react';
 
 import TiptapToolbar from './TiptapToolbar';
 
+type TiptapSize = 'compact' | 'default' | 'article';
+
 type TiptapProps = {
   value: string;
   onChange: (value: string) => void;
+  placeholder?: string;
+  /** compact: short paragraphs and FAQ answers, article: full news stories. */
+  size?: TiptapSize;
+  ariaLabel?: string;
 };
 
-export default function Tiptap({ value, onChange }: TiptapProps) {
+const MIN_HEIGHT: Record<TiptapSize, string> = {
+  compact: 'min-h-[96px]',
+  default: 'min-h-[160px]',
+  article: 'min-h-[360px]',
+};
+
+export default function Tiptap({
+  value,
+  onChange,
+  placeholder = 'Start writing…',
+  size = 'default',
+  ariaLabel,
+}: TiptapProps) {
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [
+      // The server sanitizer drops <code>, so the editor does not offer it.
+      StarterKit.configure({
+        code: false,
+        codeBlock: false,
+        heading: { levels: [2, 3] },
+        link: {
+          openOnClick: false,
+          autolink: true,
+          defaultProtocol: 'https',
+        },
+      }),
+      Placeholder.configure({ placeholder }),
+    ],
     content: value,
 
     onUpdate: ({ editor }) => {
@@ -20,18 +52,8 @@ export default function Tiptap({ value, onChange }: TiptapProps) {
 
     editorProps: {
       attributes: {
-        class: [
-          'min-h-[420px]',
-          'px-4',
-          'py-4',
-          'outline-none',
-          'text-sm',
-          'leading-7',
-          'text-gray-700',
-          'prose',
-          'prose-gray',
-          'max-w-none',
-        ].join(' '),
+        class: ['cms-rich-text', MIN_HEIGHT[size], 'px-4 py-3 outline-none'].join(' '),
+        ...(ariaLabel ? { 'aria-label': ariaLabel } : {}),
       },
     },
   });
@@ -50,14 +72,16 @@ export default function Tiptap({ value, onChange }: TiptapProps) {
 
   if (!editor) {
     return (
-      <div className="flex min-h-[420px] items-center justify-center text-sm text-gray-400">
-        Loading editor...
+      <div
+        className={`flex ${MIN_HEIGHT[size]} items-center justify-center rounded-lg border border-gray-200 text-sm text-gray-400`}
+      >
+        Loading editor…
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white transition-colors focus-within:border-[#7e1518] focus-within:ring-2 focus-within:ring-[#7e1518]/10">
       <TiptapToolbar editor={editor} />
 
       <EditorContent editor={editor} />

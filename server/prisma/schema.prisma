@@ -497,6 +497,21 @@ model AuditLog {
 }
 
 
+// First-party page view log for the CMS traffic dashboard. No IP address or
+// cookie is stored: `sessionId` is a random id the public site keeps in
+// sessionStorage, so it groups views of one browsing session only.
+model PageView {
+  id           String   @id @default(uuid()) @db.Uuid
+  path         String   @db.VarChar(500)
+  referrerHost String?  @db.VarChar(255)
+  sessionId    String   @db.VarChar(64)
+  deviceType   String   @db.VarChar(20)
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([path, createdAt])
+}
+
 model HeroSlide {
   id          String   @id @default(uuid()) @db.Uuid
 

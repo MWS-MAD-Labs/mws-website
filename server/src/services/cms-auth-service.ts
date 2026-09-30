@@ -2,9 +2,12 @@ import { ResponseError } from "../error/response-error";
 import { listActiveEmployees } from "../lib/central-client";
 import { z } from "zod";
 import { getUserUnitId, isMadLabsUser } from "../lib/admin-access";
+import { sendMail } from "../lib/mailer";
 import { getPrisma } from "../lib/prisma";
+import { cmsInvitationEmail, cmsLoginUrl } from "./cms-invitation-email";
 import {
   CmsUserRepository,
+  type CmsInvitationWithRelations,
   type CmsUserWithRole,
 } from "../repositories/cms-user-repository";
 import type { CentralUser } from "../types/central-types";
@@ -232,6 +235,31 @@ async function writeAuditLog(input: {
       },
     })
     .catch(() => undefined);
+}
+
+/**
+ * The invitation stands even if the email fails; the admin sees the result and
+ * can resend or share the login link another way.
+ */
+async function sendInvitationEmail(
+  invitation: CmsInvitationWithRelations,
+  actor?: { name?: string | null },
+) {
+  const roleName = isCmsRoleName(invitation.role.name) ? invitation.role.name : "ADMIN";
+  const notification = await sendMail(
+    cmsInvitationEmail({
+      email: invitation.email,
+      roleLabel: invitation.role.description ?? ROLE_LABELS[roleName],
+      inviterName: actor?.name,
+      expiresAt: invitation.expiresAt,
+    }),
+  );
+
+  return {
+    ...invitationListItem(invitation),
+    notification,
+    loginUrl: cmsLoginUrl(),
+  };
 }
 
 export class CmsAuthService {
@@ -497,7 +525,10 @@ export class CmsAuthService {
     return updated ? userListItem(updated) : null;
   }
 
-  static async inviteAdmin(payload: unknown, actorId?: string) {
+  static async inviteAdmin(
+    payload: unknown,
+    actor?: { id: string; name?: string | null },
+  ) {
     const parsed = zInvitePayload(payload);
     const role = await CmsUserRepository.findRoleByName(parsed.roleName);
     if (!role) throw new ResponseError(400, "CMS role is not configured.");
@@ -505,19 +536,54 @@ export class CmsAuthService {
     const invitation = await CmsUserRepository.createInvitation({
       email: parsed.email,
       cmsRoleId: role.id,
-      invitedById: actorId,
+      invitedById: actor?.id,
       expiresAt: parsed.expiresAt,
     });
 
     await writeAuditLog({
-      actorId,
+      actorId: actor?.id,
       action: "CMS_USER_INVITED",
       entityType: "CmsUserInvitation",
       entityId: invitation.id,
       newValues: { email: parsed.email, role: parsed.roleName },
     });
 
-    return invitationListItem(invitation);
+    return sendInvitationEmail(invitation, actor);
+  }
+
+  static async resendInvitation(
+    invitationId: string,
+    actor?: { id: string; name?: string | null },
+  ) {
+    if (!z.string().uuid().safeParse(invitationId).success) {
+      throw new ResponseError(404, "Invitation not found.");
+    }
+
+    const invitation = await CmsUserRepository.findInvitationById(invitationId);
+    if (!invitation) throw new ResponseError(404, "Invitation not found.");
+
+    if (invitation.status !== "PENDING") {
+      throw new ResponseError(409, "Only pending invitations can be resent.");
+    }
+
+    if (invitation.expiresAt && invitation.expiresAt <= new Date()) {
+      throw new ResponseError(
+        409,
+        "This invitation has expired. Revoke it and send a new invitation.",
+      );
+    }
+
+    const result = await sendInvitationEmail(invitation, actor);
+
+    await writeAuditLog({
+      actorId: actor?.id,
+      action: "CMS_USER_INVITATION_RESENT",
+      entityType: "CmsUserInvitation",
+      entityId: invitation.id,
+      newValues: { emailSent: result.notification.sent },
+    });
+
+    return result;
   }
 
   static async revokeInvitation(invitationId: string, actorId?: string) {

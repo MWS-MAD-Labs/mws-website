@@ -28,9 +28,30 @@ function isMenuItemVisible(item: MenuItem, user: AuthUser): boolean {
   return item.children.some((child) => isMenuItemVisible(child, user));
 }
 
+function menuHrefs(items: MenuItem[]): string[] {
+  return items.flatMap((item) => [
+    ...(item.href ? [item.href] : []),
+    ...menuHrefs(item.children ?? []),
+  ]);
+}
+
+const allMenuHrefs = menuHrefs(menuSections.flatMap((section) => section.items));
+
+/**
+ * The menu entry a page belongs to: the longest href that is the path itself or
+ * a parent of it. `/admin/news/123/edit` highlights Posts, and `/admin` (the
+ * dashboard) only matches itself instead of every CMS page.
+ */
+function activeMenuHref(pathname: string): string | undefined {
+  return allMenuHrefs
+    .filter((href) => pathname === href || (href !== '/admin' && pathname.startsWith(`${href}/`)))
+    .sort((a, b) => b.length - a.length)[0];
+}
+
 function hasActiveChild(item: MenuItem, pathname: string): boolean {
+  const activeHref = activeMenuHref(pathname);
   return Boolean(
-    item.children?.some((child) => child.href === pathname || hasActiveChild(child, pathname)),
+    item.children?.some((child) => child.href === activeHref || hasActiveChild(child, pathname)),
   );
 }
 
@@ -172,7 +193,8 @@ function SidebarMenuItem({
 
   const isOpen = openMenus.includes(item.label);
 
-  const isActiveParent = item.href === location.pathname || hasActiveChild(item, location.pathname);
+  const isActiveParent =
+    item.href === activeMenuHref(location.pathname) || hasActiveChild(item, location.pathname);
 
   const leftPadding = collapsed
     ? 'px-0 justify-center'
@@ -293,14 +315,15 @@ function SidebarMenuItem({
   return (
     <NavLink
       to={item.href}
+      end
       title={collapsed ? item.label : undefined}
-      className={({ isActive }) =>
+      className={() =>
         [
           'flex h-9 items-center gap-2 rounded-md',
           'text-sm transition-colors',
           level === 0 ? 'font-medium' : '',
           leftPadding,
-          isActive
+          item.href === activeMenuHref(location.pathname)
             ? 'bg-white/15 font-semibold text-white'
             : 'text-white hover:bg-white/10 hover:text-white',
         ].join(' ')

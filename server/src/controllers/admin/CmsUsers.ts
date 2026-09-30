@@ -62,8 +62,24 @@ export class CmsUsersController {
 
   static async inviteAdmin(c: Context<{ Variables: SessionVariables }>) {
     const body = await c.req.json();
-    const invitation = await CmsAuthService.inviteAdmin(body, c.var.user.id);
+    const invitation = await CmsAuthService.inviteAdmin(body, {
+      id: c.var.user.id,
+      name: c.var.user.name,
+    });
     return c.json({ data: invitation }, 201);
+  }
+
+  static async resendInvitation(c: Context<{ Variables: SessionVariables }>) {
+    const invitationId = c.req.param("id");
+    if (!invitationId) {
+      throw new ResponseError(400, "Invitation id is required.");
+    }
+
+    const invitation = await CmsAuthService.resendInvitation(invitationId, {
+      id: c.var.user.id,
+      name: c.var.user.name,
+    });
+    return c.json({ data: invitation });
   }
 
   static async revokeInvitation(c: Context<{ Variables: SessionVariables }>) {

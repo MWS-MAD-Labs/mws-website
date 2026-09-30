@@ -155,6 +155,15 @@ export const CmsUserRepository = {
     });
   },
 
+  async findInvitationById(id: string): Promise<CmsInvitationWithRelations | null> {
+    const prisma = getPrisma();
+
+    return prisma.cmsUserInvitation.findUnique({
+      where: { id },
+      include: invitationInclude,
+    });
+  },
+
   async listInvitations(): Promise<CmsInvitationWithRelations[]> {
     const prisma = getPrisma();
 

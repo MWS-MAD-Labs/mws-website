@@ -12,9 +12,46 @@ import type {
 } from "@/features/hero/heroData";
 import type { AuthUser, CmsRoleName } from "@/admin/types/auth";
 
+export type DashboardRecentUpdate = {
+  type: "news" | "page" | "academic" | "hero";
+  title: string;
+  status: "PUBLISHED" | "DRAFT" | "ARCHIVED" | "SCHEDULED" | "HIDDEN";
+  updatedAt: string;
+  editPath: string;
+};
+
+export type DashboardContentSummary = {
+  news: { published: number; scheduled: number; drafts: number; archived: number };
+  hero: { total: number; active: number; missingMedia: number };
+  gallery: { galleries: number; images: number; videos: number };
+  academic: Array<{
+    levelKey: AcademicLevelKey;
+    title: string;
+    hasUnpublishedChanges: boolean;
+    isPublished: boolean;
+    updatedAt: string;
+  }>;
+  users: { active: number; pendingInvitations: number } | null;
+  recentUpdates: DashboardRecentUpdate[];
+};
+
 export type AdminDashboardData = {
   message: string;
   user: AuthUser;
+  content: DashboardContentSummary;
+};
+
+export type AnalyticsRange = 7 | 30 | 90;
+
+export type AnalyticsOverview = {
+  range: AnalyticsRange;
+  totals: { views: number; visits: number; pagesPerVisit: number; activeNow: number };
+  /** Percent change against the previous period; null when there is no baseline. */
+  change: { views: number | null; visits: number | null };
+  daily: Array<{ date: string; views: number; visits: number }>;
+  topPages: Array<{ path: string; views: number; visits: number }>;
+  referrers: Array<{ source: string; visits: number }>;
+  devices: Array<{ device: string; visits: number }>;
 };
 
 export type CmsUserListItem = {
@@ -64,6 +101,11 @@ export type CmsInvitationListItem = {
   } | null;
   invitedBy: { id: string; name: string; email: string | null } | null;
   acceptedUser: { id: string; name: string; email: string | null } | null;
+};
+
+export type CmsInvitationResult = CmsInvitationListItem & {
+  notification: { sent: true } | { sent: false; reason: string };
+  loginUrl: string;
 };
 
 export type HeroSlideFormData = {
@@ -407,6 +449,13 @@ export const adminApi = {
     return response!.data;
   },
 
+  async analytics(days: AnalyticsRange): Promise<AnalyticsOverview> {
+    const response = await apiRequest<{ data: AnalyticsOverview }>(
+      `/admin/analytics?days=${days}`,
+    );
+    return response!.data;
+  },
+
   async users(): Promise<CmsUsersData> {
     const response = await apiRequest<{ data: CmsUsersData }>("/admin/users");
     return response!.data;
@@ -440,13 +489,21 @@ export const adminApi = {
     return response!.data;
   },
 
-  async inviteCmsAdmin(email: string): Promise<CmsInvitationListItem> {
-    const response = await apiRequest<{ data: CmsInvitationListItem }>(
+  async inviteCmsAdmin(email: string): Promise<CmsInvitationResult> {
+    const response = await apiRequest<{ data: CmsInvitationResult }>(
       "/admin/users/invitations",
       {
         method: "POST",
         body: { email, roleName: "ADMIN" },
       },
+    );
+    return response!.data;
+  },
+
+  async resendCmsInvitation(id: string): Promise<CmsInvitationResult> {
+    const response = await apiRequest<{ data: CmsInvitationResult }>(
+      `/admin/users/invitations/${id}/resend`,
+      { method: "POST" },
     );
     return response!.data;
   },

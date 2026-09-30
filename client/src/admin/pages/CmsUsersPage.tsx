@@ -3,6 +3,7 @@ import { UserPlus } from 'lucide-react';
 import {
   adminApi,
   type CmsInvitationListItem,
+  type CmsInvitationResult,
   type CmsRoleListItem,
   type CmsUserListItem,
 } from '@/admin/api/adminApi';
@@ -33,6 +34,12 @@ function formatDate(value: string | null) {
   }).format(new Date(value));
 }
 
+function invitationEmailMessage(action: string, invitation: CmsInvitationResult) {
+  return invitation.notification.sent
+    ? `${action} and emailed to ${invitation.email}.`
+    : `${action}, but the email could not be sent (${invitation.notification.reason}). Share the login link with ${invitation.email} directly: ${invitation.loginUrl}`;
+}
+
 export default function CmsUsersPage() {
   const [data, setData] = useState<CmsUsersState>({
     users: [],
@@ -45,6 +52,7 @@ export default function CmsUsersPage() {
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [isInviting, setIsInviting] = useState(false);
+  const [resendingId, setResendingId] = useState<string | null>(null);
 
   async function loadUsers() {
     const usersData = await adminApi.users();
@@ -128,15 +136,29 @@ export default function CmsUsersPage() {
     setMessage(null);
 
     try {
-      await adminApi.inviteCmsAdmin(inviteEmail);
+      const invitation = await adminApi.inviteCmsAdmin(inviteEmail);
       await loadUsers();
       setInviteEmail('');
       setInviteOpen(false);
-      setMessage('Admin invitation created.');
+      setMessage(invitationEmailMessage('Invitation created', invitation));
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Admin invitation could not be created.');
     } finally {
       setIsInviting(false);
+    }
+  }
+
+  async function resendInvitation(invitation: CmsInvitationListItem) {
+    setResendingId(invitation.id);
+    setMessage(null);
+
+    try {
+      const result = await adminApi.resendCmsInvitation(invitation.id);
+      setMessage(invitationEmailMessage('Invitation resent', result));
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Invitation email could not be resent.');
+    } finally {
+      setResendingId(null);
     }
   }
 
@@ -273,13 +295,23 @@ export default function CmsUsersPage() {
                       {formatDate(invitation.createdAt)}
                     </p>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => void revokeInvitation(invitation)}
-                  >
-                    Revoke
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={resendingId === invitation.id}
+                      onClick={() => void resendInvitation(invitation)}
+                    >
+                      {resendingId === invitation.id ? 'Sending...' : 'Resend Email'}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => void revokeInvitation(invitation)}
+                    >
+                      Revoke
+                    </Button>
+                  </div>
                 </div>
               ))}
             {!data.invitations.some((invitation) => invitation.status === 'PENDING') ? (

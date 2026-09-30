@@ -27,7 +27,9 @@ import {
 export default function NewsPage() {
   const [result, setResult] = useState<NewsPostList>(EMPTY_NEWS_RESULT);
   const [categories, setCategories] = useState<NewsCategory[]>([]);
-  const [filters, setFilters] = useState<NewsFilters>(createInitialNewsFilters);
+  const [filters, setFilters] = useState<NewsFilters>(() =>
+    createInitialNewsFilters(window.location.search),
+  );
   const [page, setPage] = useState(1);
   const [refreshVersion, setRefreshVersion] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
