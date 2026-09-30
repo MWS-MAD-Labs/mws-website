@@ -76,45 +76,38 @@ export default function Navbar() {
     isHome && isHidden && !isOpen && '-translate-y-full',
   );
 
-  const topNavClassName = ({ isActive }: { isActive: boolean }) =>
-    cx(
-      'relative flex items-center',
-      'font-[var(--f-head)] text-[14.5px]',
-      'transition-colors duration-300',
+const topNavClassName = ({ isActive }: { isActive: boolean }) =>
+  cx(
+    'relative flex items-center',
+    'font-[var(--f-head)] text-[16px] font-bold',
+    'transition-colors duration-300',
 
-      // Top = white + bold
-      // Scrolled = charcoal + medium
-      useTransparentHomeHeader ? 'font-bold text-white' : 'font-medium text-[var(--charcoal)]',
+    useTransparentHomeHeader ? 'text-white' : 'text-[var(--charcoal)]',
 
-      'after:absolute after:-bottom-1 after:left-0',
-      'after:h-[2px]',
-      'after:transition-[width,background-color] after:duration-300',
-      'after:content-[""]',
+    'after:absolute after:-bottom-1 after:left-0',
+    'after:h-[2px]',
+    'after:transition-[width,background-color] after:duration-300',
+    'after:content-[""]',
 
-      // Underline follows navbar state.
-      useTransparentHomeHeader ? 'after:bg-white' : 'after:bg-[var(--burgundy)]',
+    useTransparentHomeHeader ? 'after:bg-white' : 'after:bg-[var(--burgundy)]',
 
-      // Hover follows navbar state.
-      useTransparentHomeHeader ? 'hover:text-white' : 'hover:text-[var(--burgundy)]',
+    useTransparentHomeHeader ? 'hover:text-white' : 'hover:text-[var(--burgundy)]',
 
-      'hover:after:w-full',
+    'hover:after:w-full',
 
-      // Active state.
-      isActive &&
-        (useTransparentHomeHeader
-          ? 'font-bold text-white after:w-full'
-          : 'font-semibold text-[var(--burgundy)] after:w-full'),
+    isActive && 'font-extrabold after:w-full',
 
-      // Mobile
-      'max-[980px]:min-h-11',
-      'max-[980px]:w-full',
-      'max-[980px]:px-3',
-      'max-[980px]:py-2.5',
-      'max-[980px]:text-[13px]',
-      'max-[980px]:leading-tight',
-      'max-[980px]:after:hidden',
-      'max-[980px]:hover:bg-[rgba(126,21,24,0.06)]',
-    );
+    // Mobile
+    'max-[980px]:min-h-11',
+    'max-[980px]:w-full',
+    'max-[980px]:px-3',
+    'max-[980px]:py-2.5',
+    'max-[980px]:text-[14px]',
+    'max-[980px]:font-bold',
+    'max-[980px]:leading-tight',
+    'max-[980px]:after:hidden',
+    'max-[980px]:hover:bg-[rgba(126,21,24,0.06)]',
+  );
 
   const dropdownLinkClassName = ({ isActive }: { isActive: boolean }) =>
     cx(
@@ -504,12 +497,12 @@ export default function Navbar() {
             {/* Book a Tour */}
             <Link
               className={cx(
-                'border border-[var(--burgundy)]',
+                'border border-[var(--white)]',
                 'px-[22px] py-2.5',
-                'text-sm font-[var(--f-head)] font-semibold',
-                'text-[var(--burgundy)]',
+                'text-sm font-[var(--f-head)] font-bold',
+                'text-[var(--white)]',
                 'transition-[background,color] duration-300',
-                'hover:bg-[var(--burgundy)] hover:text-white',
+                'hover:bg-[var(--white)] hover:text-[var(--burgundy)]',
 
                 // Mobile CTA
                 'max-[980px]:mt-3',

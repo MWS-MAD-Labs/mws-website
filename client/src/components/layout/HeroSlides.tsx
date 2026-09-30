@@ -43,17 +43,12 @@ export default function Hero({
   const transitionTimer = useRef<number | null>(null);
   const currentIndexRef = useRef(activeIndex);
 
-  // Menandakan perubahan slide berasal dari user,
-  // bukan dari auto-slide parent.
   const isManualNavigation = useRef(false);
 
   useEffect(() => {
     currentIndexRef.current = currentIndex;
   }, [currentIndex]);
 
-  /*
-   * Preload hero images/posters.
-   */
   useEffect(() => {
     slides.forEach((slide) => {
       const src = slide.poster || slide.image;
@@ -65,15 +60,6 @@ export default function Hero({
     });
   }, [slides]);
 
-  /*
-   * Handle perubahan activeIndex dari parent.
-   *
-   * Behavior:
-   * - Video aktif + perubahan otomatis -> abaikan.
-   * - Manual navigation -> tetap diproses.
-   * - Slide berikutnya VIDEO -> langsung tampil tanpa transition.
-   * - Slide berikutnya IMAGE -> transition normal.
-   */
   useEffect(() => {
     if (activeIndex === currentIndexRef.current) {
       return;
@@ -86,13 +72,6 @@ export default function Hero({
       return;
     }
 
-    /*
-     * Kalau current slide adalah video dan perubahan bukan
-     * berasal dari tombol user, jangan pindah slide.
-     *
-     * Ini membuat video tetap looping dan tidak terganggu
-     * oleh auto-slide.
-     */
     if (currentSlide.mediaType === 'VIDEO' && !isManualNavigation.current) {
       return;
     }
@@ -108,10 +87,6 @@ export default function Hero({
       transitionTimer.current = null;
     }
 
-    /*
-     * VIDEO:
-     * Langsung ganti tanpa transition 900ms.
-     */
     if (nextSlide.mediaType === 'VIDEO') {
       currentIndexRef.current = activeIndex;
 
@@ -124,10 +99,6 @@ export default function Hero({
       return;
     }
 
-    /*
-     * IMAGE:
-     * Gunakan transition normal.
-     */
     queueMicrotask(() => {
       setIncomingIndex(activeIndex);
       setIsTransitioning(true);
@@ -151,9 +122,6 @@ export default function Hero({
     };
   }, [activeIndex, slides]);
 
-  /*
-   * Cleanup timer saat component unmount.
-   */
   useEffect(() => {
     return () => {
       if (transitionTimer.current !== null) {
@@ -162,9 +130,7 @@ export default function Hero({
     };
   }, []);
 
-  /*
-   * Manual navigation handlers.
-   */
+
   const handlePrevious = () => {
     isManualNavigation.current = true;
     onPrevious();
@@ -184,9 +150,6 @@ export default function Hero({
 
   const incomingSlide = incomingIndex !== null ? slides[incomingIndex] : null;
 
-  /*
-   * Belum ada hero slide dari CMS.
-   */
   if (!currentSlide) {
     return (
       <section id="hero" className="relative h-screen min-h-[680px] w-full overflow-hidden">
@@ -236,7 +199,8 @@ export default function Hero({
       </div>
 
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black/20" />
+      <div className="pointer-events-none absolute inset-0 bg-black/20" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
 
       {/* =========================================================
           PREVIOUS
@@ -248,7 +212,7 @@ export default function Hero({
         disabled={isTransitioning}
         className="absolute left-8 top-1/2 z-30 -translate-y-1/2 text-2xl text-white transition-opacity hover:opacity-70 disabled:pointer-events-none disabled:opacity-50"
       >
-        <ArrowBigLeftDash/>
+        <ArrowBigLeftDash />
       </button>
 
       {/* =========================================================
@@ -261,7 +225,7 @@ export default function Hero({
         disabled={isTransitioning}
         className="absolute right-8 top-1/2 z-30 -translate-y-1/2 text-2xl text-white transition-opacity hover:opacity-70 disabled:pointer-events-none disabled:opacity-50"
       >
-        <ArrowBigRightDash/>
+        <ArrowBigRightDash />
       </button>
 
       {/* =========================================================

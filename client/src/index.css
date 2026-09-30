@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Nunito+Sans:opsz,wght@6..12,400;6..12,500;6..12,600&family=Lora:ital,wght@0,500;1,500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,500;6..12,600&family=Lora:ital,wght@0,500;1,500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -296,6 +296,31 @@ h3 {
   }
   html {
     scroll-behavior: auto;
+  }
+}
+
+/*
+ * AOS is an enhancement. aos.css hides every [data-aos] element until AOS adds
+ * .aos-animate, so its hidden state only applies while publicAos.ts has
+ * initialised AOS (html.aos-ready) and motion is allowed. Anywhere else the
+ * content is simply shown.
+ */
+html:not(.aos-ready) [data-aos] {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+/* Set while AOS applies each element's starting state, so it is not animated. */
+html.aos-preparing [data-aos] {
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-aos] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
   }
 }
 

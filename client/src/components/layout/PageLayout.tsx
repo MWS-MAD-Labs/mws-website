@@ -1,124 +1,16 @@
-import { useCallback, useEffect, useState } from "react";
-import AOS from "aos";
-import "aos/dist/aos.css";
-import { Link, Outlet, useLocation } from "react-router-dom";
-import { X } from "lucide-react";
-import Chatbot from "./Chatbot";
-import Footer from "./Footer";
-import Navbar from "./Navbar";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Link, Outlet, useLocation } from 'react-router-dom';
+import { X } from 'lucide-react';
+import Chatbot from './Chatbot';
+import Footer from './Footer';
+import Navbar from './Navbar';
+import { refreshPublicAos, syncPublicAos, watchPublicAos } from './publicAos';
 
-const ANNOUNCEMENT_SESSION_KEY = "mws-public-announcement-dismissed";
-
-function prefersReducedMotion() {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
-
-type AosAnimation =
-  | "fade-up"
-  | "fade-down"
-  | "fade-left"
-  | "fade-right"
-  | "fade-up-right"
-  | "fade-up-left"
-  | "fade-down-right"
-  | "fade-down-left";
-
-function hasMedia(element: HTMLElement) {
-  return Boolean(element.querySelector("img, picture, video"));
-}
-
-function hasGridLayout(element: HTMLElement) {
-  return Boolean(
-    element.querySelector(
-      ".grid, [class*='grid-cols'], [class*='md:grid-cols'], [class*='lg:grid-cols']",
-    ),
-  );
-}
-
-function isCtaLike(element: HTMLElement) {
-  const metadata = `${element.id} ${element.className} ${
-    element.getAttribute("aria-label") ?? ""
-  }`.toLowerCase();
-
-  return (
-    metadata.includes("cta") ||
-    metadata.includes("contact") ||
-    metadata.includes("admission")
-  );
-}
-
-function isHeroLike(element: HTMLElement) {
-  return (
-    element.id === "hero" ||
-    element.closest("#hero") !== null ||
-    element.classList.contains("hero") ||
-    element.className.toLowerCase().includes("hero")
-  );
-}
-
-function getPublicAosAnimation(element: HTMLElement, index: number): AosAnimation {
-  if (isCtaLike(element)) {
-    return "fade-up";
-  }
-
-  if (hasMedia(element)) {
-    return index % 2 === 0 ? "fade-right" : "fade-left";
-  }
-
-  if (hasGridLayout(element)) {
-    return index % 2 === 0 ? "fade-up-right" : "fade-up-left";
-  }
-
-  const directionalAnimations: AosAnimation[] = [
-    "fade-up",
-    "fade-down",
-    "fade-up-right",
-    "fade-up-left",
-    "fade-down-right",
-    "fade-down-left",
-  ];
-
-  return directionalAnimations[index % directionalAnimations.length];
-}
-
-function setManagedAosAttributes(
-  element: HTMLElement,
-  animation: AosAnimation,
-  index: number,
-) {
-  if (isHeroLike(element)) {
-    return;
-  }
-
-  if (
-    element.hasAttribute("data-aos") &&
-    element.getAttribute("data-aos-managed") !== "true"
-  ) {
-    return;
-  }
-
-  element.setAttribute("data-aos", animation);
-  element.setAttribute("data-aos-managed", "true");
-  element.setAttribute("data-aos-duration", "550");
-  element.setAttribute("data-aos-easing", "ease-out-cubic");
-  element.setAttribute("data-aos-once", "true");
-  element.setAttribute("data-aos-offset", "72");
-  element.setAttribute("data-aos-delay", String(Math.min(index * 30, 120)));
-}
-
-function applyPublicAosAttributes() {
-  const sections = document.querySelectorAll<HTMLElement>(
-    ".site-content main > section:not(#hero), .site-content main > div, .site-content article, .site-content [data-public-reveal]",
-  );
-
-  sections.forEach((element, index) => {
-    setManagedAosAttributes(element, getPublicAosAnimation(element, index), index);
-  });
-}
+const ANNOUNCEMENT_SESSION_KEY = 'mws-public-announcement-dismissed';
 
 function hasDismissedAnnouncement() {
   try {
-    return sessionStorage.getItem(ANNOUNCEMENT_SESSION_KEY) === "true";
+    return sessionStorage.getItem(ANNOUNCEMENT_SESSION_KEY) === 'true';
   } catch {
     return false;
   }
@@ -126,7 +18,7 @@ function hasDismissedAnnouncement() {
 
 function storeAnnouncementDismissal() {
   try {
-    sessionStorage.setItem(ANNOUNCEMENT_SESSION_KEY, "true");
+    sessionStorage.setItem(ANNOUNCEMENT_SESSION_KEY, 'true');
   } catch {
     // Keep the popup functional even when sessionStorage is unavailable.
   }
@@ -142,24 +34,24 @@ function PublicAnnouncementPopup() {
 
   useEffect(() => {
     if (!isOpen) {
-      document.body.style.overflow = "";
+      document.body.style.overflow = '';
       return;
     }
 
     const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow = 'hidden';
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (event.key === 'Escape') {
         closePopup();
       }
     };
 
-    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown);
 
     return () => {
       document.body.style.overflow = previousOverflow;
-      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener('keydown', handleKeyDown);
     };
   }, [closePopup, isOpen]);
 
@@ -197,11 +89,11 @@ function PublicAnnouncementPopup() {
           id="public-announcement-copy"
           className="mt-4 max-w-[390px] text-[15px] leading-[1.7] text-[var(--charcoal-muted)] sm:text-base"
         >
-          Meet our team, explore the learning spaces, and see how Mutiara
-          Waldorf School supports each child with warmth, rhythm, and purpose.
+          Meet our team, explore the learning spaces, and see how Mutiara Waldorf School supports
+          each child with warmth, rhythm, and purpose.
         </p>
         <Link
-          className="mt-7 inline-flex min-h-[46px] items-center justify-center border border-[var(--burgundy)] bg-[var(--burgundy)] px-6 py-3 font-[var(--f-head)] text-sm font-bold uppercase text-white transition-colors duration-200 hover:border-[var(--burgundy-dark)] hover:bg-[var(--burgundy-dark)] hover:text-white motion-reduce:transition-none max-[560px]:w-full"
+          className="mt-7 inline-flex min-h-[46px] items-center justify-center border border-[var(--burgundy)] bg-[var(--burgundy)] px-6 py-3 text-sm font-[var(--f-head)] font-bold uppercase text-white transition-colors duration-200 hover:border-[var(--burgundy-dark)] hover:bg-[var(--burgundy-dark)] hover:text-white motion-reduce:transition-none max-[560px]:w-full"
           to="/contact"
           onClick={closePopup}
         >
@@ -214,28 +106,35 @@ function PublicAnnouncementPopup() {
 
 export default function PageLayout() {
   const { hash, pathname } = useLocation();
+  const siteContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (import.meta.env.DEV) console.info("[PUBLIC][AOS] Initializing...");
-    applyPublicAosAttributes();
+    const pageName = pathname
+      .split('/')
+      .filter(Boolean)
+      .pop()
+      ?.replace(/-/g, '')
+      .replace(/\b\w/g, (char) => char.toUpperCase());
 
-    AOS.init({
-      disable: prefersReducedMotion,
-      duration: 550,
-      easing: "ease-out-cubic",
-      once: true,
-    });
+    document.title =
+      pathname === '/'
+        ? 'Millennia World School'
+        : `${pageName ?? 'Page'} - Millennia World School`;
+  }, [pathname]);
 
-    if (import.meta.env.DEV) console.info("[PUBLIC][AOS] Initialized");
-  }, []);
+  // Layout effect: AOS attributes must be in place before the browser paints
+  // the route, or visible content paints first and then fades out.
+  useLayoutEffect(() => {
+    if (!syncPublicAos() || !siteContentRef.current) {
+      return;
+    }
 
-  useEffect(() => {
-    applyPublicAosAttributes();
-    AOS.refreshHard();
+    const watcher = watchPublicAos(siteContentRef.current);
+    return () => watcher.disconnect();
   }, [pathname]);
 
   useEffect(() => {
-    const header = document.querySelector<HTMLElement>("[data-header]");
+    const header = document.querySelector<HTMLElement>('[data-header]');
 
     if (!header) {
       return;
@@ -243,15 +142,15 @@ export default function PageLayout() {
 
     const syncNavbarHeight = () => {
       const height = Math.ceil(header.getBoundingClientRect().height);
-      document.documentElement.style.setProperty("--navbar-height", `${height}px`);
+      document.documentElement.style.setProperty('--navbar-height', `${height}px`);
     };
 
     syncNavbarHeight();
 
-    window.addEventListener("resize", syncNavbarHeight);
+    window.addEventListener('resize', syncNavbarHeight);
 
-    if (!("ResizeObserver" in window)) {
-      return () => window.removeEventListener("resize", syncNavbarHeight);
+    if (!('ResizeObserver' in window)) {
+      return () => window.removeEventListener('resize', syncNavbarHeight);
     }
 
     const resizeObserver = new ResizeObserver(syncNavbarHeight);
@@ -259,7 +158,7 @@ export default function PageLayout() {
 
     return () => {
       resizeObserver.disconnect();
-      window.removeEventListener("resize", syncNavbarHeight);
+      window.removeEventListener('resize', syncNavbarHeight);
     };
   }, []);
 
@@ -273,33 +172,34 @@ export default function PageLayout() {
         }
 
         const navbarHeight = Number.parseFloat(
-          getComputedStyle(document.documentElement).getPropertyValue("--navbar-height"),
+          getComputedStyle(document.documentElement).getPropertyValue('--navbar-height'),
         );
         const targetTop = target.getBoundingClientRect().top + window.scrollY;
 
         window.scrollTo({
           top: Math.max(0, targetTop - (Number.isFinite(navbarHeight) ? navbarHeight : 0)),
-          behavior: "instant",
+          behavior: 'instant',
         });
+        refreshPublicAos();
       });
       return;
     }
 
-    window.scrollTo({ top: 0, behavior: "instant" });
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    // AOS ran before this scroll reset, against the previous route's position.
+    refreshPublicAos();
   }, [hash, pathname]);
 
   useEffect(() => {
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    const revealItems = document.querySelectorAll(".reveal, [data-reveal]");
+    const revealItems = document.querySelectorAll('.reveal, [data-reveal]');
     const markRevealed = (element: Element) => {
-      element.classList.add("in");
-      element.setAttribute("data-revealed", "true");
+      element.classList.add('in');
+      element.setAttribute('data-revealed', 'true');
     };
 
-    if (reduceMotion || !("IntersectionObserver" in window)) {
+    if (reduceMotion || !('IntersectionObserver' in window)) {
       revealItems.forEach(markRevealed);
       return;
     }
@@ -325,7 +225,7 @@ export default function PageLayout() {
     <>
       <Navbar />
       <div className="navbar-spacer" aria-hidden="true" />
-      <div className="site-content">
+      <div className="site-content" ref={siteContentRef}>
         <Outlet />
       </div>
       <Footer />
