@@ -1,18 +1,15 @@
-import { useEffect, useState, type FormEvent } from "react";
-import {
-  adminApi,
-  type AdminAdmissionProgram,
-  type GalleryItem,
-} from "@/admin/api/adminApi";
-import AppShell from "@/admin/components/layout/AppShell";
-import Button from "@/admin/components/ui/Button";
-import Field from "@/admin/components/ui/Field";
-import StatusMessage from "@/admin/components/ui/StatusMessage";
-import GalleryAssetPickerModal from "@/admin/features/gallery/components/GalleryAssetPickerModal";
+import { useEffect, useState, type FormEvent } from 'react';
+import { adminApi, type AdminAdmissionProgram, type GalleryItem } from '@/admin/api/adminApi';
+import AppShell from '@/admin/components/layout/AppShell';
+import ContentPageHeader from '@/admin/components/ui/ContentPageHeader';
+import Button from '@/admin/components/ui/Button';
+import Field from '@/admin/components/ui/Field';
+import StatusMessage from '@/admin/components/ui/StatusMessage';
+import GalleryAssetPickerModal from '@/admin/features/gallery/components/GalleryAssetPickerModal';
 
 function optionalText(value: string) {
   const trimmed = value.trim();
-  return trimmed ? trimmed : "";
+  return trimmed ? trimmed : '';
 }
 
 function updateProgramField(
@@ -21,9 +18,7 @@ function updateProgramField(
   field: keyof AdminAdmissionProgram,
   value: string | boolean | null,
 ) {
-  return programs.map((program) =>
-    program.id === id ? { ...program, [field]: value } : program,
-  );
+  return programs.map((program) => (program.id === id ? { ...program, [field]: value } : program));
 }
 
 export default function AdmissionsPage() {
@@ -44,7 +39,7 @@ export default function AdmissionsPage() {
     queueMicrotask(() => {
       loadAdmissions()
         .catch((error) =>
-          setMessage(error instanceof Error ? error.message : "Failed to load admissions."),
+          setMessage(error instanceof Error ? error.message : 'Failed to load admissions.'),
         )
         .finally(() => setIsLoading(false));
     });
@@ -61,20 +56,20 @@ export default function AdmissionsPage() {
           ...program,
           age: optionalText(program.age),
           adminWhatsapp: optionalText(program.adminWhatsapp),
-          contactLabel: optionalText(program.contactLabel ?? ""),
+          contactLabel: optionalText(program.contactLabel ?? ''),
           description: optionalText(program.description),
-          exploreLabel: optionalText(program.exploreLabel ?? ""),
+          exploreLabel: optionalText(program.exploreLabel ?? ''),
           image: optionalText(program.image),
-          imageAlt: optionalText(program.imageAlt ?? ""),
+          imageAlt: optionalText(program.imageAlt ?? ''),
           path: optionalText(program.path),
           sortOrder: program.sortOrder ?? index,
           isActive: program.isActive ?? true,
         })),
       );
       setPrograms(data.programs);
-      setMessage("Admissions content updated.");
+      setMessage('Admissions content updated.');
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Failed to save admissions.");
+      setMessage(error instanceof Error ? error.message : 'Failed to save admissions.');
     } finally {
       setIsSaving(false);
     }
@@ -83,7 +78,11 @@ export default function AdmissionsPage() {
   return (
     <AppShell title="Admissions">
       <section className="space-y-5 p-6">
-        <p className="text-sm text-gray-500">Programs / Admissions</p>
+        <ContentPageHeader
+          breadcrumbs={[{ label: 'Programs' }, { label: 'Admissions' }]}
+          title="Admissions"
+          description=""
+        />
 
         <form
           className="overflow-hidden rounded-lg border border-gray-200 bg-white"
@@ -91,15 +90,13 @@ export default function AdmissionsPage() {
         >
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 px-5 py-4">
             <div>
-              <h1 className="text-lg font-semibold text-gray-900">
-                Admissions by Level
-              </h1>
+              <h1 className="text-lg font-semibold text-gray-900">Admissions by Level</h1>
               <p className="text-sm text-gray-500">
                 Maintain the program cards shown on the public Admissions page.
               </p>
             </div>
             <Button disabled={isSaving || isLoading} type="submit">
-              {isSaving ? "Saving..." : "Save Changes"}
+              {isSaving ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
 
@@ -111,7 +108,8 @@ export default function AdmissionsPage() {
 
           <div className="grid gap-4 p-5">
             <div className="rounded-lg border border-[#7e1518]/15 bg-[#faf8f3] px-4 py-3 text-sm text-[#625759]">
-              Edit the visible title, age range, description, image, and WhatsApp contact for each admissions card.
+              Edit the visible title, age range, description, image, and WhatsApp contact for each
+              admissions card.
             </div>
 
             {isLoading ? (
@@ -127,18 +125,13 @@ export default function AdmissionsPage() {
             ) : null}
 
             {programs.map((program, index) => (
-              <section
-                className="rounded-lg border border-gray-200 p-4"
-                key={program.id}
-              >
+              <section className="rounded-lg border border-gray-200 p-4" key={program.id}>
                 <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <h2 className="text-base font-semibold text-gray-900">
                       {program.title || `Program ${index + 1}`}
                     </h2>
-                    <p className="text-sm text-gray-500">
-                      Public admissions card content.
-                    </p>
+                    <p className="text-sm text-gray-500">Public admissions card content.</p>
                   </div>
                   <label className="flex items-center gap-2 text-sm text-gray-700">
                     <input
@@ -146,12 +139,7 @@ export default function AdmissionsPage() {
                       type="checkbox"
                       onChange={(event) =>
                         setPrograms((current) =>
-                          updateProgramField(
-                            current,
-                            program.id,
-                            "isActive",
-                            event.target.checked,
-                          ),
+                          updateProgramField(current, program.id, 'isActive', event.target.checked),
                         )
                       }
                     />
@@ -166,12 +154,7 @@ export default function AdmissionsPage() {
                       value={program.title}
                       onChange={(event) =>
                         setPrograms((current) =>
-                          updateProgramField(
-                            current,
-                            program.id,
-                            "title",
-                            event.target.value,
-                          ),
+                          updateProgramField(current, program.id, 'title', event.target.value),
                         )
                       }
                     />
@@ -182,12 +165,7 @@ export default function AdmissionsPage() {
                       value={program.age}
                       onChange={(event) =>
                         setPrograms((current) =>
-                          updateProgramField(
-                            current,
-                            program.id,
-                            "age",
-                            event.target.value,
-                          ),
+                          updateProgramField(current, program.id, 'age', event.target.value),
                         )
                       }
                     />
@@ -195,11 +173,11 @@ export default function AdmissionsPage() {
                   <div className="rounded-lg border border-gray-200 p-4 lg:col-span-2">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <h3 className="text-sm font-semibold text-gray-900">
-                          Program Image
-                        </h3>
+                        <h3 className="text-sm font-semibold text-gray-900">Program Image</h3>
                         <p className="text-sm text-gray-500">
-                          {program.image ? "Image selected from Gallery Library." : "No image selected."}
+                          {program.image
+                            ? 'Image selected from Gallery Library.'
+                            : 'No image selected.'}
                         </p>
                       </div>
                       <Button
@@ -222,15 +200,10 @@ export default function AdmissionsPage() {
                   <Field label="Image Description">
                     <input
                       className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
-                      value={program.imageAlt ?? ""}
+                      value={program.imageAlt ?? ''}
                       onChange={(event) =>
                         setPrograms((current) =>
-                          updateProgramField(
-                            current,
-                            program.id,
-                            "imageAlt",
-                            event.target.value,
-                          ),
+                          updateProgramField(current, program.id, 'imageAlt', event.target.value),
                         )
                       }
                     />
@@ -244,7 +217,7 @@ export default function AdmissionsPage() {
                           updateProgramField(
                             current,
                             program.id,
-                            "adminWhatsapp",
+                            'adminWhatsapp',
                             event.target.value,
                           ),
                         )
@@ -254,13 +227,13 @@ export default function AdmissionsPage() {
                   <Field label="Explore Button Text">
                     <input
                       className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
-                      value={program.exploreLabel ?? ""}
+                      value={program.exploreLabel ?? ''}
                       onChange={(event) =>
                         setPrograms((current) =>
                           updateProgramField(
                             current,
                             program.id,
-                            "exploreLabel",
+                            'exploreLabel',
                             event.target.value,
                           ),
                         )
@@ -270,13 +243,13 @@ export default function AdmissionsPage() {
                   <Field label="WhatsApp Button Text">
                     <input
                       className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
-                      value={program.contactLabel ?? ""}
+                      value={program.contactLabel ?? ''}
                       onChange={(event) =>
                         setPrograms((current) =>
                           updateProgramField(
                             current,
                             program.id,
-                            "contactLabel",
+                            'contactLabel',
                             event.target.value,
                           ),
                         )
@@ -293,7 +266,7 @@ export default function AdmissionsPage() {
                           updateProgramField(
                             current,
                             program.id,
-                            "description",
+                            'description',
                             event.target.value,
                           ),
                         )
@@ -306,11 +279,10 @@ export default function AdmissionsPage() {
           </div>
         </form>
         <GalleryAssetPickerModal
-          allowedKinds={["IMAGE"]}
+          allowedKinds={['IMAGE']}
           galleries={galleries}
           initialGalleryId={
-            programs.find((program) => program.id === assetPickerProgramId)?.galleryId ??
-            null
+            programs.find((program) => program.id === assetPickerProgramId)?.galleryId ?? null
           }
           open={assetPickerProgramId !== null}
           title="Choose Program Image"

@@ -5,6 +5,7 @@ import type { OurSchoolPageData } from '@/api/pageApi';
 import { adminApi, type GalleryItem, type OurSchoolItem } from '@/admin/api/adminApi';
 import Tiptap from '@/admin/components/Tiptap';
 import AppShell from '@/admin/components/layout/AppShell';
+import ContentPageHeader from '@/admin/components/ui/ContentPageHeader';
 import GalleryPickerModal from '@/admin/features/gallery/components/GalleryPickerModal';
 import { asset } from '@/data/site';
 
@@ -287,54 +288,48 @@ export default function OurSchoolPage() {
   return (
     <AppShell title="Our School">
       <div className="min-h-full bg-white">
-        {/* Editor toolbar */}
-        <div className="sticky top-0 z-30 flex min-h-[64px] items-center justify-between border-b border-black/10 bg-white px-6">
-          <div>
-            <div className="flex items-center gap-3">
-              <h2 className="text-base font-semibold text-[var(--charcoal)]">Our School</h2>
+        <div className="px-6 py-6">
+          <div className="flex items-center justify-between pb-5">
+            <ContentPageHeader
+              breadcrumbs={[{ label: 'Content' }, { label: 'Our School' }]}
+              title="Our School"
+              description="Edit the public Our School page content."
+            />
 
-              <span className="bg-emerald-50 px-2 py-1 text-[10px] font-medium text-emerald-700">
-                {status === 'PUBLISHED' ? 'Published' : 'Draft'}
-              </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={isSaving || isLoading}
+                onClick={previewLive}
+                className="inline-flex items-center gap-2 border border-black/10 bg-white px-4 py-2.5 text-sm font-medium text-[var(--charcoal)] transition-colors hover:border-[var(--burgundy)] hover:text-[var(--burgundy)] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Eye size={15} />
+                Preview Live
+              </button>
+
+              <button
+                type="button"
+                disabled={isSaving || isLoading}
+                onClick={() => void persist('DRAFT')}
+                className="inline-flex items-center gap-2 border border-black/10 bg-white px-4 py-2.5 text-sm font-medium text-[var(--charcoal)] transition-colors hover:border-[var(--burgundy)] hover:text-[var(--burgundy)] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Save size={15} />
+                {isSaving ? 'Saving...' : 'Save Draft'}
+              </button>
+
+              <button
+                type="button"
+                disabled={isSaving || isLoading}
+                onClick={() => void persist('PUBLISHED')}
+                className="border border-[var(--burgundy)] bg-[var(--burgundy)] px-5 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Publish
+              </button>
             </div>
-
-            <p className="mt-0.5 text-xs text-[var(--charcoal-muted)]">
-              Edit the page content directly below.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              disabled={isSaving || isLoading}
-              onClick={previewLive}
-              className="inline-flex items-center gap-2 border border-black/10 bg-white px-4 py-2.5 text-sm font-medium text-[var(--charcoal)] transition-colors hover:border-[var(--burgundy)] hover:text-[var(--burgundy)] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <Eye size={15} />
-              Preview Live
-            </button>
-
-            <button
-              type="button"
-              disabled={isSaving || isLoading}
-              onClick={() => void persist('DRAFT')}
-              className="inline-flex items-center gap-2 border border-black/10 bg-white px-4 py-2.5 text-sm font-medium text-[var(--charcoal)] transition-colors hover:border-[var(--burgundy)] hover:text-[var(--burgundy)] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <Save size={15} />
-
-              {isSaving ? 'Saving...' : 'Save Draft'}
-            </button>
-
-            <button
-              type="button"
-              disabled={isSaving || isLoading}
-              onClick={() => void persist('PUBLISHED')}
-              className="border border-[var(--burgundy)] bg-[var(--burgundy)] px-5 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Publish
-            </button>
           </div>
         </div>
+
+        {/* Editor toolbar */}
 
         <main className="overflow-hidden bg-white">
           {/* Hero */}

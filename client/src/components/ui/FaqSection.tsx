@@ -15,9 +15,9 @@ export default function FaqSection({ id, items }: FaqSectionProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <section id={id} className="w-full bg-[var(--warm-white)] py-[96px] md:py-[120px]">
-      <div className="mx-auto w-full max-w-[1000px] px-6 md:px-10">
-        <h2 className="mb-12 text-[clamp(32px,4vw,48px)] font-semibold leading-[1.1] tracking-[-0.025em] text-[var(--charcoal)]">
+    <section id={id} className="w-full bg-[var(--warm-white)] py-[64px] md:py-[120px]">
+      <div className="mx-auto w-full max-w-[1000px] px-5 sm:px-6 md:px-10">
+        <h2 className="mb-8 text-[clamp(30px,8vw,48px)] font-semibold leading-[1.1] tracking-[-0.025em] text-[var(--charcoal)] md:mb-12">
           Frequently Asked Questions
         </h2>
 
@@ -29,7 +29,7 @@ export default function FaqSection({ id, items }: FaqSectionProps) {
               <div key={item.question} className="border-b border-[var(--border)]">
                 <button
                   type="button"
-                  className="flex w-full cursor-pointer items-center justify-between gap-8 py-6 text-left"
+                  className="flex w-full cursor-pointer items-center justify-between gap-5 py-5 text-left md:gap-8 md:py-6"
                   aria-expanded={isOpen}
                   onClick={() => setOpenIndex(isOpen ? null : index)}
                 >

@@ -12,8 +12,8 @@ export default function EditorialFeature({
   imageAlt,
 }: EditorialFeatureProps) {
   return (
-    <section className="w-full bg-[var(--warm-white)] py-[96px] md:py-[120px]">
-      <div className="mx-auto grid w-full max-w-[1240px] items-center gap-12 px-6 md:gap-20 md:px-10 lg:grid-cols-[0.9fr_1.1fr]">
+    <section className="w-full bg-[var(--warm-white)] py-[64px] md:py-[120px]">
+      <div className="mx-auto grid w-full max-w-[1240px] items-center gap-9 px-5 sm:px-6 md:gap-20 md:px-10 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="overflow-hidden">
           <img
             src={image}
@@ -23,7 +23,7 @@ export default function EditorialFeature({
         </div>
 
         <div className="max-w-[560px]">
-          <h2 className="mb-7 text-[clamp(32px,4vw,48px)] font-semibold leading-[1.1] tracking-[-0.025em] text-[var(--charcoal)]">
+          <h2 className="mb-5 text-[clamp(30px,8vw,48px)] font-semibold leading-[1.1] tracking-[-0.025em] text-[var(--charcoal)] md:mb-7">
             {title}
           </h2>
 

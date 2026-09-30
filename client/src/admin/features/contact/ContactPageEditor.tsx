@@ -1,4 +1,5 @@
 import AppShell from '@/admin/components/layout/AppShell';
+import ContentPageHeader from '@/admin/components/ui/ContentPageHeader';
 import ContactEditorFields from './components/ContactEditorFields';
 import { useContactPageEditor } from './hooks/useContactPageEditor';
 
@@ -9,6 +10,14 @@ export default function ContactPageEditor() {
   return (
     <AppShell title="Contact">
       <section className="flex-1">
+        <div className="border-b border-black/10 bg-white px-6 py-6">
+          <ContentPageHeader
+            breadcrumbs={[{ label: 'Content' }, { label: 'Contact' }]}
+            title=""
+            description=""
+          />
+        </div>
+
         {error && (
           <div
             role="alert"

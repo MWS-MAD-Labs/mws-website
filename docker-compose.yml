@@ -88,6 +88,7 @@ services:
       sh -c "export DATABASE_URL=\"postgresql://$${POSTGRES_USER:-mws_website}:$${POSTGRES_PASSWORD:-postgres}@db:5432/$${POSTGRES_DB:-mws_website}?schema=public\" &&
       export SHADOW_DATABASE_URL=\"postgresql://$${POSTGRES_USER:-mws_website}:$${POSTGRES_PASSWORD:-postgres}@db:5432/$${POSTGRES_DB:-mws_website}_shadow?schema=public\" &&
       bun run db:migrate &&
+      bun run db:seed:cms-roles &&
       bun run src/index.ts"
     depends_on:
       db:

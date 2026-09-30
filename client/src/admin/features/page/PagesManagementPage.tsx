@@ -1,31 +1,23 @@
-import { ChevronRight, Eye, MoreHorizontal, Pencil } from 'lucide-react';
+import { Eye, MoreHorizontal, Pencil } from 'lucide-react';
 
 import AppShell from '@/admin/components/layout/AppShell';
+import ContentPageHeader from '@/admin/components/ui/ContentPageHeader';
 import { managedPages } from './config/pages';
 
 export default function PagesManagementPage() {
   return (
     <AppShell title="Pages">
       <section className="space-y-6 px-6 py-6 lg:px-8 lg:py-7">
-        {/* Breadcrumb */}
-        <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs">
-          <span className="text-gray-400">Content</span>
-          <ChevronRight size={13} className="text-gray-300" />
-          <span className="font-medium text-gray-700">Pages</span>
-        </nav>
-
-        {/* Header */}
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900">Your Site's Pages</h2>
-
-            <p className="mt-1 text-sm text-gray-500">Manage and edit your website pages.</p>
-          </div>
-
-          <span className="text-sm text-gray-400">
-            {managedPages.length} {managedPages.length === 1 ? 'page' : 'pages'}
-          </span>
-        </div>
+        <ContentPageHeader
+          breadcrumbs={[{ label: 'Content' }, { label: 'Pages' }]}
+          title="Your Site's Pages"
+          description="Manage and edit your website pages."
+          action={
+            <span className="text-sm text-gray-400">
+              {managedPages.length} {managedPages.length === 1 ? 'page' : 'pages'}
+            </span>
+          }
+        />
 
         {/* Page Grid */}
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

@@ -5,6 +5,7 @@ import { Eye, Image as ImageIcon, Save, Upload } from 'lucide-react';
 import { adminApi, type AcademicLevelData, type AcademicLevelKey } from '@/admin/api/adminApi';
 import Tiptap from '@/admin/components/Tiptap';
 import AppShell from '@/admin/components/layout/AppShell';
+import ContentPageHeader from '@/admin/components/ui/ContentPageHeader';
 import { publicAssetUrl } from '@/lib/api';
 
 type PageStatus = 'DRAFT' | 'PUBLISHED';
@@ -280,6 +281,14 @@ export default function AcademicLevelEditorPage() {
   return (
     <AppShell title={`Academic / ${levelTitle}`}>
       <div className="bg-[#f5f4f1]">
+        <div className="border-b border-black/10 bg-white px-6 py-6">
+          <ContentPageHeader
+            breadcrumbs={[{ label: 'Academic' }, { label: levelTitle }]}
+            title={'Academic / ' + levelTitle}
+            description={isLoading ? 'Loading content...' : 'Edit the page content directly below.'}
+          />
+        </div>
+
         {/* Toolbar */}
         <header className="sticky top-0 z-40 border-b border-black/10 bg-white/95 backdrop-blur">
           <div className="flex min-h-[68px] items-center justify-between gap-4 px-6">
@@ -343,7 +352,11 @@ export default function AcademicLevelEditorPage() {
         <main className="bg-white">
           <section className="w-full">
             <div className="relative h-[520px] w-full overflow-hidden md:h-[550px]">
-              <img src={publicAssetUrl(heroImage)} alt="" className="absolute inset-0 h-full w-full object-cover" />
+              <img
+                src={publicAssetUrl(heroImage)}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover"
+              />
 
               <div className="absolute inset-0 bg-black/15" />
 

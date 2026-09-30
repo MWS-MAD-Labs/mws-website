@@ -1,18 +1,18 @@
-import { Link, useParams } from "react-router-dom";
-import AppShell from "@/admin/components/layout/AppShell";
-import Modal from "@/admin/components/ui/Modal";
-import StatusMessage from "@/admin/components/ui/StatusMessage";
-import GalleryAssetPreviewModal from "./components/GalleryAssetPreviewModal";
-import GalleryAssetTabs from "./components/GalleryAssetTabs";
-import GalleryAssetToolbar from "./components/GalleryAssetToolbar";
-import GalleryDeleteConfirmModal from "./components/GalleryDeleteConfirmModal";
-import GalleryDetailHeader from "./components/GalleryDetailHeader";
-import GallerySelectionBar from "./components/GallerySelectionBar";
-import ImageList from "./components/layouts/ImageList";
-import UploadImages from "./components/layouts/UploadImages";
-import UploadVidio from "./components/layouts/UploadVidio";
-import VidioList from "./components/layouts/VidioList";
-import { useGalleryDetail } from "./hooks/useGalleryDetail";
+import { useParams } from 'react-router-dom';
+import AppShell from '@/admin/components/layout/AppShell';
+import Modal from '@/admin/components/ui/Modal';
+import StatusMessage from '@/admin/components/ui/StatusMessage';
+import GalleryAssetPreviewModal from './components/GalleryAssetPreviewModal';
+import GalleryAssetTabs from './components/GalleryAssetTabs';
+import GalleryAssetToolbar from './components/GalleryAssetToolbar';
+import GalleryDeleteConfirmModal from './components/GalleryDeleteConfirmModal';
+import GalleryDetailHeader from './components/GalleryDetailHeader';
+import GallerySelectionBar from './components/GallerySelectionBar';
+import ImageList from './components/layouts/ImageList';
+import UploadImages from './components/layouts/UploadImages';
+import UploadVidio from './components/layouts/UploadVidio';
+import VidioList from './components/layouts/VidioList';
+import { useGalleryDetail } from './hooks/useGalleryDetail';
 
 export default function GalleryDetailPage() {
   const { galleryId } = useParams();
@@ -53,20 +53,10 @@ export default function GalleryDetailPage() {
   } = useGalleryDetail(galleryId);
 
   return (
-    <AppShell title={gallery?.title ?? "Gallery Detail"}>
+    <AppShell title={gallery?.title ?? 'Gallery Detail'}>
       <section className="space-y-5 p-6">
-        <p className="text-sm text-gray-500">
-          <Link className="hover:text-gray-900" to="/admin/gallery">
-            All Galleries
-          </Link>{" "}
-          / {gallery?.title ?? "Gallery Detail"}
-        </p>
-
         <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-          <GalleryDetailHeader
-            gallery={gallery}
-            onOpenUpload={setOpenUpload}
-          />
+          <GalleryDetailHeader gallery={gallery} onOpenUpload={setOpenUpload} />
 
           {message ? (
             <div className="border-b border-gray-200 bg-[#faf8f3] px-5 py-3">
@@ -74,9 +64,7 @@ export default function GalleryDetailPage() {
             </div>
           ) : null}
 
-          {isLoading ? (
-            <div className="p-5 text-sm text-gray-500">Loading gallery...</div>
-          ) : null}
+          {isLoading ? <div className="p-5 text-sm text-gray-500">Loading gallery...</div> : null}
 
           {!isLoading && !gallery ? (
             <div className="p-5 text-sm text-gray-500">Gallery not found.</div>
@@ -101,11 +89,11 @@ export default function GalleryDetailPage() {
               <GallerySelectionBar
                 disabled={isSaving}
                 selectedCount={selectedIds.length}
-                onDelete={() => setConfirmDelete({ mode: "bulk" })}
+                onDelete={() => setConfirmDelete({ mode: 'bulk' })}
               />
 
               <div className="p-4">
-                {activeTab === "images" ? (
+                {activeTab === 'images' ? (
                   <ImageList
                     images={visibleImages}
                     selectedIds={selectedImageIds}
@@ -127,7 +115,7 @@ export default function GalleryDetailPage() {
       </section>
 
       <Modal
-        open={openUpload === "images"}
+        open={openUpload === 'images'}
         title="Upload Image"
         onClose={() => setOpenUpload(null)}
       >
@@ -139,7 +127,7 @@ export default function GalleryDetailPage() {
       </Modal>
 
       <Modal
-        open={openUpload === "videos"}
+        open={openUpload === 'videos'}
         title="Upload Video"
         onClose={() => setOpenUpload(null)}
       >
@@ -158,9 +146,9 @@ export default function GalleryDetailPage() {
         isSaving={isSaving}
         totalAssets={previewAssets.length}
         onClose={() => setPreview(null)}
-        onDelete={() => setConfirmDelete({ mode: "preview" })}
-        onNext={() => goToPreviewAsset("next")}
-        onPrevious={() => goToPreviewAsset("previous")}
+        onDelete={() => setConfirmDelete({ mode: 'preview' })}
+        onNext={() => goToPreviewAsset('next')}
+        onPrevious={() => goToPreviewAsset('previous')}
       />
 
       <GalleryDeleteConfirmModal

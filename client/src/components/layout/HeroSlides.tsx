@@ -1,4 +1,4 @@
-import { ArrowBigLeftDash, ArrowBigRightDash } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -42,7 +42,6 @@ export default function Hero({
 
   const transitionTimer = useRef<number | null>(null);
   const currentIndexRef = useRef(activeIndex);
-
   const isManualNavigation = useRef(false);
 
   useEffect(() => {
@@ -76,12 +75,8 @@ export default function Hero({
       return;
     }
 
-    // Reset manual flag setelah perubahan diproses.
     isManualNavigation.current = false;
 
-    /*
-     * Clear transition sebelumnya jika masih berjalan.
-     */
     if (transitionTimer.current !== null) {
       window.clearTimeout(transitionTimer.current);
       transitionTimer.current = null;
@@ -130,7 +125,6 @@ export default function Hero({
     };
   }, []);
 
-
   const handlePrevious = () => {
     isManualNavigation.current = true;
     onPrevious();
@@ -147,7 +141,6 @@ export default function Hero({
   };
 
   const currentSlide = slides[currentIndex];
-
   const incomingSlide = incomingIndex !== null ? slides[incomingIndex] : null;
 
   if (!currentSlide) {
@@ -170,7 +163,7 @@ export default function Hero({
             poster={currentSlide.poster || currentSlide.image || undefined}
             className={`absolute inset-0 h-full w-full object-cover will-change-transform ${
               isTransitioning ? 'animate-hero-out' : ''
-            } `}
+            }`}
             autoPlay
             loop={currentSlide.isLooping ?? true}
             muted
@@ -183,7 +176,7 @@ export default function Hero({
             alt={currentSlide.alt}
             className={`absolute inset-0 h-full w-full object-cover will-change-transform ${
               isTransitioning ? 'animate-hero-out' : ''
-            } `}
+            }`}
           />
         )}
 
@@ -198,41 +191,18 @@ export default function Hero({
         )}
       </div>
 
-      {/* Overlay */}
+      {/* =========================================================
+          OVERLAY
+      ========================================================= */}
       <div className="pointer-events-none absolute inset-0 bg-black/20" />
+
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
-
-      {/* =========================================================
-          PREVIOUS
-      ========================================================= */}
-      <button
-        type="button"
-        onClick={handlePrevious}
-        aria-label="Previous slide"
-        disabled={isTransitioning}
-        className="absolute left-8 top-1/2 z-30 -translate-y-1/2 text-2xl text-white transition-opacity hover:opacity-70 disabled:pointer-events-none disabled:opacity-50"
-      >
-        <ArrowBigLeftDash />
-      </button>
-
-      {/* =========================================================
-          NEXT
-      ========================================================= */}
-      <button
-        type="button"
-        onClick={handleNext}
-        aria-label="Next slide"
-        disabled={isTransitioning}
-        className="absolute right-8 top-1/2 z-30 -translate-y-1/2 text-2xl text-white transition-opacity hover:opacity-70 disabled:pointer-events-none disabled:opacity-50"
-      >
-        <ArrowBigRightDash />
-      </button>
 
       {/* =========================================================
           HERO CONTENT
       ========================================================= */}
       <div className="absolute inset-x-0 bottom-0 z-20">
-        <div className="px-14 pb-16 md:px-16 md:pb-20">
+        <div className="px-6 pb-28 sm:px-10 sm:pb-28 md:px-16 md:pb-32">
           {/* Current text */}
           {!isTransitioning && (
             <div
@@ -240,24 +210,24 @@ export default function Hero({
               className="animate-hero-text-in max-w-[600px] text-white"
             >
               {currentSlide.headline && (
-                <h1 className="text-5xl font-bold leading-[0.95] tracking-tight text-white">
+                <h1 className="text-4xl font-bold leading-[0.95] tracking-tight text-white sm:text-5xl">
                   {currentSlide.headline}
                 </h1>
               )}
 
               {currentSlide.caption && (
-                <p className="mt-6 max-w-[500px] text-base leading-relaxed">
+                <p className="mt-5 max-w-[500px] text-sm leading-relaxed sm:mt-6 sm:text-base">
                   {currentSlide.caption}
                 </p>
               )}
 
               <Link
                 to={currentSlide.ctaHref ?? DEFAULT_CTA_HREF}
-                className="mt-7 inline-flex items-center gap-3 text-sm font-medium transition-opacity hover:opacity-70"
+                className="mt-6 inline-flex items-center gap-3 text-sm font-medium text-white transition-opacity hover:opacity-70 sm:mt-7"
               >
                 {currentSlide.ctaLabel ?? DEFAULT_CTA_LABEL}
 
-                <span>→</span>
+                <span aria-hidden="true">→</span>
               </Link>
             </div>
           )}
@@ -269,43 +239,91 @@ export default function Hero({
               className="animate-hero-text-in max-w-[600px] text-white"
             >
               {incomingSlide.headline && (
-                <h1 className="text-5xl font-bold leading-[0.95] tracking-tight text-white">
+                <h1 className="text-4xl font-bold leading-[0.95] tracking-tight text-white sm:text-5xl">
                   {incomingSlide.headline}
                 </h1>
               )}
 
               {incomingSlide.caption && (
-                <p className="mt-6 max-w-[500px] text-base leading-relaxed">
+                <p className="mt-5 max-w-[500px] text-sm leading-relaxed sm:mt-6 sm:text-base">
                   {incomingSlide.caption}
                 </p>
               )}
 
               <Link
                 to={incomingSlide.ctaHref ?? DEFAULT_CTA_HREF}
-                className="mt-7 inline-flex items-center gap-3 text-sm font-medium"
+                className="mt-6 inline-flex items-center gap-3 text-sm font-medium text-white transition-opacity hover:opacity-70 sm:mt-7"
               >
                 {incomingSlide.ctaLabel ?? DEFAULT_CTA_LABEL}
 
-                <span>→</span>
+                <span aria-hidden="true">→</span>
               </Link>
             </div>
           )}
         </div>
       </div>
 
-      <div className="absolute bottom-8 right-10 z-30 flex items-center gap-2">
-        {slides.map((slide, index) => (
+      {/* =========================================================
+          HERO NAVIGATION
+      ========================================================= */}
+      <div className="absolute bottom-6 right-5 z-30 flex items-center gap-4 text-white sm:bottom-8 sm:right-10 sm:gap-5">
+        {/* Slide indicators */}
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          {slides.map((slide, index) => {
+            const isActive = index === activeIndex;
+
+            return (
+              <button
+                key={slide.id ?? slide.image}
+                type="button"
+                onClick={() => handleSelectSlide(index)}
+                disabled={isTransitioning}
+                aria-label={`Go to slide ${index + 1}`}
+                aria-current={isActive ? 'true' : undefined}
+                className="group flex items-center gap-2 disabled:pointer-events-none"
+              >
+                <span
+                  className={`text-[10px] font-semibold tracking-[0.16em] transition-opacity duration-300 sm:text-[11px] ${
+                    isActive ? 'opacity-100' : 'opacity-50 group-hover:opacity-100'
+                  }`}
+                >
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+
+                <span
+                  className={`h-px transition-all duration-300 ${
+                    isActive
+                      ? 'w-8 bg-white sm:w-10'
+                      : 'w-2 bg-white/50 group-hover:w-4 group-hover:bg-white'
+                  }`}
+                />
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Previous / Next */}
+        <div className="flex items-center border-l border-white/30 pl-2 sm:pl-3">
           <button
-            key={slide.id ?? slide.image}
             type="button"
-            onClick={() => handleSelectSlide(index)}
+            onClick={handlePrevious}
             disabled={isTransitioning}
-            aria-label={`Go to slide ${index + 1}`}
-            className={`h-1.5 rounded-full transition-all duration-300 disabled:pointer-events-none ${
-              index === activeIndex ? 'w-8 bg-white' : 'w-2 bg-white/60'
-            } `}
-          />
-        ))}
+            aria-label="Previous slide"
+            className="flex h-9 w-9 items-center justify-center text-white transition-opacity hover:opacity-60 disabled:pointer-events-none disabled:opacity-40 sm:h-10 sm:w-10"
+          >
+            <ChevronLeft size={20} strokeWidth={1.5} className="sm:h-[22px] sm:w-[22px]" />
+          </button>
+
+          <button
+            type="button"
+            onClick={handleNext}
+            disabled={isTransitioning}
+            aria-label="Next slide"
+            className="flex h-9 w-9 items-center justify-center text-white transition-opacity hover:opacity-60 disabled:pointer-events-none disabled:opacity-40 sm:h-10 sm:w-10"
+          >
+            <ChevronRight size={20} strokeWidth={1.5} className="sm:h-[22px] sm:w-[22px]" />
+          </button>
+        </div>
       </div>
     </section>
   );

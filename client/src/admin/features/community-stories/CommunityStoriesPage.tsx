@@ -1,18 +1,19 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import {
   adminApi,
   type AdminCommunityStoriesPage,
   type AdminNewsPost,
   type AdminNewsPayload,
   type GalleryItem,
-} from "@/admin/api/adminApi";
-import AppShell from "@/admin/components/layout/AppShell";
-import Button from "@/admin/components/ui/Button";
-import Field from "@/admin/components/ui/Field";
-import StatusMessage from "@/admin/components/ui/StatusMessage";
-import GalleryAssetPickerModal from "@/admin/features/gallery/components/GalleryAssetPickerModal";
-import GalleryPickerModal from "@/admin/features/gallery/components/GalleryPickerModal";
-import GalleryThumb from "@/admin/features/gallery/components/GalleryThumb";
+} from '@/admin/api/adminApi';
+import AppShell from '@/admin/components/layout/AppShell';
+import ContentPageHeader from '@/admin/components/ui/ContentPageHeader';
+import Button from '@/admin/components/ui/Button';
+import Field from '@/admin/components/ui/Field';
+import StatusMessage from '@/admin/components/ui/StatusMessage';
+import GalleryAssetPickerModal from '@/admin/features/gallery/components/GalleryAssetPickerModal';
+import GalleryPickerModal from '@/admin/features/gallery/components/GalleryPickerModal';
+import GalleryThumb from '@/admin/features/gallery/components/GalleryThumb';
 
 type PageForm = {
   galleryId: string | null;
@@ -36,14 +37,14 @@ type NewsForm = {
 };
 
 const emptyNewsForm: NewsForm = {
-  excerpt: "",
+  excerpt: '',
   galleryId: null,
-  imageAlt: "",
-  imagePath: "",
+  imageAlt: '',
+  imagePath: '',
   isPublished: false,
-  publishedAt: "",
-  slug: "",
-  title: "",
+  publishedAt: '',
+  slug: '',
+  title: '',
 };
 
 function optionalText(value: string) {
@@ -54,10 +55,10 @@ function optionalText(value: string) {
 function pageToForm(page: AdminCommunityStoriesPage): PageForm {
   return {
     galleryId: page.galleryId,
-    heroImageAlt: page.heroImageAlt ?? "",
-    heroImagePath: page.heroImagePath ?? "",
-    introBody: page.introBody.join("\n\n"),
-    introTitle: page.introTitle ?? "",
+    heroImageAlt: page.heroImageAlt ?? '',
+    heroImagePath: page.heroImagePath ?? '',
+    introBody: page.introBody.join('\n\n'),
+    introTitle: page.introTitle ?? '',
     isPublished: page.isPublished,
     title: page.title,
   };
@@ -65,12 +66,12 @@ function pageToForm(page: AdminCommunityStoriesPage): PageForm {
 
 function newsToForm(news: AdminNewsPost): NewsForm {
   return {
-    excerpt: news.excerpt ?? "",
+    excerpt: news.excerpt ?? '',
     galleryId: news.galleryId,
-    imageAlt: news.imageAlt ?? "",
-    imagePath: news.imagePath ?? "",
+    imageAlt: news.imageAlt ?? '',
+    imagePath: news.imagePath ?? '',
     isPublished: news.isPublished,
-    publishedAt: news.publishedAt ? news.publishedAt.slice(0, 16) : "",
+    publishedAt: news.publishedAt ? news.publishedAt.slice(0, 16) : '',
     slug: news.slug,
     title: news.title,
   };
@@ -80,8 +81,8 @@ function slugify(value: string) {
   return value
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
 function newsPayload(form: NewsForm): AdminNewsPayload {
@@ -135,11 +136,7 @@ export default function CommunityStoriesPage() {
     queueMicrotask(() => {
       loadData()
         .catch((error) =>
-          setMessage(
-            error instanceof Error
-              ? error.message
-              : "Failed to load community stories.",
-          ),
+          setMessage(error instanceof Error ? error.message : 'Failed to load community stories.'),
         )
         .finally(() => setIsLoading(false));
     });
@@ -166,11 +163,9 @@ export default function CommunityStoriesPage() {
         title: pageForm.title,
       });
       setPageForm(pageToForm(updatedPage));
-      setMessage("Community Stories page updated.");
+      setMessage('Community Stories page updated.');
     } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Failed to save community stories.",
-      );
+      setMessage(error instanceof Error ? error.message : 'Failed to save community stories.');
     } finally {
       setIsSaving(false);
     }
@@ -184,16 +179,16 @@ export default function CommunityStoriesPage() {
     try {
       if (editingNewsId) {
         await adminApi.updateCommunityNews(editingNewsId, newsPayload(newsForm));
-        setMessage("News item updated.");
+        setMessage('News item updated.');
       } else {
         await adminApi.createCommunityNews(newsPayload(newsForm));
-        setMessage("News item created.");
+        setMessage('News item created.');
       }
       setEditingNewsId(null);
       setNewsForm(emptyNewsForm);
       await loadData();
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Failed to save news.");
+      setMessage(error instanceof Error ? error.message : 'Failed to save news.');
     } finally {
       setIsSaving(false);
     }
@@ -210,9 +205,9 @@ export default function CommunityStoriesPage() {
         setNewsForm(emptyNewsForm);
       }
       await loadData();
-      setMessage("News item deleted.");
+      setMessage('News item deleted.');
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Failed to delete news.");
+      setMessage(error instanceof Error ? error.message : 'Failed to delete news.');
     } finally {
       setIsSaving(false);
     }
@@ -221,7 +216,11 @@ export default function CommunityStoriesPage() {
   return (
     <AppShell title="Community Stories">
       <section className="space-y-5 p-6">
-        <p className="text-sm text-gray-500">Content / Community Stories</p>
+        <ContentPageHeader
+          breadcrumbs={[{ label: 'Content' }, { label: 'Community Stories' }]}
+          title="Community Stories"
+          description="Manage the public Community Stories page content and story list."
+        />
 
         {message ? (
           <div className="rounded-lg border border-gray-200 bg-white px-5 py-3">
@@ -241,15 +240,11 @@ export default function CommunityStoriesPage() {
             >
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 px-5 py-4">
                 <div>
-                  <h1 className="text-lg font-semibold text-gray-900">
-                    Page Content
-                  </h1>
-                  <p className="text-sm text-gray-500">
-                    Hero, intro copy, and connected gallery.
-                  </p>
+                  <h1 className="text-lg font-semibold text-gray-900">Page Content</h1>
+                  <p className="text-sm text-gray-500">Hero, intro copy, and connected gallery.</p>
                 </div>
                 <Button disabled={isSaving} type="submit">
-                  {isSaving ? "Saving..." : "Save Page"}
+                  {isSaving ? 'Saving...' : 'Save Page'}
                 </Button>
               </div>
 
@@ -269,11 +264,9 @@ export default function CommunityStoriesPage() {
                   <div className="rounded-lg border border-gray-200 p-4 lg:col-span-2">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <h3 className="text-sm font-semibold text-gray-900">
-                          Hero Image
-                        </h3>
+                        <h3 className="text-sm font-semibold text-gray-900">Hero Image</h3>
                         <p className="truncate text-sm text-gray-500">
-                          {pageForm.heroImagePath || "No image selected."}
+                          {pageForm.heroImagePath || 'No image selected.'}
                         </p>
                       </div>
                       <Button
@@ -289,7 +282,7 @@ export default function CommunityStoriesPage() {
                       <img
                         className="mt-3 aspect-video w-full rounded-lg object-cover"
                         src={adminApi.publicAssetUrl(pageForm.heroImagePath)}
-                        alt={pageForm.heroImageAlt || "Community Stories hero"}
+                        alt={pageForm.heroImageAlt || 'Community Stories hero'}
                       />
                     ) : null}
                   </div>
@@ -299,9 +292,7 @@ export default function CommunityStoriesPage() {
                       value={pageForm.heroImageAlt}
                       onChange={(event) =>
                         setPageForm((current) =>
-                          current
-                            ? { ...current, heroImageAlt: event.target.value }
-                            : current,
+                          current ? { ...current, heroImageAlt: event.target.value } : current,
                         )
                       }
                     />
@@ -313,9 +304,7 @@ export default function CommunityStoriesPage() {
                     value={pageForm.introTitle}
                     onChange={(event) =>
                       setPageForm((current) =>
-                        current
-                          ? { ...current, introTitle: event.target.value }
-                          : current,
+                        current ? { ...current, introTitle: event.target.value } : current,
                       )
                     }
                   />
@@ -334,9 +323,7 @@ export default function CommunityStoriesPage() {
                 <div className="rounded-lg border border-gray-200 p-4">
                   <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                     <div>
-                      <h2 className="text-sm font-semibold text-gray-900">
-                        Connected Gallery
-                      </h2>
+                      <h2 className="text-sm font-semibold text-gray-900">Connected Gallery</h2>
                       <p className="text-sm text-gray-500">
                         Used by the public gallery grid on this page.
                       </p>
@@ -357,7 +344,7 @@ export default function CommunityStoriesPage() {
                           {selectedGallery.title}
                         </p>
                         <p className="truncate text-sm text-gray-500">
-                          {selectedGallery.description || "-"}
+                          {selectedGallery.description || '-'}
                         </p>
                       </div>
                     </div>
@@ -371,9 +358,7 @@ export default function CommunityStoriesPage() {
                     type="checkbox"
                     onChange={(event) =>
                       setPageForm((current) =>
-                        current
-                          ? { ...current, isPublished: event.target.checked }
-                          : current,
+                        current ? { ...current, isPublished: event.target.checked } : current,
                       )
                     }
                   />
@@ -382,13 +367,10 @@ export default function CommunityStoriesPage() {
               </div>
             </form>
 
-            <form
-              className="h-fit rounded-lg border border-gray-200 bg-white"
-              onSubmit={saveNews}
-            >
+            <form className="h-fit rounded-lg border border-gray-200 bg-white" onSubmit={saveNews}>
               <div className="border-b border-gray-200 px-5 py-4">
                 <h2 className="text-base font-semibold text-gray-900">
-                  {editingNews ? "Edit News" : "New News"}
+                  {editingNews ? 'Edit News' : 'New News'}
                 </h2>
               </div>
               <div className="grid gap-4 p-5">
@@ -434,11 +416,9 @@ export default function CommunityStoriesPage() {
                   <div className="rounded-lg border border-gray-200 p-4 sm:col-span-2">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <h3 className="text-sm font-semibold text-gray-900">
-                          News Image
-                        </h3>
+                        <h3 className="text-sm font-semibold text-gray-900">News Image</h3>
                         <p className="truncate text-sm text-gray-500">
-                          {newsForm.imagePath || "No image selected."}
+                          {newsForm.imagePath || 'No image selected.'}
                         </p>
                       </div>
                       <Button
@@ -454,7 +434,7 @@ export default function CommunityStoriesPage() {
                       <img
                         className="mt-3 aspect-video w-full rounded-lg object-cover"
                         src={adminApi.publicAssetUrl(newsForm.imagePath)}
-                        alt={newsForm.imageAlt || newsForm.title || "News image"}
+                        alt={newsForm.imageAlt || newsForm.title || 'News image'}
                       />
                     ) : null}
                   </div>
@@ -486,9 +466,7 @@ export default function CommunityStoriesPage() {
                 </Field>
                 <div className="rounded-lg border border-gray-200 p-4">
                   <div className="mb-3 flex items-center justify-between gap-3">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      News Gallery
-                    </h3>
+                    <h3 className="text-sm font-semibold text-gray-900">News Gallery</h3>
                     <Button
                       size="sm"
                       type="button"
@@ -501,9 +479,7 @@ export default function CommunityStoriesPage() {
                   {selectedNewsGallery ? (
                     <div className="flex items-center gap-3">
                       <GalleryThumb gallery={selectedNewsGallery} />
-                      <p className="truncate text-sm text-gray-700">
-                        {selectedNewsGallery.title}
-                      </p>
+                      <p className="truncate text-sm text-gray-700">{selectedNewsGallery.title}</p>
                     </div>
                   ) : (
                     <p className="text-sm text-gray-500">No gallery selected.</p>
@@ -534,7 +510,7 @@ export default function CommunityStoriesPage() {
                     Clear
                   </Button>
                   <Button disabled={isSaving} type="submit">
-                    {isSaving ? "Saving..." : "Save News"}
+                    {isSaving ? 'Saving...' : 'Save News'}
                   </Button>
                 </div>
               </div>
@@ -557,15 +533,11 @@ export default function CommunityStoriesPage() {
                     key={item.id}
                   >
                     <div className="min-w-0">
-                      <h3 className="truncate text-sm font-semibold text-gray-900">
-                        {item.title}
-                      </h3>
-                      <p className="truncate text-sm text-gray-500">
-                        /news/{item.slug}
-                      </p>
+                      <h3 className="truncate text-sm font-semibold text-gray-900">{item.title}</h3>
+                      <p className="truncate text-sm text-gray-500">/news/{item.slug}</p>
                     </div>
                     <p className="text-sm text-gray-500">
-                      {item.isPublished ? "Published" : "Draft"}
+                      {item.isPublished ? 'Published' : 'Draft'}
                     </p>
                     <div className="flex justify-end gap-2">
                       <Button
@@ -610,12 +582,10 @@ export default function CommunityStoriesPage() {
           open={isNewsGalleryPickerOpen}
           selectedGalleryId={newsForm.galleryId}
           onClose={() => setIsNewsGalleryPickerOpen(false)}
-          onSelect={(galleryId) =>
-            setNewsForm((current) => ({ ...current, galleryId }))
-          }
+          onSelect={(galleryId) => setNewsForm((current) => ({ ...current, galleryId }))}
         />
         <GalleryAssetPickerModal
-          allowedKinds={["IMAGE"]}
+          allowedKinds={['IMAGE']}
           galleries={galleries}
           initialGalleryId={pageForm?.galleryId ?? null}
           open={isHeroAssetPickerOpen}
@@ -635,7 +605,7 @@ export default function CommunityStoriesPage() {
           }
         />
         <GalleryAssetPickerModal
-          allowedKinds={["IMAGE"]}
+          allowedKinds={['IMAGE']}
           galleries={galleries}
           initialGalleryId={newsForm.galleryId}
           open={isNewsAssetPickerOpen}

@@ -12,7 +12,8 @@
     "db:migrate:dev": "prisma migrate dev",
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",
-    "db:validate": "prisma validate"
+    "db:validate": "prisma validate",
+    "db:seed:cms-roles": "bun run src/scripts/seed-cms-roles.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",

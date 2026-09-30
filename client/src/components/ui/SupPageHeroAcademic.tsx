@@ -62,13 +62,13 @@ export default function SupPageHeroAcademic({
 
       {/* Academic navigation */}
       <nav className="w-full border-b border-gray-200 bg-white">
-        <div className="flex w-full">
+        <div className="flex w-full overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {/* Section label */}
-          <div className="flex shrink-0 items-center border-r border-gray-200 px-8 md:min-w-[205px] md:px-10">
+          <div className="flex shrink-0 items-center border-r border-gray-200 px-5 sm:px-6 md:min-w-[205px] md:px-10">
             <Link
               to="/academic"
               className={[
-                'flex items-center gap-4 py-5 text-sm font-semibold',
+                'flex items-center gap-3 py-4 text-sm font-semibold sm:gap-4 md:py-5',
                 'transition-colors duration-200',
                 pathname === '/academic'
                   ? 'text-[var(--burgundy)]'
@@ -81,7 +81,7 @@ export default function SupPageHeroAcademic({
           </div>
 
           {/* Program links */}
-          <div className="min-w-0 flex-1 overflow-x-auto">
+          <div className="min-w-0 flex-1">
             <div className="flex min-w-max">
               {academicItems.map((item) => {
                 const isActive = pathname === item.path || pathname.startsWith(`${item.path}/`);
@@ -91,7 +91,7 @@ export default function SupPageHeroAcademic({
                     key={item.path}
                     to={item.path}
                     className={[
-                      'relative flex items-center whitespace-nowrap px-7 py-5',
+                      'relative flex shrink-0 items-center whitespace-nowrap px-5 py-4 sm:px-6 md:px-7 md:py-5',
                       'border-r border-gray-100',
                       'text-sm transition-colors duration-200',
                       isActive
@@ -102,7 +102,7 @@ export default function SupPageHeroAcademic({
                     {item.label}
 
                     {isActive && (
-                      <span className="absolute inset-x-6 bottom-0 h-[2px] bg-[var(--burgundy)]" />
+                      <span className="absolute inset-x-5 bottom-0 h-[2px] bg-[var(--burgundy)] sm:inset-x-6" />
                     )}
                   </Link>
                 );

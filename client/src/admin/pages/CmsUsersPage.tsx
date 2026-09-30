@@ -1,19 +1,20 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { UserPlus } from "lucide-react";
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { UserPlus } from 'lucide-react';
 import {
   adminApi,
   type CmsInvitationListItem,
   type CmsRoleListItem,
   type CmsUserListItem,
-} from "@/admin/api/adminApi";
-import AppShell from "@/admin/components/layout/AppShell";
-import Button from "@/admin/components/ui/Button";
-import Field from "@/admin/components/ui/Field";
-import Modal from "@/admin/components/ui/Modal";
-import Panel from "@/admin/components/ui/Panel";
-import Select from "@/admin/components/ui/Select";
-import StatusMessage from "@/admin/components/ui/StatusMessage";
-import type { CmsRoleName } from "@/admin/types/auth";
+} from '@/admin/api/adminApi';
+import AppShell from '@/admin/components/layout/AppShell';
+import ContentPageHeader from '@/admin/components/ui/ContentPageHeader';
+import Button from '@/admin/components/ui/Button';
+import Field from '@/admin/components/ui/Field';
+import Modal from '@/admin/components/ui/Modal';
+import Panel from '@/admin/components/ui/Panel';
+import Select from '@/admin/components/ui/Select';
+import StatusMessage from '@/admin/components/ui/StatusMessage';
+import type { CmsRoleName } from '@/admin/types/auth';
 
 type CmsUsersState = {
   users: CmsUserListItem[];
@@ -22,13 +23,13 @@ type CmsUsersState = {
 };
 
 const inputClass =
-  "rounded-lg border border-[rgba(36,23,24,0.14)] px-3 py-2 text-sm outline-none focus:border-[#7e1518]";
+  'rounded-lg border border-[rgba(36,23,24,0.14)] px-3 py-2 text-sm outline-none focus:border-[#7e1518]';
 
 function formatDate(value: string | null) {
-  if (!value) return "-";
-  return new Intl.DateTimeFormat("en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
+  if (!value) return '-';
+  return new Intl.DateTimeFormat('en-US', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
   }).format(new Date(value));
 }
 
@@ -42,7 +43,7 @@ export default function CmsUsersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [savingUserId, setSavingUserId] = useState<string | null>(null);
   const [inviteOpen, setInviteOpen] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteEmail, setInviteEmail] = useState('');
   const [isInviting, setIsInviting] = useState(false);
 
   async function loadUsers() {
@@ -60,9 +61,7 @@ export default function CmsUsersPage() {
       })
       .catch((error) => {
         if (!cancelled) {
-          setMessage(
-            error instanceof Error ? error.message : "CMS users could not be loaded.",
-          );
+          setMessage(error instanceof Error ? error.message : 'CMS users could not be loaded.');
         }
       })
       .finally(() => {
@@ -75,7 +74,7 @@ export default function CmsUsersPage() {
   }, []);
 
   const adminRoles = useMemo(
-    () => data.roles.filter((role) => role.name === "ADMIN"),
+    () => data.roles.filter((role) => role.name === 'ADMIN'),
     [data.roles],
   );
 
@@ -88,19 +87,14 @@ export default function CmsUsersPage() {
     setMessage(null);
 
     try {
-      const updatedUser = await adminApi.updateUserRole(
-        user.id,
-        roleName as CmsRoleName,
-      );
+      const updatedUser = await adminApi.updateUserRole(user.id, roleName as CmsRoleName);
       setData((current) => ({
         ...current,
-        users: current.users.map((item) =>
-          item.id === updatedUser.id ? updatedUser : item,
-        ),
+        users: current.users.map((item) => (item.id === updatedUser.id ? updatedUser : item)),
       }));
-      setMessage("CMS user role updated.");
+      setMessage('CMS user role updated.');
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Role could not be updated.");
+      setMessage(error instanceof Error ? error.message : 'Role could not be updated.');
     } finally {
       setSavingUserId(null);
     }
@@ -108,9 +102,7 @@ export default function CmsUsersPage() {
 
   async function updateStatus(user: CmsUserListItem) {
     const nextStatus = !user.isActive;
-    const confirmed = window.confirm(
-      `${nextStatus ? "Reactivate" : "Deactivate"} ${user.name}?`,
-    );
+    const confirmed = window.confirm(`${nextStatus ? 'Reactivate' : 'Deactivate'} ${user.name}?`);
     if (!confirmed) return;
 
     setSavingUserId(user.id);
@@ -120,13 +112,11 @@ export default function CmsUsersPage() {
       const updatedUser = await adminApi.updateUserStatus(user.id, nextStatus);
       setData((current) => ({
         ...current,
-        users: current.users.map((item) =>
-          item.id === updatedUser.id ? updatedUser : item,
-        ),
+        users: current.users.map((item) => (item.id === updatedUser.id ? updatedUser : item)),
       }));
-      setMessage(`CMS user ${nextStatus ? "reactivated" : "deactivated"}.`);
+      setMessage(`CMS user ${nextStatus ? 'reactivated' : 'deactivated'}.`);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Status could not be updated.");
+      setMessage(error instanceof Error ? error.message : 'Status could not be updated.');
     } finally {
       setSavingUserId(null);
     }
@@ -140,13 +130,11 @@ export default function CmsUsersPage() {
     try {
       await adminApi.inviteCmsAdmin(inviteEmail);
       await loadUsers();
-      setInviteEmail("");
+      setInviteEmail('');
       setInviteOpen(false);
-      setMessage("Admin invitation created.");
+      setMessage('Admin invitation created.');
     } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Admin invitation could not be created.",
-      );
+      setMessage(error instanceof Error ? error.message : 'Admin invitation could not be created.');
     } finally {
       setIsInviting(false);
     }
@@ -159,15 +147,21 @@ export default function CmsUsersPage() {
     try {
       await adminApi.revokeCmsInvitation(invitation.id);
       await loadUsers();
-      setMessage("Invitation revoked.");
+      setMessage('Invitation revoked.');
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Invitation could not be revoked.");
+      setMessage(error instanceof Error ? error.message : 'Invitation could not be revoked.');
     }
   }
 
   return (
     <AppShell title="CMS Users">
       <section className="space-y-5 p-6">
+        <ContentPageHeader
+          breadcrumbs={[{ label: 'Admin' }, { label: 'CMS Users' }]}
+          title="CMS Users"
+          description="Manage approved CMS accounts, roles, and invitations."
+        />
+
         {message ? <StatusMessage>{message}</StatusMessage> : null}
 
         <Panel
@@ -198,7 +192,6 @@ export default function CmsUsersPage() {
                 </thead>
                 <tbody>
                   {data.users.map((user) => {
-
                     return (
                       <tr
                         key={user.id}

@@ -27,7 +27,7 @@ export default function EditorialSplit({
 
   const textBlock = (
     <div className="max-w-[600px]">
-      <h2 className="mb-7 text-[clamp(32px,4vw,48px)] font-semibold leading-[1.1] tracking-[-0.025em] text-[var(--charcoal)]">
+      <h2 className="mb-5 text-[clamp(30px,8vw,48px)] font-semibold leading-[1.1] tracking-[-0.025em] text-[var(--charcoal)] md:mb-7">
         {title}
       </h2>
 
@@ -36,8 +36,8 @@ export default function EditorialSplit({
   );
 
   return (
-    <section className="w-full bg-white  md:py-[12px]">
-      <div className="mx-auto grid w-full max-w-[1240px] items-stretch gap-12 px-6 md:gap-20 md:px-10 lg:grid-cols-2">
+    <section className="w-full bg-white py-[64px] md:py-[12px]">
+      <div className="mx-auto grid w-full max-w-[1240px] items-stretch gap-9 px-5 sm:px-6 md:gap-20 md:px-10 lg:grid-cols-2">
         {imageFirst ? (
           <>
             {imageBlock}

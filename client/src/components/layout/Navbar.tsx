@@ -76,38 +76,38 @@ export default function Navbar() {
     isHome && isHidden && !isOpen && '-translate-y-full',
   );
 
-const topNavClassName = ({ isActive }: { isActive: boolean }) =>
-  cx(
-    'relative flex items-center',
-    'font-[var(--f-head)] text-[16px] font-bold',
-    'transition-colors duration-300',
+  const topNavClassName = ({ isActive }: { isActive: boolean }) =>
+    cx(
+      'relative flex items-center',
+      'font-[var(--f-head)] text-[16px] font-bold',
+      'transition-colors duration-300',
 
-    useTransparentHomeHeader ? 'text-white' : 'text-[var(--charcoal)]',
+      useTransparentHomeHeader ? 'text-white' : 'text-[var(--charcoal)]',
 
-    'after:absolute after:-bottom-1 after:left-0',
-    'after:h-[2px]',
-    'after:transition-[width,background-color] after:duration-300',
-    'after:content-[""]',
+      'after:absolute after:-bottom-1 after:left-0',
+      'after:h-[2px]',
+      'after:transition-[width,background-color] after:duration-300',
+      'after:content-[""]',
 
-    useTransparentHomeHeader ? 'after:bg-white' : 'after:bg-[var(--burgundy)]',
+      useTransparentHomeHeader ? 'after:bg-white' : 'after:bg-[var(--burgundy)]',
 
-    useTransparentHomeHeader ? 'hover:text-white' : 'hover:text-[var(--burgundy)]',
+      useTransparentHomeHeader ? 'hover:text-white' : 'hover:text-[var(--burgundy)]',
 
-    'hover:after:w-full',
+      'hover:after:w-full',
 
-    isActive && 'font-extrabold after:w-full',
+      isActive && 'font-extrabold after:w-full',
 
-    // Mobile
-    'max-[980px]:min-h-11',
-    'max-[980px]:w-full',
-    'max-[980px]:px-3',
-    'max-[980px]:py-2.5',
-    'max-[980px]:text-[14px]',
-    'max-[980px]:font-bold',
-    'max-[980px]:leading-tight',
-    'max-[980px]:after:hidden',
-    'max-[980px]:hover:bg-[rgba(126,21,24,0.06)]',
-  );
+      // Mobile
+      'max-[980px]:min-h-11',
+      'max-[980px]:w-full',
+      'max-[980px]:px-3',
+      'max-[980px]:py-2.5',
+      'max-[980px]:text-[14px]',
+      'max-[980px]:font-bold',
+      'max-[980px]:leading-tight',
+      'max-[980px]:after:hidden',
+      'max-[980px]:hover:bg-[rgba(126,21,24,0.06)]',
+    );
 
   const dropdownLinkClassName = ({ isActive }: { isActive: boolean }) =>
     cx(
@@ -177,7 +177,14 @@ const topNavClassName = ({ isActive }: { isActive: boolean }) =>
 
       // Mobile smooth top-to-bottom animation
       'max-[980px]:visible',
-      'max-[980px]:overflow-hidden',
+      menu === 'academics'
+        ? [
+            'max-[980px]:overflow-x-auto',
+            'max-[980px]:overflow-y-hidden',
+            'max-[980px]:[scrollbar-width:none]',
+            'max-[980px]:[&::-webkit-scrollbar]:hidden',
+          ].join(' ')
+        : 'max-[980px]:overflow-hidden',
       'max-[980px]:transition-[max-height,opacity,transform]',
       'max-[980px]:duration-[240ms]',
       'max-[980px]:ease-out',
@@ -196,12 +203,19 @@ const topNavClassName = ({ isActive }: { isActive: boolean }) =>
           ].join(' '),
     );
 
-  const dropdownListClassName = (columns: 1 | 3) =>
+  const dropdownListClassName = (columns: 1 | 3, menu?: MenuKey) =>
     cx(
       'grid w-full list-none gap-x-8 gap-y-1',
       columns === 3 ? 'grid-cols-3' : 'grid-cols-1',
-      'max-[980px]:grid-cols-1',
-      'max-[980px]:gap-0',
+      menu === 'academics'
+        ? [
+            'max-[980px]:flex',
+            'max-[980px]:w-max',
+            'max-[980px]:min-w-full',
+            'max-[980px]:gap-2',
+            'max-[980px]:pr-3',
+          ].join(' ')
+        : ['max-[980px]:grid-cols-1', 'max-[980px]:gap-0'].join(' '),
     );
 
   const navItemClassName = (...extra: Array<string | false | null | undefined>) =>
@@ -245,6 +259,32 @@ const topNavClassName = ({ isActive }: { isActive: boolean }) =>
       'transition-transform duration-[225ms] ease-out',
       openMenu === menu && 'rotate-180',
     );
+
+  const bookTourClassName = cx(
+    'border',
+    'px-[22px] py-2.5',
+    'text-sm font-[var(--f-head)] font-bold',
+    'transition-[background,color,border-color] duration-300',
+    useTransparentHomeHeader
+      ? 'border-[var(--white)] text-[var(--white)] hover:bg-[var(--burgundy)] hover:text-[var(--white)]'
+      : 'border-[var(--burgundy)] text-[var(--burgundy)] hover:bg-[var(--burgundy)] hover:text-[var(--white)]',
+
+    // Mobile CTA appears inside the solid mobile menu panel.
+    'max-[980px]:mt-3',
+    'max-[980px]:flex',
+    'max-[980px]:min-h-11',
+    'max-[980px]:w-full',
+    'max-[980px]:shrink-0',
+    'max-[980px]:items-center',
+    'max-[980px]:justify-center',
+    'max-[980px]:border-[var(--burgundy)]',
+    'max-[980px]:px-4',
+    'max-[980px]:py-3',
+    'max-[980px]:text-center',
+    'max-[980px]:text-[var(--burgundy)]',
+    'max-[980px]:hover:bg-[var(--burgundy)]',
+    'max-[980px]:hover:text-[var(--white)]',
+  );
 
   return (
     <div className="h-0">
@@ -420,7 +460,7 @@ const topNavClassName = ({ isActive }: { isActive: boolean }) =>
                   </button>
 
                   <div className={dropdownPanelClassName('pages')}>
-                    <ul className={dropdownListClassName(1)}>
+                    <ul className={dropdownListClassName(1, 'pages')}>
                       {pageLinks.map((item) => (
                         <li key={item.path}>
                           <NavLink to={item.path} className={dropdownLinkClassName}>
@@ -453,10 +493,21 @@ const topNavClassName = ({ isActive }: { isActive: boolean }) =>
                   </button>
 
                   <div className={dropdownPanelClassName('academics')}>
-                    <ul className={dropdownListClassName(3)}>
+                    <ul className={dropdownListClassName(3, 'academics')}>
                       {academicLinks.map((item) => (
-                        <li key={item.path}>
-                          <NavLink to={item.path} className={dropdownLinkClassName}>
+                        <li
+                          key={item.path}
+                          className="max-[980px]:w-[clamp(170px,55vw,220px)] max-[980px]:shrink-0"
+                        >
+                          <NavLink
+                            to={item.path}
+                            className={(state) =>
+                              cx(
+                                dropdownLinkClassName(state),
+                                'max-[980px]:h-full max-[980px]:whitespace-normal max-[980px]:pr-4',
+                              )
+                            }
+                          >
                             <span className="block">{item.label}</span>
 
                             {item.description && (
@@ -495,29 +546,7 @@ const topNavClassName = ({ isActive }: { isActive: boolean }) =>
             </nav>
 
             {/* Book a Tour */}
-            <Link
-              className={cx(
-                'border border-[var(--white)]',
-                'px-[22px] py-2.5',
-                'text-sm font-[var(--f-head)] font-bold',
-                'text-[var(--white)]',
-                'transition-[background,color] duration-300',
-                'hover:bg-[var(--white)] hover:text-[var(--burgundy)]',
-
-                // Mobile CTA
-                'max-[980px]:mt-3',
-                'max-[980px]:flex',
-                'max-[980px]:min-h-11',
-                'max-[980px]:w-full',
-                'max-[980px]:shrink-0',
-                'max-[980px]:items-center',
-                'max-[980px]:justify-center',
-                'max-[980px]:px-4',
-                'max-[980px]:py-3',
-                'max-[980px]:text-center',
-              )}
-              to="/book-a-tour"
-            >
+            <Link className={bookTourClassName} to="/book-a-tour">
               Book a Tour
             </Link>
           </div>

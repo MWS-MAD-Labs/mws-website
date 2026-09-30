@@ -1,4 +1,5 @@
 import { ArrowLeft } from 'lucide-react';
+import ContentPageHeader from '@/admin/components/ui/ContentPageHeader';
 
 export default function NewsEditorHeader({
   isEditing,
@@ -18,17 +19,19 @@ export default function NewsEditorHeader({
         <ArrowLeft size={17} />
       </button>
 
-      <div>
-        <h1 className="text-xl font-semibold text-gray-900">
-          {isEditing ? 'Edit news post' : 'Create a news post'}
-        </h1>
-
-        <p className="mt-1 text-sm text-gray-500">
-          {isEditing
+      <ContentPageHeader
+        breadcrumbs={[
+          { label: 'Content' },
+          { label: 'News', path: '/admin/news' },
+          { label: isEditing ? 'Edit News' : 'Create News' },
+        ]}
+        title={isEditing ? 'Edit news post' : 'Create a news post'}
+        description={
+          isEditing
             ? 'Update the article content and publication settings.'
-            : 'Write a story and save it as a draft or publish it.'}
-        </p>
-      </div>
+            : 'Write a story and save it as a draft or publish it.'
+        }
+      />
     </div>
   );
 }

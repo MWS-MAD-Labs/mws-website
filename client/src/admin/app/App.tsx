@@ -13,6 +13,7 @@ import { AuthProvider } from '@/admin/auth/AuthProvider';
 import { RequireAuth } from '@/admin/auth/RequireAuth';
 import { useAuth } from '@/admin/auth/useAuth';
 import AppShell from '@/admin/components/layout/AppShell';
+import ContentPageHeader from '@/admin/components/ui/ContentPageHeader';
 import { hasCmsPermission } from '@/admin/types/auth';
 
 import AdmissionsPage from '@/admin/features/admissions/AdmissionsPage';
@@ -219,6 +220,16 @@ function NewsCategoriesRoute() {
   return (
     <AppShell title="News categories">
       <section className="space-y-5 p-6">
+        <ContentPageHeader
+          breadcrumbs={[
+            { label: 'Content' },
+            { label: 'News', path: '/admin/news' },
+            { label: 'Categories' },
+          ]}
+          title="News categories"
+          description="Manage the categories used to organize school news."
+        />
+
         <RouteMessageBanner message={message} />
 
         <NewsCategories
@@ -376,6 +387,16 @@ function NewsTagsRoute() {
   return (
     <AppShell title="News tags">
       <section className="space-y-5 p-6">
+        <ContentPageHeader
+          breadcrumbs={[
+            { label: 'Content' },
+            { label: 'News', path: '/admin/news' },
+            { label: 'Tags' },
+          ]}
+          title="News tags"
+          description="Manage the tags used to group and filter news posts."
+        />
+
         <RouteMessageBanner message={message} />
 
         <NewsTags
