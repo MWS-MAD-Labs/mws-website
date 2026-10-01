@@ -24,7 +24,7 @@ type CmsUsersState = {
 };
 
 const inputClass =
-  'rounded-lg border border-[rgba(36,23,24,0.14)] px-3 py-2 text-sm outline-none focus:border-[#7e1518]';
+  'rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm outline-none focus:border-[#3C50E0]';
 
 function formatDate(value: string | null) {
   if (!value) return '-';
@@ -196,12 +196,12 @@ export default function CmsUsersPage() {
             </Button>
           }
         >
-          {isLoading ? <p className="text-sm text-[#625759]">Loading CMS users...</p> : null}
+          {isLoading ? <p className="text-sm text-[#64748B]">Loading CMS users...</p> : null}
 
           {!isLoading ? (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[920px] border-collapse text-left text-sm">
-                <thead className="border-b border-[rgba(36,23,24,0.14)] text-xs uppercase text-[#625759]">
+                <thead className="border-b border-[#E2E8F0] text-xs uppercase text-[#64748B]">
                   <tr>
                     <th className="px-3 py-3 font-semibold">User</th>
                     <th className="px-3 py-3 font-semibold">Unit</th>
@@ -217,22 +217,22 @@ export default function CmsUsersPage() {
                     return (
                       <tr
                         key={user.id}
-                        className="border-b border-[rgba(36,23,24,0.08)] last:border-b-0"
+                        className="border-b border-[#E2E8F0] last:border-b-0"
                       >
                         <td className="px-3 py-3">
-                          <p className="font-medium text-[#241718]">{user.name}</p>
-                          <p className="text-xs text-[#625759]">{user.email ?? '-'}</p>
+                          <p className="font-medium text-[#1C2434]">{user.name}</p>
+                          <p className="text-xs text-[#64748B]">{user.email ?? '-'}</p>
                         </td>
 
-                        <td className="px-3 py-3 text-[#625759]">{user.unit}</td>
+                        <td className="px-3 py-3 text-[#64748B]">{user.unit}</td>
 
                         <td className="px-3 py-3">
-                          <span className={user.isActive ? 'text-emerald-700' : 'text-[#7e1518]'}>
+                          <span className={user.isActive ? 'text-[#047857]' : 'text-[#3C50E0]'}>
                             {user.isActive ? 'Active' : 'Inactive'}
                           </span>
                         </td>
 
-                        <td className="px-3 py-3 text-[#625759]">
+                        <td className="px-3 py-3 text-[#64748B]">
                           {formatDate(user.lastCentralSyncedAt)}
                         </td>
 
@@ -273,7 +273,7 @@ export default function CmsUsersPage() {
               </table>
 
               {!data.users.length ? (
-                <p className="px-3 py-6 text-sm text-[#625759]">No CMS users found.</p>
+                <p className="px-3 py-6 text-sm text-[#64748B]">No CMS users found.</p>
               ) : null}
             </div>
           ) : null}
@@ -286,11 +286,11 @@ export default function CmsUsersPage() {
               .map((invitation) => (
                 <div
                   key={invitation.id}
-                  className="flex flex-wrap items-center justify-between gap-3 border-b border-[rgba(36,23,24,0.08)] pb-3 last:border-b-0 last:pb-0"
+                  className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E2E8F0] pb-3 last:border-b-0 last:pb-0"
                 >
                   <div>
-                    <p className="font-medium text-[#241718]">{invitation.email}</p>
-                    <p className="text-sm text-[#625759]">
+                    <p className="font-medium text-[#1C2434]">{invitation.email}</p>
+                    <p className="text-sm text-[#64748B]">
                       {invitation.role?.label ?? invitation.role?.name ?? 'Admin'} · Invited{' '}
                       {formatDate(invitation.createdAt)}
                     </p>
@@ -315,7 +315,7 @@ export default function CmsUsersPage() {
                 </div>
               ))}
             {!data.invitations.some((invitation) => invitation.status === 'PENDING') ? (
-              <p className="text-sm text-[#625759]">No pending invitations.</p>
+              <p className="text-sm text-[#64748B]">No pending invitations.</p>
             ) : null}
           </div>
         </Panel>

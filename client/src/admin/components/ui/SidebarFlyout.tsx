@@ -41,7 +41,7 @@ export default function SidebarFlyout({ item, position, onClose }: SidebarFlyout
 
   return (
     <div
-      className="fixed z-[1000] w-56 overflow-y-auto rounded-md border border-white/10 bg-[#1F1F1E] p-1.5 shadow-xl"
+      className="fixed z-[1000] w-56 overflow-y-auto rounded-md border border-[#333A48] bg-[#1C2434] p-1.5 shadow-xl"
       style={{
         top: position.top,
         left: position.left,
@@ -49,7 +49,7 @@ export default function SidebarFlyout({ item, position, onClose }: SidebarFlyout
       }}
       onMouseLeave={onClose}
     >
-      <div className="border-b border-white/10 px-3 py-2">
+      <div className="border-b border-[#333A48] px-3 py-2">
         <p className="text-xs font-semibold text-white">{item.label}</p>
       </div>
 
@@ -83,15 +83,15 @@ function SidebarFlyoutItem({
   if (visibleChildren?.length) {
     return (
       <div>
-        <div className="flex h-9 items-center gap-2 rounded-md px-3 text-sm text-white">
+        <div className="flex h-9 items-center gap-2 rounded-md px-3 text-sm text-[#AEB7C4]">
           <Icon size={16} strokeWidth={1.8} />
 
           <span className="flex-1 truncate">{item.label}</span>
 
-          <ChevronRight size={14} strokeWidth={1.8} className="text-white/50" />
+          <ChevronRight size={14} strokeWidth={1.8} className="text-[#AEB7C4]" />
         </div>
 
-        <div className="ml-3 border-l border-white/10 pl-1">
+        <div className="ml-3 border-l border-[#333A48] pl-1">
           {visibleChildren.map((child) => (
             <SidebarFlyoutItem
               key={child.href ?? child.label}
@@ -117,8 +117,8 @@ function SidebarFlyoutItem({
         [
           'flex h-9 items-center gap-2 rounded-md px-3 text-sm transition-colors',
           isActive
-            ? 'bg-white/15 font-semibold text-white'
-            : 'text-white/80 hover:bg-white/10 hover:text-white',
+            ? 'bg-[#333A48] font-semibold text-white'
+            : 'text-[#AEB7C4] hover:bg-[#333A48] hover:text-white',
         ].join(' ')
       }
     >

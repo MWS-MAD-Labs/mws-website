@@ -12,22 +12,22 @@ export default function LoginPage() {
   return (
     <AuthScreen>
       <section className="w-full max-w-sm">
-        <div className="rounded-lg border border-[rgba(36,23,24,0.14)] bg-white px-6 py-8 shadow-sm sm:px-8">
+        <div className="rounded-lg border border-[#E2E8F0] bg-white px-6 py-8 shadow-sm sm:px-8">
           <div className="mb-8 text-center">
             <img
               src="https://app.mws.web.id/assets/logo-nPmE2HJi.webp"
               alt="Millennia World School"
               className="mx-auto h-16 w-16 object-contain"
             />
-            <p className="mt-3 text-sm font-semibold tracking-normal text-[#241718]">
+            <p className="mt-3 text-sm font-semibold tracking-normal text-[#1C2434]">
               MWS CMS
             </p>
           </div>
           <div className="mb-6 text-center">
-            <h1 className="text-2xl font-semibold tracking-normal text-[#241718]">
+            <h1 className="text-2xl font-semibold tracking-normal text-[#1C2434]">
               Sign in to Dashboard
             </h1>
-            <p className="mt-2 text-sm text-[#625759]">
+            <p className="mt-2 text-sm text-[#64748B]">
               Use your MWS Google account to continue.
             </p>
           </div>
@@ -36,14 +36,14 @@ export default function LoginPage() {
             {loginError && (
               <div
                 role="alert"
-                className="rounded-md bg-[#7e1518]/10 px-3 py-2.5 text-center text-sm text-[#7e1518]"
+                className="rounded-md bg-[#3C50E0]/10 px-3 py-2.5 text-center text-sm text-[#3C50E0]"
               >
                 {loginError}
               </div>
             )}
             {isSessionLoading && (
-              <div className="flex items-center justify-center gap-2 text-xs text-[#625759]">
-                <span className="h-3 w-3 animate-spin rounded-full border-2 border-[#625759]/25 border-t-[#625759]" />
+              <div className="flex items-center justify-center gap-2 text-xs text-[#64748B]">
+                <span className="h-3 w-3 animate-spin rounded-full border-2 border-[#64748B]/25 border-t-[#64748B]" />
                 <span>Checking session...</span>
               </div>
             )}

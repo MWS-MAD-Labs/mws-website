@@ -49,7 +49,7 @@ CMS routes live under `/admin`. CMS login uses Google OAuth, then the server res
 Roles:
 
 - `SUPER_ADMIN`: explicit MAD Labs CMS administrator, configured through bootstrap allowlist or existing CMS user records.
-- `ADMIN`: invited/approved CMS editor.
+- `ADMIN`: invited/approved CMS editor, or an active MAD Labs employee auto-registered on first CMS login.
 
 Implemented CMS areas include News, Gallery Library, Home Hero, Admissions, Our School, Community Stories, Contact Page, Academic level pages, and CMS User Management.
 

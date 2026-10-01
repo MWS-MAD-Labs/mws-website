@@ -12,32 +12,31 @@ const TYPE_LABELS: Record<DashboardRecentUpdate['type'], string> = {
 
 export default function RecentUpdates({ updates }: { updates: DashboardRecentUpdate[] }) {
   return (
-    <section aria-labelledby="recent-title" className="rounded-lg border border-gray-200 bg-white">
-      <div className="border-b border-gray-200 px-5 py-4">
-        <h2 id="recent-title" className="text-base font-semibold text-[#241718]">
+    <section aria-labelledby="recent-title" className="rounded-lg border border-[#E2E8F0] bg-white">
+      <div className="border-b border-[#E2E8F0] px-4 py-3">
+        <h2 id="recent-title" className="text-sm font-semibold text-[#1C2434]">
           Recently updated
         </h2>
-        <p className="mt-0.5 text-sm text-gray-500">Pick up where you or your team left off.</p>
       </div>
 
       {!updates.length ? (
-        <p className="px-5 py-8 text-center text-sm text-gray-500">Nothing has been edited yet.</p>
+        <p className="px-5 py-8 text-center text-sm text-[#64748B]">Nothing has been edited yet.</p>
       ) : (
-        <ul className="divide-y divide-gray-100">
+        <ul className="divide-y divide-[#E2E8F0]">
           {updates.map((update) => (
             <li key={`${update.type}-${update.editPath}`}>
               <Link
                 to={update.editPath}
-                className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-gray-50"
+                className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-[#F1F5F9]"
               >
-                <span className="w-16 shrink-0 text-xs font-medium text-gray-400">
+                <span className="w-16 shrink-0 text-xs font-medium text-[#64748B]">
                   {TYPE_LABELS[update.type]}
                 </span>
-                <span className="min-w-0 flex-1 truncate text-sm font-medium text-gray-900">
+                <span className="min-w-0 flex-1 truncate text-sm font-medium text-[#1C2434]">
                   {update.title}
                 </span>
                 <StatusBadge status={update.status} />
-                <span className="hidden w-24 shrink-0 text-right text-xs text-gray-400 sm:block">
+                <span className="hidden w-24 shrink-0 text-right text-xs text-[#64748B] sm:block">
                   {formatRelativeTime(update.updatedAt)}
                 </span>
               </Link>

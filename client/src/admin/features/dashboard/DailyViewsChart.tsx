@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import type { AnalyticsOverview } from '@/admin/api/adminApi';
-import { formatCount, formatDay, formatFullCount, niceMax } from './format';
+import { formatCount, formatDay, formatFullCount } from './format';
 
 type Day = AnalyticsOverview['daily'][number];
 
-const CHART_HEIGHT = 200;
+const CHART_HEIGHT = 280;
+const CHART_MAX = 100;
 const TICKS = 4;
 
 function labelEvery(count: number) {
@@ -22,9 +23,8 @@ export default function DailyViewsChart({ daily }: { daily: Day[] }) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [showTable, setShowTable] = useState(false);
 
-  const max = niceMax(Math.max(...daily.map((day) => day.views), 0));
-  // 4 intervals when that gives whole numbers (0/50/100/…), otherwise 5 (0/50/…/250).
-  const intervals = Number.isInteger(max / TICKS) ? TICKS : 5;
+  const max = CHART_MAX;
+  const intervals = TICKS;
   const ticks = Array.from({ length: intervals + 1 }, (_, index) => (max / intervals) * index);
   const every = labelEvery(daily.length);
   const total = daily.reduce((sum, day) => sum + day.views, 0);
@@ -33,32 +33,36 @@ export default function DailyViewsChart({ daily }: { daily: Day[] }) {
   return (
     <div>
       <div className="mb-3 flex items-center justify-between gap-3">
-        <h3 className="text-sm font-semibold text-[#241718]">Page views per day</h3>
+        <h3 className="text-sm font-semibold text-[#1C2434]">Page views per day</h3>
         <button
           type="button"
           onClick={() => setShowTable((current) => !current)}
-          className="text-xs font-semibold text-[#7e1518] hover:underline"
+          className="text-xs font-semibold text-[#3C50E0] hover:underline"
         >
           {showTable ? 'Show chart' : 'Show as table'}
         </button>
       </div>
 
       {showTable ? (
-        <div className="max-h-[260px] overflow-y-auto rounded-md border border-gray-100">
+        <div className="max-h-[260px] overflow-y-auto rounded-md border border-[#E2E8F0]">
           <table className="w-full text-sm">
-            <thead className="sticky top-0 bg-gray-50 text-left text-xs text-gray-500">
+            <thead className="sticky top-0 bg-[#F1F5F9] text-left text-xs text-[#64748B]">
               <tr>
                 <th className="px-3 py-2 font-semibold">Date</th>
                 <th className="px-3 py-2 text-right font-semibold">Page views</th>
                 <th className="px-3 py-2 text-right font-semibold">Visits</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 tabular-nums">
+            <tbody className="divide-y divide-[#E2E8F0] tabular-nums">
               {[...daily].reverse().map((day) => (
                 <tr key={day.date}>
-                  <td className="px-3 py-1.5 text-gray-700">{formatDay(day.date, true)}</td>
-                  <td className="px-3 py-1.5 text-right text-gray-900">{formatFullCount(day.views)}</td>
-                  <td className="px-3 py-1.5 text-right text-gray-600">{formatFullCount(day.visits)}</td>
+                  <td className="px-3 py-1.5 text-[#1C2434]">{formatDay(day.date, true)}</td>
+                  <td className="px-3 py-1.5 text-right text-[#1C2434]">
+                    {formatFullCount(day.views)}
+                  </td>
+                  <td className="px-3 py-1.5 text-right text-[#64748B]">
+                    {formatFullCount(day.visits)}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -68,9 +72,8 @@ export default function DailyViewsChart({ daily }: { daily: Day[] }) {
         <div
           role="img"
           aria-label={`Page views per day: ${formatFullCount(total)} in total over ${daily.length} days.`}
-          className="relative mt-5 pl-10"
+          className="relative mt-10 pl-10"
         >
-          {/* Recessive hairline grid with clean tick values */}
           <div className="absolute inset-y-0 left-0 right-0" style={{ height: CHART_HEIGHT }}>
             {ticks.map((tick) => (
               <div
@@ -78,10 +81,10 @@ export default function DailyViewsChart({ daily }: { daily: Day[] }) {
                 className="absolute left-0 right-0 flex items-center"
                 style={{ bottom: `${(tick / max) * 100}%` }}
               >
-                <span className="w-8 -translate-y-1/2 pr-2 text-right text-[11px] tabular-nums text-gray-400">
+                <span className="w-8 -translate-y-1/2 pr-2 text-right text-[11px] tabular-nums text-[#64748B]">
                   {formatCount(tick)}
                 </span>
-                <span className="h-px flex-1 bg-gray-100" />
+                <span className="h-px flex-1 bg-[#F1F5F9]" />
               </div>
             ))}
           </div>
@@ -92,7 +95,7 @@ export default function DailyViewsChart({ daily }: { daily: Day[] }) {
             onMouseLeave={() => setActiveIndex(null)}
           >
             {daily.map((day, index) => {
-              const height = max ? (day.views / max) * 100 : 0;
+              const height = Math.min((day.views / max) * 100, 100);
               const isActive = activeIndex === index;
 
               return (
@@ -106,15 +109,19 @@ export default function DailyViewsChart({ daily }: { daily: Day[] }) {
                   className="group relative flex h-full min-w-0 flex-1 items-end justify-center outline-none"
                 >
                   {isActive ? (
-                    <span className="absolute inset-0 rounded-sm bg-[#7e1518]/[0.04]" />
+                    <span className="absolute inset-0 rounded-sm bg-[#3C50E0]/[0.04]" />
                   ) : null}
+
                   <span
                     className={[
                       'relative w-full max-w-[24px] rounded-t-[4px] transition-colors',
-                      isActive ? 'bg-[#5e1013]' : 'bg-[#7e1518]',
+                      isActive ? 'bg-[#2F3EC8]' : 'bg-[#3C50E0]',
                       day.views === 0 ? 'bg-transparent' : '',
                     ].join(' ')}
-                    style={{ height: `${height}%`, minHeight: day.views > 0 ? 2 : 0 }}
+                    style={{
+                      height: `${height}%`,
+                      minHeight: day.views > 0 ? 2 : 0,
+                    }}
                   />
                 </button>
               );
@@ -123,18 +130,22 @@ export default function DailyViewsChart({ daily }: { daily: Day[] }) {
             {active && activeIndex !== null ? (
               <div
                 role="status"
-                className="pointer-events-none absolute -top-2 z-10 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-md border border-gray-200 bg-white px-3 py-2 text-xs shadow-lg"
+                className="pointer-events-none absolute -top-2 z-10 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-md border border-[#E2E8F0] bg-white px-3 py-2 text-xs shadow-lg"
                 style={{
                   left: `${((activeIndex + 0.5) / daily.length) * 100}%`,
                 }}
               >
-                <p className="font-semibold text-[#241718]">{formatDay(active.date, true)}</p>
-                <p className="mt-1 flex items-center gap-2 text-gray-600">
-                  <span className="h-2 w-2 rounded-sm bg-[#7e1518]" />
-                  <span className="tabular-nums text-gray-900">{formatFullCount(active.views)}</span>
+                <p className="font-semibold text-[#1C2434]">{formatDay(active.date, true)}</p>
+
+                <p className="mt-1 flex items-center gap-2 text-[#64748B]">
+                  <span className="h-2 w-2 rounded-sm bg-[#3C50E0]" />
+                  <span className="tabular-nums text-[#1C2434]">
+                    {formatFullCount(active.views)}
+                  </span>
                   page views
                 </p>
-                <p className="mt-0.5 pl-4 text-gray-500">
+
+                <p className="mt-0.5 pl-4 text-[#64748B]">
                   <span className="tabular-nums">{formatFullCount(active.visits)}</span> visits
                 </p>
               </div>
@@ -145,7 +156,7 @@ export default function DailyViewsChart({ daily }: { daily: Day[] }) {
             {daily.map((day, index) => (
               <span
                 key={day.date}
-                className="min-w-0 flex-1 overflow-visible whitespace-nowrap text-center text-[11px] text-gray-400"
+                className="min-w-0 flex-1 overflow-visible whitespace-nowrap text-center text-[11px] text-[#64748B]"
               >
                 {index % every === 0 || index === daily.length - 1 ? formatDay(day.date) : ''}
               </span>

@@ -8,9 +8,9 @@ type PagesTableProps = {
 
 export default function PagesTable({ pages }: PagesTableProps) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-[rgba(36,23,24,0.14)] bg-white shadow-sm">
+    <div className="overflow-x-auto rounded-lg border border-[#E2E8F0] bg-white shadow-sm">
       <table className="w-full min-w-[760px] border-collapse text-left text-sm">
-        <thead className="border-b border-[rgba(36,23,24,0.14)] bg-[#faf8f3] text-xs uppercase text-[#625759]">
+        <thead className="border-b border-[#E2E8F0] bg-[#F1F5F9] text-xs uppercase text-[#64748B]">
           <tr>
             <th className="px-4 py-3 font-semibold">Page</th>
             <th className="px-4 py-3 font-semibold">Template</th>
@@ -22,13 +22,13 @@ export default function PagesTable({ pages }: PagesTableProps) {
           {pages.map((page) => (
             <tr
               key={page.id}
-              className="border-b border-[rgba(36,23,24,0.08)] last:border-b-0"
+              className="border-b border-[#E2E8F0] last:border-b-0"
             >
               <td className="px-4 py-3">
-                <div className="font-medium text-[#241718]">{page.title}</div>
-                <div className="mt-1 text-xs text-[#625759]">{page.path}</div>
+                <div className="font-medium text-[#1C2434]">{page.title}</div>
+                <div className="mt-1 text-xs text-[#64748B]">{page.path}</div>
               </td>
-              <td className="px-4 py-3 text-[#625759]">{page.template}</td>
+              <td className="px-4 py-3 text-[#64748B]">{page.template}</td>
               <td className="px-4 py-3">
                 <PageStatusBadge status={page.status} />
               </td>

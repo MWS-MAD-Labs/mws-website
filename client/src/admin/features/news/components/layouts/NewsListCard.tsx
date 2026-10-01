@@ -42,7 +42,7 @@ export default function NewsListCard({
   onStatusChange: (post: NewsPost, status: NewsStatus) => void;
 }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+    <div className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
       <ListHeader
         filters={filters}
         total={result.pagination.total}
@@ -75,18 +75,18 @@ function ListHeader({
   onFilterChange: UpdateNewsFilter;
 }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-200 px-5 py-4">
+    <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#E2E8F0] px-5 py-4">
       <div>
-        <h2 className="font-semibold text-gray-900">News posts</h2>
+        <h2 className="font-semibold text-[#1C2434]">News posts</h2>
 
-        <p className="mt-0.5 text-sm text-gray-500">
+        <p className="mt-0.5 text-sm text-[#64748B]">
           {total} {total === 1 ? 'post' : 'posts'}
         </p>
       </div>
 
-      <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-gray-700">
+      <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-[#1C2434]">
         <input
-          className="h-4 w-4 accent-[#7e1518]"
+          className="h-4 w-4 accent-[#3C50E0]"
           type="checkbox"
           checked={filters.featuredOnly}
           onChange={(event) => onFilterChange('featuredOnly', event.target.checked)}
@@ -107,7 +107,7 @@ function FilterBar({
   onFilterChange: UpdateNewsFilter;
 }) {
   return (
-    <div className="grid gap-3 border-b border-gray-200 bg-gray-50/60 px-5 py-4 md:grid-cols-[minmax(220px,1fr)_180px_220px]">
+    <div className="grid gap-3 border-b border-[#E2E8F0] bg-[#F1F5F9] px-5 py-4 md:grid-cols-[minmax(220px,1fr)_180px_220px]">
       <SearchInput
         placeholder="Search title, slug, or excerpt..."
         value={filters.search}
@@ -161,15 +161,15 @@ function NewsRows({
   onStatusChange: (post: NewsPost, status: NewsStatus) => void;
 }) {
   if (isLoading) {
-    return <div className="p-10 text-center text-sm text-gray-500">Loading news...</div>;
+    return <div className="p-10 text-center text-sm text-[#64748B]">Loading news...</div>;
   }
 
   if (!posts.length) {
     return (
       <div className="p-10 text-center">
-        <p className="font-medium text-gray-700">No news posts found.</p>
+        <p className="font-medium text-[#1C2434]">No news posts found.</p>
 
-        <p className="mt-1 text-sm text-gray-500">Adjust the filters or create a new story.</p>
+        <p className="mt-1 text-sm text-[#64748B]">Adjust the filters or create a new story.</p>
       </div>
     );
   }
@@ -177,7 +177,7 @@ function NewsRows({
   return (
     <>
       {/* Mobile */}
-      <div className="divide-y divide-gray-200 lg:hidden">
+      <div className="divide-y divide-[#E2E8F0] lg:hidden">
         {posts.map((post) => (
           <MobileNewsRow
             deletingId={deletingId}
@@ -195,7 +195,7 @@ function NewsRows({
         <table className="w-full min-w-[900px] border-collapse">
           <TableHeader />
 
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-[#E2E8F0]">
             {posts.map((post) => (
               <NewsTableRow
                 deletingId={deletingId}
@@ -216,24 +216,24 @@ function NewsRows({
 function TableHeader() {
   return (
     <thead>
-      <tr className="border-y border-[#e8e2e2] bg-[#faf8f7] text-left">
-        <th className="px-5 py-3.5 text-[10px] font-bold uppercase tracking-[0.08em] text-[#6f6262]">
+      <tr className="border-y border-[#E2E8F0] bg-[#F1F5F9] text-left">
+        <th className="px-5 py-3.5 text-[10px] font-bold uppercase tracking-[0.08em] text-[#64748B]">
           Article
         </th>
 
-        <th className="px-5 py-3.5 text-[10px] font-bold uppercase tracking-[0.08em] text-[#6f6262]">
+        <th className="px-5 py-3.5 text-[10px] font-bold uppercase tracking-[0.08em] text-[#64748B]">
           Category
         </th>
 
-        <th className="px-5 py-3.5 text-[10px] font-bold uppercase tracking-[0.08em] text-[#6f6262]">
+        <th className="px-5 py-3.5 text-[10px] font-bold uppercase tracking-[0.08em] text-[#64748B]">
           Publication
         </th>
 
-        <th className="px-5 py-3.5 text-[10px] font-bold uppercase tracking-[0.08em] text-[#6f6262]">
+        <th className="px-5 py-3.5 text-[10px] font-bold uppercase tracking-[0.08em] text-[#64748B]">
           Author
         </th>
 
-        <th className="px-5 py-3.5 text-right text-[10px] font-bold uppercase tracking-[0.08em] text-[#6f6262]">
+        <th className="px-5 py-3.5 text-right text-[10px] font-bold uppercase tracking-[0.08em] text-[#64748B]">
           Actions
         </th>
       </tr>
@@ -257,7 +257,7 @@ function NewsTableRow({
   const isStatusUpdating = statusUpdatingId === post.id;
 
   return (
-    <tr className="transition-colors hover:bg-gray-50/50">
+    <tr className="transition-colors hover:bg-[#F1F5F9]/50">
       {/* Article */}
       <td className="px-5 py-4 align-middle">
         <div className="flex min-w-0 items-center gap-3">
@@ -265,21 +265,21 @@ function NewsTableRow({
 
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="truncate text-sm font-semibold text-gray-900">{post.title}</h3>
+              <h3 className="truncate text-sm font-semibold text-[#1C2434]">{post.title}</h3>
 
               {post.isFeatured ? (
                 <Star
                   aria-label="Featured"
-                  className="shrink-0 fill-amber-400 text-amber-400"
+                  className="shrink-0 fill-[#F59E0B] text-[#F59E0B]"
                   size={14}
                 />
               ) : null}
             </div>
 
-            <p className="mt-1 truncate text-xs text-gray-500">/{post.slug}</p>
+            <p className="mt-1 truncate text-xs text-[#64748B]">/{post.slug}</p>
 
             {post.excerpt ? (
-              <p className="mt-1 line-clamp-1 text-xs text-gray-400">{post.excerpt}</p>
+              <p className="mt-1 line-clamp-1 text-xs text-[#64748B]">{post.excerpt}</p>
             ) : null}
           </div>
         </div>
@@ -287,7 +287,7 @@ function NewsTableRow({
 
       {/* Category */}
       <td className="px-5 py-4 align-middle">
-        <span className="text-sm text-gray-600">{post.category?.name || 'Uncategorized'}</span>
+        <span className="text-sm text-[#64748B]">{post.category?.name || 'Uncategorized'}</span>
       </td>
 
       {/* Publication */}
@@ -307,7 +307,7 @@ function NewsTableRow({
             ))}
           </Select>
 
-          <p className="truncate text-[11px] leading-4 text-gray-400">
+          <p className="truncate text-[11px] leading-4 text-[#64748B]">
             {post.publishedAt ? formatNewsDate(post.publishedAt) : 'Not published'}
           </p>
         </div>
@@ -316,11 +316,11 @@ function NewsTableRow({
       {/* Author */}
       <td className="px-5 py-4 align-middle">
         <div className="min-w-0">
-          <p className="truncate text-sm text-gray-600">
+          <p className="truncate text-sm text-[#64748B]">
             {post.authorName || post.author?.name || '-'}
           </p>
 
-          <p className="mt-1 text-xs text-gray-400">{post.viewCount} views</p>
+          <p className="mt-1 text-xs text-[#64748B]">{post.viewCount} views</p>
         </div>
       </td>
 
@@ -344,7 +344,7 @@ function NewsTableRow({
             target="_blank"
             rel="opener"
             aria-label={`Edit ${post.title} in a new tab`}
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md border border-gray-200 px-3 text-xs font-semibold text-gray-700 transition-colors hover:border-[#7e1518]/30 hover:bg-[#7e1518]/5 hover:text-[#7e1518]"
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md border border-[#E2E8F0] px-3 text-xs font-semibold text-[#1C2434] transition-colors hover:border-[#3C50E0]/30 hover:bg-[#3C50E0]/5 hover:text-[#3C50E0]"
           >
             <Pencil size={14} />
           </Link>
@@ -378,18 +378,18 @@ function MobileNewsRow({
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h3 className="truncate text-sm font-semibold text-gray-900">{post.title}</h3>
+                <h3 className="truncate text-sm font-semibold text-[#1C2434]">{post.title}</h3>
 
                 {post.isFeatured ? (
                   <Star
                     aria-label="Featured"
-                    className="shrink-0 fill-amber-400 text-amber-400"
+                    className="shrink-0 fill-[#F59E0B] text-[#F59E0B]"
                     size={14}
                   />
                 ) : null}
               </div>
 
-              <p className="mt-1 truncate text-xs text-gray-500">/{post.slug}</p>
+              <p className="mt-1 truncate text-xs text-[#64748B]">/{post.slug}</p>
             </div>
 
             <div className="flex shrink-0 items-center gap-1.5">
@@ -410,7 +410,7 @@ function MobileNewsRow({
                 target="_blank"
                 rel="opener"
                 aria-label={`Edit ${post.title} in a new tab`}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 text-gray-600 transition-colors hover:border-[#7e1518]/30 hover:bg-[#7e1518]/5 hover:text-[#7e1518]"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-[#E2E8F0] text-[#64748B] transition-colors hover:border-[#3C50E0]/30 hover:bg-[#3C50E0]/5 hover:text-[#3C50E0]"
               >
                 <Pencil size={14} />
               </Link>
@@ -418,21 +418,21 @@ function MobileNewsRow({
           </div>
 
           {post.excerpt ? (
-            <p className="mt-1 line-clamp-2 text-xs text-gray-400">{post.excerpt}</p>
+            <p className="mt-1 line-clamp-2 text-xs text-[#64748B]">{post.excerpt}</p>
           ) : null}
 
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <span className="text-xs text-gray-500">{post.category?.name || 'Uncategorized'}</span>
+            <span className="text-xs text-[#64748B]">{post.category?.name || 'Uncategorized'}</span>
 
-            <span className="text-gray-300">•</span>
+            <span className="text-[#64748B]">•</span>
 
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-[#64748B]">
               {post.authorName || post.author?.name || '-'}
             </span>
 
-            <span className="text-gray-300">•</span>
+            <span className="text-[#64748B]">•</span>
 
-            <span className="text-xs text-gray-400">{post.viewCount} views</span>
+            <span className="text-xs text-[#64748B]">{post.viewCount} views</span>
           </div>
 
           <div className="mt-3 flex items-center gap-2">
@@ -450,7 +450,7 @@ function MobileNewsRow({
               ))}
             </Select>
 
-            <span className="shrink-0 text-[11px] text-gray-400">
+            <span className="shrink-0 text-[11px] text-[#64748B]">
               {post.publishedAt ? formatNewsDate(post.publishedAt) : 'Not published'}
             </span>
           </div>
@@ -463,7 +463,7 @@ function MobileNewsRow({
 function CoverThumbnail({ post }: { post: NewsPost }) {
   if (!post.coverImage) {
     return (
-      <div className="grid h-14 w-20 shrink-0 place-items-center rounded-md bg-gray-100 text-gray-400">
+      <div className="grid h-14 w-20 shrink-0 place-items-center rounded-md bg-[#F1F5F9] text-[#64748B]">
         <Image aria-hidden="true" size={20} />
       </div>
     );
@@ -471,7 +471,7 @@ function CoverThumbnail({ post }: { post: NewsPost }) {
 
   return (
     <img
-      className="h-14 w-20 shrink-0 rounded-md bg-gray-100 object-cover"
+      className="h-14 w-20 shrink-0 rounded-md bg-[#F1F5F9] object-cover"
       src={adminApi.publicAssetUrl(post.coverImage)}
       alt={post.coverImageAlt || ''}
     />
@@ -494,8 +494,8 @@ function Pagination({
   const { page, totalPages } = result.pagination;
 
   return (
-    <div className="flex items-center justify-between gap-3 border-t border-gray-200 bg-gray-50/30 px-5 py-4">
-      <p className="text-sm text-gray-500">
+    <div className="flex items-center justify-between gap-3 border-t border-[#E2E8F0] bg-[#F1F5F9]/30 px-5 py-4">
+      <p className="text-sm text-[#64748B]">
         Page {page} of {totalPages}
       </p>
 

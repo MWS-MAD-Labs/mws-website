@@ -7,7 +7,7 @@ type ContactPagePreviewProps = {
 
 export default function ContactPagePreview({ content }: ContactPagePreviewProps) {
   return (
-    <div className="overflow-hidden rounded-lg border border-[rgba(36,23,24,0.14)] bg-white shadow-sm">
+    <div className="overflow-hidden rounded-lg border border-[#E2E8F0] bg-white shadow-sm">
       <div className="max-h-[760px] overflow-auto bg-white">
         <ContactPageView content={content} preview />
       </div>

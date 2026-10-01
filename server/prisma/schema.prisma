@@ -43,6 +43,7 @@ enum NewsMediaType {
   DOCUMENT
 }
 
+// Clear DB
 
 model CmsRole {
   id          String   @id @default(uuid()) @db.Uuid
@@ -98,62 +99,6 @@ model CmsUserInvitation {
   @@index([email])
   @@index([centralUserId])
   @@index([status])
-}
-
-
-model Gallery {
-  id          String   @id @default(uuid()) @db.Uuid
-  title       String   @db.VarChar(255)
-  description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  images GalleryImage[]
-  videos GalleryVideo[]
-
-  programs     Program[]
-  admissions   Admission[]
-  campusTours  CampusTour[]
-  curriculums  Curriculum[]
-  affiliations Affiliation[]
-
-  academics     Academic[]
-  ourSchools    OurSchool[]
-  contacts      Contact[]
-  kindergartens Kindergarten[]
-  elementaries  Elementary[]
-  juniorHighs   JuniorHigh[]
-  academicLevelPages AcademicLevelPage[]
-  communityStoriesPages CommunityStoriesPage[]
-}
-
-model GalleryImage {
-  id        String   @id @default(uuid()) @db.Uuid
-  galleryId String   @db.Uuid
-  path      String   @db.VarChar(500)
-  title     String?  @db.VarChar(255)
-  caption   String?
-  sortOrder Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  gallery Gallery @relation(fields: [galleryId], references: [id])
-
-  featuredInOurSchools OurSchool[] @relation("OurSchoolFeaturedImage")
-}
-
-model GalleryVideo {
-  id         String          @id @default(uuid()) @db.Uuid
-  galleryId  String          @db.Uuid
-  sourceType VideoSourceType
-  source     String          @db.VarChar(1000)
-  title      String?         @db.VarChar(255)
-  caption    String?
-  sortOrder  Int             @default(0)
-  createdAt  DateTime        @default(now())
-  updatedAt  DateTime        @updatedAt
-
-  gallery Gallery @relation(fields: [galleryId], references: [id])
 }
 
 model NewsCategory {
@@ -229,6 +174,216 @@ model NewsPostMedia {
   newsPost NewsPost @relation(fields: [newsPostId], references: [id])
 }
 
+model Academic {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @db.VarChar(255)
+  description String?
+  coverImage     String?  @db.VarChar(1000)
+  galleryId   String?  @db.Uuid
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  gallery Gallery? @relation(fields: [galleryId], references: [id])
+}
+
+model AcademicLevel {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @db.VarChar(255)
+  description String?
+
+  kindergartens Kindergarten[]
+  elementaries  Elementary[]
+  juniorHighs   JuniorHigh[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Kindergarten {
+  id             String   @id @default(uuid()) @db.Uuid
+  academicLevelId String   @db.Uuid
+
+  title          String   @db.VarChar(255)
+  description    String?
+
+  coverImage     String?  @db.VarChar(1000)
+  galleryId      String?  @db.Uuid
+
+  hero           Json
+  overview       Json
+  sections       Json
+
+  status         String   @default("PUBLISHED") @db.VarChar(30)
+  publishedAt    DateTime?
+
+  academicLevel AcademicLevel @relation(fields: [academicLevelId], references: [id])
+  gallery       Gallery?       @relation(fields: [galleryId], references: [id])
+  faqs          KindergartenFaq[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Elementary {
+  id             String   @id @default(uuid()) @db.Uuid
+  academicLevelId String   @db.Uuid
+
+  title          String   @db.VarChar(255)
+  description    String?
+
+  coverImage     String?  @db.VarChar(1000)
+  galleryId      String?  @db.Uuid
+
+  hero           Json
+  overview       Json
+  sections       Json
+
+  status         String   @default("PUBLISHED") @db.VarChar(30)
+  publishedAt    DateTime?
+
+  academicLevel AcademicLevel @relation(fields: [academicLevelId], references: [id])
+  gallery       Gallery?       @relation(fields: [galleryId], references: [id])
+  faqs          ElementaryFaq[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model JuniorHigh {
+  id             String   @id @default(uuid()) @db.Uuid
+  academicLevelId String   @db.Uuid
+
+  title          String   @db.VarChar(255)
+  description    String?
+
+  coverImage     String?  @db.VarChar(1000)
+  galleryId      String?  @db.Uuid
+
+  hero           Json
+  overview       Json
+  sections       Json
+
+  status         String   @default("PUBLISHED") @db.VarChar(30)
+  publishedAt    DateTime?
+
+  academicLevel AcademicLevel @relation(fields: [academicLevelId], references: [id])
+  gallery       Gallery?       @relation(fields: [galleryId], references: [id])
+  faqs          JuniorHighFaq[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Faq {
+  id        String   @id @default(uuid()) @db.Uuid
+  question  String   @db.VarChar(500)
+  answer    String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  kindergartens KindergartenFaq[]
+  elementaries  ElementaryFaq[]
+  juniorHighs   JuniorHighFaq[]
+
+  @@index([isActive])
+}
+
+model KindergartenFaq {
+  academicLevelId String @db.Uuid
+  faqId           String @db.Uuid
+  sortOrder       Int    @default(0)
+
+  academicLevel Kindergarten @relation(fields: [academicLevelId], references: [id])
+  faq           Faq          @relation(fields: [faqId], references: [id])
+
+  @@id([academicLevelId, faqId])
+  @@index([faqId])
+  @@index([academicLevelId, sortOrder])
+}
+
+model ElementaryFaq {
+  academicLevelId String @db.Uuid
+  faqId           String @db.Uuid
+  sortOrder       Int    @default(0)
+
+  academicLevel Elementary @relation(fields: [academicLevelId], references: [id])
+  faq           Faq        @relation(fields: [faqId], references: [id])
+
+  @@id([academicLevelId, faqId])
+  @@index([faqId])
+  @@index([academicLevelId, sortOrder])
+}
+
+model JuniorHighFaq {
+  academicLevelId String @db.Uuid
+  faqId           String @db.Uuid
+  sortOrder       Int    @default(0)
+
+  academicLevel JuniorHigh @relation(fields: [academicLevelId], references: [id])
+  faq           Faq        @relation(fields: [faqId], references: [id])
+
+  @@id([academicLevelId, faqId])
+  @@index([faqId])
+  @@index([academicLevelId, sortOrder])
+}
+
+model Gallery {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @db.VarChar(255)
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  images GalleryImage[]
+  videos GalleryVideo[]
+
+  programs     Program[]
+  admissions   Admission[]
+  campusTours  CampusTour[]
+  curriculums  Curriculum[]
+  affiliations Affiliation[]
+
+  academics     Academic[]
+  ourSchools    OurSchool[]
+  contacts      Contact[]
+  kindergartens Kindergarten[]
+  elementaries  Elementary[]
+  juniorHighs   JuniorHigh[]
+  communityStoriesPages CommunityStoriesPage[]
+}
+
+model GalleryImage {
+  id        String   @id @default(uuid()) @db.Uuid
+  galleryId String   @db.Uuid
+  path      String   @db.VarChar(500)
+  title     String?  @db.VarChar(255)
+  caption   String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  gallery Gallery @relation(fields: [galleryId], references: [id])
+
+  featuredInOurSchools OurSchool[] @relation("OurSchoolFeaturedImage")
+}
+
+model GalleryVideo {
+  id         String          @id @default(uuid()) @db.Uuid
+  galleryId  String          @db.Uuid
+  sourceType VideoSourceType
+  source     String          @db.VarChar(1000)
+  title      String?         @db.VarChar(255)
+  caption    String?
+  sortOrder  Int             @default(0)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  gallery Gallery @relation(fields: [galleryId], references: [id])
+}
+
+
+// Not Clear DB
 
 
 model Program {
@@ -251,7 +406,6 @@ model Program {
   campusTours  CampusTour[]
   curriculums  Curriculum[]
   affiliations Affiliation[]
-  academicLevelPage AcademicLevelPage?
 }
 
 model Admission {
@@ -310,88 +464,6 @@ model Affiliation {
   program Program  @relation(fields: [programId], references: [id])
   gallery Gallery? @relation(fields: [galleryId], references: [id])
 }
-
-
-model Academic {
-  id          String   @id @default(uuid()) @db.Uuid
-  title       String   @db.VarChar(255)
-  description String?
-  galleryId   String?  @db.Uuid
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  gallery Gallery? @relation(fields: [galleryId], references: [id])
-
-  kindergartens Kindergarten[]
-  elementaries  Elementary[]
-  juniorHighs   JuniorHigh[]
-}
-
-model Kindergarten {
-  id          String   @id @default(uuid()) @db.Uuid
-  academicId  String   @db.Uuid
-  title       String   @db.VarChar(255)
-  description String?
-  galleryId   String?  @db.Uuid
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  academic Academic @relation(fields: [academicId], references: [id])
-  gallery  Gallery? @relation(fields: [galleryId], references: [id])
-}
-
-model Elementary {
-  id          String   @id @default(uuid()) @db.Uuid
-  academicId  String   @db.Uuid
-  title       String   @db.VarChar(255)
-  description String?
-  galleryId   String?  @db.Uuid
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  academic Academic @relation(fields: [academicId], references: [id])
-  gallery  Gallery? @relation(fields: [galleryId], references: [id])
-}
-
-model JuniorHigh {
-  id          String   @id @default(uuid()) @db.Uuid
-  academicId  String   @db.Uuid
-  title       String   @db.VarChar(255)
-  description String?
-  galleryId   String?  @db.Uuid
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  academic Academic @relation(fields: [academicId], references: [id])
-  gallery  Gallery? @relation(fields: [galleryId], references: [id])
-}
-
-model AcademicLevelPage {
-  id             String    @id @default(uuid()) @db.Uuid
-  programId      String    @unique @db.Uuid
-  levelKey       String    @unique @db.VarChar(50)
-  hero           Json
-  overview       Json
-  sections       Json
-  faq            Json?
-  galleryId      String?   @db.Uuid
-  isPublished    Boolean   @default(true)
-  status         String    @default("PUBLISHED") @db.VarChar(30)
-  publishedAt    DateTime?
-  draftProgram   Json?
-  draftHero      Json?
-  draftOverview  Json?
-  draftSections  Json?
-  draftFaq       Json?
-  draftGalleryId String?   @db.Uuid
-  draftSavedAt   DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-
-  program Program  @relation(fields: [programId], references: [id])
-  gallery Gallery? @relation(fields: [galleryId], references: [id])
-}
-
 
 
 model OurSchool {

@@ -13,7 +13,7 @@ export function TextField({
 }: TextFieldProps) {
   return (
     <div>
-      <label className="block text-sm font-semibold text-[#241718]">
+      <label className="block text-sm font-semibold text-[#1C2434]">
         {label}
       </label>
 
@@ -21,7 +21,7 @@ export function TextField({
         value={value}
         required={required}
         onChange={(event) => onChange(event.currentTarget.value)}
-        className="mt-2 h-10 w-full rounded-md border border-[rgba(36,23,24,0.18)] px-3 text-sm font-normal outline-none focus:border-[#7e1518]"
+        className="mt-2 h-10 w-full rounded-md border border-[#E2E8F0] px-3 text-sm font-normal outline-none focus:border-[#3C50E0]"
       />
 
       <div className="mt-1 flex justify-end">
@@ -46,7 +46,7 @@ export function TextAreaField({
 }: TextAreaFieldProps) {
   return (
     <div>
-      <label className="block text-sm font-semibold text-[#241718]">
+      <label className="block text-sm font-semibold text-[#1C2434]">
         {label}
       </label>
 
@@ -55,7 +55,7 @@ export function TextAreaField({
         required={required}
         rows={rows}
         onChange={(event) => onChange(event.currentTarget.value)}
-        className="mt-2 w-full rounded-md border border-[rgba(36,23,24,0.18)] px-3 py-3 text-sm font-normal outline-none focus:border-[#7e1518]"
+        className="mt-2 w-full rounded-md border border-[#E2E8F0] px-3 py-3 text-sm font-normal outline-none focus:border-[#3C50E0]"
       />
 
       <div className="mt-1 flex justify-end">

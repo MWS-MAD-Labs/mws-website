@@ -120,21 +120,21 @@ export default function GalleryAssetPickerModal({
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
           />
-          <div className="max-h-[52vh] overflow-y-auto rounded-lg border border-gray-200">
+          <div className="max-h-[52vh] overflow-y-auto rounded-lg border border-[#E2E8F0]">
             {filteredGalleries.map((gallery) => {
               const isActive = gallery.id === activeGallery?.id;
 
               return (
                 <button
-                  className={`block w-full border-b border-gray-200 px-3 py-3 text-left text-sm last:border-b-0 ${
-                    isActive ? "bg-[#faf8f3] text-[#7e1518]" : "bg-white text-gray-700"
+                  className={`block w-full border-b border-[#E2E8F0] px-3 py-3 text-left text-sm last:border-b-0 ${
+                    isActive ? "bg-[#F1F5F9] text-[#3C50E0]" : "bg-white text-[#1C2434]"
                   }`}
                   key={gallery.id}
                   type="button"
                   onClick={() => setActiveGalleryId(gallery.id)}
                 >
                   <span className="block truncate font-semibold">{gallery.title}</span>
-                  <span className="block text-xs text-gray-500">
+                  <span className="block text-xs text-[#64748B]">
                     {gallery.images.length} Images / {gallery.videos.length} Videos
                   </span>
                 </button>
@@ -145,13 +145,13 @@ export default function GalleryAssetPickerModal({
 
         <div className="min-w-0">
           {!activeGallery ? (
-            <div className="rounded-lg border border-dashed border-gray-200 p-6 text-sm text-gray-500">
+            <div className="rounded-lg border border-dashed border-[#E2E8F0] p-6 text-sm text-[#64748B]">
               No gallery available.
             </div>
           ) : null}
 
           {activeGallery && !assets.length ? (
-            <div className="rounded-lg border border-dashed border-gray-200 p-6 text-sm text-gray-500">
+            <div className="rounded-lg border border-dashed border-[#E2E8F0] p-6 text-sm text-[#64748B]">
               No matching assets in this gallery.
             </div>
           ) : null}
@@ -160,12 +160,12 @@ export default function GalleryAssetPickerModal({
             <div className="grid max-h-[52vh] gap-3 overflow-y-auto sm:grid-cols-2 xl:grid-cols-3">
               {assets.map((asset) => (
                 <button
-                  className="overflow-hidden rounded-lg border border-gray-200 bg-white text-left hover:border-[#7e1518]"
+                  className="overflow-hidden rounded-lg border border-[#E2E8F0] bg-white text-left hover:border-[#3C50E0]"
                   key={`${asset.selection.kind}-${asset.id}`}
                   type="button"
                   onClick={() => chooseAsset(asset.selection)}
                 >
-                  <div className="grid aspect-video place-items-center bg-gray-100">
+                  <div className="grid aspect-video place-items-center bg-[#F1F5F9]">
                     {asset.selection.kind === "IMAGE" ? (
                       <img
                         className="h-full w-full object-cover"
@@ -179,15 +179,15 @@ export default function GalleryAssetPickerModal({
                         muted
                       />
                     ) : (
-                      <span className="px-3 text-center text-sm font-semibold text-gray-500">
+                      <span className="px-3 text-center text-sm font-semibold text-[#64748B]">
                         YouTube Video
                       </span>
                     )}
                   </div>
-                  <span className="block truncate px-3 py-2 text-sm font-semibold text-gray-900">
+                  <span className="block truncate px-3 py-2 text-sm font-semibold text-[#1C2434]">
                     {asset.selection.label}
                   </span>
-                  <span className="block px-3 pb-3 text-xs text-gray-500">
+                  <span className="block px-3 pb-3 text-xs text-[#64748B]">
                     {asset.selection.kind}
                   </span>
                 </button>

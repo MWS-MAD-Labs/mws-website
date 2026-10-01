@@ -30,7 +30,7 @@ export default function GalleryDeleteConfirmModal({
       onClose={onClose}
     >
       <div className="grid gap-4">
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-[#64748B]">
           {confirmDelete?.mode === "bulk"
             ? `Are you sure you want to delete ${selectedCount} selected asset${
                 selectedCount === 1 ? "" : "s"

@@ -17,7 +17,9 @@ import ContentPageHeader from '@/admin/components/ui/ContentPageHeader';
 import { hasCmsPermission } from '@/admin/types/auth';
 
 import AdmissionsPage from '@/admin/features/admissions/AdmissionsPage';
+import AcademicFaqsPage from '@/admin/features/academic/AcademicFaqsPage';
 import AcademicLevelEditorPage from '@/admin/features/academic/AcademicLevelEditorPage';
+import AcademicOverviewPage from '@/admin/features/academic/AcademicOverviewPage';
 import ContactPageEditor from '@/admin/features/contact/ContactPageEditor';
 import CommunityStoriesPage from '@/admin/features/community-stories/CommunityStoriesPage';
 import HeroSlidesPage from '@/admin/features/home/HeroSlidesPage';
@@ -32,7 +34,9 @@ import HelpPage from '@/admin/features/placeholders/HelpPage';
 import PermissionsPage from '@/admin/features/placeholders/PermissionsPage';
 
 import GalleryDetailPage from '@/admin/features/gallery/GalleryDetailPage';
+import GalleryImagesPage from '@/admin/features/gallery/GalleryImagesPage';
 import GalleryListPage from '@/admin/features/gallery/GalleryListPage';
+import GalleryVidioPage from '@/admin/features/gallery/GalleryVidioPage';
 
 import OurSchoolPage from '@/admin/features/our-school/OurSchoolPage';
 
@@ -420,8 +424,8 @@ function RouteMessageBanner({ message }: { message: RouteMessage }) {
 
   const classes =
     message.type === 'success'
-      ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-      : 'border-red-200 bg-red-50 text-red-700';
+      ? 'border-[#10B981]/20 bg-[#10B981]/10 text-[#047857]'
+      : 'border-[#EF4444]/20 bg-[#EF4444]/10 text-[#B91C1C]';
 
   return <div className={`rounded-lg border px-4 py-3 text-sm ${classes}`}>{message.text}</div>;
 }
@@ -535,6 +539,39 @@ export default function AdminApp() {
 
         {/* Academic */}
         <Route
+          path="academic"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <AcademicOverviewPage />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="academic/faqs"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <AcademicFaqsPage />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+
+        {/* <Route
+          path="academic/levels"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <AcademicLevelsPage />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        /> */}
+
+        <Route
           path="academic/kindergarten"
           element={
             <RequireAuth>
@@ -636,6 +673,28 @@ export default function AdminApp() {
         />
 
         <Route
+          path="gallery/Gambar"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <GalleryImagesPage />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="gallery/videos"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <GalleryVidioPage />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+
+        <Route
           path="gallery/:galleryId"
           element={
             <RequireAuth>
@@ -645,10 +704,6 @@ export default function AdminApp() {
             </RequireAuth>
           }
         />
-
-        <Route path="gallery/images" element={<Navigate to="/admin/gallery" replace />} />
-
-        <Route path="gallery/videos" element={<Navigate to="/admin/gallery" replace />} />
 
         {/* Users */}
         <Route

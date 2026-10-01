@@ -76,6 +76,33 @@ const academicPayloadSchema = z.object({
 type AcademicPayload = z.infer<typeof academicPayloadSchema>;
 type AcademicProgramPayload = AcademicPayload["program"];
 type AcademicPagePayload = AcademicPayload["page"];
+type AcademicLevelRecord = {
+  id: string;
+  academicLevelId: string;
+  title: string;
+  description: string | null;
+  coverImage: string | null;
+  galleryId: string | null;
+  hero: Prisma.JsonValue;
+  overview: Prisma.JsonValue;
+  sections: Prisma.JsonValue;
+  status: string;
+  publishedAt: Date | null;
+  updatedAt: Date;
+  academicLevel: {
+    title: string;
+    description: string | null;
+  };
+  faqs: Array<{
+    sortOrder: number;
+    faq: {
+      id: string;
+      question: string;
+      answer: string;
+      isActive: boolean;
+    };
+  }>;
+};
 
 const defaultLevels = {
   kindergarten: {
@@ -280,8 +307,6 @@ const ACCEPTED_DOCUMENT_TYPES = new Set([
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ]);
 
-type LevelRecord = Awaited<ReturnType<typeof findLevelRecord>>;
-
 function parseLevelKey(value: string | undefined): AcademicLevelKey {
   const parsed = levelKeySchema.safeParse(value);
   if (!parsed.success) throw new ResponseError(404, "Academic level not found.");
@@ -296,69 +321,48 @@ function json<T>(value: Prisma.JsonValue | null | undefined): T | null {
   return value ? (value as unknown as T) : null;
 }
 
-function hasDraft(record: NonNullable<LevelRecord>) {
-  return Boolean(record.draftProgram && record.draftHero && record.draftOverview && record.draftSections);
-}
-
 function programFromRecord(
   levelKey: AcademicLevelKey,
-  record: NonNullable<LevelRecord>,
-  mode: "published" | "draft",
+  record: AcademicLevelRecord,
 ): AcademicProgramPayload {
   const fallback = defaultLevels[levelKey].program;
-  if (mode === "draft") {
-    return { ...fallback, ...json<AcademicProgramPayload>(record.draftProgram) };
-  }
-
   return {
-    title: record.program.title,
-    age: record.program.ageRange || fallback.age,
-    description: record.program.description || fallback.description,
-    image: record.program.imagePath || fallback.image,
-    imageAlt: record.program.imageAlt || fallback.imageAlt,
-    path: record.program.path || fallback.path,
-    sortOrder: record.program.sortOrder,
-    isActive: record.program.isActive,
+    title: record.title,
+    age: fallback.age,
+    description: record.description || record.academicLevel.description || fallback.description,
+    image: record.coverImage || fallback.image,
+    imageAlt: fallback.imageAlt,
+    path: fallback.path,
+    sortOrder: fallback.sortOrder,
+    isActive: record.status !== "ARCHIVED",
   };
 }
 
 function pageFromRecord(
   levelKey: AcademicLevelKey,
-  record: NonNullable<LevelRecord>,
-  mode: "published" | "draft",
+  record: AcademicLevelRecord,
 ): AcademicPagePayload {
   const fallback = defaultLevels[levelKey].page;
-  if (mode === "draft") {
-    return {
-      isPublished: false,
-      galleryId: record.draftGalleryId ?? record.galleryId,
-      hero: json<AcademicPagePayload["hero"]>(record.draftHero) ?? fallback.hero,
-      overview:
-        json<AcademicPagePayload["overview"]>(record.draftOverview) ??
-        fallback.overview,
-      sections:
-        json<AcademicPagePayload["sections"]>(record.draftSections) ??
-        fallback.sections,
-      faq: json<AcademicPagePayload["faq"]>(record.draftFaq) ?? [],
-    };
-  }
-
   return {
-    isPublished: record.isPublished,
+    isPublished: record.status === "PUBLISHED",
     galleryId: record.galleryId,
     hero: json<AcademicPagePayload["hero"]>(record.hero) ?? fallback.hero,
     overview:
       json<AcademicPagePayload["overview"]>(record.overview) ?? fallback.overview,
     sections:
       json<AcademicPagePayload["sections"]>(record.sections) ?? fallback.sections,
-    faq: json<AcademicPagePayload["faq"]>(record.faq) ?? [],
+    faq: (record.faqs ?? [])
+      .filter((item) => item.faq.isActive)
+      .map((item) => ({
+        question: item.faq.question,
+        answer: item.faq.answer,
+      })),
   };
 }
 
 function pageResponse(
   levelKey: AcademicLevelKey,
-  record: LevelRecord,
-  mode: "published" | "draft" | "editor" = "published",
+  record: AcademicLevelRecord | null,
 ) {
   const fallback = defaultLevels[levelKey];
   if (!record) {
@@ -370,66 +374,205 @@ function pageResponse(
     };
   }
 
-  const responseMode =
-    mode === "draft" || (mode === "editor" && record.status === "DRAFT" && hasDraft(record))
-      ? "draft"
-      : "published";
-
   return {
     levelKey,
-    status:
-      responseMode === "draft"
-        ? "DRAFT"
-        : mode === "published"
-          ? "PUBLISHED"
-          : (record.status as AcademicStatus),
-    draftSavedAt: record.draftSavedAt,
+    status: record.status === "DRAFT" ? "DRAFT" : "PUBLISHED",
+    draftSavedAt: record.status === "DRAFT" ? record.updatedAt : null,
     publishedAt: record.publishedAt,
-    program: programFromRecord(levelKey, record, responseMode),
-    page: pageFromRecord(levelKey, record, responseMode),
+    program: programFromRecord(levelKey, record),
+    page: pageFromRecord(levelKey, record),
   };
 }
 
-async function findLevelRecord(levelKey: AcademicLevelKey) {
-  return getPrisma().academicLevelPage.findUnique({
-    where: { levelKey },
-    include: { program: true },
-  });
-}
-
-async function findProgramByLevel(levelKey: AcademicLevelKey) {
-  const fallback = defaultLevels[levelKey];
-  return getPrisma().program.findFirst({
-    where: { path: fallback.program.path },
-  });
-}
-
-function programDataFromPayload(
+async function findLevelRecord(
   levelKey: AcademicLevelKey,
+): Promise<AcademicLevelRecord | null> {
+  const prisma = getPrisma();
+  const query = {
+    include: {
+      academicLevel: { select: { title: true, description: true } },
+      faqs: {
+        orderBy: { sortOrder: "asc" },
+        include: { faq: true },
+      },
+    },
+    orderBy: { updatedAt: "desc" },
+  } as const;
+
+  if (levelKey === "kindergarten") {
+    return prisma.kindergarten.findFirst(query);
+  }
+  if (levelKey === "elementary") {
+    return prisma.elementary.findFirst(query);
+  }
+  return prisma.juniorHigh.findFirst(query);
+}
+
+async function ensureAcademicLevel(
+  levelKey: AcademicLevelKey,
+  existing: AcademicLevelRecord | null,
   program: AcademicProgramPayload,
 ) {
-  const fallback = defaultLevels[levelKey];
-  return {
+  const prisma = getPrisma();
+  const data = {
     title: program.title,
-    ageRange: nullable(program.age),
     description: nullable(program.description),
-    imagePath: nullable(program.image),
-    imageAlt: nullable(program.imageAlt),
-    path: nullable(program.path) ?? fallback.program.path,
-    sortOrder: program.sortOrder ?? fallback.program.sortOrder,
-    isActive: program.isActive ?? true,
+  };
+
+  if (existing) {
+    return prisma.academicLevel.update({
+      where: { id: existing.academicLevelId },
+      data,
+    });
+  }
+
+  const fallbackTitle = defaultLevels[levelKey].program.title;
+  const found = await prisma.academicLevel.findFirst({
+    where: { title: fallbackTitle },
+    orderBy: { updatedAt: "desc" },
+  });
+
+  if (found) {
+    return prisma.academicLevel.update({
+      where: { id: found.id },
+      data,
+    });
+  }
+
+  return prisma.academicLevel.create({ data });
+}
+
+function levelData(
+  academicLevelId: string,
+  data: AcademicPayload,
+  status: AcademicStatus,
+) {
+  return {
+    academicLevelId,
+    title: data.program.title,
+    description: nullable(data.program.description ?? data.page.hero.description),
+    coverImage: nullable(data.program.image ?? data.page.hero.image),
+    galleryId: data.page.galleryId ?? null,
+    hero: data.page.hero as Prisma.InputJsonValue,
+    overview: data.page.overview as Prisma.InputJsonValue,
+    sections: data.page.sections as Prisma.InputJsonValue,
+    status,
+    publishedAt: status === "PUBLISHED" ? new Date() : null,
   };
 }
 
-async function ensureProgram(levelKey: AcademicLevelKey, program?: AcademicProgramPayload) {
+async function findOrCreateFaq(item: { question: string; answer: string }) {
   const prisma = getPrisma();
-  const existingProgram = await findProgramByLevel(levelKey);
-  const fallback = defaultLevels[levelKey].program;
-  const data = programDataFromPayload(levelKey, program ?? fallback);
+  const question = item.question.trim();
+  const answer = item.answer.trim();
+  const existing = await prisma.faq.findFirst({
+    where: { question, answer },
+    orderBy: { updatedAt: "desc" },
+  });
 
-  return existingProgram
-    ? prisma.program.update({ where: { id: existingProgram.id }, data })
-    : prisma.program.create({ data });
+  if (existing) return existing;
+  return prisma.faq.create({ data: { question, answer, isActive: true } });
+}
+
+async function upsertLegacyFaqLink(
+  levelKey: AcademicLevelKey,
+  academicLevelId: string,
+  faqId: string,
+  sortOrder: number,
+) {
+  const prisma = getPrisma();
+  const args = {
+    where: {
+      academicLevelId_faqId: {
+        academicLevelId,
+        faqId,
+      },
+    },
+    update: { sortOrder },
+    create: {
+      academicLevelId,
+      faqId,
+      sortOrder,
+    },
+  };
+
+  if (levelKey === "kindergarten") return prisma.kindergartenFaq.upsert(args);
+  if (levelKey === "elementary") return prisma.elementaryFaq.upsert(args);
+  return prisma.juniorHighFaq.upsert(args);
+}
+
+async function deleteMissingLegacyFaqLinks(
+  levelKey: AcademicLevelKey,
+  academicLevelId: string,
+  faqIds: string[],
+) {
+  const prisma = getPrisma();
+  const args = {
+    where: {
+      academicLevelId,
+      ...(faqIds.length ? { faqId: { notIn: faqIds } } : {}),
+    },
+  };
+
+  if (levelKey === "kindergarten") return prisma.kindergartenFaq.deleteMany(args);
+  if (levelKey === "elementary") return prisma.elementaryFaq.deleteMany(args);
+  return prisma.juniorHighFaq.deleteMany(args);
+}
+
+async function syncLegacyFaqPayload(
+  levelKey: AcademicLevelKey,
+  academicLevelId: string,
+  faqItems: AcademicPagePayload["faq"] | undefined,
+) {
+  const cleanItems = (faqItems ?? [])
+    .map((item) => ({
+      question: item.question.trim(),
+      answer: item.answer.trim(),
+    }))
+    .filter((item) => item.question && item.answer);
+  const faqIds: string[] = [];
+
+  for (const [sortOrder, item] of cleanItems.entries()) {
+    const faq = await findOrCreateFaq(item);
+    faqIds.push(faq.id);
+    await upsertLegacyFaqLink(levelKey, academicLevelId, faq.id, sortOrder);
+  }
+
+  await deleteMissingLegacyFaqLinks(levelKey, academicLevelId, faqIds);
+}
+
+async function saveLevelRecord(
+  levelKey: AcademicLevelKey,
+  existing: AcademicLevelRecord | null,
+  data: AcademicPayload,
+  status: AcademicStatus,
+) {
+  const prisma = getPrisma();
+  const academicLevel = await ensureAcademicLevel(levelKey, existing, data.program);
+  const nextData = levelData(academicLevel.id, data, status);
+
+  if (levelKey === "kindergarten") {
+    const saved = existing
+      ? prisma.kindergarten.update({ where: { id: existing.id }, data: nextData })
+      : prisma.kindergarten.create({ data: nextData });
+    const record = await saved;
+    await syncLegacyFaqPayload(levelKey, record.id, data.page.faq);
+    return record;
+  }
+  if (levelKey === "elementary") {
+    const saved = existing
+      ? prisma.elementary.update({ where: { id: existing.id }, data: nextData })
+      : prisma.elementary.create({ data: nextData });
+    const record = await saved;
+    await syncLegacyFaqPayload(levelKey, record.id, data.page.faq);
+    return record;
+  }
+  const saved = existing
+    ? prisma.juniorHigh.update({ where: { id: existing.id }, data: nextData })
+    : prisma.juniorHigh.create({ data: nextData });
+  const record = await saved;
+  await syncLegacyFaqPayload(levelKey, record.id, data.page.faq);
+  return record;
 }
 
 function parseSavePayload(payload: unknown) {
@@ -490,15 +633,12 @@ function decodeAcademicObjectName(rawObjectName: string | undefined) {
 
 export class AcademicPageService {
   static async listLevels() {
-    const records = await getPrisma().academicLevelPage.findMany({
-      include: { program: true },
-      orderBy: [{ program: { sortOrder: "asc" } }, { updatedAt: "desc" }],
-    });
-    const byKey = new Map(records.map((record) => [record.levelKey, record]));
+    const records = await Promise.all(LEVEL_KEYS.map(findLevelRecord));
 
-    return LEVEL_KEYS.map((levelKey) =>
-      pageResponse(levelKey, byKey.get(levelKey) ?? null, "published"),
-    );
+    return LEVEL_KEYS.map((levelKey, index) => {
+      const response = pageResponse(levelKey, records[index] ?? null);
+      return response.page.isPublished ? response : defaultLevels[levelKey];
+    });
   }
 
   static async getLevel(rawLevelKey: string | undefined) {
@@ -509,7 +649,7 @@ export class AcademicPageService {
     ]);
 
     return {
-      ...pageResponse(levelKey, record, "editor"),
+      ...pageResponse(levelKey, record),
       galleries,
     };
   }
@@ -521,11 +661,11 @@ export class AcademicPageService {
     const levelKey = parseLevelKey(rawLevelKey);
     const record = await findLevelRecord(levelKey);
 
-    if (options.previewDraft && record && hasDraft(record)) {
-      return pageResponse(levelKey, record, "draft");
+    if (options.previewDraft && record) {
+      return pageResponse(levelKey, record);
     }
 
-    const response = pageResponse(levelKey, record, "published");
+    const response = pageResponse(levelKey, record);
     if (!response.page.isPublished) return defaultLevels[levelKey];
     return response;
   }
@@ -535,87 +675,8 @@ export class AcademicPageService {
     const data = parseSavePayload(payload);
     const status: AcademicStatus =
       data.status ?? (data.page.isPublished ? "PUBLISHED" : "DRAFT");
-    const prisma = getPrisma();
-    const fallback = defaultLevels[levelKey];
-
-    if (status === "DRAFT") {
-      const program = await ensureProgram(levelKey);
-      await prisma.academicLevelPage.upsert({
-        where: { levelKey },
-        create: {
-          levelKey,
-          programId: program.id,
-          hero: fallback.page.hero,
-          overview: fallback.page.overview,
-          sections: fallback.page.sections,
-          faq: fallback.page.faq ?? [],
-          galleryId: null,
-          isPublished: false,
-          status: "DRAFT",
-          draftProgram: data.program,
-          draftHero: data.page.hero,
-          draftOverview: data.page.overview,
-          draftSections: data.page.sections,
-          draftFaq: data.page.faq ?? [],
-          draftGalleryId: data.page.galleryId ?? null,
-          draftSavedAt: new Date(),
-        },
-        update: {
-          status: "DRAFT",
-          draftProgram: data.program,
-          draftHero: data.page.hero,
-          draftOverview: data.page.overview,
-          draftSections: data.page.sections,
-          draftFaq: data.page.faq ?? [],
-          draftGalleryId: data.page.galleryId ?? null,
-          draftSavedAt: new Date(),
-        },
-      });
-
-      return this.getLevel(levelKey);
-    }
-
-    const program = await ensureProgram(levelKey, data.program);
-    await prisma.academicLevelPage.upsert({
-      where: { levelKey },
-      create: {
-        levelKey,
-        programId: program.id,
-        hero: data.page.hero,
-        overview: data.page.overview,
-        sections: data.page.sections,
-        faq: data.page.faq ?? [],
-        galleryId: data.page.galleryId ?? null,
-        isPublished: true,
-        status: "PUBLISHED",
-        publishedAt: new Date(),
-        draftProgram: data.program,
-        draftHero: data.page.hero,
-        draftOverview: data.page.overview,
-        draftSections: data.page.sections,
-        draftFaq: data.page.faq ?? [],
-        draftGalleryId: data.page.galleryId ?? null,
-        draftSavedAt: new Date(),
-      },
-      update: {
-        programId: program.id,
-        hero: data.page.hero,
-        overview: data.page.overview,
-        sections: data.page.sections,
-        faq: data.page.faq ?? [],
-        galleryId: data.page.galleryId ?? null,
-        isPublished: true,
-        status: "PUBLISHED",
-        publishedAt: new Date(),
-        draftProgram: data.program,
-        draftHero: data.page.hero,
-        draftOverview: data.page.overview,
-        draftSections: data.page.sections,
-        draftFaq: data.page.faq ?? [],
-        draftGalleryId: data.page.galleryId ?? null,
-        draftSavedAt: new Date(),
-      },
-    });
+    const existing = await findLevelRecord(levelKey);
+    await saveLevelRecord(levelKey, existing, data, status);
 
     return this.getLevel(levelKey);
   }

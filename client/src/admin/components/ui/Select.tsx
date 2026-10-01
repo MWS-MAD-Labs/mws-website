@@ -8,8 +8,8 @@ export default function Select({ className = '', ...props }: SelectProps) {
     <div className="relative">
       <select
         className={[
-          'w-full appearance-none rounded-md border border-gray-300 bg-white px-3 py-2 pr-9 text-sm outline-none transition',
-          'focus:border-[#7e1518] focus:ring-2 focus:ring-[#7e1518]/10',
+          'w-full appearance-none rounded-md border border-[#E2E8F0] bg-white px-3 py-2 pr-9 text-sm outline-none transition',
+          'focus:border-[#3C50E0] focus:ring-2 focus:ring-[#3C50E0]/10',
           'disabled:cursor-not-allowed disabled:opacity-60',
           className,
         ]
@@ -19,7 +19,7 @@ export default function Select({ className = '', ...props }: SelectProps) {
       />
 
       <ChevronDown
-        className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500"
+        className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748B]"
         aria-hidden="true"
       />
     </div>

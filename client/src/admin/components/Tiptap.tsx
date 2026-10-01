@@ -73,7 +73,7 @@ export default function Tiptap({
   if (!editor) {
     return (
       <div
-        className={`flex ${MIN_HEIGHT[size]} items-center justify-center rounded-lg border border-gray-200 text-sm text-gray-400`}
+        className={`flex ${MIN_HEIGHT[size]} items-center justify-center rounded-lg border border-[#E2E8F0] text-sm text-[#64748B]`}
       >
         Loading editor…
       </div>
@@ -81,7 +81,7 @@ export default function Tiptap({
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white transition-colors focus-within:border-[#7e1518] focus-within:ring-2 focus-within:ring-[#7e1518]/10">
+    <div className="overflow-hidden rounded-lg border border-[#E2E8F0] bg-white transition-colors focus-within:border-[#3C50E0] focus-within:ring-2 focus-within:ring-[#3C50E0]/10">
       <TiptapToolbar editor={editor} />
 
       <EditorContent editor={editor} />

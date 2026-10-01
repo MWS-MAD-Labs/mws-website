@@ -10,8 +10,8 @@ export default function ContactForm({
   updateContent,
 }: ContactEditorSectionProps) {
   return (
-    <div className="rounded-lg border border-[rgba(36,23,24,0.14)] bg-white p-5 shadow-sm">
-      <h2 className="mb-4 text-lg font-semibold text-[#241718]">
+    <div className="rounded-lg border border-[#E2E8F0] bg-white p-5 shadow-sm">
+      <h2 className="mb-4 text-lg font-semibold text-[#1C2434]">
         Contact Form
       </h2>
       <TextField

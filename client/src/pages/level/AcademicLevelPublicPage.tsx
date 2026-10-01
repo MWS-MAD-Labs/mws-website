@@ -60,6 +60,7 @@ export default function AcademicLevelPublicPage({
         curriculumFile={data.page.overview.curriculumFile ?? undefined}
         curriculumLabel={data.page.overview.curriculumLabel ?? undefined}
         sections={data.page.sections}
+        faq={data.page.faq ?? []}
         closingText={data.page.overview.closingText ?? undefined}
       />
     </>

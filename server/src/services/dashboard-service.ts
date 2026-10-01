@@ -6,6 +6,8 @@ const ACADEMIC_LABELS: Record<string, string> = {
   "high-school": "High School",
 };
 
+const ACADEMIC_LEVEL_KEYS = ["kindergarten", "elementary", "high-school"] as const;
+
 export type RecentUpdate = {
   type: "news" | "page" | "academic" | "hero";
   title: string;
@@ -53,15 +55,20 @@ export class DashboardService {
       prisma.gallery.count(),
       prisma.galleryImage.count(),
       prisma.galleryVideo.count(),
-      prisma.academicLevelPage.findMany({
-        select: {
-          levelKey: true,
-          status: true,
-          isPublished: true,
-          updatedAt: true,
-          program: { select: { title: true } },
-        },
-      }),
+      Promise.all([
+        prisma.kindergarten.findFirst({
+          select: { title: true, status: true, updatedAt: true },
+          orderBy: { updatedAt: "desc" },
+        }),
+        prisma.elementary.findFirst({
+          select: { title: true, status: true, updatedAt: true },
+          orderBy: { updatedAt: "desc" },
+        }),
+        prisma.juniorHigh.findFirst({
+          select: { title: true, status: true, updatedAt: true },
+          orderBy: { updatedAt: "desc" },
+        }),
+      ]),
       prisma.ourSchool.findFirst({ select: { updatedAt: true }, orderBy: { updatedAt: "desc" } }),
       prisma.communityStoriesPage.findFirst({
         select: { updatedAt: true, isPublished: true },
@@ -87,14 +94,20 @@ export class DashboardService {
     const statusCount = (status: string) =>
       newsByStatus.find((row) => row.status === status)?._count._all ?? 0;
 
-    const academic = academicPages.map((page) => ({
-      levelKey: page.levelKey,
-      title: ACADEMIC_LABELS[page.levelKey] ?? page.program.title,
-      // A draft saved on top of a published page: the live page is unchanged.
-      hasUnpublishedChanges: page.status === "DRAFT" && page.isPublished,
-      isPublished: page.isPublished,
-      updatedAt: page.updatedAt,
-    }));
+    const academic = academicPages.flatMap((page, index) => {
+      if (!page) return [];
+      const levelKey = ACADEMIC_LEVEL_KEYS[index];
+      if (!levelKey) return [];
+      return [
+        {
+          levelKey,
+          title: ACADEMIC_LABELS[levelKey] ?? page.title,
+          hasUnpublishedChanges: page.status === "DRAFT",
+          isPublished: page.status === "PUBLISHED",
+          updatedAt: page.updatedAt,
+        },
+      ];
+    });
 
     const recentUpdates: RecentUpdate[] = [
       ...recentNews.map((post) => ({

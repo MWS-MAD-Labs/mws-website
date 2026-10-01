@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import type { DashboardContentSummary } from '@/admin/api/adminApi';
 import { formatFullCount } from './format';
 
-function OverviewCard({
+function OverviewItem({
   to,
   icon: Icon,
   title,
@@ -21,22 +21,26 @@ function OverviewCard({
   return (
     <Link
       to={to}
-      className="group flex flex-col rounded-lg border border-gray-200 bg-white p-4 transition-colors hover:border-[#7e1518]/40 hover:bg-[#7e1518]/[0.02]"
+      className="group flex min-w-0 items-center gap-3 px-4 py-3 transition-colors hover:bg-[#F1F5F9]"
     >
-      <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
-        <Icon size={16} className="text-[#7e1518]" aria-hidden="true" />
-        {title}
-        <ArrowRight
-          size={14}
-          className="ml-auto text-gray-300 transition-colors group-hover:text-[#7e1518]"
-          aria-hidden="true"
-        />
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-[#3C50E0]/10 text-[#3C50E0]">
+        <Icon size={17} aria-hidden="true" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <p className="truncate text-sm font-semibold text-[#1C2434]">{title}</p>
+          <ArrowRight
+            size={14}
+            className="shrink-0 text-[#64748B] transition-colors group-hover:text-[#3C50E0]"
+            aria-hidden="true"
+          />
+        </div>
+        <p className="mt-0.5 truncate text-xs text-[#64748B]">{detail}</p>
       </div>
-      <p className="mt-2 text-2xl font-semibold text-[#241718]">
+      <p className="shrink-0 text-right text-xl font-semibold tabular-nums text-[#1C2434]">
         {formatFullCount(value)}
-        <span className="ml-1.5 text-sm font-normal text-gray-500">{unit}</span>
+        <span className="ml-1 text-xs font-normal text-[#64748B]">{unit}</span>
       </p>
-      <p className="mt-1 text-xs text-gray-500">{detail}</p>
     </Link>
   );
 }
@@ -59,49 +63,58 @@ export default function ContentOverview({ content }: { content: DashboardContent
     .join(' · ');
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <OverviewCard
-        to="/admin/news"
-        icon={Newspaper}
-        title="News"
-        value={news.published}
-        unit="live"
-        detail={newsDetail || 'No drafts waiting'}
-      />
-      <OverviewCard
-        to="/admin/content/home"
-        icon={LayoutPanelTop}
-        title="Home hero"
-        value={hero.active}
-        unit={hero.active === 1 ? 'slide shown' : 'slides shown'}
-        detail={
-          hiddenSlides > 0
-            ? count(hiddenSlides, 'hidden slide')
-            : hero.total
-              ? 'All slides are shown'
-              : 'No slides yet, so the default hero is shown'
-        }
-      />
-      <OverviewCard
-        to="/admin/gallery"
-        icon={Images}
-        title="Gallery library"
-        value={gallery.images + gallery.videos}
-        unit="files"
-        detail={`${count(gallery.images, 'photo')} · ${count(gallery.videos, 'video')} in ${count(gallery.galleries, 'gallery', 'galleries')}`}
-      />
-      <OverviewCard
-        to="/admin/academic/kindergarten"
-        icon={GraduationCap}
-        title="Academic pages"
-        value={liveAcademic}
-        unit="live"
-        detail={
-          academicWithChanges
-            ? `${count(academicWithChanges, 'page')} with unpublished changes`
-            : 'Everything is published'
-        }
-      />
-    </div>
+    <section aria-labelledby="overview-title" className="rounded-lg border border-[#E2E8F0] bg-white">
+      <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-4 py-3">
+        <h2 id="overview-title" className="text-sm font-semibold text-[#1C2434]">
+          Content Overview
+        </h2>
+        <span className="text-xs text-[#64748B]">Live website content</span>
+      </div>
+
+      <div className="grid divide-y divide-[#E2E8F0] md:grid-cols-2 md:divide-x md:divide-y-0 xl:grid-cols-4">
+        <OverviewItem
+          to="/admin/news"
+          icon={Newspaper}
+          title="News"
+          value={news.published}
+          unit="live"
+          detail={newsDetail || 'No drafts waiting'}
+        />
+        <OverviewItem
+          to="/admin/content/home"
+          icon={LayoutPanelTop}
+          title="Home Hero"
+          value={hero.active}
+          unit="shown"
+          detail={
+            hiddenSlides > 0
+              ? count(hiddenSlides, 'hidden slide')
+              : hero.total
+                ? 'All slides are shown'
+                : 'Default hero is shown'
+          }
+        />
+        <OverviewItem
+          to="/admin/gallery"
+          icon={Images}
+          title="Gallery"
+          value={gallery.images + gallery.videos}
+          unit="files"
+          detail={`${count(gallery.images, 'photo')} · ${count(gallery.videos, 'video')}`}
+        />
+        <OverviewItem
+          to="/admin/academic/kindergarten"
+          icon={GraduationCap}
+          title="Academic"
+          value={liveAcademic}
+          unit="live"
+          detail={
+            academicWithChanges
+              ? `${count(academicWithChanges, 'page')} with unpublished changes`
+              : 'Everything is published'
+          }
+        />
+      </div>
+    </section>
   );
 }

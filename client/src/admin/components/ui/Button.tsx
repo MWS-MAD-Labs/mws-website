@@ -13,11 +13,11 @@ export default function Button({
   ...props
 }: ButtonProps) {
   const variantClass = {
-    danger: 'border border-[#b3261e] bg-transparent text-[#b3261e] hover:bg-[#b3261e]/5',
-    ghost: 'border border-transparent bg-transparent text-[#241718] hover:bg-[#241718]/5',
+    danger: 'border border-[#EF4444] bg-transparent text-[#EF4444] hover:bg-[#EF4444]/5',
+    ghost: 'border border-transparent bg-transparent text-[#1C2434] hover:bg-[#1C2434]/5',
     outline:
-      'border border-[rgba(36,23,24,0.14)] bg-transparent text-[#241718] hover:bg-[#7e1518]/5',
-    primary: 'border border-transparent bg-[#7e1518] text-white hover:bg-[#5e1013]',
+      'border border-[#E2E8F0] bg-white text-[#1C2434] hover:bg-[#F1F5F9]',
+    primary: 'border border-transparent bg-[#3C50E0] text-white hover:bg-[#2F3EC8]',
   }[variant];
 
   const sizeClass = size === 'sm' ? 'px-4 py-2 text-[13px]' : 'px-4 py-3 text-[14px]';

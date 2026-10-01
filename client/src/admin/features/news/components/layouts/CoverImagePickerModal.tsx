@@ -87,7 +87,7 @@ export default function CoverImagePickerModal({
     <Modal open={open} title="Choose news cover image" onClose={onClose}>
       <div className="space-y-4">
         {/* Tabs */}
-        <div className="border-b border-gray-200">
+        <div className="border-b border-[#E2E8F0]">
           <div className="flex gap-6">
             <button
               type="button"
@@ -95,8 +95,8 @@ export default function CoverImagePickerModal({
               className={[
                 'border-b-2 px-1 pb-3 text-sm font-medium',
                 mode === 'GALLERY'
-                  ? 'border-[#7e1518] text-[#7e1518]'
-                  : 'border-transparent text-gray-500 hover:text-gray-700',
+                  ? 'border-[#3C50E0] text-[#3C50E0]'
+                  : 'border-transparent text-[#64748B] hover:text-[#1C2434]',
               ].join(' ')}
             >
               Gallery
@@ -108,8 +108,8 @@ export default function CoverImagePickerModal({
               className={[
                 'border-b-2 px-1 pb-3 text-sm font-medium',
                 mode === 'UPLOAD'
-                  ? 'border-[#7e1518] text-[#7e1518]'
-                  : 'border-transparent text-gray-500 hover:text-gray-700',
+                  ? 'border-[#3C50E0] text-[#3C50E0]'
+                  : 'border-transparent text-[#64748B] hover:text-[#1C2434]',
               ].join(' ')}
             >
               Upload from computer
@@ -128,7 +128,7 @@ export default function CoverImagePickerModal({
                 onChange={(event) => setSearchQuery(event.target.value)}
               />
 
-              <div className="max-h-[52vh] overflow-y-auto rounded-lg border border-gray-200">
+              <div className="max-h-[52vh] overflow-y-auto rounded-lg border border-[#E2E8F0]">
                 {filteredGalleries.length ? (
                   filteredGalleries.map((gallery) => {
                     const isActive = gallery.id === activeGallery?.id;
@@ -139,24 +139,24 @@ export default function CoverImagePickerModal({
                         type="button"
                         onClick={() => setActiveGalleryId(gallery.id)}
                         className={[
-                          'block w-full border-b border-gray-200 px-3 py-3 text-left last:border-b-0',
+                          'block w-full border-b border-[#E2E8F0] px-3 py-3 text-left last:border-b-0',
                           isActive
-                            ? 'bg-[#faf8f3] text-[#7e1518]'
-                            : 'bg-white text-gray-700 hover:bg-gray-50',
+                            ? 'bg-[#F1F5F9] text-[#3C50E0]'
+                            : 'bg-white text-[#1C2434] hover:bg-[#F1F5F9]',
                         ].join(' ')}
                       >
                         <span className="block truncate text-sm font-semibold">
                           {gallery.title}
                         </span>
 
-                        <span className="block text-xs text-gray-500">
+                        <span className="block text-xs text-[#64748B]">
                           {gallery.images.length} Images
                         </span>
                       </button>
                     );
                   })
                 ) : (
-                  <div className="p-4 text-sm text-gray-500">No galleries found.</div>
+                  <div className="p-4 text-sm text-[#64748B]">No galleries found.</div>
                 )}
               </div>
             </div>
@@ -164,11 +164,11 @@ export default function CoverImagePickerModal({
             {/* Images */}
             <div className="min-w-0">
               {!activeGallery ? (
-                <div className="rounded-lg border border-dashed border-gray-200 p-6 text-sm text-gray-500">
+                <div className="rounded-lg border border-dashed border-[#E2E8F0] p-6 text-sm text-[#64748B]">
                   No gallery available.
                 </div>
               ) : !images.length ? (
-                <div className="rounded-lg border border-dashed border-gray-200 p-6 text-sm text-gray-500">
+                <div className="rounded-lg border border-dashed border-[#E2E8F0] p-6 text-sm text-[#64748B]">
                   No images in this gallery.
                 </div>
               ) : (
@@ -178,9 +178,9 @@ export default function CoverImagePickerModal({
                       key={image.id}
                       type="button"
                       onClick={() => selectGalleryImage(activeGallery, image)}
-                      className="overflow-hidden rounded-lg border border-gray-200 bg-white text-left transition hover:border-[#7e1518] hover:shadow-sm"
+                      className="overflow-hidden rounded-lg border border-[#E2E8F0] bg-white text-left transition hover:border-[#3C50E0] hover:shadow-sm"
                     >
-                      <div className="aspect-video bg-gray-100">
+                      <div className="aspect-video bg-[#F1F5F9]">
                         <img
                           src={adminApi.galleryImageUrl(image)}
                           alt={image.title || image.caption || activeGallery.title}
@@ -188,7 +188,7 @@ export default function CoverImagePickerModal({
                         />
                       </div>
 
-                      <span className="block truncate px-3 py-2 text-sm font-semibold text-gray-900">
+                      <span className="block truncate px-3 py-2 text-sm font-semibold text-[#1C2434]">
                         {image.title || image.caption || 'Gallery image'}
                       </span>
                     </button>
@@ -211,21 +211,21 @@ export default function CoverImagePickerModal({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="flex min-h-[300px] w-full items-center justify-center rounded-xl border border-dashed border-gray-300 bg-gray-50 px-6 text-center transition hover:border-[#7e1518] hover:bg-[#faf8f3]"
+              className="flex min-h-[300px] w-full items-center justify-center rounded-xl border border-dashed border-[#E2E8F0] bg-[#F1F5F9] px-6 text-center transition hover:border-[#3C50E0] hover:bg-[#F1F5F9]"
             >
               <div>
-                <p className="text-sm font-semibold text-gray-900">Upload an image</p>
+                <p className="text-sm font-semibold text-[#1C2434]">Upload an image</p>
 
-                <p className="mt-1 text-sm text-gray-500">Click to browse from your computer</p>
+                <p className="mt-1 text-sm text-[#64748B]">Click to browse from your computer</p>
 
-                <p className="mt-2 text-xs text-gray-400">JPG, PNG, WEBP, or GIF · Max 10 MB</p>
+                <p className="mt-2 text-xs text-[#64748B]">JPG, PNG, WEBP, or GIF · Max 10 MB</p>
               </div>
             </button>
           </div>
         )}
 
         {/* Footer */}
-        <div className="flex justify-end border-t border-gray-200 pt-4">
+        <div className="flex justify-end border-t border-[#E2E8F0] pt-4">
           <Button type="button" variant="outline" onClick={onClose}>
             Cancel
           </Button>

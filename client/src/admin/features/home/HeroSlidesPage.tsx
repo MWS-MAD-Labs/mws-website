@@ -134,7 +134,7 @@ function HomeHeroPreview({
   const mediaUrl = slide.mediaPath ? adminApi.publicAssetUrl(slide.mediaPath) : '';
 
   return (
-    <div className="overflow-hidden rounded-lg border border-gray-200 bg-[#111]">
+    <div className="overflow-hidden rounded-lg border border-[#E2E8F0] bg-[#111]">
       <div className="relative aspect-[16/9] min-h-[360px] overflow-hidden bg-[#181818]">
         {mediaUrl ? (
           slide.mediaType === 'VIDEO' ? (
@@ -334,32 +334,32 @@ export default function HeroSlidesPage() {
         </div>
 
         {message ? (
-          <div className="rounded-lg border border-gray-200 bg-white px-5 py-3">
+          <div className="rounded-lg border border-[#E2E8F0] bg-white px-5 py-3">
             <StatusMessage>{message}</StatusMessage>
           </div>
         ) : null}
 
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
           <div className="space-y-5">
-            <section className="rounded-lg border border-gray-200 bg-white p-5">
+            <section className="rounded-lg border border-[#E2E8F0] bg-white p-5">
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-[#1C2434]">
                     <Eye size={16} />
                     Live Preview
                   </div>
 
-                  <p className="mt-1 text-sm text-gray-500">
+                  <p className="mt-1 text-sm text-[#64748B]">
                     {editingSlide ? editingSlide.title || 'Selected slide' : 'Unsaved slide'}
                   </p>
                 </div>
 
                 <div className="flex flex-wrap gap-2 text-xs font-semibold">
-                  <span className="rounded-md bg-[#faf8f3] px-3 py-1.5 text-[#625759]">
+                  <span className="rounded-md bg-[#F1F5F9] px-3 py-1.5 text-[#64748B]">
                     {activeSlideCount} Active
                   </span>
 
-                  <span className="rounded-md bg-[#faf8f3] px-3 py-1.5 text-[#625759]">
+                  <span className="rounded-md bg-[#F1F5F9] px-3 py-1.5 text-[#64748B]">
                     {readySlideCount} Ready
                   </span>
                 </div>
@@ -368,24 +368,24 @@ export default function HeroSlidesPage() {
               <HomeHeroPreview activeSlideCount={activeSlideCount} slide={previewSlide} />
             </section>
 
-            <section className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 px-5 py-4">
+            <section className="overflow-hidden rounded-lg border border-[#E2E8F0] bg-white">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-4">
                 <div>
-                  <h2 className="text-base font-semibold text-gray-900">Slides</h2>
+                  <h2 className="text-base font-semibold text-[#1C2434]">Slides</h2>
 
-                  <p className="text-sm text-gray-500">{slides.length} total slides</p>
+                  <p className="text-sm text-[#64748B]">{slides.length} total slides</p>
                 </div>
               </div>
 
               <div className="p-4">
                 {isLoading ? (
-                  <div className="rounded-lg border border-gray-200 p-6 text-sm text-gray-500">
+                  <div className="rounded-lg border border-[#E2E8F0] p-6 text-sm text-[#64748B]">
                     Loading hero slides...
                   </div>
                 ) : null}
 
                 {!isLoading && !slides.length ? (
-                  <div className="rounded-lg border border-dashed border-gray-200 p-6 text-sm text-gray-500">
+                  <div className="rounded-lg border border-dashed border-[#E2E8F0] p-6 text-sm text-[#64748B]">
                     No hero slides yet.
                   </div>
                 ) : null}
@@ -402,14 +402,14 @@ export default function HeroSlidesPage() {
                           className={[
                             'grid w-full gap-3 rounded-lg border p-3 text-left transition-colors md:grid-cols-[96px_minmax(0,1fr)_auto]',
                             isSelected
-                              ? 'border-[#7e1518] bg-[#7e1518]/5'
-                              : 'border-gray-200 bg-white hover:bg-gray-50',
+                              ? 'border-[#3C50E0] bg-[#3C50E0]/5'
+                              : 'border-[#E2E8F0] bg-white hover:bg-[#F1F5F9]',
                           ].join(' ')}
                           key={slide.id}
                           type="button"
                           onClick={() => editSlide(slide)}
                         >
-                          <div className="h-16 w-24 overflow-hidden rounded-md bg-gray-100">
+                          <div className="h-16 w-24 overflow-hidden rounded-md bg-[#F1F5F9]">
                             {slide.mediaPath ? (
                               preview.mediaType === 'VIDEO' ? (
                                 <video
@@ -425,7 +425,7 @@ export default function HeroSlidesPage() {
                                 />
                               )
                             ) : (
-                              <div className="grid h-full place-items-center text-gray-400">
+                              <div className="grid h-full place-items-center text-[#64748B]">
                                 <ImagePlus size={18} />
                               </div>
                             )}
@@ -433,7 +433,7 @@ export default function HeroSlidesPage() {
 
                           <div className="min-w-0">
                             <div className="flex flex-wrap items-center gap-2">
-                              <h3 className="truncate text-sm font-semibold text-gray-900">
+                              <h3 className="truncate text-sm font-semibold text-[#1C2434]">
                                 {preview.title}
                               </h3>
 
@@ -441,27 +441,27 @@ export default function HeroSlidesPage() {
                                 className={[
                                   'rounded-md px-2 py-1 text-[11px] font-semibold',
                                   status === 'Ready'
-                                    ? 'bg-emerald-50 text-emerald-700'
+                                    ? 'bg-[#10B981]/10 text-[#047857]'
                                     : status === 'Hidden'
-                                      ? 'bg-gray-100 text-gray-500'
-                                      : 'bg-amber-50 text-amber-700',
+                                      ? 'bg-[#F1F5F9] text-[#64748B]'
+                                      : 'bg-[#F59E0B]/10 text-[#D97706]',
                                 ].join(' ')}
                               >
                                 {status}
                               </span>
                             </div>
 
-                            <p className="mt-1 truncate text-sm text-gray-500">
+                            <p className="mt-1 truncate text-sm text-[#64748B]">
                               {preview.caption || '-'}
                             </p>
 
-                            <p className="mt-1 text-xs text-gray-400">
+                            <p className="mt-1 text-xs text-[#64748B]">
                               {slide.isActive ? 'Visible on website' : 'Hidden from website'}
                             </p>
                           </div>
 
                           <div className="flex items-center justify-end gap-2">
-                            <Pencil size={16} className="text-gray-400" />
+                            <Pencil size={16} className="text-[#64748B]" />
                           </div>
                         </button>
                       );
@@ -472,14 +472,14 @@ export default function HeroSlidesPage() {
             </section>
           </div>
 
-          <form className="h-fit rounded-lg border border-gray-200 bg-white" onSubmit={saveSlide}>
-            <div className="flex flex-wrap items-start justify-between gap-3 border-b border-gray-200 px-5 py-4">
+          <form className="h-fit rounded-lg border border-[#E2E8F0] bg-white" onSubmit={saveSlide}>
+            <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#E2E8F0] px-5 py-4">
               <div>
-                <h2 className="text-base font-semibold text-gray-900">
+                <h2 className="text-base font-semibold text-[#1C2434]">
                   {editingSlide ? 'Edit Slide' : 'New Slide'}
                 </h2>
 
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-[#64748B]">
                   {editingSlide
                     ? 'Edit the text, media, and button that visitors see on the homepage.'
                     : 'Add a new slide for the homepage hero carousel.'}
@@ -502,13 +502,13 @@ export default function HeroSlidesPage() {
             </div>
 
             <div className="grid gap-4 p-5">
-              <div className="rounded-lg border border-[#7e1518]/15 bg-[#faf8f3] px-4 py-3 text-sm text-[#625759]">
+              <div className="rounded-lg border border-[#3C50E0]/15 bg-[#F1F5F9] px-4 py-3 text-sm text-[#64748B]">
                 This form only controls content visitors can see in the Home hero.
               </div>
 
               <Field label="Headline">
                 <input
-                  className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                  className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
                   value={form.title}
                   onChange={(event) =>
                     setForm((current) => ({
@@ -521,7 +521,7 @@ export default function HeroSlidesPage() {
 
               <Field label="Caption">
                 <textarea
-                  className="min-h-24 rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                  className="min-h-24 rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
                   value={form.caption}
                   onChange={(event) =>
                     setForm((current) => ({
@@ -532,12 +532,12 @@ export default function HeroSlidesPage() {
                 />
               </Field>
 
-              <div className="rounded-lg border border-gray-200 p-4">
+              <div className="rounded-lg border border-[#E2E8F0] p-4">
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <h3 className="text-sm font-semibold text-gray-900">Hero Image or Video</h3>
+                    <h3 className="text-sm font-semibold text-[#1C2434]">Hero Image or Video</h3>
 
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-[#64748B]">
                       {form.mediaPath
                         ? 'Media selected from Gallery Library.'
                         : 'No media selected.'}
@@ -556,7 +556,7 @@ export default function HeroSlidesPage() {
                 </div>
 
                 {form.mediaPath ? (
-                  <div className="overflow-hidden rounded-lg bg-gray-100">
+                  <div className="overflow-hidden rounded-lg bg-[#F1F5F9]">
                     {form.mediaType === 'VIDEO' ? (
                       <video
                         className="aspect-video w-full object-cover"
@@ -576,7 +576,7 @@ export default function HeroSlidesPage() {
 
               <Field label="Image Description">
                 <input
-                  className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                  className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
                   value={form.mediaAlt}
                   onChange={(event) =>
                     setForm((current) => ({
@@ -590,7 +590,7 @@ export default function HeroSlidesPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Button Text">
                   <input
-                    className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                    className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
                     value={form.ctaLabel}
                     onChange={(event) =>
                       setForm((current) => ({
@@ -602,7 +602,7 @@ export default function HeroSlidesPage() {
                 </Field>
               </div>
 
-              <div className="grid gap-3 rounded-lg border border-gray-200 p-4 text-sm text-gray-700">
+              <div className="grid gap-3 rounded-lg border border-[#E2E8F0] p-4 text-sm text-[#1C2434]">
                 <label className="flex items-center justify-between gap-3">
                   <span>Show this slide on website</span>
 

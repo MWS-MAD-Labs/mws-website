@@ -33,8 +33,8 @@ export default function PageEditorPage() {
           description="Manage the editable sections for this page."
         />
 
-        <div className="my-5 flex flex-wrap items-center gap-2 text-sm text-[#625759]">
-          <span className="rounded-md border border-[rgba(36,23,24,0.14)] bg-white px-3 py-1.5 font-semibold text-[#241718]">
+        <div className="my-5 flex flex-wrap items-center gap-2 text-sm text-[#64748B]">
+          <span className="rounded-md border border-[#E2E8F0] bg-white px-3 py-1.5 font-semibold text-[#1C2434]">
             {page.template}
           </span>
           <span>{sections.length} sections</span>
@@ -47,7 +47,7 @@ export default function PageEditorPage() {
             onSelectSection={setSelectedSectionId}
           />
         ) : (
-          <div className="rounded-lg border border-[rgba(36,23,24,0.14)] bg-white px-4 py-6 text-sm text-[#625759] shadow-sm">
+          <div className="rounded-lg border border-[#E2E8F0] bg-white px-4 py-6 text-sm text-[#64748B] shadow-sm">
             No editable sections configured.
           </div>
         )}

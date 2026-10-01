@@ -12,7 +12,7 @@ export default function NewsEditorHeader({
     <div className="flex items-start gap-3">
       <button
         aria-label="Back to news"
-        className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-gray-200 bg-white text-gray-600 transition-colors hover:border-[#7e1518]/30 hover:text-[#7e1518]"
+        className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-[#E2E8F0] bg-white text-[#64748B] transition-colors hover:border-[#3C50E0]/30 hover:text-[#3C50E0]"
         type="button"
         onClick={onClose}
       >

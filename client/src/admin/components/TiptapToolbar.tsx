@@ -51,7 +51,7 @@ function ToolbarButton({
       onClick={onClick}
       className={[
         'inline-flex h-8 w-8 items-center justify-center rounded-md transition-colors',
-        active ? 'bg-[#7e1518] text-white' : 'text-gray-600 hover:bg-gray-200/70 hover:text-gray-900',
+        active ? 'bg-[#3C50E0] text-white' : 'text-[#64748B] hover:bg-[#E2E8F0] hover:text-[#1C2434]',
         'disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent',
       ].join(' ')}
     >
@@ -61,7 +61,7 @@ function ToolbarButton({
 }
 
 function ToolbarDivider() {
-  return <span aria-hidden="true" className="mx-1 h-5 w-px bg-gray-200" />;
+  return <span aria-hidden="true" className="mx-1 h-5 w-px bg-[#E2E8F0]" />;
 }
 
 const MOD = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl';
@@ -109,7 +109,7 @@ export default function TiptapToolbar({ editor }: TiptapToolbarProps) {
   }
 
   return (
-    <div className="border-b border-gray-200 bg-gray-50">
+    <div className="border-b border-[#E2E8F0] bg-[#F1F5F9]">
       <div
         role="toolbar"
         aria-label="Text formatting"
@@ -229,9 +229,9 @@ export default function TiptapToolbar({ editor }: TiptapToolbarProps) {
         <div
           role="group"
           aria-label="Link"
-          className="flex flex-wrap items-center gap-2 border-t border-gray-200 bg-white px-3 py-2"
+          className="flex flex-wrap items-center gap-2 border-t border-[#E2E8F0] bg-white px-3 py-2"
         >
-          <label className="text-xs font-medium text-gray-600" htmlFor="tiptap-link-input">
+          <label className="text-xs font-medium text-[#64748B]" htmlFor="tiptap-link-input">
             Link URL
           </label>
           <input
@@ -249,23 +249,23 @@ export default function TiptapToolbar({ editor }: TiptapToolbarProps) {
               }
               if (event.key === 'Escape') setIsEditingLink(false);
             }}
-            className="min-w-[220px] flex-1 rounded-md border border-gray-200 px-2.5 py-1.5 text-sm outline-none focus:border-[#7e1518]"
+            className="min-w-[220px] flex-1 rounded-md border border-[#E2E8F0] px-2.5 py-1.5 text-sm outline-none focus:border-[#3C50E0]"
           />
           <button
             type="button"
             onClick={applyLink}
-            className="rounded-md bg-[#7e1518] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#5e1013]"
+            className="rounded-md bg-[#3C50E0] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#2F3EC8]"
           >
             {linkValue.trim() ? 'Apply' : 'Remove link'}
           </button>
           <button
             type="button"
             onClick={() => setIsEditingLink(false)}
-            className="rounded-md px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100"
+            className="rounded-md px-3 py-1.5 text-xs font-semibold text-[#64748B] hover:bg-[#F1F5F9]"
           >
             Cancel
           </button>
-          <p className="w-full text-[11px] text-gray-500">
+          <p className="w-full text-[11px] text-[#64748B]">
             Select text first, then add a link. Leave empty to remove it.
           </p>
         </div>

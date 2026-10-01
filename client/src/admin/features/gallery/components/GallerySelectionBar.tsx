@@ -15,8 +15,8 @@ export default function GallerySelectionBar({
   if (!selectedCount) return null;
 
   return (
-    <div className="flex items-center justify-between gap-3 border-b border-gray-200 bg-gray-50 px-5 py-3">
-      <p className="text-sm font-medium text-gray-700">
+    <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] bg-[#F1F5F9] px-5 py-3">
+      <p className="text-sm font-medium text-[#1C2434]">
         {selectedCount} selected
       </p>
       <Button

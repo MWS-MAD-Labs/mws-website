@@ -13,7 +13,7 @@ export default function PagesManagementPage() {
           title="Your Site's Pages"
           description="Manage and edit your website pages."
           action={
-            <span className="text-sm text-gray-400">
+            <span className="text-sm text-[#64748B]">
               {managedPages.length} {managedPages.length === 1 ? 'page' : 'pages'}
             </span>
           }
@@ -24,37 +24,37 @@ export default function PagesManagementPage() {
           {managedPages.map((page) => (
             <article
               key={page.id}
-              className="group overflow-hidden rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-sm"
+              className="group overflow-hidden rounded-lg border border-[#E2E8F0] bg-white transition-shadow hover:shadow-sm"
             >
               {/* Preview */}
-              <div className="relative aspect-[16/9] overflow-hidden border-b border-gray-200 bg-gray-50">
+              <div className="relative aspect-[16/9] overflow-hidden border-b border-[#E2E8F0] bg-[#F1F5F9]">
                 {/* Browser-style preview */}
-                <div className="absolute inset-3 overflow-hidden rounded border border-gray-200 bg-white shadow-sm">
+                <div className="absolute inset-3 overflow-hidden rounded border border-[#E2E8F0] bg-white shadow-sm">
                   {/* Browser bar */}
-                  <div className="flex h-5 items-center gap-1 border-b border-gray-100 bg-gray-50 px-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-gray-300" />
-                    <span className="h-1.5 w-1.5 rounded-full bg-gray-300" />
-                    <span className="h-1.5 w-1.5 rounded-full bg-gray-300" />
+                  <div className="flex h-5 items-center gap-1 border-b border-[#E2E8F0] bg-[#F1F5F9] px-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#64748B]/30" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#64748B]/30" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#64748B]/30" />
                   </div>
 
                   {/* Page preview */}
                   <div className="space-y-2.5 p-3">
                     <div className="flex items-center justify-between">
-                      <div className="h-2 w-16 rounded bg-gray-200" />
+                      <div className="h-2 w-16 rounded bg-[#E2E8F0]" />
 
                       <div className="flex gap-1">
-                        <div className="h-1.5 w-6 rounded bg-gray-100" />
-                        <div className="h-1.5 w-6 rounded bg-gray-100" />
-                        <div className="h-1.5 w-6 rounded bg-gray-100" />
+                        <div className="h-1.5 w-6 rounded bg-[#F1F5F9]" />
+                        <div className="h-1.5 w-6 rounded bg-[#F1F5F9]" />
+                        <div className="h-1.5 w-6 rounded bg-[#F1F5F9]" />
                       </div>
                     </div>
 
-                    <div className="h-14 rounded bg-gray-100" />
+                    <div className="h-14 rounded bg-[#F1F5F9]" />
 
                     <div className="space-y-1.5">
-                      <div className="h-1.5 w-3/4 rounded bg-gray-100" />
-                      <div className="h-1.5 w-full rounded bg-gray-100" />
-                      <div className="h-1.5 w-2/3 rounded bg-gray-100" />
+                      <div className="h-1.5 w-3/4 rounded bg-[#F1F5F9]" />
+                      <div className="h-1.5 w-full rounded bg-[#F1F5F9]" />
+                      <div className="h-1.5 w-2/3 rounded bg-[#F1F5F9]" />
                     </div>
                   </div>
                 </div>
@@ -63,7 +63,7 @@ export default function PagesManagementPage() {
                 <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/35 opacity-0 transition-opacity group-hover:opacity-100">
                   <button
                     type="button"
-                    className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-2 text-xs font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50"
+                    className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-2 text-xs font-medium text-[#1C2434] shadow-sm transition-colors hover:bg-[#F1F5F9]"
                   >
                     <Pencil size={14} />
                     Edit
@@ -71,7 +71,7 @@ export default function PagesManagementPage() {
 
                   <button
                     type="button"
-                    className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-2 text-xs font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50"
+                    className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-2 text-xs font-medium text-[#1C2434] shadow-sm transition-colors hover:bg-[#F1F5F9]"
                   >
                     <Eye size={14} />
                     Preview
@@ -88,14 +88,14 @@ export default function PagesManagementPage() {
                       <span
                         className={[
                           'h-2 w-2 shrink-0 rounded-full',
-                          page.status === 'Published' ? 'bg-emerald-500' : 'bg-gray-300',
+                          page.status === 'Published' ? 'bg-[#10B981]' : 'bg-[#64748B]/30',
                         ].join(' ')}
                       />
 
-                      <h3 className="truncate text-sm font-semibold text-gray-900">{page.title}</h3>
+                      <h3 className="truncate text-sm font-semibold text-[#1C2434]">{page.title}</h3>
                     </div>
 
-                    <p className="mt-1.5 truncate pl-4 font-mono text-[11px] text-gray-400">
+                    <p className="mt-1.5 truncate pl-4 font-mono text-[11px] text-[#64748B]">
                       {page.path}
                     </p>
                   </div>
@@ -103,22 +103,22 @@ export default function PagesManagementPage() {
                   <button
                     type="button"
                     aria-label={`More actions for ${page.title}`}
-                    className="shrink-0 rounded-md p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                    className="shrink-0 rounded-md p-1 text-[#64748B] transition-colors hover:bg-[#F1F5F9] hover:text-[#1C2434]"
                   >
                     <MoreHorizontal size={17} />
                   </button>
                 </div>
 
                 {/* Meta */}
-                <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
-                  <span className="text-[11px] text-gray-400">{page.template}</span>
+                <div className="mt-4 flex items-center justify-between border-t border-[#E2E8F0] pt-3">
+                  <span className="text-[11px] text-[#64748B]">{page.template}</span>
 
                   <span
                     className={[
                       'rounded-md px-2 py-1 text-[10px] font-semibold',
                       page.status === 'Published'
-                        ? 'bg-emerald-50 text-emerald-700'
-                        : 'bg-gray-100 text-gray-500',
+                        ? 'bg-[#10B981]/10 text-[#047857]'
+                        : 'bg-[#F1F5F9] text-[#64748B]',
                     ].join(' ')}
                   >
                     {page.status}

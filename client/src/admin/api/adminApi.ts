@@ -217,66 +217,103 @@ export type AdminAdmissionsData = {
 };
 
 export type AcademicLevelKey = "kindergarten" | "elementary" | "high-school";
-export type AcademicStatus = "DRAFT" | "PUBLISHED";
-export type AcademicRichText = string | string[];
 
-export type AcademicLevelData = {
-  levelKey: AcademicLevelKey;
-  status?: AcademicStatus;
-  draftSavedAt?: string | null;
+export type AcademicOverviewItem = {
+  id: string;
+  title: string;
+  description: string | null;
+  coverImage: string | null;
+  galleryId: string | null;
+  gallery?: GalleryItem | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AcademicOverviewPayload = {
+  title: string;
+  description?: string | null;
+  coverImage?: string | null;
+  galleryId?: string | null;
+};
+
+export type AcademicMasterLevel = {
+  id: string;
+  title: string;
+  description: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AcademicMasterLevelPayload = {
+  title: string;
+  description?: string | null;
+};
+
+export type AcademicLevelJson = unknown;
+
+export type AcademicFaqItem = {
+  id: string;
+  question: string;
+  answer: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  _count?: {
+    kindergartens: number;
+    elementaries: number;
+    juniorHighs: number;
+  };
+};
+
+export type AcademicFaqPayload = {
+  question: string;
+  answer: string;
+  isActive?: boolean;
+};
+
+export type AcademicLevelFaqLink = {
+  academicLevelId: string;
+  faqId: string;
+  sortOrder: number;
+  faq: AcademicFaqItem;
+};
+
+export type FixedAcademicLevelItem = {
+  id: string;
+  academicLevelId: string;
+  title: string;
+  description: string | null;
+  coverImage: string | null;
+  galleryId: string | null;
+  hero: AcademicLevelJson;
+  overview: AcademicLevelJson;
+  sections: AcademicLevelJson;
+  faqs?: AcademicLevelFaqLink[];
+  status: string;
+  publishedAt: string | null;
+  academicLevel?: AcademicMasterLevel;
+  gallery?: GalleryItem | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type FixedAcademicLevelPayload = {
+  academicLevelId: string;
+  title: string;
+  description?: string | null;
+  coverImage?: string | null;
+  galleryId?: string | null;
+  hero: AcademicLevelJson;
+  overview: AcademicLevelJson;
+  sections: AcademicLevelJson;
+  status?: string;
   publishedAt?: string | null;
-  program: {
-    title: string;
-    age: string | null;
-    description: string | null;
-    image: string | null;
-    imageAlt: string | null;
-    path: string | null;
-    sortOrder: number;
-    isActive: boolean;
-  };
-  page: {
-    isPublished: boolean;
-    galleryId: string | null;
-    hero: {
-      title: string;
-      description: string;
-      image: string;
-      imageAlt: string;
-    };
-    overview: {
-      introTitle: string;
-      intro: AcademicRichText;
-      introImage: string;
-      introImageAlt: string;
-      curriculumTitle: string;
-      curriculumDescription: AcademicRichText;
-      curriculumFile?: string | null;
-      curriculumLabel?: string | null;
-      closingText?: string | null;
-    };
-    sections: Array<{
-      title: string;
-      text: string;
-      image: string;
-      imageAlt: string;
-      imagePosition?: "left" | "right";
-    }>;
-    faq?: Array<{ question: string; answer: string }>;
-  };
 };
 
-export type AdminAcademicLevelData = AcademicLevelData & {
-  galleries: GalleryItem[];
-};
-
-export type AcademicAssetUploadResult = {
-  path: string;
-  objectName: string;
-  filename: string;
-  contentType: string;
-  size: number;
-};
+export type FixedAcademicCrudResource =
+  | "kindergartens"
+  | "elementaries"
+  | "junior-highs";
 
 export type AdminCommunityStoriesPage = {
   id: string | null;
@@ -667,42 +704,205 @@ export const adminApi = {
     return response!.data;
   },
 
-  async academicLevel(
-    levelKey: AcademicLevelKey,
-  ): Promise<AdminAcademicLevelData> {
-    const response = await apiRequest<{ data: AdminAcademicLevelData }>(
-      `/admin/academic-levels/${levelKey}`,
+  async academicOverviews(): Promise<AcademicOverviewItem[]> {
+    const response = await apiRequest<{ data: AcademicOverviewItem[] }>(
+      "/admin/academic-crud/academics",
     );
-    return response!.data;
+    return response?.data ?? [];
   },
 
-  async updateAcademicLevel(
-    levelKey: AcademicLevelKey,
-    data: AcademicLevelData,
-  ): Promise<AdminAcademicLevelData> {
-    const response = await apiRequest<{ data: AdminAcademicLevelData }>(
-      `/admin/academic-levels/${levelKey}`,
+  async createAcademicOverview(
+    data: AcademicOverviewPayload,
+  ): Promise<AcademicOverviewItem> {
+    const response = await apiRequest<{ data: AcademicOverviewItem }>(
+      "/admin/academic-crud/academics",
       {
-        method: "PUT",
+        method: "POST",
         body: data,
       },
     );
     return response!.data;
   },
 
-  async uploadAcademicLevelAsset(
-    levelKey: AcademicLevelKey,
-    data: { file: File; type: "image" | "document" },
-  ): Promise<AcademicAssetUploadResult> {
-    const body = new FormData();
-    body.append("file", data.file);
-    body.append("type", data.type);
-
-    const response = await apiRequest<{ data: AcademicAssetUploadResult }>(
-      `/admin/academic-levels/${levelKey}/assets`,
-      { method: "POST", body },
+  async updateAcademicOverview(
+    id: string,
+    data: Partial<AcademicOverviewPayload>,
+  ): Promise<AcademicOverviewItem> {
+    const response = await apiRequest<{ data: AcademicOverviewItem }>(
+      `/admin/academic-crud/academics/${id}`,
+      {
+        method: "PATCH",
+        body: data,
+      },
     );
     return response!.data;
+  },
+
+  async deleteAcademicOverview(id: string): Promise<void> {
+    await apiRequest(`/admin/academic-crud/academics/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  async academicMasterLevels(): Promise<AcademicMasterLevel[]> {
+    const response = await apiRequest<{ data: AcademicMasterLevel[] }>(
+      "/admin/academic-crud/academic-levels",
+    );
+    return response?.data ?? [];
+  },
+
+  async createAcademicMasterLevel(
+    data: AcademicMasterLevelPayload,
+  ): Promise<AcademicMasterLevel> {
+    const response = await apiRequest<{ data: AcademicMasterLevel }>(
+      "/admin/academic-crud/academic-levels",
+      {
+        method: "POST",
+        body: data,
+      },
+    );
+    return response!.data;
+  },
+
+  async updateAcademicMasterLevel(
+    id: string,
+    data: Partial<AcademicMasterLevelPayload>,
+  ): Promise<AcademicMasterLevel> {
+    const response = await apiRequest<{ data: AcademicMasterLevel }>(
+      `/admin/academic-crud/academic-levels/${id}`,
+      {
+        method: "PATCH",
+        body: data,
+      },
+    );
+    return response!.data;
+  },
+
+  async deleteAcademicMasterLevel(id: string): Promise<void> {
+    await apiRequest(`/admin/academic-crud/academic-levels/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  async academicFaqs(): Promise<AcademicFaqItem[]> {
+    const response = await apiRequest<{ data: AcademicFaqItem[] }>(
+      "/admin/academic-crud/faqs",
+    );
+    return response?.data ?? [];
+  },
+
+  async createAcademicFaq(data: AcademicFaqPayload): Promise<AcademicFaqItem> {
+    const response = await apiRequest<{ data: AcademicFaqItem }>(
+      "/admin/academic-crud/faqs",
+      {
+        method: "POST",
+        body: data,
+      },
+    );
+    return response!.data;
+  },
+
+  async updateAcademicFaq(
+    id: string,
+    data: Partial<AcademicFaqPayload>,
+  ): Promise<AcademicFaqItem> {
+    const response = await apiRequest<{ data: AcademicFaqItem }>(
+      `/admin/academic-crud/faqs/${id}`,
+      {
+        method: "PATCH",
+        body: data,
+      },
+    );
+    return response!.data;
+  },
+
+  async deleteAcademicFaq(id: string): Promise<void> {
+    await apiRequest(`/admin/academic-crud/faqs/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  async fixedAcademicLevels(
+    resource: FixedAcademicCrudResource,
+  ): Promise<FixedAcademicLevelItem[]> {
+    const response = await apiRequest<{ data: FixedAcademicLevelItem[] }>(
+      `/admin/academic-crud/${resource}`,
+    );
+    return response?.data ?? [];
+  },
+
+  async createFixedAcademicLevel(
+    resource: FixedAcademicCrudResource,
+    data: FixedAcademicLevelPayload,
+  ): Promise<FixedAcademicLevelItem> {
+    const response = await apiRequest<{ data: FixedAcademicLevelItem }>(
+      `/admin/academic-crud/${resource}`,
+      {
+        method: "POST",
+        body: data,
+      },
+    );
+    return response!.data;
+  },
+
+  async updateFixedAcademicLevel(
+    resource: FixedAcademicCrudResource,
+    id: string,
+    data: Partial<FixedAcademicLevelPayload>,
+  ): Promise<FixedAcademicLevelItem> {
+    const response = await apiRequest<{ data: FixedAcademicLevelItem }>(
+      `/admin/academic-crud/${resource}/${id}`,
+      {
+        method: "PATCH",
+        body: data,
+      },
+    );
+    return response!.data;
+  },
+
+  async deleteFixedAcademicLevel(
+    resource: FixedAcademicCrudResource,
+    id: string,
+  ): Promise<void> {
+    await apiRequest(`/admin/academic-crud/${resource}/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  async attachAcademicFaq(
+    resource: FixedAcademicCrudResource,
+    id: string,
+    data: { faqId: string; sortOrder?: number },
+  ): Promise<AcademicLevelFaqLink> {
+    const response = await apiRequest<{ data: AcademicLevelFaqLink }>(
+      `/admin/academic-crud/${resource}/${id}/faqs`,
+      {
+        method: "POST",
+        body: data,
+      },
+    );
+    return response!.data;
+  },
+
+  async reorderAcademicFaqs(
+    resource: FixedAcademicCrudResource,
+    id: string,
+    faqIds: string[],
+  ): Promise<void> {
+    await apiRequest(`/admin/academic-crud/${resource}/${id}/faqs`, {
+      method: "PATCH",
+      body: { faqIds },
+    });
+  },
+
+  async detachAcademicFaq(
+    resource: FixedAcademicCrudResource,
+    id: string,
+    faqId: string,
+  ): Promise<void> {
+    await apiRequest(`/admin/academic-crud/${resource}/${id}/faqs/${faqId}`, {
+      method: "DELETE",
+    });
   },
 
   async communityStories(): Promise<AdminCommunityStoriesData> {

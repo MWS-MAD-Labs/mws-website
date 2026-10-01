@@ -10,7 +10,7 @@ export default function ContactPageEditor() {
   return (
     <AppShell title="Contact">
       <section className="flex-1">
-        <div className="border-b border-black/10 bg-white px-6 py-6">
+        <div className="border-b border-[#E2E8F0] bg-white px-6 py-6">
           <ContentPageHeader
             breadcrumbs={[{ label: 'Content' }, { label: 'Contact' }]}
             title=""
@@ -21,7 +21,7 @@ export default function ContactPageEditor() {
         {error && (
           <div
             role="alert"
-            className="mx-6 mt-4 rounded-lg border border-[#7e1518]/20 bg-[#7e1518]/10 px-4 py-3 text-sm text-[#7e1518]"
+            className="mx-6 mt-4 rounded-lg border border-[#3C50E0]/20 bg-[#3C50E0]/10 px-4 py-3 text-sm text-[#3C50E0]"
           >
             {error}
           </div>
@@ -30,7 +30,7 @@ export default function ContactPageEditor() {
         {notice && (
           <div
             role="status"
-            className="mx-6 mt-4 rounded-lg border border-emerald-600/20 bg-emerald-50 px-4 py-3 text-sm text-emerald-700"
+            className="mx-6 mt-4 rounded-lg border border-[#10B981]/20 bg-[#10B981]/10 px-4 py-3 text-sm text-[#047857]"
           >
             {notice}
           </div>

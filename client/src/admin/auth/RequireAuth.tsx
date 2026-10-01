@@ -9,7 +9,7 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
   if (isSessionLoading) {
     return (
       <AuthScreen>
-        <p className="text-sm text-[#625759]">Checking session...</p>
+        <p className="text-sm text-[#64748B]">Checking session...</p>
       </AuthScreen>
     );
   }

@@ -213,9 +213,11 @@ function SidebarMenuItem({
         <div
           className={[
             'flex h-9 w-full items-center rounded-md',
-            'text-sm font-medium text-white',
+            'text-sm font-medium',
             'transition-colors',
-            isActiveParent ? 'bg-white/15' : 'hover:bg-white/10',
+            isActiveParent
+              ? 'bg-[#333A48] text-white'
+              : 'text-[#AEB7C4] hover:bg-[#333A48] hover:text-white',
           ].join(' ')}
         >
           {/* Parent navigation */}
@@ -260,7 +262,7 @@ function SidebarMenuItem({
               type="button"
               aria-label={isOpen ? `Collapse ${item.label}` : `Expand ${item.label}`}
               onClick={() => toggleMenu(item.label)}
-              className="flex h-full w-8 shrink-0 items-center justify-center rounded-r-md text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+              className="flex h-full w-8 shrink-0 items-center justify-center rounded-r-md text-[#AEB7C4] transition-colors hover:bg-[#333A48] hover:text-white"
             >
               <ChevronDown
                 size={15}
@@ -324,8 +326,8 @@ function SidebarMenuItem({
           level === 0 ? 'font-medium' : '',
           leftPadding,
           item.href === activeMenuHref(location.pathname)
-            ? 'bg-white/15 font-semibold text-white'
-            : 'text-white hover:bg-white/10 hover:text-white',
+            ? 'bg-[#333A48] font-semibold text-white'
+            : 'text-[#AEB7C4] hover:bg-[#333A48] hover:text-white',
         ].join(' ')
       }
     >

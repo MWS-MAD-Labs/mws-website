@@ -1,4 +1,4 @@
-import { Bell, ChevronDown, LogOut, User} from 'lucide-react';
+import { Bell, ChevronDown, LogOut, User } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/admin/auth/useAuth';
 import Sidebar from '@/admin/components/layout/Sidebar';
@@ -22,19 +22,19 @@ export default function AppShell({ children, title }: AppShellProps) {
     .toUpperCase();
 
   return (
-    <div className="flex h-screen overflow-hidden bg-white">
+    <div className="flex h-screen overflow-hidden bg-[#F1F5F9] text-[#1C2434]">
       <Sidebar />
 
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-white/10 bg-[#1F1F1E] px-6">
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-[#E2E8F0] bg-white px-6">
           <div>
-            <h1 className="text-xl font-bold text-white">{title}</h1>
+            <h1 className="text-xl font-bold text-[#1C2434]">{title}</h1>
           </div>
 
           <div className="flex items-center gap-4">
             {/* Notifications */}
             <button
-              className="grid h-9 w-9 place-items-center rounded-full border border-white/10 text-white/60 hover:bg-white/10 hover:text-white"
+              className="grid h-9 w-9 place-items-center rounded-full border border-[#E2E8F0] text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#1C2434]"
               type="button"
               aria-label="Notifications"
             >
@@ -46,7 +46,7 @@ export default function AppShell({ children, title }: AppShellProps) {
               <button
                 type="button"
                 onClick={() => setProfileOpen((current) => !current)}
-                className="flex items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-white/10"
+                className="flex items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-[#F1F5F9]"
                 aria-expanded={profileOpen}
                 aria-haspopup="menu"
               >
@@ -58,14 +58,14 @@ export default function AppShell({ children, title }: AppShellProps) {
                     alt={user?.name ?? 'CMS user'}
                   />
                 ) : (
-                  <div className="grid h-9 w-9 place-items-center rounded-full bg-white/15 text-sm font-semibold text-white">
+                  <div className="grid h-9 w-9 place-items-center rounded-full bg-[#3C50E0] text-sm font-semibold text-white">
                     {initials}
                   </div>
                 )}
 
                 {/* Name */}
                 <div className="hidden sm:block">
-                  <p className="max-w-44 truncate text-sm font-semibold text-white">
+                  <p className="max-w-44 truncate text-sm font-semibold text-[#1C2434]">
                     {user?.name ?? 'CMS User'}
                   </p>
                 </div>
@@ -73,7 +73,7 @@ export default function AppShell({ children, title }: AppShellProps) {
                 <ChevronDown
                   size={16}
                   className={[
-                    'text-white/60 transition-transform',
+                    'text-[#64748B] transition-transform',
                     profileOpen ? 'rotate-180' : '',
                   ].join(' ')}
                 />
@@ -82,11 +82,11 @@ export default function AppShell({ children, title }: AppShellProps) {
               {/* Dropdown */}
               {profileOpen ? (
                 <div
-                  className="absolute right-0 top-full z-50 mt-2 w-64 overflow-hidden border border-white/10 bg-[#151515] shadow-xl"
+                  className="absolute right-0 top-full z-50 mt-2 w-64 overflow-hidden border border-[#E2E8F0] bg-white shadow-xl"
                   role="menu"
                 >
                   {/* User Info */}
-                  <div className="flex items-center gap-3 border-b border-white/10 px-4 py-4">
+                  <div className="flex items-center gap-3 border-b border-[#E2E8F0] px-4 py-4">
                     {photoUrl ? (
                       <img
                         className="h-16 w-16 shrink-0 object-cover"
@@ -94,17 +94,17 @@ export default function AppShell({ children, title }: AppShellProps) {
                         alt={user?.name ?? 'CMS user'}
                       />
                     ) : (
-                      <div className="grid h-16 w-16 shrink-0 place-items-center bg-white/15 text-white">
+                      <div className="grid h-16 w-16 shrink-0 place-items-center bg-[#F1F5F9] text-[#64748B]">
                         <User size={30} strokeWidth={1.5} />
                       </div>
                     )}
 
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-white">
+                      <p className="truncate text-sm font-semibold text-[#1C2434]">
                         {user?.name ?? 'CMS User'}
                       </p>
 
-                      <p className="mt-1 truncate text-xs text-white/50">
+                      <p className="mt-1 truncate text-xs text-[#64748B]">
                         {user?.role.label ?? user?.role.name ?? 'CMS User'}
                       </p>
                     </div>
@@ -118,7 +118,7 @@ export default function AppShell({ children, title }: AppShellProps) {
                       onClick={() => {
                         setProfileOpen(false);
                       }}
-                      className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+                      className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-[#64748B] transition-colors hover:bg-[#F1F5F9] hover:text-[#1C2434]"
                     >
                       <User size={16} strokeWidth={1.8} />
                       <span>Profile</span>
@@ -126,12 +126,12 @@ export default function AppShell({ children, title }: AppShellProps) {
                   </div>
 
                   {/* Logout */}
-                  <div className="border-t border-white/10 py-1.5">
+                  <div className="border-t border-[#E2E8F0] py-1.5">
                     <button
                       type="button"
                       role="menuitem"
                       onClick={() => void logout()}
-                      className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+                      className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-[#EF4444] transition-colors hover:bg-[#EF4444]/5"
                     >
                       <LogOut size={16} strokeWidth={1.8} />
                       <span>Log Out</span>
@@ -143,7 +143,7 @@ export default function AppShell({ children, title }: AppShellProps) {
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto">{children}</div>
+        <div className="flex-1 overflow-y-auto bg-[#F1F5F9]">{children}</div>
       </main>
     </div>
   );

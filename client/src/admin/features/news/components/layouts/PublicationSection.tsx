@@ -97,9 +97,9 @@ export default function PublicationSection({
         </div>
 
         <div>
-          <label className="flex min-h-[42px] cursor-pointer items-center gap-2 text-sm font-medium text-gray-700">
+          <label className="flex min-h-[42px] cursor-pointer items-center gap-2 text-sm font-medium text-[#1C2434]">
             <input
-              className="h-4 w-4 accent-[#7e1518]"
+              className="h-4 w-4 accent-[#3C50E0]"
               type="checkbox"
               checked={form.isFeatured}
               onChange={(event) => onFieldChange('isFeatured', event.target.checked)}
@@ -108,15 +108,15 @@ export default function PublicationSection({
           </label>
         </div>
 
-        <div className="border-t border-gray-200 pt-5">
+        <div className="border-t border-[#E2E8F0] pt-5">
           <div className="mb-3">
-            <h3 className="text-sm font-medium text-gray-700">Tags</h3>
+            <h3 className="text-sm font-medium text-[#1C2434]">Tags</h3>
 
-            <p className="mt-1 text-xs text-gray-500">Select all tags that apply to this story.</p>
+            <p className="mt-1 text-xs text-[#64748B]">Select all tags that apply to this story.</p>
           </div>
 
           {!tags.length ? (
-            <p className="text-sm text-gray-500">No news tags available.</p>
+            <p className="text-sm text-[#64748B]">No news tags available.</p>
           ) : (
             <div className="flex flex-wrap gap-2">
               {tags.map((tag) => {
@@ -131,8 +131,8 @@ export default function PublicationSection({
                     className={[
                       'rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors',
                       isSelected
-                        ? 'border-[#7e1518] bg-[#7e1518] text-white'
-                        : 'border-gray-200 bg-white text-gray-600 hover:border-[#7e1518]/40 hover:text-[#7e1518]',
+                        ? 'border-[#3C50E0] bg-[#3C50E0] text-white'
+                        : 'border-[#E2E8F0] bg-white text-[#64748B] hover:border-[#3C50E0]/40 hover:text-[#3C50E0]',
                     ].join(' ')}
                   >
                     {tag.name}

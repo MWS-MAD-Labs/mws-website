@@ -16,7 +16,7 @@ export default function GalleryAssetToolbar({
   onSortChange,
 }: GalleryAssetToolbarProps) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-200 px-5 py-4">
+    <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#E2E8F0] px-5 py-4">
       <SearchInput
         className="max-w-sm"
         placeholder="Search your assets"

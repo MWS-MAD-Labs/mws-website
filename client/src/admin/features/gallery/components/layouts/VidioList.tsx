@@ -15,7 +15,7 @@ export default function VidioList({
 }: VidioListProps) {
   if (!videos.length) {
     return (
-      <div className="rounded-lg border border-dashed border-gray-200 p-6 text-sm text-gray-500">
+      <div className="rounded-lg border border-dashed border-[#E2E8F0] p-6 text-sm text-[#64748B]">
         No videos in this gallery yet.
       </div>
     );
@@ -29,12 +29,12 @@ export default function VidioList({
         return (
           <div
             className={`group relative overflow-hidden rounded-lg border bg-white ${
-              isSelected ? "border-[#7e1518] ring-2 ring-[#7e1518]/20" : "border-gray-200"
+              isSelected ? "border-[#3C50E0] ring-2 ring-[#3C50E0]/20" : "border-[#E2E8F0]"
             }`}
             key={video.id}
           >
             <button
-              className="grid aspect-[4/3] w-full place-items-center bg-[#241718]"
+              className="grid aspect-[4/3] w-full place-items-center bg-[#1C2434]"
               type="button"
               onClick={() => onOpenPreview(index)}
               aria-label={`Preview ${video.title ?? "gallery video"}`}
@@ -53,7 +53,7 @@ export default function VidioList({
             </button>
             <label className="absolute left-2 top-2 grid h-6 w-6 cursor-pointer place-items-center rounded border border-white/80 bg-white/90 shadow-sm">
               <input
-                className="h-4 w-4 accent-[#7e1518]"
+                className="h-4 w-4 accent-[#3C50E0]"
                 type="checkbox"
                 checked={isSelected}
                 onChange={() => onToggleSelection(video.id)}

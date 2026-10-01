@@ -7,13 +7,13 @@ type PanelProps = {
 
 export default function Panel({ action, children, description, title }: PanelProps) {
   return (
-    <section className="rounded-lg border border-[rgba(36,23,24,0.14)] bg-white shadow-sm">
+    <section className="rounded-lg border border-[#E2E8F0] bg-white shadow-sm">
       {title || action || description ? (
-        <header className="flex flex-wrap items-start justify-between gap-3 border-b border-[rgba(36,23,24,0.1)] px-5 py-4">
+        <header className="flex flex-wrap items-start justify-between gap-3 border-b border-[#E2E8F0] px-5 py-4">
           <div>
-            {title ? <h2 className="text-lg font-semibold">{title}</h2> : null}
+            {title ? <h2 className="text-lg font-semibold text-[#1C2434]">{title}</h2> : null}
             {description ? (
-              <div className="mt-1 text-sm text-[#625759]">{description}</div>
+              <div className="mt-1 text-sm text-[#64748B]">{description}</div>
             ) : null}
           </div>
           {action}

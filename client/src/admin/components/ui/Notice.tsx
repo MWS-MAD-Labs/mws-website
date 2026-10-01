@@ -10,16 +10,16 @@ export type NoticeMessage = {
 const TONES: Record<NoticeTone, { icon: LucideIcon; className: string; role: 'status' | 'alert' }> = {
   success: {
     icon: CheckCircle2,
-    className: 'border-emerald-200 bg-emerald-50 text-emerald-800',
+    className: 'border-[#10B981]/20 bg-[#10B981]/10 text-[#047857]',
     role: 'status',
   },
-  error: { icon: XCircle, className: 'border-red-200 bg-red-50 text-red-800', role: 'alert' },
+  error: { icon: XCircle, className: 'border-[#EF4444]/20 bg-[#EF4444]/10 text-[#B91C1C]', role: 'alert' },
   warning: {
     icon: AlertTriangle,
-    className: 'border-amber-200 bg-amber-50 text-amber-800',
+    className: 'border-[#F59E0B]/20 bg-[#F59E0B]/10 text-[#D97706]',
     role: 'status',
   },
-  info: { icon: Info, className: 'border-gray-200 bg-gray-50 text-gray-700', role: 'status' },
+  info: { icon: Info, className: 'border-[#E2E8F0] bg-[#F1F5F9] text-[#64748B]', role: 'status' },
 };
 
 /**

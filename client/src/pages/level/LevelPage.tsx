@@ -2,6 +2,7 @@ import DOMPurify from 'dompurify';
 import { Download } from 'lucide-react';
 
 import AdmissionsCta from '@/components/layout/AdmissionsCta';
+import FaqAccordion from '@/components/ui/FaqAccordion';
 
 type RichText = string | string[];
 
@@ -26,6 +27,7 @@ type LevelPageProps = {
 
   sections: SectionItem[];
 
+  faq?: Array<{ question: string; answer: string }>;
   closingText?: string;
 };
 
@@ -57,6 +59,7 @@ export default function LevelPage({
   curriculumFile,
   curriculumLabel,
   sections,
+  faq = [],
   closingText,
 }: LevelPageProps) {
   return (
@@ -162,6 +165,19 @@ export default function LevelPage({
           </div>
         </section>
       )}
+
+      {faq.length ? (
+        <section className="subpage-section pt-0">
+          <div className="wrap">
+            <div className="mx-auto max-w-4xl border-t border-black/10 pt-8">
+              <div className="subpage-body mb-8 text-center">
+                <h2>Frequently Asked Questions</h2>
+              </div>
+              <FaqAccordion items={faq} />
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {/* CTA */}
       <AdmissionsCta

@@ -321,7 +321,7 @@ export default function CreateUpdateNews() {
         <NewsEditorMessage message={message} />
 
         {loading ? (
-          <div className="rounded-lg border border-gray-200 bg-white p-8 text-center text-sm text-gray-500">
+          <div className="rounded-lg border border-[#E2E8F0] bg-white p-8 text-center text-sm text-[#64748B]">
             Loading news editor...
           </div>
         ) : (
@@ -360,7 +360,7 @@ export default function CreateUpdateNews() {
               onToggleTag={(tagId) => updateForm('tagIds', toggleTagId(form.tagIds, tagId))}
             />
 
-            <div className="flex items-center justify-between border-t border-gray-200 pt-5">
+            <div className="flex items-center justify-between border-t border-[#E2E8F0] pt-5">
               <Button type="button" variant="ghost" onClick={handleClose}>
                 Back
               </Button>

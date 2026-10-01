@@ -14,7 +14,7 @@ export default function TagsSection({
     <EditorSection title="Tags" description="Select all tags that apply.">
       <div className="p-5">
         {!tags.length ? (
-          <p className="text-sm text-gray-500">No news tags available.</p>
+          <p className="text-sm text-[#64748B]">No news tags available.</p>
         ) : (
           <div className="flex flex-wrap gap-2">
             {tags.map((tag) => {
@@ -24,8 +24,8 @@ export default function TagsSection({
                   aria-pressed={isSelected}
                   className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
                     isSelected
-                      ? 'border-[#7e1518] bg-[#7e1518] text-white'
-                      : 'border-gray-200 bg-white text-gray-600 hover:border-[#7e1518]/40 hover:text-[#7e1518]'
+                      ? 'border-[#3C50E0] bg-[#3C50E0] text-white'
+                      : 'border-[#E2E8F0] bg-white text-[#64748B] hover:border-[#3C50E0]/40 hover:text-[#3C50E0]'
                   }`}
                   key={tag.id}
                   type="button"

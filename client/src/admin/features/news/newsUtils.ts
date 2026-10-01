@@ -32,14 +32,14 @@ export function formatNewsDate(value: string | null) {
 
 export function getNewsStatusClasses(status: NewsStatus) {
   if (status === 'PUBLISHED') {
-    return 'bg-emerald-50 text-emerald-700 ring-emerald-600/20';
+    return 'bg-[#10B981]/10 text-[#047857] ring-[#10B981]/20';
   }
 
   if (status === 'ARCHIVED') {
-    return 'bg-gray-100 text-gray-600 ring-gray-500/20';
+    return 'bg-[#F1F5F9] text-[#64748B] ring-[#64748B]/20';
   }
 
-  return 'bg-amber-50 text-amber-700 ring-amber-600/20';
+  return 'bg-[#F59E0B]/10 text-[#D97706] ring-[#F59E0B]/20';
 }
 
 export function getNewsStatusLabel(status: NewsStatus) {

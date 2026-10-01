@@ -12,7 +12,7 @@ type GalleryDetailHeaderProps = {
 
 export default function GalleryDetailHeader({ gallery, onOpenUpload }: GalleryDetailHeaderProps) {
   return (
-    <div className="border-b border-gray-200 px-5 py-4">
+    <div className="border-b border-[#E2E8F0] px-5 py-4">
       <ContentPageHeader
         breadcrumbs={[
           { label: 'Media' },

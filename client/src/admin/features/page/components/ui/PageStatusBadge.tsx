@@ -7,8 +7,8 @@ type PageStatusBadgeProps = {
 export default function PageStatusBadge({ status }: PageStatusBadgeProps) {
   const statusClass =
     status === "Published"
-      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-      : "border-amber-200 bg-amber-50 text-amber-700";
+      ? "border-[#10B981]/20 bg-[#10B981]/10 text-[#047857]"
+      : "border-[#F59E0B]/20 bg-[#F59E0B]/10 text-[#D97706]";
 
   return (
     <span

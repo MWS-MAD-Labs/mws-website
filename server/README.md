@@ -39,7 +39,7 @@ CMS roles are:
 - `SUPER_ADMIN`: can manage CMS users.
 - `ADMIN`: can manage content.
 
-New admins must be invited or explicitly bootstrapped. MAD Labs membership alone does not create SUPER_ADMIN access.
+Active MAD Labs employees are auto-registered as `ADMIN` on first CMS login. `SUPER_ADMIN` access still requires an explicit bootstrap allowlist, seed, or existing CMS user record.
 
 ## Main APIs
 

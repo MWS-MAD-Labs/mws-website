@@ -91,10 +91,10 @@ export default function UploadVidio({
 
   return (
     <form className="grid gap-4" onSubmit={handleSubmit}>
-      <div className="grid grid-cols-2 rounded border border-[rgba(36,23,24,0.12)] p-1">
+      <div className="grid grid-cols-2 rounded border border-[#E2E8F0] p-1">
         <button
           className={`rounded px-3 py-2 text-sm font-semibold ${
-            mode === "upload" ? "bg-[#241718] text-white" : "text-[#625759]"
+            mode === "upload" ? "bg-[#1C2434] text-white" : "text-[#64748B]"
           }`}
           type="button"
           onClick={() => setMode("upload")}
@@ -103,7 +103,7 @@ export default function UploadVidio({
         </button>
         <button
           className={`rounded px-3 py-2 text-sm font-semibold ${
-            mode === "youtube" ? "bg-[#241718] text-white" : "text-[#625759]"
+            mode === "youtube" ? "bg-[#1C2434] text-white" : "text-[#64748B]"
           }`}
           type="button"
           onClick={() => setMode("youtube")}
@@ -115,7 +115,7 @@ export default function UploadVidio({
       {mode === "upload" ? (
         <>
           <label
-            className="grid min-h-40 cursor-pointer place-items-center rounded-lg border border-dashed border-[rgba(36,23,24,0.28)] bg-[#faf8f3] p-4 text-center"
+            className="grid min-h-40 cursor-pointer place-items-center rounded-lg border border-dashed border-[#E2E8F0] bg-[#F1F5F9] p-4 text-center"
             onDragOver={(event) => event.preventDefault()}
             onDrop={handleDrop}
           >
@@ -128,17 +128,17 @@ export default function UploadVidio({
             {previewUrl ? (
               <video className="max-h-52 rounded" src={previewUrl} controls />
             ) : (
-              <span className="text-sm font-medium text-[#625759]">
+              <span className="text-sm font-medium text-[#64748B]">
                 Choose video
               </span>
             )}
           </label>
-          {file ? <div className="text-sm text-[#625759]">{file.name}</div> : null}
+          {file ? <div className="text-sm text-[#64748B]">{file.name}</div> : null}
         </>
       ) : (
         <Field label="YouTube URL">
           <input
-            className="rounded border border-[rgba(36,23,24,0.18)] px-3 py-2"
+            className="rounded border border-[#E2E8F0] px-3 py-2"
             placeholder="https://www.youtube.com/watch?v=..."
             required={mode === "youtube"}
             value={youtubeUrl}
@@ -149,21 +149,21 @@ export default function UploadVidio({
 
       <Field label="Title">
         <input
-          className="rounded border border-[rgba(36,23,24,0.18)] px-3 py-2"
+          className="rounded border border-[#E2E8F0] px-3 py-2"
           value={title}
           onChange={(event) => setTitle(event.target.value)}
         />
       </Field>
       <Field label="Caption">
         <textarea
-          className="min-h-20 rounded border border-[rgba(36,23,24,0.18)] px-3 py-2"
+          className="min-h-20 rounded border border-[#E2E8F0] px-3 py-2"
           value={caption}
           onChange={(event) => setCaption(event.target.value)}
         />
       </Field>
       <Field label="Sort Order">
         <input
-          className="rounded border border-[rgba(36,23,24,0.18)] px-3 py-2"
+          className="rounded border border-[#E2E8F0] px-3 py-2"
           type="number"
           value={sortOrder}
           onChange={(event) => setSortOrder(event.target.value)}

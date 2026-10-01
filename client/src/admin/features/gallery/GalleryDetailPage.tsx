@@ -55,19 +55,19 @@ export default function GalleryDetailPage() {
   return (
     <AppShell title={gallery?.title ?? 'Gallery Detail'}>
       <section className="space-y-5 p-6">
-        <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+        <div className="overflow-hidden rounded-lg border border-[#E2E8F0] bg-white">
           <GalleryDetailHeader gallery={gallery} onOpenUpload={setOpenUpload} />
 
           {message ? (
-            <div className="border-b border-gray-200 bg-[#faf8f3] px-5 py-3">
+            <div className="border-b border-[#E2E8F0] bg-[#F1F5F9] px-5 py-3">
               <StatusMessage>{message}</StatusMessage>
             </div>
           ) : null}
 
-          {isLoading ? <div className="p-5 text-sm text-gray-500">Loading gallery...</div> : null}
+          {isLoading ? <div className="p-5 text-sm text-[#64748B]">Loading gallery...</div> : null}
 
           {!isLoading && !gallery ? (
-            <div className="p-5 text-sm text-gray-500">Gallery not found.</div>
+            <div className="p-5 text-sm text-[#64748B]">Gallery not found.</div>
           ) : null}
 
           {gallery ? (

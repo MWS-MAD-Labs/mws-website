@@ -37,8 +37,8 @@ function InlineText({
     'w-full border border-transparent bg-transparent',
     'px-1.5 py-1',
     'outline-none transition-colors duration-150',
-    'focus:border-[var(--burgundy)] focus:bg-white',
-    'placeholder:text-[var(--charcoal-muted)]',
+    'focus:border-[#3C50E0] focus:bg-white',
+    'placeholder:text-[#64748B]',
     className,
   ].join(' ');
 
@@ -120,17 +120,17 @@ export default function ContactEditorFields({
   return (
     <div>
       {/* Editor toolbar */}
-      <div className="sticky top-0 z-30 flex min-h-[64px] items-center justify-between border-b border-black/10 bg-white px-6">
+      <div className="sticky top-0 z-30 flex min-h-[64px] items-center justify-between border-b border-[#E2E8F0] bg-white px-6">
         <div>
           <div className="flex items-center gap-3">
-            <h2 className="text-base font-semibold text-[var(--charcoal)]">Contact</h2>
+            <h2 className="text-base font-semibold text-[#1C2434]">Contact</h2>
 
-            <span className="bg-emerald-50 px-2 py-1 text-[10px] font-medium text-emerald-700">
+            <span className="bg-[#10B981]/10 px-2 py-1 text-[10px] font-medium text-[#047857]">
               Published
             </span>
           </div>
 
-          <p className="mt-0.5 text-xs text-[var(--charcoal-muted)]">
+          <p className="mt-0.5 text-xs text-[#64748B]">
             Edit the page content directly below.
           </p>
         </div>
@@ -139,7 +139,7 @@ export default function ContactEditorFields({
           <button
             type="button"
             disabled={isSaving || isLoading}
-            className="inline-flex items-center gap-2 border border-black/10 bg-white px-4 py-2.5 text-sm font-medium text-[var(--charcoal)] transition-colors hover:border-[var(--burgundy)] hover:text-[var(--burgundy)] disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-2 border border-[#E2E8F0] bg-white px-4 py-2.5 text-sm font-medium text-[#1C2434] transition-colors hover:border-[#3C50E0] hover:text-[#3C50E0] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Eye size={15} />
             Preview Live
@@ -149,7 +149,7 @@ export default function ContactEditorFields({
             type="button"
             disabled={isSaving || isLoading}
             onClick={() => void onSave()}
-            className="inline-flex items-center gap-2 border border-black/10 bg-white px-4 py-2.5 text-sm font-medium text-[var(--charcoal)] transition-colors hover:border-[var(--burgundy)] hover:text-[var(--burgundy)] disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-2 border border-[#E2E8F0] bg-white px-4 py-2.5 text-sm font-medium text-[#1C2434] transition-colors hover:border-[#3C50E0] hover:text-[#3C50E0] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Save size={15} />
             {isSaving ? 'Saving...' : 'Save Draft'}
@@ -159,7 +159,7 @@ export default function ContactEditorFields({
             type="button"
             disabled={isSaving || isLoading}
             onClick={() => void onSave()}
-            className="border border-[var(--burgundy)] bg-[var(--burgundy)] px-5 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="border border-[#3C50E0] bg-[#3C50E0] px-5 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Publish
           </button>
@@ -180,7 +180,7 @@ export default function ContactEditorFields({
                     className="block h-[280px] w-full object-cover sm:h-[360px] lg:h-[460px]"
                   />
 
-                  <label className="absolute bottom-4 left-4 inline-flex cursor-pointer items-center gap-2 bg-white px-4 py-2.5 text-sm font-medium text-[var(--charcoal)] shadow-sm transition-colors hover:text-[var(--burgundy)]">
+                  <label className="absolute bottom-4 left-4 inline-flex cursor-pointer items-center gap-2 bg-white px-4 py-2.5 text-sm font-medium text-[#1C2434] shadow-sm transition-colors hover:text-[#3C50E0]">
                     <Upload size={15} />
                     Change Image
                     <input
@@ -204,7 +204,7 @@ export default function ContactEditorFields({
                 <InlineText
                   ariaLabel="Contact page title"
                   value={content.hero.title}
-                  className="text-3xl font-[var(--f-head)] font-semibold leading-tight tracking-tight text-[var(--charcoal)] sm:text-4xl md:text-5xl"
+                  className="text-3xl font-[var(--f-head)] font-semibold leading-tight tracking-tight text-[#1C2434] sm:text-4xl md:text-5xl"
                   onChange={(value) =>
                     updateHero((hero) => ({
                       ...hero,
@@ -232,12 +232,12 @@ export default function ContactEditorFields({
         {/* Contact information */}
         <section className="pb-14 md:pb-20">
           <div className="wrap">
-            <div className="border-t border-black/10">
-              <div className="border-b border-black/10 py-6">
+            <div className="border-t border-[#E2E8F0]">
+              <div className="border-b border-[#E2E8F0] py-6">
                 <InlineText
                   ariaLabel="Contact information title"
                   value={content.directContacts.title}
-                  className="text-2xl font-[var(--f-head)] font-semibold tracking-tight text-[var(--charcoal)] sm:text-3xl"
+                  className="text-2xl font-[var(--f-head)] font-semibold tracking-tight text-[#1C2434] sm:text-3xl"
                   onChange={(value) =>
                     updateDirectContacts((directContacts) => ({
                       ...directContacts,
@@ -247,13 +247,13 @@ export default function ContactEditorFields({
                 />
               </div>
 
-              <div className="grid divide-y divide-black/10 md:grid-cols-2 md:divide-x md:divide-y-0">
+              <div className="grid divide-y divide-[#E2E8F0] md:grid-cols-2 md:divide-x md:divide-y-0">
                 {/* Direct contacts */}
                 <div className="py-7 md:py-9 md:pr-10">
                   <InlineText
                     ariaLabel="Contact heading"
                     value={content.directContacts.heading}
-                    className="text-xl font-[var(--f-head)] font-semibold text-[var(--charcoal)]"
+                    className="text-xl font-[var(--f-head)] font-semibold text-[#1C2434]"
                     onChange={(value) =>
                       updateDirectContacts((directContacts) => ({
                         ...directContacts,
@@ -264,14 +264,14 @@ export default function ContactEditorFields({
 
                   <div className="mt-5 space-y-4 text-sm leading-7">
                     <div>
-                      <span className="mb-1 block text-xs font-medium uppercase tracking-[0.08em] text-[var(--charcoal-muted)]">
+                      <span className="mb-1 block text-xs font-medium uppercase tracking-[0.08em] text-[#64748B]">
                         Phone
                       </span>
 
                       <InlineText
                         ariaLabel="Phone"
                         value={content.directContacts.phone}
-                        className="text-[var(--charcoal)]"
+                        className="text-[#1C2434]"
                         onChange={(value) =>
                           updateDirectContacts((directContacts) => ({
                             ...directContacts,
@@ -282,14 +282,14 @@ export default function ContactEditorFields({
                     </div>
 
                     <div>
-                      <span className="mb-1 block text-xs font-medium uppercase tracking-[0.08em] text-[var(--charcoal-muted)]">
+                      <span className="mb-1 block text-xs font-medium uppercase tracking-[0.08em] text-[#64748B]">
                         WhatsApp
                       </span>
 
                       <InlineText
                         ariaLabel="WhatsApp"
                         value={content.directContacts.whatsapp}
-                        className="text-[var(--charcoal)]"
+                        className="text-[#1C2434]"
                         onChange={(value) =>
                           updateDirectContacts((directContacts) => ({
                             ...directContacts,
@@ -300,14 +300,14 @@ export default function ContactEditorFields({
                     </div>
 
                     <div>
-                      <span className="mb-1 block text-xs font-medium uppercase tracking-[0.08em] text-[var(--charcoal-muted)]">
+                      <span className="mb-1 block text-xs font-medium uppercase tracking-[0.08em] text-[#64748B]">
                         Email
                       </span>
 
                       <InlineText
                         ariaLabel="Email"
                         value={content.directContacts.email}
-                        className="break-words text-[var(--charcoal)]"
+                        className="break-words text-[#1C2434]"
                         onChange={(value) =>
                           updateDirectContacts((directContacts) => ({
                             ...directContacts,
@@ -324,7 +324,7 @@ export default function ContactEditorFields({
                   <InlineText
                     ariaLabel="Address title"
                     value={content.address.title}
-                    className="text-xl font-[var(--f-head)] font-semibold text-[var(--charcoal)]"
+                    className="text-xl font-[var(--f-head)] font-semibold text-[#1C2434]"
                     onChange={(value) =>
                       updateAddress((address) => ({
                         ...address,
@@ -337,7 +337,7 @@ export default function ContactEditorFields({
                     <InlineText
                       ariaLabel="School name"
                       value={content.address.name}
-                      className="font-semibold text-[var(--charcoal)]"
+                      className="font-semibold text-[#1C2434]"
                       onChange={(value) =>
                         updateAddress((address) => ({
                           ...address,
@@ -350,7 +350,7 @@ export default function ContactEditorFields({
                       ariaLabel="Address lines"
                       multiline
                       value={linesToText(content.address.lines)}
-                      className="min-h-28 text-[var(--charcoal-muted)]"
+                      className="min-h-28 text-[#64748B]"
                       onChange={(value) =>
                         updateAddress((address) => ({
                           ...address,
@@ -366,14 +366,14 @@ export default function ContactEditorFields({
         </section>
 
         {/* Office hours */}
-        <section className="border-y border-black/10 bg-[#faf8f5] py-14 sm:py-16 md:py-20">
+        <section className="border-y border-[#E2E8F0] bg-[#faf8f5] py-14 sm:py-16 md:py-20">
           <div className="wrap">
             <div className="grid gap-8 md:grid-cols-[0.7fr_1.3fr] md:gap-12 lg:gap-20">
               <div>
                 <InlineText
                   ariaLabel="Opening hours title"
                   value={content.officeHours.title}
-                  className="text-2xl font-[var(--f-head)] font-semibold tracking-tight text-[var(--charcoal)] sm:text-3xl"
+                  className="text-2xl font-[var(--f-head)] font-semibold tracking-tight text-[#1C2434] sm:text-3xl"
                   onChange={(value) =>
                     updateOfficeHours((officeHours) => ({
                       ...officeHours,
@@ -383,16 +383,16 @@ export default function ContactEditorFields({
                 />
               </div>
 
-              <div className="border-t border-black/10">
+              <div className="border-t border-[#E2E8F0]">
                 {content.officeHours.items.map((item, index) => (
                   <div
                     key={`${item.title}-${index}`}
-                    className="grid gap-2 border-b border-black/10 py-5 sm:grid-cols-[180px_1fr] sm:gap-8"
+                    className="grid gap-2 border-b border-[#E2E8F0] py-5 sm:grid-cols-[180px_1fr] sm:gap-8"
                   >
                     <InlineText
                       ariaLabel={`Opening hours label ${index + 1}`}
                       value={item.title}
-                      className="font-semibold text-[var(--charcoal)]"
+                      className="font-semibold text-[#1C2434]"
                       onChange={(value) =>
                         updateOfficeHours((officeHours) => ({
                           ...officeHours,
@@ -406,7 +406,7 @@ export default function ContactEditorFields({
                     <InlineText
                       ariaLabel={`Opening hours text ${index + 1}`}
                       value={item.text}
-                      className="text-sm leading-6 text-[var(--charcoal-muted)]"
+                      className="text-sm leading-6 text-[#64748B]"
                       onChange={(value) =>
                         updateOfficeHours((officeHours) => ({
                           ...officeHours,
@@ -430,7 +430,7 @@ export default function ContactEditorFields({
               <InlineText
                 ariaLabel="Map title"
                 value={content.map.title}
-                className="text-2xl font-[var(--f-head)] font-semibold tracking-tight text-[var(--charcoal)] sm:text-3xl"
+                className="text-2xl font-[var(--f-head)] font-semibold tracking-tight text-[#1C2434] sm:text-3xl"
                 onChange={(value) =>
                   updateMap((map) => ({
                     ...map,
@@ -442,7 +442,7 @@ export default function ContactEditorFields({
               <InlineText
                 ariaLabel="Map title attribute"
                 value={content.map.titleAttr}
-                className="text-xs text-[var(--charcoal-muted)]"
+                className="text-xs text-[#64748B]"
                 onChange={(value) =>
                   updateMap((map) => ({
                     ...map,
@@ -452,7 +452,7 @@ export default function ContactEditorFields({
               />
             </div>
 
-            <div className="contact-map-wrapper w-full overflow-hidden border border-black/10">
+            <div className="contact-map-wrapper w-full overflow-hidden border border-[#E2E8F0]">
               <iframe
                 src={content.map.src}
                 className="block h-[320px] w-full border-0 sm:h-[400px] md:h-[500px]"
@@ -467,7 +467,7 @@ export default function ContactEditorFields({
               ariaLabel="Map source URL"
               multiline
               value={content.map.src}
-              className="mt-3 min-h-24 text-xs leading-5 text-[var(--charcoal-muted)]"
+              className="mt-3 min-h-24 text-xs leading-5 text-[#64748B]"
               onChange={(value) =>
                 updateMap((map) => ({
                   ...map,

@@ -17,7 +17,7 @@ type CategoryFormErrors = Partial<Record<keyof CategoryFormState, string>>;
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const FIELD_CLASS =
-  'w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none transition focus:border-[#7e1518] focus:ring-2 focus:ring-[#7e1518]/10';
+  'w-full rounded-md border border-[#E2E8F0] px-3 py-2 text-sm outline-none transition focus:border-[#3C50E0] focus:ring-2 focus:ring-[#3C50E0]/10';
 
 export default function NewsCategories({
   categories,
@@ -127,7 +127,7 @@ export default function NewsCategories({
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+    <div className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
       <ListHeader total={categories.length} onCreateClick={openCreateForm} />
 
       <FilterBar search={search} onSearchChange={onSearchChange} />
@@ -177,9 +177,9 @@ export default function NewsCategories({
             />
           </FormField>
 
-          <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-gray-700">
+          <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-[#1C2434]">
             <input
-              className="h-4 w-4 accent-[#7e1518]"
+              className="h-4 w-4 accent-[#3C50E0]"
               disabled={isSaving}
               type="checkbox"
               checked={form.isActive}
@@ -188,7 +188,7 @@ export default function NewsCategories({
             Active
           </label>
 
-          <div className="flex justify-end gap-2 border-t border-gray-100 pt-4">
+          <div className="flex justify-end gap-2 border-t border-[#E2E8F0] pt-4">
             <Button disabled={isSaving} type="button" variant="outline" onClick={closeForm}>
               Cancel
             </Button>
@@ -205,11 +205,11 @@ export default function NewsCategories({
 
 function ListHeader({ total, onCreateClick }: { total: number; onCreateClick: () => void }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-200 px-5 py-4">
+    <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#E2E8F0] px-5 py-4">
       <div>
-        <h2 className="font-semibold text-gray-900">News categories</h2>
+        <h2 className="font-semibold text-[#1C2434]">News categories</h2>
 
-        <p className="mt-0.5 text-sm text-gray-500">
+        <p className="mt-0.5 text-sm text-[#64748B]">
           {total} {total === 1 ? 'category' : 'categories'}
         </p>
       </div>
@@ -230,7 +230,7 @@ function FilterBar({
   onSearchChange: (value: string) => void;
 }) {
   return (
-    <div className="border-b border-gray-200 bg-gray-50/60 px-5 py-4">
+    <div className="border-b border-[#E2E8F0] bg-[#F1F5F9] px-5 py-4">
       <SearchInput
         placeholder="Search category..."
         value={search}
@@ -256,19 +256,19 @@ function CategoryRows({
   onEdit: (category: NewsCategory) => void;
 }) {
   if (isLoading) {
-    return <div className="p-10 text-center text-sm text-gray-500">Loading categories...</div>;
+    return <div className="p-10 text-center text-sm text-[#64748B]">Loading categories...</div>;
   }
 
   if (!categories.length) {
     return (
       <div className="p-10 text-center">
-        <div className="mx-auto grid h-10 w-10 place-items-center rounded-md bg-gray-100 text-gray-400">
+        <div className="mx-auto grid h-10 w-10 place-items-center rounded-md bg-[#F1F5F9] text-[#64748B]">
           <FolderOpen size={18} />
         </div>
 
-        <p className="mt-3 font-medium text-gray-700">No categories found.</p>
+        <p className="mt-3 font-medium text-[#1C2434]">No categories found.</p>
 
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-[#64748B]">
           {search ? 'Try a different search term.' : 'There are no news categories to display.'}
         </p>
       </div>
@@ -278,7 +278,7 @@ function CategoryRows({
   return (
     <>
       {/* Mobile */}
-      <div className="divide-y divide-gray-200 lg:hidden">
+      <div className="divide-y divide-[#E2E8F0] lg:hidden">
         {categories.map((category) => (
           <MobileCategoryRow
             category={category}
@@ -295,7 +295,7 @@ function CategoryRows({
         <table className="w-full min-w-[700px] border-collapse">
           <TableHeader />
 
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-[#E2E8F0]">
             {categories.map((category) => (
               <CategoryTableRow
                 category={category}
@@ -315,24 +315,24 @@ function CategoryRows({
 function TableHeader() {
   return (
     <thead>
-      <tr className="border-y border-[#e8e2e2] bg-[#faf8f7] text-left">
-        <th className="px-5 py-3.5 text-[10px] font-bold uppercase tracking-[0.08em] text-[#6f6262]">
+      <tr className="border-y border-[#E2E8F0] bg-[#F1F5F9] text-left">
+        <th className="px-5 py-3.5 text-[10px] font-bold uppercase tracking-[0.08em] text-[#64748B]">
           Category
         </th>
 
-        <th className="px-5 py-3.5 text-[10px] font-bold uppercase tracking-[0.08em] text-[#6f6262]">
+        <th className="px-5 py-3.5 text-[10px] font-bold uppercase tracking-[0.08em] text-[#64748B]">
           Slug
         </th>
 
-        <th className="px-5 py-3.5 text-center text-[10px] font-bold uppercase tracking-[0.08em] text-[#6f6262]">
+        <th className="px-5 py-3.5 text-center text-[10px] font-bold uppercase tracking-[0.08em] text-[#64748B]">
           Articles
         </th>
 
-        <th className="px-5 py-3.5 text-right text-[10px] font-bold uppercase tracking-[0.08em] text-[#6f6262]">
+        <th className="px-5 py-3.5 text-right text-[10px] font-bold uppercase tracking-[0.08em] text-[#64748B]">
           Status
         </th>
 
-        <th className="px-5 py-3.5 text-right text-[10px] font-bold uppercase tracking-[0.08em] text-[#6f6262]">
+        <th className="px-5 py-3.5 text-right text-[10px] font-bold uppercase tracking-[0.08em] text-[#64748B]">
           Actions
         </th>
       </tr>
@@ -352,26 +352,26 @@ function CategoryTableRow({
   onEdit: () => void;
 }) {
   return (
-    <tr className="transition-colors hover:bg-gray-50/50">
+    <tr className="transition-colors hover:bg-[#F1F5F9]/50">
       {/* Category */}
       <td className="px-5 py-4 align-middle">
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-gray-900">{category.name}</p>
+          <p className="truncate text-sm font-semibold text-[#1C2434]">{category.name}</p>
 
           {category.description ? (
-            <p className="mt-1 line-clamp-1 text-xs text-gray-400">{category.description}</p>
+            <p className="mt-1 line-clamp-1 text-xs text-[#64748B]">{category.description}</p>
           ) : null}
         </div>
       </td>
 
       {/* Slug */}
       <td className="px-5 py-4 align-middle">
-        <span className="text-sm text-gray-500">/{category.slug}</span>
+        <span className="text-sm text-[#64748B]">/{category.slug}</span>
       </td>
 
       {/* Articles */}
       <td className="px-5 py-4 text-center align-middle">
-        <span className="inline-flex min-w-8 items-center justify-center rounded-md bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-600">
+        <span className="inline-flex min-w-8 items-center justify-center rounded-md bg-[#F1F5F9] px-2 py-1 text-xs font-semibold text-[#64748B]">
           {category._count.posts}
         </span>
       </td>
@@ -381,7 +381,7 @@ function CategoryTableRow({
         <span
           className={[
             'inline-flex rounded-md px-2 py-1 text-[11px] font-semibold',
-            category.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-500',
+            category.isActive ? 'bg-[#10B981]/10 text-[#047857]' : 'bg-[#F1F5F9] text-[#64748B]',
           ].join(' ')}
         >
           {category.isActive ? 'Active' : 'Inactive'}
@@ -434,12 +434,12 @@ function MobileCategoryRow({
     <article className="p-4">
       <div className="flex min-w-0 items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="truncate text-sm font-semibold text-gray-900">{category.name}</h3>
+          <h3 className="truncate text-sm font-semibold text-[#1C2434]">{category.name}</h3>
 
-          <p className="mt-1 truncate text-xs text-gray-500">/{category.slug}</p>
+          <p className="mt-1 truncate text-xs text-[#64748B]">/{category.slug}</p>
 
           {category.description ? (
-            <p className="mt-1 line-clamp-2 text-xs text-gray-400">{category.description}</p>
+            <p className="mt-1 line-clamp-2 text-xs text-[#64748B]">{category.description}</p>
           ) : null}
         </div>
 
@@ -447,7 +447,7 @@ function MobileCategoryRow({
           <span
             className={[
               'rounded-md px-2 py-1 text-[11px] font-semibold',
-              category.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-500',
+              category.isActive ? 'bg-[#10B981]/10 text-[#047857]' : 'bg-[#F1F5F9] text-[#64748B]',
             ].join(' ')}
           >
             {category.isActive ? 'Active' : 'Inactive'}
@@ -478,10 +478,10 @@ function MobileCategoryRow({
         </div>
       </div>
 
-      <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-3">
-        <span className="text-xs text-gray-400">Articles</span>
+      <div className="mt-3 flex items-center justify-between border-t border-[#E2E8F0] pt-3">
+        <span className="text-xs text-[#64748B]">Articles</span>
 
-        <span className="text-xs font-semibold text-gray-600">{category._count.posts}</span>
+        <span className="text-xs font-semibold text-[#64748B]">{category._count.posts}</span>
       </div>
     </article>
   );
@@ -498,11 +498,11 @@ function FormField({
 }) {
   return (
     <label className="block">
-      <span className="text-sm font-semibold text-gray-700">{label}</span>
+      <span className="text-sm font-semibold text-[#1C2434]">{label}</span>
 
       <div className="mt-1">{children}</div>
 
-      {error ? <p className="mt-1 text-xs text-red-600">{error}</p> : null}
+      {error ? <p className="mt-1 text-xs text-[#EF4444]">{error}</p> : null}
     </label>
   );
 }

@@ -11,7 +11,7 @@ export default function PlaceholderPage({ title }: PlaceholderPageProps) {
       <section className="flex-1 space-y-5 p-6">
         <ContentPageHeader breadcrumbs={[{ label: 'Admin' }, { label: title }]} title={title} />
 
-        <div className="rounded-lg border border-[rgba(36,23,24,0.14)] bg-white p-6 shadow-sm">
+        <div className="rounded-lg border border-[#E2E8F0] bg-white p-6 shadow-sm">
           <div>Ini Halaman {title}</div>
         </div>
       </section>

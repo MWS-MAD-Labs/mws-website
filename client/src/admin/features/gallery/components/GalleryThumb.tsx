@@ -9,7 +9,7 @@ export default function GalleryThumb({ gallery }: GalleryThumbProps) {
 
   if (!firstImage) {
     return (
-      <div className="grid h-14 w-20 shrink-0 place-items-center rounded-md bg-gray-100 text-xs text-gray-400">
+      <div className="grid h-14 w-20 shrink-0 place-items-center rounded-md bg-[#F1F5F9] text-xs text-[#64748B]">
         No Image
       </div>
     );

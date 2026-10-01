@@ -29,7 +29,7 @@ export default function GoogleCallbackPage() {
 
   return (
     <AuthScreen>
-      <p className="text-sm text-[#625759]">Completing Google sign-in...</p>
+      <p className="text-sm text-[#64748B]">Completing Google sign-in...</p>
     </AuthScreen>
   );
 }

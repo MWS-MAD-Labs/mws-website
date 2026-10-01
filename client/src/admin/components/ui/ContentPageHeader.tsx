@@ -24,9 +24,9 @@ export default function ContentPageHeader({
       <div className="min-w-0">
         <ContentBreadcrumb items={breadcrumbs} />
 
-        <h1 className="mt-1 text-xl font-semibold text-gray-900">{title}</h1>
+        <h1 className="mt-1 text-xl font-semibold text-[#1C2434]">{title}</h1>
 
-        {description ? <p className="mt-1 text-sm text-gray-500">{description}</p> : null}
+        {description ? <p className="mt-1 text-sm text-[#64748B]">{description}</p> : null}
       </div>
 
       {action ? <div className="shrink-0">{action}</div> : null}

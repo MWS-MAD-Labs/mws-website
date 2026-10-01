@@ -31,22 +31,22 @@ export default function ArticlePhotosSection({
     >
       <div className="p-5">
         {photos.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-5 py-8 text-center">
-            <p className="text-sm font-medium text-gray-700">No article photos added</p>
+          <div className="rounded-lg border border-dashed border-[#E2E8F0] bg-[#F1F5F9] px-5 py-8 text-center">
+            <p className="text-sm font-medium text-[#1C2434]">No article photos added</p>
 
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-[#64748B]">
               Add photos that are different from the cover image.
             </p>
           </div>
         ) : (
           <div className="space-y-4">
             {photos.map((photo, index) => (
-              <div key={photo.id} className="rounded-lg border border-gray-200 bg-white p-4">
+              <div key={photo.id} className="rounded-lg border border-[#E2E8F0] bg-white p-4">
                 <div className="mb-4 flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">Photo {index + 1}</p>
+                    <p className="text-sm font-semibold text-[#1C2434]">Photo {index + 1}</p>
 
-                    <p className="mt-0.5 text-xs text-gray-500">Additional article image</p>
+                    <p className="mt-0.5 text-xs text-[#64748B]">Additional article image</p>
                   </div>
 
                   <Button type="button" variant="ghost" onClick={() => onRemovePhoto(photo.id)}>
@@ -56,7 +56,7 @@ export default function ArticlePhotosSection({
                 </div>
 
                 <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)]">
-                  <div className="overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+                  <div className="overflow-hidden rounded-lg border border-[#E2E8F0] bg-[#F1F5F9]">
                     <div className="aspect-[4/3]">
                       <img
                         src={photo.previewUrl}
@@ -69,7 +69,7 @@ export default function ArticlePhotosSection({
                   <div className="space-y-4">
                     <div>
                       <label
-                        className="mb-1.5 block text-sm font-medium text-gray-700"
+                        className="mb-1.5 block text-sm font-medium text-[#1C2434]"
                         htmlFor={`${photo.id}-alt`}
                       >
                         Alternative text
@@ -86,7 +86,7 @@ export default function ArticlePhotosSection({
 
                     <div>
                       <label
-                        className="mb-1.5 block text-sm font-medium text-gray-700"
+                        className="mb-1.5 block text-sm font-medium text-[#1C2434]"
                         htmlFor={`${photo.id}-caption`}
                       >
                         Caption

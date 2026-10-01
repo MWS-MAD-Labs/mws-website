@@ -25,11 +25,11 @@ export default function CoverImageSection({
     localPreviewUrl || (form.coverImage ? adminApi.publicAssetUrl(form.coverImage) : '');
 
   return (
-    <section className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-      <div className="border-b border-gray-200 px-5 py-4">
-        <h2 className="text-sm font-semibold text-gray-900">Cover Image</h2>
+    <section className="overflow-hidden rounded-lg border border-[#E2E8F0] bg-white">
+      <div className="border-b border-[#E2E8F0] px-5 py-4">
+        <h2 className="text-sm font-semibold text-[#1C2434]">Cover Image</h2>
 
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs text-[#64748B]">
           Main image displayed at the top of the news article.
         </p>
       </div>
@@ -40,7 +40,7 @@ export default function CoverImageSection({
             <button
               type="button"
               onClick={onOpenAssetPicker}
-              className="group relative block aspect-[16/7] w-full overflow-hidden rounded-lg border border-gray-200 bg-gray-50 text-left transition hover:border-[#7e1518] focus:outline-none focus:ring-2 focus:ring-[#7e1518]/20"
+              className="group relative block aspect-[16/7] w-full overflow-hidden rounded-lg border border-[#E2E8F0] bg-[#F1F5F9] text-left transition hover:border-[#3C50E0] focus:outline-none focus:ring-2 focus:ring-[#3C50E0]/20"
             >
               {previewUrl ? (
                 <>
@@ -51,7 +51,7 @@ export default function CoverImageSection({
                   />
 
                   <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition group-hover:bg-black/25">
-                    <span className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-gray-900 opacity-0 shadow-sm transition group-hover:opacity-100">
+                    <span className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-[#1C2434] opacity-0 shadow-sm transition group-hover:opacity-100">
                       Change image
                     </span>
                   </div>
@@ -65,9 +65,9 @@ export default function CoverImageSection({
               ) : (
                 <div className="flex h-full items-center justify-center text-center">
                   <div>
-                    <p className="text-sm font-semibold text-gray-700">Choose cover image</p>
+                    <p className="text-sm font-semibold text-[#1C2434]">Choose cover image</p>
 
-                    <p className="mt-1 text-xs text-gray-500">
+                    <p className="mt-1 text-xs text-[#64748B]">
                       Select from Gallery or upload from your computer
                     </p>
                   </div>
@@ -91,10 +91,10 @@ export default function CoverImageSection({
           <div className="flex flex-col justify-center">
             <label
               htmlFor="news-cover-image-alt"
-              className="mb-1.5 block text-sm font-medium text-gray-700"
+              className="mb-1.5 block text-sm font-medium text-[#1C2434]"
             >
               Alternative text
-              <span className="ml-1 font-normal text-gray-400">(optional)</span>
+              <span className="ml-1 font-normal text-[#64748B]">(optional)</span>
             </label>
 
             <input
@@ -103,10 +103,10 @@ export default function CoverImageSection({
               value={form.coverImageAlt}
               onChange={(event) => onFieldChange('coverImageAlt', event.target.value)}
               placeholder="Describe the cover image"
-              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition-colors placeholder:text-gray-400 focus:border-[#7e1518] focus:ring-2 focus:ring-[#7e1518]/10"
+              className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2.5 text-sm text-[#1C2434] outline-none transition-colors placeholder:text-[#64748B] focus:border-[#3C50E0] focus:ring-2 focus:ring-[#3C50E0]/10"
             />
 
-            <p className="mt-2 text-xs leading-5 text-gray-400">
+            <p className="mt-2 text-xs leading-5 text-[#64748B]">
               Used to describe the image for accessibility.
             </p>
           </div>

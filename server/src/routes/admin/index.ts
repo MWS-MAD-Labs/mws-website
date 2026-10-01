@@ -20,6 +20,7 @@ import { adminHeroSlideRoute } from "./hero-slide-route";
 import { adminNewsRoute } from "./news-route";
 import { adminOurSchoolRoute } from "./our-school-route";
 import { adminAcademicLevelRoute } from "./academic-level-route";
+import { adminAcademicCrudRoute } from "./academic-crud-route";
 
 export const adminRoute = new Hono<{ Variables: SessionVariables }>();
 
@@ -93,4 +94,5 @@ adminRoute.route("/admissions", adminAdmissionRoute);
 adminRoute.route("/community-stories", adminCommunityStoriesRoute);
 adminRoute.route("/our-school", adminOurSchoolRoute);
 adminRoute.route("/academic-levels", adminAcademicLevelRoute);
+adminRoute.route("/academic-crud", adminAcademicCrudRoute);
 adminRoute.route("/news", adminNewsRoute);

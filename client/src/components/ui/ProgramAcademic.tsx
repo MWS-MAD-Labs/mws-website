@@ -37,7 +37,7 @@ export default function ProgramAcademic({ programs = defaultPrograms }: ProgramA
     <section
       id="academic-programs"
       aria-labelledby="classes-title"
-      className="w-full bg-white px-5 py-[64px] sm:px-6 sm:py-[76px] md:px-7 md:py-[100px]"
+      className="aos-skip-hero w-full bg-white px-5 py-[64px] sm:px-6 sm:py-[76px] md:px-7 md:py-[100px]"
     >
       <div className="relative isolate mx-auto w-full max-w-[1600px] overflow-hidden py-6 sm:py-8 md:px-10 md:py-[60px]">
         <DecorativeDoodles />

@@ -7,15 +7,15 @@ export default function Hero({
   updateContent,
 }: ContactEditorSectionProps) {
   return (
-    <section className="overflow-hidden rounded-lg border border-[rgba(36,23,24,0.14)] bg-white shadow-sm">
-      <div className="flex items-start justify-between border-b border-[rgba(36,23,24,0.10)] px-5 py-4">
+    <section className="overflow-hidden rounded-lg border border-[#E2E8F0] bg-white shadow-sm">
+      <div className="flex items-start justify-between border-b border-[#E2E8F0] px-5 py-4">
         <div className="flex items-start gap-3">
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[#f3f0ef] text-xs font-bold text-[#625759]">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[#f3f0ef] text-xs font-bold text-[#64748B]">
             01
           </div>
 
           <div>
-            <h2 className="text-base font-semibold text-[#241718]">Introduction</h2>
+            <h2 className="text-base font-semibold text-[#1C2434]">Introduction</h2>
             <p className="mt-0.5 text-xs text-[#817678]">
               Manage the title, introduction, and image shown at the top of the Contact page.
             </p>
@@ -77,11 +77,11 @@ export default function Hero({
         </div>
 
         <div className="min-w-0">
-          <label className="block text-sm font-semibold text-[#241718]">
+          <label className="block text-sm font-semibold text-[#1C2434]">
             Image Preview
           </label>
 
-          <div className="group relative mt-2 overflow-hidden rounded-md border border-[rgba(36,23,24,0.14)] bg-[#f5f3f2]">
+          <div className="group relative mt-2 overflow-hidden rounded-md border border-[#E2E8F0] bg-[#F1F5F9]">
             {content.hero.image ? (
               <>
                 <img
@@ -111,7 +111,7 @@ export default function Hero({
           {content.hero.image && (
             <button
               type="button"
-              className="mt-2 inline-flex h-9 items-center gap-2 rounded-md border border-[rgba(36,23,24,0.16)] bg-white px-3 text-xs font-semibold text-[#625759] transition-colors hover:border-[#7e1518]/30 hover:text-[#7e1518]"
+              className="mt-2 inline-flex h-9 items-center gap-2 rounded-md border border-[#E2E8F0] bg-white px-3 text-xs font-semibold text-[#64748B] transition-colors hover:border-[#3C50E0]/30 hover:text-[#3C50E0]"
               onClick={() =>
                 updateContent((current) => ({
                   ...current,

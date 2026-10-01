@@ -60,19 +60,19 @@ export default function ArticleSection({
           />
         </Field>
 
-        <div className="border-t border-gray-200 pt-5">
+        <div className="border-t border-[#E2E8F0] pt-5">
           <div className="mb-4">
-            <h3 className="text-sm font-semibold text-gray-900">Search & URL</h3>
+            <h3 className="text-sm font-semibold text-[#1C2434]">Search & URL</h3>
 
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-[#64748B]">
               Optional settings for the article URL and search engines.
             </p>
           </div>
 
           <div className="space-y-5">
             <Field label="Article URL">
-              <div className="flex overflow-hidden rounded-lg border border-gray-200 bg-white focus-within:border-[#7e1518] focus-within:ring-2 focus-within:ring-[#7e1518]/10">
-                <span className="grid place-items-center border-r border-gray-200 bg-gray-50 px-3 text-sm text-gray-500">
+              <div className="flex overflow-hidden rounded-lg border border-[#E2E8F0] bg-white focus-within:border-[#3C50E0] focus-within:ring-2 focus-within:ring-[#3C50E0]/10">
+                <span className="grid place-items-center border-r border-[#E2E8F0] bg-[#F1F5F9] px-3 text-sm text-[#64748B]">
                   /news/
                 </span>
 

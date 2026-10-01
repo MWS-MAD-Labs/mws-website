@@ -20,7 +20,7 @@ export default function GalleryList({
 }: GalleryListProps) {
   if (isLoading) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-6 text-sm text-gray-500">
+      <div className="rounded-lg border border-[#E2E8F0] bg-white p-6 text-sm text-[#64748B]">
         Loading galleries...
       </div>
     );
@@ -28,22 +28,22 @@ export default function GalleryList({
 
   if (!galleries.length) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-6 text-sm text-gray-500">
+      <div className="rounded-lg border border-[#E2E8F0] bg-white p-6 text-sm text-[#64748B]">
         No galleries yet.
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+    <div className="overflow-hidden rounded-lg border border-[#E2E8F0] bg-white">
       {message ? (
-        <div className="border-b border-gray-200 bg-[#faf8f3] px-4 py-3 text-sm text-[#7b3f2a]">
+        <div className="border-b border-[#E2E8F0] bg-[#F1F5F9] px-4 py-3 text-sm text-[#D97706]">
           {message}
         </div>
       ) : null}
 
       {/* Table Header */}
-      <div className="hidden grid-cols-[minmax(0,1fr)_140px_140px_140px] items-center gap-4 border-b border-gray-200 bg-gray-50 px-4 py-3 text-xs font-medium text-gray-500 md:grid">
+      <div className="hidden grid-cols-[minmax(0,1fr)_140px_140px_140px] items-center gap-4 border-b border-[#E2E8F0] bg-[#F1F5F9] px-4 py-3 text-xs font-medium text-[#64748B] md:grid">
         <span>Gallery</span>
         <span>Created At</span>
         <span>Updated At</span>
@@ -51,7 +51,7 @@ export default function GalleryList({
       </div>
 
       {/* Rows */}
-      <div className="divide-y divide-gray-200">
+      <div className="divide-y divide-[#E2E8F0]">
         {galleries.map((gallery) => (
           <div
             key={gallery.id}
@@ -62,15 +62,15 @@ export default function GalleryList({
               <GalleryThumb gallery={gallery} />
 
               <div className="min-w-0">
-                <h2 className="truncate text-sm font-semibold text-gray-900">
+                <h2 className="truncate text-sm font-semibold text-[#1C2434]">
                   {gallery.title}
                 </h2>
 
-                <p className="truncate text-sm text-gray-500">
+                <p className="truncate text-sm text-[#64748B]">
                   {gallery.description || "-"}
                 </p>
 
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-[#64748B]">
                   {gallery.images.length} Images /{" "}
                   {gallery.videos.length} Videos
                 </p>
@@ -78,12 +78,12 @@ export default function GalleryList({
             </div>
 
             {/* Created */}
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-[#64748B]">
               {new Date(gallery.createdAt).toLocaleDateString()}
             </div>
 
             {/* Updated */}
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-[#64748B]">
               {new Date(gallery.updatedAt).toLocaleDateString()}
             </div>
 

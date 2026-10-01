@@ -1,6 +1,9 @@
 import {
+  Baby,
   BookOpen,
   Files,
+  GalleryVerticalEndIcon,
+  GraduationCap,
   Images,
   LayoutDashboard,
   LucideHome,
@@ -9,6 +12,7 @@ import {
   School,
   Tags,
   Users,
+  Video,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -88,28 +92,42 @@ export const menuSections: MenuSection[] = [
       },
       {
         label: 'Academic',
-        Icon: School,
+        Icon: GraduationCap,
         enabled: true,
         requiredPermission: 'content:manage',
         children: [
           {
+            label: 'Overview',
+            href: '/admin/academic',
+            Icon: LayoutDashboard,
+            enabled: true,
+            requiredPermission: 'content:manage',
+          },
+          {
+            label: 'FAQ',
+            href: '/admin/academic/faqs',
+            Icon: MessageSquare,
+            enabled: true,
+            requiredPermission: 'content:manage',
+          },
+          {
             label: 'Kindergarten',
             href: '/admin/academic/kindergarten',
-            Icon: School,
+            Icon: Baby,
             enabled: true,
             requiredPermission: 'content:manage',
           },
           {
             label: 'Elementary',
             href: '/admin/academic/elementary',
-            Icon: School,
+            Icon: BookOpen,
             enabled: true,
             requiredPermission: 'content:manage',
           },
           {
             label: 'High School',
             href: '/admin/academic/high-school',
-            Icon: BookOpen,
+            Icon: GraduationCap,
             enabled: true,
             requiredPermission: 'content:manage',
           },
@@ -145,11 +163,33 @@ export const menuSections: MenuSection[] = [
         ],
       },
       {
-        label: 'Gallery Library',
-        href: '/admin/gallery',
-        Icon: Images,
+        label: 'Gallery',
         enabled: true,
+        Icon: GalleryVerticalEndIcon,
         requiredPermission: 'content:manage',
+        children: [
+          {
+            label: 'Gallery Library',
+            href: '/admin/gallery',
+            Icon: GalleryVerticalEndIcon,
+            enabled: true,
+            requiredPermission: 'content:manage',
+          },
+          {
+            label: 'Gambar Galeri',
+            href: '/admin/gallery/Gambar',
+            Icon: Images,
+            enabled: true,
+            requiredPermission: 'content:manage',
+          },
+          {
+            label: 'Video Galeri',
+            href: '/admin/gallery/videos',
+            Icon: Video,
+            enabled: true,
+            requiredPermission: 'content:manage',
+          },
+        ],
       },
       {
         label: 'CMS Users',

@@ -40,7 +40,7 @@ export type UpdateNewsForm = <Key extends keyof NewsForm>(key: Key, value: NewsF
 export const NEWS_EDITOR_FORM_ID = 'news-editor-form';
 
 export const NEWS_INPUT_CLASS =
-  'w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition-colors placeholder:text-gray-400 focus:border-[#7e1518] focus:ring-2 focus:ring-[#7e1518]/10';
+  'w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2.5 text-sm text-[#1C2434] outline-none transition-colors placeholder:text-[#64748B] focus:border-[#3C50E0] focus:ring-2 focus:ring-[#3C50E0]/10';
 
 export function createEmptyNewsForm(): NewsForm {
   return {

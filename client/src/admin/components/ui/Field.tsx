@@ -17,7 +17,7 @@ export default function Field({ children, label, hint, as = 'label' }: FieldProp
     <Wrapper className="grid gap-1 text-sm font-medium">
       <span>{label}</span>
       {children}
-      {hint ? <span className="text-xs font-normal text-gray-500">{hint}</span> : null}
+      {hint ? <span className="text-xs font-normal text-[#64748B]">{hint}</span> : null}
     </Wrapper>
   );
 }

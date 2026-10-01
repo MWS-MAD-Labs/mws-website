@@ -42,8 +42,8 @@ function SectionPreview({ section }: { section: PageSection }) {
           >
             <div className="h-9 bg-[#d9c49a]" />
             <div className="space-y-1.5 p-2">
-              <span className="block h-1.5 rounded-full bg-[#7e1518]/50" />
-              <span className="block h-1.5 w-2/3 rounded-full bg-[#241718]/18" />
+              <span className="block h-1.5 rounded-full bg-[#3C50E0]/50" />
+              <span className="block h-1.5 w-2/3 rounded-full bg-[#1C2434]/18" />
             </div>
           </div>
         ))}
@@ -54,10 +54,10 @@ function SectionPreview({ section }: { section: PageSection }) {
   if (section.preview === "form") {
     return (
       <div className="grid h-full gap-2 p-4">
-        <span className="h-3 rounded-md bg-[#241718]/16" />
-        <span className="h-8 rounded-md border border-[#241718]/14 bg-white" />
-        <span className="h-8 rounded-md border border-[#241718]/14 bg-white" />
-        <span className="h-8 rounded-md bg-[#7e1518]" />
+        <span className="h-3 rounded-md bg-[#1C2434]/16" />
+        <span className="h-8 rounded-md border border-[#1C2434]/14 bg-white" />
+        <span className="h-8 rounded-md border border-[#1C2434]/14 bg-white" />
+        <span className="h-8 rounded-md bg-[#3C50E0]" />
       </div>
     );
   }
@@ -70,9 +70,9 @@ function SectionPreview({ section }: { section: PageSection }) {
             key={index}
             className={`rounded-sm ${
               [6, 12, 18].includes(index)
-                ? "bg-[#7e1518]"
+                ? "bg-[#3C50E0]"
                 : "bg-white"
-            } border border-[#241718]/10`}
+            } border border-[#1C2434]/10`}
           />
         ))}
       </div>
@@ -84,10 +84,10 @@ function SectionPreview({ section }: { section: PageSection }) {
       <div className="grid h-full grid-cols-[72px_1fr] gap-3 p-4">
         <span className="rounded-md bg-[#d9c49a]" />
         <div className="space-y-2">
-          <span className="block h-2 rounded-full bg-[#7e1518]/60" />
-          <span className="block h-2 rounded-full bg-[#241718]/18" />
-          <span className="block h-2 rounded-full bg-[#241718]/18" />
-          <span className="block h-2 w-2/3 rounded-full bg-[#241718]/14" />
+          <span className="block h-2 rounded-full bg-[#3C50E0]/60" />
+          <span className="block h-2 rounded-full bg-[#1C2434]/18" />
+          <span className="block h-2 rounded-full bg-[#1C2434]/18" />
+          <span className="block h-2 w-2/3 rounded-full bg-[#1C2434]/14" />
         </div>
       </div>
     );
@@ -102,8 +102,8 @@ function SectionPreview({ section }: { section: PageSection }) {
               <span
                 key={`${row}-${cell}`}
                 className={`rounded-sm ${
-                  row === 0 ? "bg-[#7e1518]/70" : "bg-white"
-                } border border-[#241718]/10`}
+                  row === 0 ? "bg-[#3C50E0]/70" : "bg-white"
+                } border border-[#1C2434]/10`}
               />
             ))}
           </div>
@@ -117,7 +117,7 @@ function SectionPreview({ section }: { section: PageSection }) {
       <div className="relative h-full bg-[#e6dcc8] p-4">
         <span className="absolute left-8 top-5 h-20 w-px rotate-45 bg-white/80" />
         <span className="absolute right-12 top-0 h-28 w-px -rotate-45 bg-white/80" />
-        <span className="absolute bottom-7 left-1/2 flex h-10 w-10 -translate-x-1/2 items-center justify-center rounded-full bg-[#7e1518] text-white">
+        <span className="absolute bottom-7 left-1/2 flex h-10 w-10 -translate-x-1/2 items-center justify-center rounded-full bg-[#3C50E0] text-white">
           <MapPinned size={18} />
         </span>
       </div>
@@ -140,7 +140,7 @@ function SectionPreview({ section }: { section: PageSection }) {
   if (section.preview === "chat") {
     return (
       <div className="flex h-full items-end justify-end p-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#7e1518] text-white shadow-sm">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#3C50E0] text-white shadow-sm">
           <Bot size={22} />
         </div>
       </div>
@@ -150,9 +150,9 @@ function SectionPreview({ section }: { section: PageSection }) {
   return (
     <div className="flex h-full items-center justify-center p-5">
       <div className="w-full max-w-[190px] space-y-2">
-        <span className="block h-2 rounded-full bg-[#7e1518]/60" />
-        <span className="block h-2 rounded-full bg-[#241718]/20" />
-        <span className="block h-2 w-3/4 rounded-full bg-[#241718]/14" />
+        <span className="block h-2 rounded-full bg-[#3C50E0]/60" />
+        <span className="block h-2 rounded-full bg-[#1C2434]/20" />
+        <span className="block h-2 w-3/4 rounded-full bg-[#1C2434]/14" />
       </div>
     </div>
   );
@@ -181,8 +181,8 @@ export default function SectionBlockCard({
       className={[
         "group rounded-lg border bg-white shadow-sm transition-[border-color,box-shadow,transform]",
         selected
-          ? "border-[#7e1518] shadow-[0_14px_34px_rgba(126,21,24,0.16)]"
-          : "border-[rgba(36,23,24,0.14)] hover:-translate-y-0.5 hover:border-[#7e1518]/45 hover:shadow-[0_14px_30px_rgba(36,23,24,0.1)]",
+          ? "border-[#3C50E0] shadow-[0_14px_34px_rgba(60,80,224,0.16)]"
+          : "border-[#E2E8F0] hover:-translate-y-0.5 hover:border-[#3C50E0]/45 hover:shadow-[0_14px_30px_rgba(28,36,52,0.08)]",
       ].join(" ")}
     >
       <button
@@ -191,7 +191,7 @@ export default function SectionBlockCard({
         className="block w-full cursor-pointer text-left"
         aria-pressed={selected}
       >
-        <div className="h-36 overflow-hidden rounded-t-lg bg-[#faf8f3]">
+        <div className="h-36 overflow-hidden rounded-t-lg bg-[#F1F5F9]">
           <SectionPreview section={section} />
         </div>
       </button>
@@ -199,14 +199,14 @@ export default function SectionBlockCard({
       <div className="p-4">
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase text-[#7e1518]">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase text-[#3C50E0]">
               <SectionIcon preview={section.preview} />
               <span>{section.type}</span>
             </div>
-            <h2 className="mt-1 text-base font-semibold text-[#241718]">
+            <h2 className="mt-1 text-base font-semibold text-[#1C2434]">
               {section.name}
             </h2>
-            <p className="mt-1 text-sm text-[#625759]">{section.summary}</p>
+            <p className="mt-1 text-sm text-[#64748B]">{section.summary}</p>
           </div>
         </div>
 
@@ -228,7 +228,7 @@ export function AddSectionCard() {
   return (
     <button
       type="button"
-      className="flex min-h-[252px] cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-[rgba(36,23,24,0.28)] bg-white p-6 text-[#625759] transition-colors hover:border-[#7e1518] hover:bg-[#7e1518]/5 hover:text-[#7e1518]"
+      className="flex min-h-[252px] cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-[#E2E8F0] bg-white p-6 text-[#64748B] transition-colors hover:border-[#3C50E0] hover:bg-[#3C50E0]/5 hover:text-[#3C50E0]"
     >
       <span className="flex h-11 w-11 items-center justify-center rounded-full border border-current">
         <Plus size={20} />

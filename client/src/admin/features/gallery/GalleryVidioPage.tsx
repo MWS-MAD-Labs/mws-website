@@ -1,3 +1,3 @@
-import GalleryListPage from "./GalleryListPage";
+import { GalleryVideosPage } from './GalleryMediaLibraryPage';
 
-export default GalleryListPage;
+export default GalleryVideosPage;

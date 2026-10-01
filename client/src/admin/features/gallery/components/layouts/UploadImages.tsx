@@ -66,7 +66,7 @@ export default function UploadImages({
   return (
     <form className="grid gap-4" onSubmit={handleSubmit}>
       <label
-        className="grid min-h-40 cursor-pointer place-items-center rounded-lg border border-dashed border-[rgba(36,23,24,0.28)] bg-[#faf8f3] p-4 text-center"
+        className="grid min-h-40 cursor-pointer place-items-center rounded-lg border border-dashed border-[#E2E8F0] bg-[#F1F5F9] p-4 text-center"
         onDragOver={(event) => event.preventDefault()}
         onDrop={handleDrop}
       >
@@ -83,29 +83,29 @@ export default function UploadImages({
             alt={file?.name ?? "Selected image preview"}
           />
         ) : (
-          <span className="text-sm font-medium text-[#625759]">Choose image</span>
+          <span className="text-sm font-medium text-[#64748B]">Choose image</span>
         )}
       </label>
 
-      {file ? <div className="text-sm text-[#625759]">{file.name}</div> : null}
+      {file ? <div className="text-sm text-[#64748B]">{file.name}</div> : null}
 
       <Field label="Title">
         <input
-          className="rounded border border-[rgba(36,23,24,0.18)] px-3 py-2"
+          className="rounded border border-[#E2E8F0] px-3 py-2"
           value={title}
           onChange={(event) => setTitle(event.target.value)}
         />
       </Field>
       <Field label="Caption">
         <textarea
-          className="min-h-20 rounded border border-[rgba(36,23,24,0.18)] px-3 py-2"
+          className="min-h-20 rounded border border-[#E2E8F0] px-3 py-2"
           value={caption}
           onChange={(event) => setCaption(event.target.value)}
         />
       </Field>
       <Field label="Sort Order">
         <input
-          className="rounded border border-[rgba(36,23,24,0.18)] px-3 py-2"
+          className="rounded border border-[#E2E8F0] px-3 py-2"
           type="number"
           value={sortOrder}
           onChange={(event) => setSortOrder(event.target.value)}

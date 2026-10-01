@@ -85,13 +85,13 @@ export default function AdmissionsPage() {
         />
 
         <form
-          className="overflow-hidden rounded-lg border border-gray-200 bg-white"
+          className="overflow-hidden rounded-lg border border-[#E2E8F0] bg-white"
           onSubmit={saveAdmissions}
         >
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 px-5 py-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-4">
             <div>
-              <h1 className="text-lg font-semibold text-gray-900">Admissions by Level</h1>
-              <p className="text-sm text-gray-500">
+              <h1 className="text-lg font-semibold text-[#1C2434]">Admissions by Level</h1>
+              <p className="text-sm text-[#64748B]">
                 Maintain the program cards shown on the public Admissions page.
               </p>
             </div>
@@ -101,39 +101,39 @@ export default function AdmissionsPage() {
           </div>
 
           {message ? (
-            <div className="border-b border-gray-200 bg-[#faf8f3] px-5 py-3">
+            <div className="border-b border-[#E2E8F0] bg-[#F1F5F9] px-5 py-3">
               <StatusMessage>{message}</StatusMessage>
             </div>
           ) : null}
 
           <div className="grid gap-4 p-5">
-            <div className="rounded-lg border border-[#7e1518]/15 bg-[#faf8f3] px-4 py-3 text-sm text-[#625759]">
+            <div className="rounded-lg border border-[#3C50E0]/15 bg-[#F1F5F9] px-4 py-3 text-sm text-[#64748B]">
               Edit the visible title, age range, description, image, and WhatsApp contact for each
               admissions card.
             </div>
 
             {isLoading ? (
-              <div className="rounded-lg border border-gray-200 p-6 text-sm text-gray-500">
+              <div className="rounded-lg border border-[#E2E8F0] p-6 text-sm text-[#64748B]">
                 Loading admissions...
               </div>
             ) : null}
 
             {!isLoading && !programs.length ? (
-              <div className="rounded-lg border border-dashed border-gray-200 p-6 text-sm text-gray-500">
+              <div className="rounded-lg border border-dashed border-[#E2E8F0] p-6 text-sm text-[#64748B]">
                 No admission programs found.
               </div>
             ) : null}
 
             {programs.map((program, index) => (
-              <section className="rounded-lg border border-gray-200 p-4" key={program.id}>
+              <section className="rounded-lg border border-[#E2E8F0] p-4" key={program.id}>
                 <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <h2 className="text-base font-semibold text-gray-900">
+                    <h2 className="text-base font-semibold text-[#1C2434]">
                       {program.title || `Program ${index + 1}`}
                     </h2>
-                    <p className="text-sm text-gray-500">Public admissions card content.</p>
+                    <p className="text-sm text-[#64748B]">Public admissions card content.</p>
                   </div>
-                  <label className="flex items-center gap-2 text-sm text-gray-700">
+                  <label className="flex items-center gap-2 text-sm text-[#1C2434]">
                     <input
                       checked={program.isActive ?? true}
                       type="checkbox"
@@ -150,7 +150,7 @@ export default function AdmissionsPage() {
                 <div className="grid gap-4 lg:grid-cols-2">
                   <Field label="Program Name">
                     <input
-                      className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                      className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
                       value={program.title}
                       onChange={(event) =>
                         setPrograms((current) =>
@@ -161,7 +161,7 @@ export default function AdmissionsPage() {
                   </Field>
                   <Field label="Age Range">
                     <input
-                      className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                      className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
                       value={program.age}
                       onChange={(event) =>
                         setPrograms((current) =>
@@ -170,11 +170,11 @@ export default function AdmissionsPage() {
                       }
                     />
                   </Field>
-                  <div className="rounded-lg border border-gray-200 p-4 lg:col-span-2">
+                  <div className="rounded-lg border border-[#E2E8F0] p-4 lg:col-span-2">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <h3 className="text-sm font-semibold text-gray-900">Program Image</h3>
-                        <p className="text-sm text-gray-500">
+                        <h3 className="text-sm font-semibold text-[#1C2434]">Program Image</h3>
+                        <p className="text-sm text-[#64748B]">
                           {program.image
                             ? 'Image selected from Gallery Library.'
                             : 'No image selected.'}
@@ -199,7 +199,7 @@ export default function AdmissionsPage() {
                   </div>
                   <Field label="Image Description">
                     <input
-                      className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                      className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
                       value={program.imageAlt ?? ''}
                       onChange={(event) =>
                         setPrograms((current) =>
@@ -210,7 +210,7 @@ export default function AdmissionsPage() {
                   </Field>
                   <Field label="WhatsApp Number">
                     <input
-                      className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                      className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
                       value={program.adminWhatsapp}
                       onChange={(event) =>
                         setPrograms((current) =>
@@ -226,7 +226,7 @@ export default function AdmissionsPage() {
                   </Field>
                   <Field label="Explore Button Text">
                     <input
-                      className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                      className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
                       value={program.exploreLabel ?? ''}
                       onChange={(event) =>
                         setPrograms((current) =>
@@ -242,7 +242,7 @@ export default function AdmissionsPage() {
                   </Field>
                   <Field label="WhatsApp Button Text">
                     <input
-                      className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                      className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
                       value={program.contactLabel ?? ''}
                       onChange={(event) =>
                         setPrograms((current) =>
@@ -259,7 +259,7 @@ export default function AdmissionsPage() {
                   <label className="grid gap-1 text-sm font-medium lg:col-span-2">
                     Description
                     <textarea
-                      className="min-h-28 rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                      className="min-h-28 rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
                       value={program.description}
                       onChange={(event) =>
                         setPrograms((current) =>

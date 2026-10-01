@@ -102,7 +102,10 @@ function sessionUserFromRecords(
   }
 
   if (!isCmsRoleName(cmsUser.role.name)) {
-    throw new ResponseError(403, "This account does not have a valid CMS role.");
+    throw new ResponseError(
+      403,
+      "This account does not have a valid CMS role.",
+    );
   }
 
   return {
@@ -191,7 +194,9 @@ function userListItem(user: CmsUserWithRole, unitName?: string | null) {
 }
 
 function invitationListItem(
-  invitation: Awaited<ReturnType<typeof CmsUserRepository.listInvitations>>[number],
+  invitation: Awaited<
+    ReturnType<typeof CmsUserRepository.listInvitations>
+  >[number],
 ) {
   return {
     id: invitation.id,
@@ -207,7 +212,8 @@ function invitationListItem(
     role: isCmsRoleName(invitation.role.name)
       ? {
           name: invitation.role.name,
-          label: invitation.role.description ?? ROLE_LABELS[invitation.role.name],
+          label:
+            invitation.role.description ?? ROLE_LABELS[invitation.role.name],
         }
       : null,
     invitedBy: invitation.invitedBy,
@@ -245,7 +251,9 @@ async function sendInvitationEmail(
   invitation: CmsInvitationWithRelations,
   actor?: { name?: string | null },
 ) {
-  const roleName = isCmsRoleName(invitation.role.name) ? invitation.role.name : "ADMIN";
+  const roleName = isCmsRoleName(invitation.role.name)
+    ? invitation.role.name
+    : "ADMIN";
   const notification = await sendMail(
     cmsInvitationEmail({
       email: invitation.email,
@@ -363,6 +371,37 @@ export class CmsAuthService {
         entityType: "CmsUser",
         entityId: createdCmsUser.id,
         newValues: { role: "SUPER_ADMIN" },
+      });
+
+      return sessionUserFromRecords(activeEmployee, {
+        ...createdCmsUser,
+        role: superAdminRole,
+      });
+    }
+
+    if (await isMadLabsUser(activeEmployee)) {
+      const superAdminRole =
+        await CmsUserRepository.findRoleByName("SUPER_ADMIN");
+      if (!superAdminRole) {
+        throw new ResponseError(500, "SUPER_ADMIN CMS role is not configured.");
+      }
+
+      const createdCmsUser = await CmsUserRepository.create({
+        centralUserId: snapshot.centralUserId,
+        email: snapshot.email,
+        name: snapshot.name,
+        unitId: snapshot.unitId,
+        cmsRoleId: superAdminRole.id,
+        isActive: true,
+        lastCentralSyncedAt: new Date(),
+      });
+
+      await writeAuditLog({
+        actorId: createdCmsUser.id,
+        action: "CMS_USER_AUTO_REGISTERED",
+        entityType: "CmsUser",
+        entityId: createdCmsUser.id,
+        newValues: { role: "SUPER_ADMIN", source: "madlabs-login" },
       });
 
       return sessionUserFromRecords(activeEmployee, {

@@ -134,8 +134,8 @@ function InlineInput({
         'w-full border border-transparent bg-transparent',
         'px-1.5 py-1',
         'outline-none transition-colors duration-150',
-        'focus:border-[var(--burgundy)] focus:bg-white',
-        'placeholder:text-[var(--charcoal-muted)]',
+        'focus:border-[#3C50E0] focus:bg-white',
+        'placeholder:text-[#64748B]',
         className,
       ].join(' ')}
     />
@@ -289,7 +289,7 @@ export default function OurSchoolPage() {
                 type="button"
                 disabled={isSaving || isLoading}
                 onClick={previewLive}
-                className="inline-flex items-center gap-2 border border-black/10 bg-white px-4 py-2.5 text-sm font-medium text-[var(--charcoal)] transition-colors hover:border-[var(--burgundy)] hover:text-[var(--burgundy)] disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-2 border border-[#E2E8F0] bg-white px-4 py-2.5 text-sm font-medium text-[#1C2434] transition-colors hover:border-[#3C50E0] hover:text-[#3C50E0] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Eye size={15} />
                 Preview Live
@@ -299,7 +299,7 @@ export default function OurSchoolPage() {
                 type="button"
                 disabled={isSaving || isLoading}
                 onClick={() => void persist('DRAFT')}
-                className="inline-flex items-center gap-2 border border-black/10 bg-white px-4 py-2.5 text-sm font-medium text-[var(--charcoal)] transition-colors hover:border-[var(--burgundy)] hover:text-[var(--burgundy)] disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-2 border border-[#E2E8F0] bg-white px-4 py-2.5 text-sm font-medium text-[#1C2434] transition-colors hover:border-[#3C50E0] hover:text-[#3C50E0] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Save size={15} />
                 {isSaving ? 'Saving...' : 'Save Draft'}
@@ -309,7 +309,7 @@ export default function OurSchoolPage() {
                 type="button"
                 disabled={isSaving || isLoading}
                 onClick={() => void persist('PUBLISHED')}
-                className="border border-[var(--burgundy)] bg-[var(--burgundy)] px-5 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                className="border border-[#3C50E0] bg-[#3C50E0] px-5 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Publish
               </button>
@@ -352,7 +352,7 @@ export default function OurSchoolPage() {
             <button
               type="button"
               onClick={() => setIsPickerOpen(true)}
-              className="absolute bottom-4 left-4 z-20 inline-flex items-center gap-2 bg-white px-4 py-2.5 text-sm font-medium text-[var(--charcoal)] shadow-sm transition-colors hover:text-[var(--burgundy)]"
+              className="absolute bottom-4 left-4 z-20 inline-flex items-center gap-2 bg-white px-4 py-2.5 text-sm font-medium text-[#1C2434] shadow-sm transition-colors hover:text-[#3C50E0]"
             >
               <Upload size={15} />
               Change Image
@@ -366,7 +366,7 @@ export default function OurSchoolPage() {
                 <InlineInput
                   ariaLabel="MWS background title"
                   value={content.background.title}
-                  className="mb-7 text-[clamp(32px,4vw,48px)] font-semibold leading-[1.1] tracking-[-0.025em] text-[var(--charcoal)]"
+                  className="mb-7 text-[clamp(32px,4vw,48px)] font-semibold leading-[1.1] tracking-[-0.025em] text-[#1C2434]"
                   onChange={(value) =>
                     updateContent((current) => ({
                       ...current,
@@ -399,7 +399,7 @@ export default function OurSchoolPage() {
                 <button
                   type="button"
                   onClick={() => setIsPickerOpen(true)}
-                  className="absolute bottom-4 left-4 inline-flex items-center gap-2 bg-white px-4 py-2.5 text-sm font-medium text-[var(--charcoal)] shadow-sm transition-colors hover:text-[var(--burgundy)]"
+                  className="absolute bottom-4 left-4 inline-flex items-center gap-2 bg-white px-4 py-2.5 text-sm font-medium text-[#1C2434] shadow-sm transition-colors hover:text-[#3C50E0]"
                 >
                   <Upload size={15} />
                   Change Image
@@ -409,7 +409,7 @@ export default function OurSchoolPage() {
           </section>
 
           {/* Vision & Mission */}
-          <section className="w-full bg-[var(--warm-white)] py-[96px] md:py-[120px]">
+          <section className="w-full bg-[#F1F5F9] py-[96px] md:py-[120px]">
             <div className="mx-auto grid w-full max-w-[1240px] items-center gap-12 px-6 md:gap-20 md:px-10 lg:grid-cols-[0.9fr_1.1fr]">
               <div className="relative overflow-hidden">
                 <img
@@ -421,7 +421,7 @@ export default function OurSchoolPage() {
                 <button
                   type="button"
                   onClick={() => setIsPickerOpen(true)}
-                  className="absolute bottom-4 left-4 inline-flex items-center gap-2 bg-white px-4 py-2.5 text-sm font-medium text-[var(--charcoal)] shadow-sm transition-colors hover:text-[var(--burgundy)]"
+                  className="absolute bottom-4 left-4 inline-flex items-center gap-2 bg-white px-4 py-2.5 text-sm font-medium text-[#1C2434] shadow-sm transition-colors hover:text-[#3C50E0]"
                 >
                   <Upload size={15} />
                   Change Image
@@ -432,7 +432,7 @@ export default function OurSchoolPage() {
                 <InlineInput
                   ariaLabel="Our Vision and Mission title"
                   value={content.visionMission.title}
-                  className="mb-7 text-[clamp(32px,4vw,48px)] font-semibold leading-[1.1] tracking-[-0.025em] text-[var(--charcoal)]"
+                  className="mb-7 text-[clamp(32px,4vw,48px)] font-semibold leading-[1.1] tracking-[-0.025em] text-[#1C2434]"
                   onChange={(value) =>
                     updateContent((current) => ({
                       ...current,
@@ -463,7 +463,7 @@ export default function OurSchoolPage() {
               <InlineInput
                 ariaLabel="Our Philosophy title"
                 value={content.philosophy.title}
-                className="mb-8 text-[clamp(32px,4vw,48px)] font-semibold leading-[1.1] tracking-[-0.025em] text-[var(--charcoal)]"
+                className="mb-8 text-[clamp(32px,4vw,48px)] font-semibold leading-[1.1] tracking-[-0.025em] text-[#1C2434]"
                 onChange={(value) =>
                   updateContent((current) => ({
                     ...current,
@@ -488,9 +488,9 @@ export default function OurSchoolPage() {
           </section>
 
           {/* FAQ */}
-          <section id="faq" className="w-full bg-[var(--warm-white)] py-[96px] md:py-[120px]">
+          <section id="faq" className="w-full bg-[#F1F5F9] py-[96px] md:py-[120px]">
             <div className="mx-auto w-full max-w-[1000px] px-6 md:px-10">
-              <h2 className="mb-12 text-[clamp(32px,4vw,48px)] font-semibold leading-[1.1] tracking-[-0.025em] text-[var(--charcoal)]">
+              <h2 className="mb-12 text-[clamp(32px,4vw,48px)] font-semibold leading-[1.1] tracking-[-0.025em] text-[#1C2434]">
                 Frequently Asked Questions
               </h2>
 
@@ -507,7 +507,7 @@ export default function OurSchoolPage() {
                         <InlineInput
                           ariaLabel={`FAQ question ${index + 1}`}
                           value={item.question}
-                          className="text-base font-semibold text-[var(--charcoal)] md:text-lg"
+                          className="text-base font-semibold text-[#1C2434] md:text-lg"
                           onChange={(value) =>
                             updateContent((current) => ({
                               ...current,
@@ -525,7 +525,7 @@ export default function OurSchoolPage() {
 
                         <button
                           type="button"
-                          className={`shrink-0 text-2xl font-light text-[var(--burgundy)] transition-transform duration-300 ${
+                          className={`shrink-0 text-2xl font-light text-[#3C50E0] transition-transform duration-300 ${
                             isOpen ? 'rotate-45' : ''
                           }`}
                           aria-expanded={isOpen}
@@ -561,7 +561,7 @@ export default function OurSchoolPage() {
 
                           <button
                             type="button"
-                            className="mb-5 mt-3 inline-flex items-center gap-2 text-xs font-semibold text-[var(--burgundy)]"
+                            className="mb-5 mt-3 inline-flex items-center gap-2 text-xs font-semibold text-[#3C50E0]"
                             onClick={() =>
                               updateContent((current) => ({
                                 ...current,
@@ -584,7 +584,7 @@ export default function OurSchoolPage() {
 
               <button
                 type="button"
-                className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[var(--burgundy)]"
+                className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#3C50E0]"
                 onClick={() =>
                   updateContent((current) => ({
                     ...current,

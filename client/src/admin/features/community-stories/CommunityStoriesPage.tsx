@@ -223,25 +223,25 @@ export default function CommunityStoriesPage() {
         />
 
         {message ? (
-          <div className="rounded-lg border border-gray-200 bg-white px-5 py-3">
+          <div className="rounded-lg border border-[#E2E8F0] bg-white px-5 py-3">
             <StatusMessage>{message}</StatusMessage>
           </div>
         ) : null}
 
         {isLoading || !pageForm ? (
-          <div className="rounded-lg border border-gray-200 bg-white p-6 text-sm text-gray-500">
+          <div className="rounded-lg border border-[#E2E8F0] bg-white p-6 text-sm text-[#64748B]">
             Loading Community Stories...
           </div>
         ) : (
           <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_430px]">
             <form
-              className="overflow-hidden rounded-lg border border-gray-200 bg-white"
+              className="overflow-hidden rounded-lg border border-[#E2E8F0] bg-white"
               onSubmit={savePage}
             >
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 px-5 py-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-4">
                 <div>
-                  <h1 className="text-lg font-semibold text-gray-900">Page Content</h1>
-                  <p className="text-sm text-gray-500">Hero, intro copy, and connected gallery.</p>
+                  <h1 className="text-lg font-semibold text-[#1C2434]">Page Content</h1>
+                  <p className="text-sm text-[#64748B]">Hero, intro copy, and connected gallery.</p>
                 </div>
                 <Button disabled={isSaving} type="submit">
                   {isSaving ? 'Saving...' : 'Save Page'}
@@ -251,7 +251,7 @@ export default function CommunityStoriesPage() {
               <div className="grid gap-4 p-5">
                 <Field label="Title">
                   <input
-                    className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                    className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
                     value={pageForm.title}
                     onChange={(event) =>
                       setPageForm((current) =>
@@ -261,11 +261,11 @@ export default function CommunityStoriesPage() {
                   />
                 </Field>
                 <div className="grid gap-4 lg:grid-cols-2">
-                  <div className="rounded-lg border border-gray-200 p-4 lg:col-span-2">
+                  <div className="rounded-lg border border-[#E2E8F0] p-4 lg:col-span-2">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <h3 className="text-sm font-semibold text-gray-900">Hero Image</h3>
-                        <p className="truncate text-sm text-gray-500">
+                        <h3 className="text-sm font-semibold text-[#1C2434]">Hero Image</h3>
+                        <p className="truncate text-sm text-[#64748B]">
                           {pageForm.heroImagePath || 'No image selected.'}
                         </p>
                       </div>
@@ -288,7 +288,7 @@ export default function CommunityStoriesPage() {
                   </div>
                   <Field label="Hero Image Alt">
                     <input
-                      className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                      className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
                       value={pageForm.heroImageAlt}
                       onChange={(event) =>
                         setPageForm((current) =>
@@ -300,7 +300,7 @@ export default function CommunityStoriesPage() {
                 </div>
                 <Field label="Intro Title">
                   <input
-                    className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                    className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
                     value={pageForm.introTitle}
                     onChange={(event) =>
                       setPageForm((current) =>
@@ -311,7 +311,7 @@ export default function CommunityStoriesPage() {
                 </Field>
                 <Field label="Intro Body">
                   <textarea
-                    className="min-h-40 rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                    className="min-h-40 rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
                     value={pageForm.introBody}
                     onChange={(event) =>
                       setPageForm((current) =>
@@ -320,11 +320,11 @@ export default function CommunityStoriesPage() {
                     }
                   />
                 </Field>
-                <div className="rounded-lg border border-gray-200 p-4">
+                <div className="rounded-lg border border-[#E2E8F0] p-4">
                   <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                     <div>
-                      <h2 className="text-sm font-semibold text-gray-900">Connected Gallery</h2>
-                      <p className="text-sm text-gray-500">
+                      <h2 className="text-sm font-semibold text-[#1C2434]">Connected Gallery</h2>
+                      <p className="text-sm text-[#64748B]">
                         Used by the public gallery grid on this page.
                       </p>
                     </div>
@@ -340,19 +340,19 @@ export default function CommunityStoriesPage() {
                     <div className="flex items-center gap-3">
                       <GalleryThumb gallery={selectedGallery} />
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-gray-900">
+                        <p className="truncate text-sm font-semibold text-[#1C2434]">
                           {selectedGallery.title}
                         </p>
-                        <p className="truncate text-sm text-gray-500">
+                        <p className="truncate text-sm text-[#64748B]">
                           {selectedGallery.description || '-'}
                         </p>
                       </div>
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-500">No gallery selected.</p>
+                    <p className="text-sm text-[#64748B]">No gallery selected.</p>
                   )}
                 </div>
-                <label className="flex items-center gap-2 text-sm text-gray-700">
+                <label className="flex items-center gap-2 text-sm text-[#1C2434]">
                   <input
                     checked={pageForm.isPublished}
                     type="checkbox"
@@ -367,16 +367,16 @@ export default function CommunityStoriesPage() {
               </div>
             </form>
 
-            <form className="h-fit rounded-lg border border-gray-200 bg-white" onSubmit={saveNews}>
-              <div className="border-b border-gray-200 px-5 py-4">
-                <h2 className="text-base font-semibold text-gray-900">
+            <form className="h-fit rounded-lg border border-[#E2E8F0] bg-white" onSubmit={saveNews}>
+              <div className="border-b border-[#E2E8F0] px-5 py-4">
+                <h2 className="text-base font-semibold text-[#1C2434]">
                   {editingNews ? 'Edit News' : 'New News'}
                 </h2>
               </div>
               <div className="grid gap-4 p-5">
                 <Field label="Title">
                   <input
-                    className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                    className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
                     value={newsForm.title}
                     onChange={(event) => {
                       const title = event.target.value;
@@ -390,7 +390,7 @@ export default function CommunityStoriesPage() {
                 </Field>
                 <Field label="Slug">
                   <input
-                    className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                    className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
                     value={newsForm.slug}
                     onChange={(event) =>
                       setNewsForm((current) => ({
@@ -402,7 +402,7 @@ export default function CommunityStoriesPage() {
                 </Field>
                 <Field label="Excerpt">
                   <textarea
-                    className="min-h-24 rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                    className="min-h-24 rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
                     value={newsForm.excerpt}
                     onChange={(event) =>
                       setNewsForm((current) => ({
@@ -413,11 +413,11 @@ export default function CommunityStoriesPage() {
                   />
                 </Field>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-lg border border-gray-200 p-4 sm:col-span-2">
+                  <div className="rounded-lg border border-[#E2E8F0] p-4 sm:col-span-2">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <h3 className="text-sm font-semibold text-gray-900">News Image</h3>
-                        <p className="truncate text-sm text-gray-500">
+                        <h3 className="text-sm font-semibold text-[#1C2434]">News Image</h3>
+                        <p className="truncate text-sm text-[#64748B]">
                           {newsForm.imagePath || 'No image selected.'}
                         </p>
                       </div>
@@ -440,7 +440,7 @@ export default function CommunityStoriesPage() {
                   </div>
                   <Field label="Image Alt">
                     <input
-                      className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                      className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
                       value={newsForm.imageAlt}
                       onChange={(event) =>
                         setNewsForm((current) => ({
@@ -453,7 +453,7 @@ export default function CommunityStoriesPage() {
                 </div>
                 <Field label="Published At">
                   <input
-                    className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                    className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
                     type="datetime-local"
                     value={newsForm.publishedAt}
                     onChange={(event) =>
@@ -464,9 +464,9 @@ export default function CommunityStoriesPage() {
                     }
                   />
                 </Field>
-                <div className="rounded-lg border border-gray-200 p-4">
+                <div className="rounded-lg border border-[#E2E8F0] p-4">
                   <div className="mb-3 flex items-center justify-between gap-3">
-                    <h3 className="text-sm font-semibold text-gray-900">News Gallery</h3>
+                    <h3 className="text-sm font-semibold text-[#1C2434]">News Gallery</h3>
                     <Button
                       size="sm"
                       type="button"
@@ -479,13 +479,13 @@ export default function CommunityStoriesPage() {
                   {selectedNewsGallery ? (
                     <div className="flex items-center gap-3">
                       <GalleryThumb gallery={selectedNewsGallery} />
-                      <p className="truncate text-sm text-gray-700">{selectedNewsGallery.title}</p>
+                      <p className="truncate text-sm text-[#1C2434]">{selectedNewsGallery.title}</p>
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-500">No gallery selected.</p>
+                    <p className="text-sm text-[#64748B]">No gallery selected.</p>
                   )}
                 </div>
-                <label className="flex items-center gap-2 text-sm text-gray-700">
+                <label className="flex items-center gap-2 text-sm text-[#1C2434]">
                   <input
                     checked={newsForm.isPublished}
                     type="checkbox"
@@ -519,24 +519,24 @@ export default function CommunityStoriesPage() {
         )}
 
         {!isLoading ? (
-          <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-            <div className="border-b border-gray-200 px-5 py-4">
-              <h2 className="text-lg font-semibold text-gray-900">News List</h2>
+          <div className="overflow-hidden rounded-lg border border-[#E2E8F0] bg-white">
+            <div className="border-b border-[#E2E8F0] px-5 py-4">
+              <h2 className="text-lg font-semibold text-[#1C2434]">News List</h2>
             </div>
             {!news.length ? (
-              <div className="p-5 text-sm text-gray-500">No news yet.</div>
+              <div className="p-5 text-sm text-[#64748B]">No news yet.</div>
             ) : (
-              <div className="divide-y divide-gray-200">
+              <div className="divide-y divide-[#E2E8F0]">
                 {news.map((item) => (
                   <div
                     className="grid gap-4 px-5 py-4 md:grid-cols-[minmax(0,1fr)_120px_150px] md:items-center"
                     key={item.id}
                   >
                     <div className="min-w-0">
-                      <h3 className="truncate text-sm font-semibold text-gray-900">{item.title}</h3>
-                      <p className="truncate text-sm text-gray-500">/news/{item.slug}</p>
+                      <h3 className="truncate text-sm font-semibold text-[#1C2434]">{item.title}</h3>
+                      <p className="truncate text-sm text-[#64748B]">/news/{item.slug}</p>
                     </div>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-[#64748B]">
                       {item.isPublished ? 'Published' : 'Draft'}
                     </p>
                     <div className="flex justify-end gap-2">

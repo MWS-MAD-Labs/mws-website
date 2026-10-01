@@ -51,25 +51,25 @@ export default function GalleryPickerModal({
         />
 
         {isLoading ? (
-          <div className="rounded-lg border border-gray-200 p-4 text-sm text-gray-500">
+          <div className="rounded-lg border border-[#E2E8F0] p-4 text-sm text-[#64748B]">
             Loading galleries...
           </div>
         ) : null}
 
         {!isLoading && !filteredGalleries.length ? (
-          <div className="rounded-lg border border-gray-200 p-4 text-sm text-gray-500">
+          <div className="rounded-lg border border-[#E2E8F0] p-4 text-sm text-[#64748B]">
             No galleries found.
           </div>
         ) : null}
 
-        <div className="max-h-[48vh] overflow-y-auto rounded-lg border border-gray-200">
+        <div className="max-h-[48vh] overflow-y-auto rounded-lg border border-[#E2E8F0]">
           {filteredGalleries.map((gallery) => {
             const isSelected = gallery.id === selectedGalleryId;
 
             return (
               <button
-                className={`grid w-full grid-cols-[80px_minmax(0,1fr)_auto] items-center gap-3 border-b border-gray-200 px-3 py-3 text-left last:border-b-0 ${
-                  isSelected ? "bg-[#faf8f3]" : "bg-white hover:bg-gray-50"
+                className={`grid w-full grid-cols-[80px_minmax(0,1fr)_auto] items-center gap-3 border-b border-[#E2E8F0] px-3 py-3 text-left last:border-b-0 ${
+                  isSelected ? "bg-[#F1F5F9]" : "bg-white hover:bg-[#F1F5F9]"
                 }`}
                 key={gallery.id}
                 type="button"
@@ -77,17 +77,17 @@ export default function GalleryPickerModal({
               >
                 <GalleryThumb gallery={gallery} />
                 <span className="min-w-0">
-                  <span className="block truncate text-sm font-semibold text-gray-900">
+                  <span className="block truncate text-sm font-semibold text-[#1C2434]">
                     {gallery.title}
                   </span>
-                  <span className="block truncate text-sm text-gray-500">
+                  <span className="block truncate text-sm text-[#64748B]">
                     {gallery.description || "-"}
                   </span>
-                  <span className="block text-xs text-gray-400">
+                  <span className="block text-xs text-[#64748B]">
                     {gallery.images.length} Images / {gallery.videos.length} Videos
                   </span>
                 </span>
-                <span className="text-xs font-semibold text-[#7e1518]">
+                <span className="text-xs font-semibold text-[#3C50E0]">
                   {isSelected ? "Selected" : "Select"}
                 </span>
               </button>

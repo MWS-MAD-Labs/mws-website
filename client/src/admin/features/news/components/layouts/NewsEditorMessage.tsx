@@ -2,7 +2,7 @@ export default function NewsEditorMessage({ message }: { message: string | null 
   if (!message) return null;
 
   return (
-    <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+    <div className="rounded-lg border border-[#F59E0B]/20 bg-[#F59E0B]/10 px-4 py-3 text-sm text-[#D97706]">
       {message}
     </div>
   );
