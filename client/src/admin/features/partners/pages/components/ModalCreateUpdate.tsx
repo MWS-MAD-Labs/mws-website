@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { X } from 'lucide-react';
 
 type PartnerFormData = {
@@ -34,20 +34,11 @@ export default function ModalCreateUpdate({
   onSubmit,
   loading = false,
 }: ModalCreateUpdateProps) {
-  const [form, setForm] = useState<PartnerFormData>(emptyForm);
+  const [form, setForm] = useState<PartnerFormData>(
+    mode === 'update' && initialData ? initialData : emptyForm,
+  );
 
   const isUpdate = mode === 'update';
-
-  useEffect(() => {
-    if (!open) return;
-
-    if (mode === 'update' && initialData) {
-      setForm(initialData);
-      return;
-    }
-
-    setForm(emptyForm);
-  }, [open, mode, initialData]);
 
   if (!open) return null;
 

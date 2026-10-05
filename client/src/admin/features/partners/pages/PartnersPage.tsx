@@ -19,11 +19,8 @@ function isPublishedStatus(status: string) {
 }
 
 function statusClassName(status: string) {
-  return isPublishedStatus(status)
-    ? 'bg-[#DCFCE7] text-[#166534]'
-    : 'bg-[#F1F5F9] text-[#64748B]';
+  return isPublishedStatus(status) ? 'bg-[#DCFCE7] text-[#166534]' : 'bg-[#F1F5F9] text-[#64748B]';
 }
-
 
 export default function PartnersPage() {
   const [partners, setPartners] = useState<Partner[]>([]);
@@ -37,23 +34,23 @@ export default function PartnersPage() {
   const [isSaving, setIsSaving] = useState(false);
 
   function handleCreate() {
-  setSelectedPartner(null);
-  setModalMode('create');
-  setModalOpen(true);
-}
+    setSelectedPartner(null);
+    setModalMode('create');
+    setModalOpen(true);
+  }
 
-function handleEdit(partner: Partner) {
-  setSelectedPartner(partner);
-  setModalMode('update');
-  setModalOpen(true);
-}
+  function handleEdit(partner: Partner) {
+    setSelectedPartner(partner);
+    setModalMode('update');
+    setModalOpen(true);
+  }
 
-function handleCloseModal() {
-  if (isSaving) return;
+  function handleCloseModal() {
+    if (isSaving) return;
 
-  setModalOpen(false);
-  setSelectedPartner(null);
-}
+    setModalOpen(false);
+    setSelectedPartner(null);
+  }
 
   const filteredPartners = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -112,7 +109,6 @@ function handleCloseModal() {
       setDeletingId(null);
     }
   }
-
 
   async function handleSubmit(data: {
     name: string;
@@ -304,24 +300,26 @@ function handleCloseModal() {
         </div>
       </section>
 
-      <ModalCreateUpdate
-        open={modalOpen}
-        mode={modalMode}
-        initialData={
-          selectedPartner
-            ? {
-                name: selectedPartner.name,
-                description: selectedPartner.description,
-                logo: selectedPartner.logo,
-                link: selectedPartner.link ?? '',
-                status: selectedPartner.status,
-              }
-            : undefined
-        }
-        onClose={handleCloseModal}
-        onSubmit={handleSubmit}
-        loading={isSaving}
-      />
+      {modalOpen ? (
+        <ModalCreateUpdate
+          open={modalOpen}
+          mode={modalMode}
+          initialData={
+            selectedPartner
+              ? {
+                  name: selectedPartner.name,
+                  description: selectedPartner.description,
+                  logo: selectedPartner.logo,
+                  link: selectedPartner.link ?? '',
+                  status: selectedPartner.status,
+                }
+              : undefined
+          }
+          onClose={handleCloseModal}
+          onSubmit={handleSubmit}
+          loading={isSaving}
+        />
+      ) : null}
     </AppShell>
   );
 }
