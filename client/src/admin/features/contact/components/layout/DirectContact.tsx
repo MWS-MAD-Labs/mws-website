@@ -3,6 +3,7 @@ import type { ContactEditorSectionProps } from "./types";
 
 export default function DirectContact({
   content,
+  isBusy = false,
   updateContent,
 }: ContactEditorSectionProps) {
   return (
@@ -13,6 +14,7 @@ export default function DirectContact({
       <div className="grid gap-4 md:grid-cols-2">
         <TextField
           label="Title"
+          disabled={isBusy}
           value={content.directContacts.title}
           onChange={(value) =>
             updateContent((current) => ({
@@ -23,6 +25,7 @@ export default function DirectContact({
         />
         <TextField
           label="Heading"
+          disabled={isBusy}
           value={content.directContacts.heading}
           onChange={(value) =>
             updateContent((current) => ({
@@ -33,6 +36,7 @@ export default function DirectContact({
         />
         <TextField
           label="Phone"
+          disabled={isBusy}
           value={content.directContacts.phone}
           onChange={(value) =>
             updateContent((current) => ({
@@ -43,6 +47,7 @@ export default function DirectContact({
         />
         <TextField
           label="WhatsApp"
+          disabled={isBusy}
           value={content.directContacts.whatsapp}
           onChange={(value) =>
             updateContent((current) => ({
@@ -53,6 +58,7 @@ export default function DirectContact({
         />
         <TextField
           label="Email"
+          disabled={isBusy}
           value={content.directContacts.email}
           onChange={(value) =>
             updateContent((current) => ({

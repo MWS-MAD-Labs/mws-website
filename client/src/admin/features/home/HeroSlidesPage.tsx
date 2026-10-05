@@ -296,6 +296,12 @@ export default function HeroSlidesPage() {
   }
 
   async function deleteSlide(id: string) {
+    const slide = slides.find((item) => item.id === id);
+    const confirmed = window.confirm(
+      `Delete "${slide?.title || 'this home hero slide'}"? This action cannot be undone.`,
+    );
+    if (!confirmed) return;
+
     setIsSaving(true);
     setMessage(null);
 
@@ -327,7 +333,12 @@ export default function HeroSlidesPage() {
         <div className="flex flex-wrap items-end justify-between gap-3">
           <HeaderHero />
 
-          <Button className="inline-flex items-center gap-2" type="button" onClick={startNewSlide}>
+          <Button
+            className="inline-flex items-center gap-2"
+            disabled={isSaving || isLoading}
+            type="button"
+            onClick={startNewSlide}
+          >
             <Plus size={16} />
             New Slide
           </Button>
@@ -546,6 +557,7 @@ export default function HeroSlidesPage() {
 
                   <Button
                     className="inline-flex items-center gap-2"
+                    disabled={isSaving || isLoading}
                     type="button"
                     variant="outline"
                     onClick={() => setIsAssetPickerOpen(true)}

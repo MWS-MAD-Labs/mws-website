@@ -53,6 +53,7 @@ export default function CmsUsersPage() {
   const [inviteEmail, setInviteEmail] = useState('');
   const [isInviting, setIsInviting] = useState(false);
   const [resendingId, setResendingId] = useState<string | null>(null);
+  const [revokingId, setRevokingId] = useState<string | null>(null);
 
   async function loadUsers() {
     const usersData = await adminApi.users();
@@ -166,12 +167,17 @@ export default function CmsUsersPage() {
     const confirmed = window.confirm(`Revoke invitation for ${invitation.email}?`);
     if (!confirmed) return;
 
+    setRevokingId(invitation.id);
+    setMessage(null);
+
     try {
       await adminApi.revokeCmsInvitation(invitation.id);
       await loadUsers();
       setMessage('Invitation revoked.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Invitation could not be revoked.');
+    } finally {
+      setRevokingId(null);
     }
   }
 
@@ -299,7 +305,7 @@ export default function CmsUsersPage() {
                     <Button
                       size="sm"
                       variant="outline"
-                      disabled={resendingId === invitation.id}
+                      disabled={resendingId === invitation.id || revokingId === invitation.id}
                       onClick={() => void resendInvitation(invitation)}
                     >
                       {resendingId === invitation.id ? 'Sending...' : 'Resend Email'}
@@ -307,9 +313,10 @@ export default function CmsUsersPage() {
                     <Button
                       size="sm"
                       variant="outline"
+                      disabled={revokingId === invitation.id || resendingId === invitation.id}
                       onClick={() => void revokeInvitation(invitation)}
                     >
-                      Revoke
+                      {revokingId === invitation.id ? 'Revoking...' : 'Revoke'}
                     </Button>
                   </div>
                 </div>
@@ -321,7 +328,14 @@ export default function CmsUsersPage() {
         </Panel>
       </section>
 
-      <Modal open={inviteOpen} title="Invite Admin" onClose={() => setInviteOpen(false)}>
+      <Modal
+        open={inviteOpen}
+        title="Invite Admin"
+        onClose={() => {
+          if (isInviting) return;
+          setInviteOpen(false);
+        }}
+      >
         <form className="space-y-4" onSubmit={inviteAdmin}>
           <Field label="Email Address">
             <input
@@ -333,7 +347,12 @@ export default function CmsUsersPage() {
             />
           </Field>
           <div className="flex justify-end gap-3">
-            <Button type="button" variant="outline" onClick={() => setInviteOpen(false)}>
+            <Button
+              disabled={isInviting}
+              type="button"
+              variant="outline"
+              onClick={() => setInviteOpen(false)}
+            >
               Cancel
             </Button>
             <Button disabled={isInviting} type="submit">

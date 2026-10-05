@@ -7,6 +7,7 @@ import type { ContactEditorSectionProps } from "./types";
 
 export default function CampusInfo({
   content,
+  isBusy = false,
   updateContent,
 }: ContactEditorSectionProps) {
   return (
@@ -17,6 +18,7 @@ export default function CampusInfo({
       <div className="grid gap-4 md:grid-cols-2">
         <TextField
           label="Title"
+          disabled={isBusy}
           value={content.address.title}
           onChange={(value) =>
             updateContent((current) => ({
@@ -27,6 +29,7 @@ export default function CampusInfo({
         />
         <TextField
           label="School Name"
+          disabled={isBusy}
           value={content.address.name}
           onChange={(value) =>
             updateContent((current) => ({
@@ -39,6 +42,7 @@ export default function CampusInfo({
       <div className="mt-4">
         <TextAreaField
           label="Address Lines"
+          disabled={isBusy}
           value={linesToText(content.address.lines)}
           onChange={(value) =>
             updateContent((current) => ({

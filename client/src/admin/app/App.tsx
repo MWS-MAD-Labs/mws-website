@@ -14,6 +14,7 @@ import { RequireAuth } from '@/admin/auth/RequireAuth';
 import { useAuth } from '@/admin/auth/useAuth';
 import AppShell from '@/admin/components/layout/AppShell';
 import ContentPageHeader from '@/admin/components/ui/ContentPageHeader';
+import StatusMessage from '@/admin/components/ui/StatusMessage';
 import { hasCmsPermission } from '@/admin/types/auth';
 
 import AdmissionsPage from '@/admin/features/admissions/AdmissionsPage';
@@ -31,6 +32,7 @@ import AuditLogsPage from '@/admin/features/placeholders/AuditLogsPage';
 import CampusTourPage from '@/admin/features/placeholders/CampusTourPage';
 import CurriculumPage from '@/admin/features/placeholders/CurriculumPage';
 import HelpPage from '@/admin/features/placeholders/HelpPage';
+import MaintenancePage from '@/admin/features/placeholders/MaintenancePage';
 import PermissionsPage from '@/admin/features/placeholders/PermissionsPage';
 
 import GalleryDetailPage from '@/admin/features/gallery/GalleryDetailPage';
@@ -423,12 +425,11 @@ function NewsTagsRoute() {
 function RouteMessageBanner({ message }: { message: RouteMessage }) {
   if (!message) return null;
 
-  const classes =
-    message.type === 'success'
-      ? 'border-[#10B981]/20 bg-[#10B981]/10 text-[#047857]'
-      : 'border-[#EF4444]/20 bg-[#EF4444]/10 text-[#B91C1C]';
-
-  return <div className={`rounded-lg border px-4 py-3 text-sm ${classes}`}>{message.text}</div>;
+  return (
+    <div className="rounded-lg border border-[#E2E8F0] bg-white px-4 py-3">
+      <StatusMessage tone={message.type}>{message.text}</StatusMessage>
+    </div>
+  );
 }
 
 export default function AdminApp() {
@@ -712,6 +713,28 @@ export default function AdminApp() {
             <RequireAuth>
               <RequireContentPermission>
                 <GalleryDetailPage />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="VoiceComunity"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <MaintenancePage title="Voice Comunity" />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="calendar"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <MaintenancePage title="Calendar" />
               </RequireContentPermission>
             </RequireAuth>
           }

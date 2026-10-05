@@ -1,6 +1,6 @@
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import { adminApi, type Partner } from '@/admin/api/adminApi';
+import { adminApi, type GalleryItem, type Partner } from '@/admin/api/adminApi';
 import AppShell from '@/admin/components/layout/AppShell';
 import Button from '@/admin/components/ui/Button';
 import SearchInput from '@/admin/components/ui/SearchInput';
@@ -24,6 +24,7 @@ function statusClassName(status: string) {
 
 export default function PartnersPage() {
   const [partners, setPartners] = useState<Partner[]>([]);
+  const [galleries, setGalleries] = useState<GalleryItem[]>([]);
   const [search, setSearch] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -73,10 +74,12 @@ export default function PartnersPage() {
     let isCurrent = true;
 
     queueMicrotask(() => {
-      adminApi
-        .partners()
-        .then((items) => {
-          if (isCurrent) setPartners(items);
+      Promise.all([adminApi.partners(), adminApi.galleries()])
+        .then(([items, galleryItems]) => {
+          if (!isCurrent) return;
+
+          setPartners(items);
+          setGalleries(galleryItems);
         })
         .catch((error) => {
           if (!isCurrent) return;
@@ -302,6 +305,7 @@ export default function PartnersPage() {
 
       {modalOpen ? (
         <ModalCreateUpdate
+          galleries={galleries}
           open={modalOpen}
           mode={modalMode}
           initialData={

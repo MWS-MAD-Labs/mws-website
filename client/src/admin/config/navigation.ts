@@ -104,13 +104,6 @@ export const menuSections: MenuSection[] = [
             requiredPermission: 'content:manage',
           },
           {
-            label: 'FAQ',
-            href: '/admin/academic/faqs',
-            Icon: MessageSquare,
-            enabled: true,
-            requiredPermission: 'content:manage',
-          },
-          {
             label: 'Kindergarten',
             href: '/admin/academic/kindergarten',
             Icon: Baby,
@@ -128,6 +121,13 @@ export const menuSections: MenuSection[] = [
             label: 'High School',
             href: '/admin/academic/high-school',
             Icon: GraduationCap,
+            enabled: true,
+            requiredPermission: 'content:manage',
+          },
+          {
+            label: 'FAQ',
+            href: '/admin/academic/faqs',
+            Icon: MessageSquare,
             enabled: true,
             requiredPermission: 'content:manage',
           },
@@ -198,6 +198,21 @@ export const menuSections: MenuSection[] = [
           },
         ],
       },
+      {
+        label: 'Voice Comunity',
+        href: '/admin/VoiceComunity',
+        Icon: Files,
+        enabled: true,
+        requiredPermission: 'content:manage',
+      },
+      {
+        label: 'Calendar',
+        href: '/admin/calendar',
+        Icon: LayoutDashboard,
+        enabled: true,
+        requiredPermission: 'content:manage',
+      },
+
       {
         label: 'CMS Users',
         href: '/admin/users',

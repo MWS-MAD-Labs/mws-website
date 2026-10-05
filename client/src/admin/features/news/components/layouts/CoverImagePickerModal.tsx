@@ -9,6 +9,7 @@ import SearchInput from '@/admin/components/ui/SearchInput';
 import type { GalleryAssetSelection } from '@/admin/features/gallery/components/GalleryAssetPickerModal';
 
 type CoverImagePickerModalProps = {
+  allowUpload?: boolean;
   galleries: GalleryItem[];
   open: boolean;
   title?: string;
@@ -20,6 +21,7 @@ type CoverImagePickerModalProps = {
 type PickerMode = 'GALLERY' | 'UPLOAD';
 
 export default function CoverImagePickerModal({
+  allowUpload = true,
   galleries,
   open,
   title = 'Choose image',
@@ -86,11 +88,13 @@ export default function CoverImagePickerModal({
               label="Gallery"
               onClick={() => setMode('GALLERY')}
             />
-            <PickerTab
-              active={mode === 'UPLOAD'}
-              label="Upload"
-              onClick={() => setMode('UPLOAD')}
-            />
+            {allowUpload ? (
+              <PickerTab
+                active={mode === 'UPLOAD'}
+                label="Upload"
+                onClick={() => setMode('UPLOAD')}
+              />
+            ) : null}
           </div>
         </div>
 

@@ -1,306 +1,61 @@
-import { useEffect, useState, type FormEvent } from 'react';
-import { adminApi, type AdminAdmissionProgram, type GalleryItem } from '@/admin/api/adminApi';
 import AppShell from '@/admin/components/layout/AppShell';
 import ContentPageHeader from '@/admin/components/ui/ContentPageHeader';
-import Button from '@/admin/components/ui/Button';
-import Field from '@/admin/components/ui/Field';
 import StatusMessage from '@/admin/components/ui/StatusMessage';
 import GalleryAssetPickerModal from '@/admin/features/gallery/components/GalleryAssetPickerModal';
 
-function optionalText(value: string) {
-  const trimmed = value.trim();
-  return trimmed ? trimmed : '';
-}
-
-function updateProgramField(
-  programs: AdminAdmissionProgram[],
-  id: string,
-  field: keyof AdminAdmissionProgram,
-  value: string | boolean | null,
-) {
-  return programs.map((program) => (program.id === id ? { ...program, [field]: value } : program));
-}
+import AdmissionsProgramsForm from './components/layout/AdmissionsProgramsForm';
+import AdmissionsSidebar from './components/layout/AdmissionsSidebar';
+import { useAdmissionsEditor } from './hooks/useAdmissionsEditor';
 
 export default function AdmissionsPage() {
-  const [programs, setPrograms] = useState<AdminAdmissionProgram[]>([]);
-  const [galleries, setGalleries] = useState<GalleryItem[]>([]);
-  const [assetPickerProgramId, setAssetPickerProgramId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-
-  async function loadAdmissions() {
-    const data = await adminApi.admissions();
-    setPrograms(data.programs);
-    setGalleries(data.galleries);
-  }
-
-  useEffect(() => {
-    queueMicrotask(() => {
-      loadAdmissions()
-        .catch((error) =>
-          setMessage(error instanceof Error ? error.message : 'Failed to load admissions.'),
-        )
-        .finally(() => setIsLoading(false));
-    });
-  }, []);
-
-  async function saveAdmissions(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setIsSaving(true);
-    setMessage(null);
-
-    try {
-      const data = await adminApi.updateAdmissions(
-        programs.map((program, index) => ({
-          ...program,
-          age: optionalText(program.age),
-          adminWhatsapp: optionalText(program.adminWhatsapp),
-          contactLabel: optionalText(program.contactLabel ?? ''),
-          description: optionalText(program.description),
-          exploreLabel: optionalText(program.exploreLabel ?? ''),
-          image: optionalText(program.image),
-          imageAlt: optionalText(program.imageAlt ?? ''),
-          path: optionalText(program.path),
-          sortOrder: program.sortOrder ?? index,
-          isActive: program.isActive ?? true,
-        })),
-      );
-      setPrograms(data.programs);
-      setMessage('Admissions content updated.');
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Failed to save admissions.');
-    } finally {
-      setIsSaving(false);
-    }
-  }
+  const editor = useAdmissionsEditor();
+  const {
+    assetPickerProgramId,
+    galleries,
+    isLoading,
+    message,
+    selectedProgram,
+    selectProgramImage,
+    setAssetPickerProgramId,
+  } = editor;
 
   return (
     <AppShell title="Admissions">
-      <section className="space-y-5 p-6">
+      <section className="w-full space-y-5 p-6">
         <ContentPageHeader
-          breadcrumbs={[{ label: 'Programs' }, { label: 'Admissions' }]}
+          breadcrumbs={[{ label: 'Content' }, { label: 'Admissions' }]}
           title="Admissions"
-          description=""
+          description="Manage the program cards shown on the public Admissions page."
         />
 
-        <form
-          className="overflow-hidden rounded-lg border border-[#E2E8F0] bg-white"
-          onSubmit={saveAdmissions}
-        >
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-4">
-            <div>
-              <h1 className="text-lg font-semibold text-[#1C2434]">Admissions by Level</h1>
-              <p className="text-sm text-[#64748B]">
-                Maintain the program cards shown on the public Admissions page.
-              </p>
-            </div>
-            <Button disabled={isSaving || isLoading} type="submit">
-              {isSaving ? 'Saving...' : 'Save Changes'}
-            </Button>
+        {message ? (
+          <div className="rounded-lg border border-[#E2E8F0] bg-white px-5 py-3">
+            <StatusMessage>{message}</StatusMessage>
           </div>
+        ) : null}
 
-          {message ? (
-            <div className="border-b border-[#E2E8F0] bg-[#F1F5F9] px-5 py-3">
-              <StatusMessage>{message}</StatusMessage>
-            </div>
-          ) : null}
-
-          <div className="grid gap-4 p-5">
-            <div className="rounded-lg border border-[#3C50E0]/15 bg-[#F1F5F9] px-4 py-3 text-sm text-[#64748B]">
-              Edit the visible title, age range, description, image, and WhatsApp contact for each
-              admissions card.
-            </div>
-
-            {isLoading ? (
-              <div className="rounded-lg border border-[#E2E8F0] p-6 text-sm text-[#64748B]">
-                Loading admissions...
-              </div>
-            ) : null}
-
-            {!isLoading && !programs.length ? (
-              <div className="rounded-lg border border-dashed border-[#E2E8F0] p-6 text-sm text-[#64748B]">
-                No admission programs found.
-              </div>
-            ) : null}
-
-            {programs.map((program, index) => (
-              <section className="rounded-lg border border-[#E2E8F0] p-4" key={program.id}>
-                <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <h2 className="text-base font-semibold text-[#1C2434]">
-                      {program.title || `Program ${index + 1}`}
-                    </h2>
-                    <p className="text-sm text-[#64748B]">Public admissions card content.</p>
-                  </div>
-                  <label className="flex items-center gap-2 text-sm text-[#1C2434]">
-                    <input
-                      checked={program.isActive ?? true}
-                      type="checkbox"
-                      onChange={(event) =>
-                        setPrograms((current) =>
-                          updateProgramField(current, program.id, 'isActive', event.target.checked),
-                        )
-                      }
-                    />
-                    Show on website
-                  </label>
-                </div>
-
-                <div className="grid gap-4 lg:grid-cols-2">
-                  <Field label="Program Name">
-                    <input
-                      className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
-                      value={program.title}
-                      onChange={(event) =>
-                        setPrograms((current) =>
-                          updateProgramField(current, program.id, 'title', event.target.value),
-                        )
-                      }
-                    />
-                  </Field>
-                  <Field label="Age Range">
-                    <input
-                      className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
-                      value={program.age}
-                      onChange={(event) =>
-                        setPrograms((current) =>
-                          updateProgramField(current, program.id, 'age', event.target.value),
-                        )
-                      }
-                    />
-                  </Field>
-                  <div className="rounded-lg border border-[#E2E8F0] p-4 lg:col-span-2">
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <h3 className="text-sm font-semibold text-[#1C2434]">Program Image</h3>
-                        <p className="text-sm text-[#64748B]">
-                          {program.image
-                            ? 'Image selected from Gallery Library.'
-                            : 'No image selected.'}
-                        </p>
-                      </div>
-                      <Button
-                        size="sm"
-                        type="button"
-                        variant="outline"
-                        onClick={() => setAssetPickerProgramId(program.id)}
-                      >
-                        Choose Image
-                      </Button>
-                    </div>
-                    {program.image ? (
-                      <img
-                        className="mt-3 aspect-video w-full rounded-lg object-cover"
-                        src={adminApi.publicAssetUrl(program.image)}
-                        alt={program.imageAlt ?? program.title}
-                      />
-                    ) : null}
-                  </div>
-                  <Field label="Image Description">
-                    <input
-                      className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
-                      value={program.imageAlt ?? ''}
-                      onChange={(event) =>
-                        setPrograms((current) =>
-                          updateProgramField(current, program.id, 'imageAlt', event.target.value),
-                        )
-                      }
-                    />
-                  </Field>
-                  <Field label="WhatsApp Number">
-                    <input
-                      className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
-                      value={program.adminWhatsapp}
-                      onChange={(event) =>
-                        setPrograms((current) =>
-                          updateProgramField(
-                            current,
-                            program.id,
-                            'adminWhatsapp',
-                            event.target.value,
-                          ),
-                        )
-                      }
-                    />
-                  </Field>
-                  <Field label="Explore Button Text">
-                    <input
-                      className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
-                      value={program.exploreLabel ?? ''}
-                      onChange={(event) =>
-                        setPrograms((current) =>
-                          updateProgramField(
-                            current,
-                            program.id,
-                            'exploreLabel',
-                            event.target.value,
-                          ),
-                        )
-                      }
-                    />
-                  </Field>
-                  <Field label="WhatsApp Button Text">
-                    <input
-                      className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
-                      value={program.contactLabel ?? ''}
-                      onChange={(event) =>
-                        setPrograms((current) =>
-                          updateProgramField(
-                            current,
-                            program.id,
-                            'contactLabel',
-                            event.target.value,
-                          ),
-                        )
-                      }
-                    />
-                  </Field>
-                  <label className="grid gap-1 text-sm font-medium lg:col-span-2">
-                    Description
-                    <textarea
-                      className="min-h-28 rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
-                      value={program.description}
-                      onChange={(event) =>
-                        setPrograms((current) =>
-                          updateProgramField(
-                            current,
-                            program.id,
-                            'description',
-                            event.target.value,
-                          ),
-                        )
-                      }
-                    />
-                  </label>
-                </div>
-              </section>
-            ))}
+        {isLoading ? (
+          <div className="rounded-lg border border-[#E2E8F0] bg-white p-8 text-center text-sm text-[#64748B]">
+            Loading admissions...
           </div>
-        </form>
+        ) : (
+          <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+            <AdmissionsProgramsForm editor={editor} />
+            <AdmissionsSidebar editor={editor} />
+          </div>
+        )}
+
         <GalleryAssetPickerModal
           allowedKinds={['IMAGE']}
           galleries={galleries}
-          initialGalleryId={
-            programs.find((program) => program.id === assetPickerProgramId)?.galleryId ?? null
-          }
+          initialGalleryId={selectedProgram?.galleryId ?? null}
           open={assetPickerProgramId !== null}
           title="Choose Program Image"
           onClose={() => setAssetPickerProgramId(null)}
-          onSelect={(asset) =>
-            setPrograms((current) =>
-              current.map((program) =>
-                program.id === assetPickerProgramId
-                  ? {
-                      ...program,
-                      galleryId: asset.galleryId,
-                      image: asset.path,
-                      imageAlt: asset.alt,
-                    }
-                  : program,
-              ),
-            )
-          }
+          onSelect={(asset) => {
+            selectProgramImage(asset);
+            setAssetPickerProgramId(null);
+          }}
         />
       </section>
     </AppShell>

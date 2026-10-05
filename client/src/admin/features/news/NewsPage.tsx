@@ -19,6 +19,7 @@ import {
 } from '@/admin/features/news/newsListModel';
 import {
   EMPTY_NEWS_RESULT,
+  NEWS_LIST_RETURN_MESSAGE_KEY,
   NEWS_LIST_RETURN_KEY,
   getErrorMessage,
   getNewsStatusLabel,
@@ -37,6 +38,7 @@ export default function NewsPage() {
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const lastReturnMarkerRef = useRef<string | null>(null);
+  const preserveMessageForNextLoadRef = useRef(false);
 
   const resetListToInitial = useCallback(() => {
     setFilters(createInitialNewsFilters());
@@ -77,6 +79,16 @@ export default function NewsPage() {
       if (!marker || marker === lastReturnMarkerRef.current) return false;
 
       lastReturnMarkerRef.current = marker;
+      try {
+        const returnMessage = window.localStorage.getItem(NEWS_LIST_RETURN_MESSAGE_KEY);
+        if (returnMessage) {
+          preserveMessageForNextLoadRef.current = true;
+          setMessage(returnMessage);
+          window.localStorage.removeItem(NEWS_LIST_RETURN_MESSAGE_KEY);
+        }
+      } catch {
+        // Returning to the list still works when browser storage is unavailable.
+      }
       resetListToInitial();
       return true;
     };
@@ -107,7 +119,11 @@ export default function NewsPage() {
     const timer = window.setTimeout(
       () => {
         setIsLoading(true);
-        setMessage(null);
+        if (preserveMessageForNextLoadRef.current) {
+          preserveMessageForNextLoadRef.current = false;
+        } else {
+          setMessage(null);
+        }
 
         adminApi
           .newsPosts(buildNewsPostFilters(filters, page))

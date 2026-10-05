@@ -7,6 +7,7 @@ import type { ContactEditorSectionProps } from "./types";
 
 export default function ContactForm({
   content,
+  isBusy = false,
   updateContent,
 }: ContactEditorSectionProps) {
   return (
@@ -16,6 +17,7 @@ export default function ContactForm({
       </h2>
       <TextField
         label="Form Title"
+        disabled={isBusy}
         value={content.form.title}
         onChange={(value) =>
           updateContent((current) => ({
@@ -27,6 +29,7 @@ export default function ContactForm({
       <div className="mt-4">
         <TextAreaField
           label="Success Message"
+          disabled={isBusy}
           value={content.form.successMessage}
           onChange={(value) =>
             updateContent((current) => ({
@@ -39,6 +42,7 @@ export default function ContactForm({
       <div className="mt-4">
         <TextAreaField
           label="Categories"
+          disabled={isBusy}
           rows={5}
           value={categoryRowsToText(content.form.categories)}
           onChange={(value) =>

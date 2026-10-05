@@ -2,6 +2,7 @@ type TextFieldProps = {
   label: string;
   value: string;
   onChange: (value: string) => void;
+  disabled?: boolean;
   required?: boolean;
 };
 
@@ -9,6 +10,7 @@ export function TextField({
   label,
   value,
   onChange,
+  disabled = false,
   required = true,
 }: TextFieldProps) {
   return (
@@ -19,6 +21,7 @@ export function TextField({
 
       <input
         value={value}
+        disabled={disabled}
         required={required}
         onChange={(event) => onChange(event.currentTarget.value)}
         className="mt-2 h-10 w-full rounded-md border border-[#E2E8F0] px-3 text-sm font-normal outline-none focus:border-[#3C50E0]"
@@ -41,6 +44,7 @@ export function TextAreaField({
   label,
   value,
   onChange,
+  disabled = false,
   required = true,
   rows = 4,
 }: TextAreaFieldProps) {
@@ -52,6 +56,7 @@ export function TextAreaField({
 
       <textarea
         value={value}
+        disabled={disabled}
         required={required}
         rows={rows}
         onChange={(event) => onChange(event.currentTarget.value)}

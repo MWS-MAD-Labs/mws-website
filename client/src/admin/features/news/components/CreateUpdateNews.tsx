@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import {
@@ -34,7 +34,7 @@ import {
   toggleTagId,
   type NewsForm,
 } from '../newsEditorModel';
-import { NEWS_STATUS_OPTIONS } from '../newsUtils';
+import { NEWS_STATUS_OPTIONS, notifyNewsListReturn } from '../newsUtils';
 
 export default function CreateUpdateNews() {
   const navigate = useNavigate();
@@ -55,6 +55,7 @@ export default function CreateUpdateNews() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const articlePhotoPreviewUrlsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     let cancelled = false;
@@ -112,12 +113,28 @@ export default function CreateUpdateNews() {
   }, [localPreviewUrl]);
 
   useEffect(() => {
-    return () => {
-      for (const photo of form.articlePhotos) {
-        if (photo.previewUrl) {
-          URL.revokeObjectURL(photo.previewUrl);
-        }
+    const nextPreviewUrls = new Set(
+      form.articlePhotos
+        .map((photo) => photo.previewUrl)
+        .filter((previewUrl): previewUrl is string => Boolean(previewUrl?.startsWith('blob:'))),
+    );
+
+    for (const previewUrl of articlePhotoPreviewUrlsRef.current) {
+      if (!nextPreviewUrls.has(previewUrl)) {
+        URL.revokeObjectURL(previewUrl);
       }
+    }
+
+    articlePhotoPreviewUrlsRef.current = nextPreviewUrls;
+  }, [form.articlePhotos]);
+
+  useEffect(() => {
+    return () => {
+      for (const previewUrl of articlePhotoPreviewUrlsRef.current) {
+        URL.revokeObjectURL(previewUrl);
+      }
+
+      articlePhotoPreviewUrlsRef.current.clear();
     };
   }, []);
 
@@ -277,6 +294,7 @@ export default function CreateUpdateNews() {
         });
       }
 
+      notifyNewsListReturn(isEditing ? 'News post updated.' : 'News post created.');
       navigate('/admin/news');
     } catch (error) {
       if (!isEditing && createdNewsId) {
@@ -562,7 +580,7 @@ export default function CreateUpdateNews() {
             </div>
 
             <div className="flex items-center justify-between border-t border-[#E2E8F0] pt-5">
-              <Button type="button" variant="ghost" onClick={handleClose}>
+              <Button type="button" variant="ghost" disabled={saving} onClick={handleClose}>
                 Back
               </Button>
 
@@ -571,7 +589,7 @@ export default function CreateUpdateNews() {
                   type="button"
                   variant="outline"
                   onClick={handlePreview}
-                  disabled={!form.slug.trim()}
+                  disabled={saving || !form.slug.trim()}
                 >
                   Preview
                 </Button>

@@ -56,7 +56,10 @@ function handleDatabaseError(error: unknown): never {
     }
 
     if (error.code === "P2003") {
-      throw new ResponseError(400, "Partner references data that does not exist.");
+      throw new ResponseError(
+        400,
+        "Partner references data that does not exist.",
+      );
     }
 
     if (error.code === "P2025") {
@@ -73,7 +76,10 @@ function handleDatabaseError(error: unknown): never {
   }
 
   if (prismaError.code === "P2003") {
-    throw new ResponseError(400, "Partner references data that does not exist.");
+    throw new ResponseError(
+      400,
+      "Partner references data that does not exist.",
+    );
   }
 
   if (prismaError.code === "P2025") {
@@ -86,6 +92,14 @@ function handleDatabaseError(error: unknown): never {
 export class PartnerService {
   static async list() {
     return repository.findAll();
+  }
+
+  static async publicLogos() {
+    const partners = await repository.findAll();
+
+    return partners
+      .filter((partner) => partner.status.trim().toLowerCase() === "active")
+      .map((partner) => ({ logo: partner.logo }));
   }
 
   static async get(id: string | undefined) {

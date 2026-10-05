@@ -4,6 +4,7 @@ import type { ContactEditorSectionProps } from "./types";
 
 export default function Hero({
   content,
+  isBusy = false,
   updateContent,
 }: ContactEditorSectionProps) {
   return (
@@ -27,6 +28,7 @@ export default function Hero({
         <div className="space-y-5">
           <TextField
             label="Title"
+            disabled={isBusy}
             value={content.hero.title}
             onChange={(value) =>
               updateContent((current) => ({
@@ -41,6 +43,7 @@ export default function Hero({
 
           <TextAreaField
             label="Introduction"
+            disabled={isBusy}
             value={content.intro}
             onChange={(value) =>
               updateContent((current) => ({ ...current, intro: value }))
@@ -49,6 +52,7 @@ export default function Hero({
 
           <TextField
             label="Image"
+            disabled={isBusy}
             value={content.hero.image}
             onChange={(value) =>
               updateContent((current) => ({
@@ -63,6 +67,7 @@ export default function Hero({
 
           <TextField
             label="Image Alt"
+            disabled={isBusy}
             value={content.hero.imageAlt}
             onChange={(value) =>
               updateContent((current) => ({
@@ -111,6 +116,7 @@ export default function Hero({
           {content.hero.image && (
             <button
               type="button"
+              disabled={isBusy}
               className="mt-2 inline-flex h-9 items-center gap-2 rounded-md border border-[#E2E8F0] bg-white px-3 text-xs font-semibold text-[#64748B] transition-colors hover:border-[#3C50E0]/30 hover:text-[#3C50E0]"
               onClick={() =>
                 updateContent((current) => ({

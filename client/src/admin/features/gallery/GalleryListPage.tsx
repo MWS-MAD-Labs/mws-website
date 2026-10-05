@@ -37,6 +37,7 @@ export default function GalleryListPage() {
   const [form, setForm] = useState<GalleryFormState>(emptyForm);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   const filteredGalleries = useMemo(() => {
@@ -117,7 +118,7 @@ export default function GalleryListPage() {
     const confirmed = window.confirm(`Delete "${gallery.title}"?`);
     if (!confirmed) return;
 
-    setIsSaving(true);
+    setDeletingId(gallery.id);
     setMessage(null);
 
     try {
@@ -127,7 +128,7 @@ export default function GalleryListPage() {
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Failed to delete gallery.');
     } finally {
-      setIsSaving(false);
+      setDeletingId(null);
     }
   }
 
@@ -163,6 +164,7 @@ export default function GalleryListPage() {
 
           <GalleryTable
             galleries={filteredGalleries}
+            deletingId={deletingId}
             isLoading={isLoading}
             isSaving={isSaving}
             onDelete={deleteGallery}
@@ -203,7 +205,7 @@ export default function GalleryListPage() {
               Batal
             </Button>
             <Button disabled={isSaving} type="submit">
-              Simpan
+              {isSaving ? 'Menyimpan...' : 'Simpan'}
             </Button>
           </div>
         </form>
@@ -213,12 +215,14 @@ export default function GalleryListPage() {
 }
 
 function GalleryTable({
+  deletingId,
   galleries,
   isLoading,
   isSaving,
   onDelete,
   onEdit,
 }: {
+  deletingId: string | null;
   galleries: GalleryItem[];
   isLoading: boolean;
   isSaving: boolean;
@@ -259,7 +263,7 @@ function GalleryTable({
               <td className="px-5 py-4">
                 <div className="flex justify-end gap-2">
                   <Button
-                    disabled={isSaving}
+                    disabled={isSaving || deletingId === gallery.id}
                     size="sm"
                     type="button"
                     variant="outline"
@@ -268,7 +272,7 @@ function GalleryTable({
                     <Pencil size={14} />
                   </Button>
                   <Button
-                    disabled={isSaving}
+                    disabled={isSaving || deletingId === gallery.id}
                     size="sm"
                     type="button"
                     variant="danger"

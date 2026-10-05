@@ -1,10 +1,19 @@
-import { afterEach, beforeAll, describe, expect, it, mock, spyOn } from "bun:test";
+import {
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  it,
+  mock,
+  spyOn,
+} from "bun:test";
 import { Hono } from "hono";
 import { ResponseError } from "../error/response-error";
 import { signSession } from "../lib/session";
 import * as centralClient from "../lib/central-client";
 import { apiRoute } from "../routes/api-router";
 import { CmsAuthService } from "../services/cms-auth-service";
+import { PartnerService } from "../services/partner-service";
 import { cmsSessionUser, testUser } from "./test-helpers";
 import type { SessionVariables } from "../types/hono-context";
 
@@ -33,7 +42,9 @@ describe("apiRoute", () => {
     const res = await buildApp().request("/api/me");
 
     expect(res.status).toBe(401);
-    expect(((await res.json()) as { errors: string }).errors).toBe("Not signed in.");
+    expect(((await res.json()) as { errors: string }).errors).toBe(
+      "Not signed in.",
+    );
   });
 
   it("returns the fresh CMS session user from /api/me", async () => {
@@ -48,5 +59,18 @@ describe("apiRoute", () => {
 
     expect(res.status).toBe(200);
     expect(((await res.json()) as { data: unknown }).data).toEqual(cmsUser);
+  });
+
+  it("returns public partner logos only", async () => {
+    spyOn(PartnerService, "publicLogos").mockResolvedValue([
+      { logo: "/uploads/partner-logo.png" },
+    ]);
+
+    const res = await buildApp().request("/api/partners");
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({
+      data: [{ logo: "/uploads/partner-logo.png" }],
+    });
   });
 });

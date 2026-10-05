@@ -6,6 +6,7 @@ import { meRoute } from "./me-route";
 import { publicPageRoute } from "./page-route";
 import { publicNewsRoute } from "./news-route";
 import { publicAnalyticsRoute } from "./analytics-route";
+import { publicPartnersRoute } from "./partners-route";
 import type { SessionVariables } from "../../types/hono-context";
 
 export const apiRoute = new Hono<{ Variables: SessionVariables }>();
@@ -15,5 +16,6 @@ apiRoute.route("/pages", publicPageRoute);
 apiRoute.route("/hero-slides", publicHeroSlideRoute);
 apiRoute.route("/gallery-images", publicGalleryMediaRoute);
 apiRoute.route("/news", publicNewsRoute);
+apiRoute.route("/partners", publicPartnersRoute);
 apiRoute.route("/contact", publicContactInquiryRoute);
 apiRoute.route("/analytics", publicAnalyticsRoute);

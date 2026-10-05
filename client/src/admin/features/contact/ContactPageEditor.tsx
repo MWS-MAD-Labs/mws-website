@@ -1,48 +1,57 @@
 import AppShell from '@/admin/components/layout/AppShell';
 import ContentPageHeader from '@/admin/components/ui/ContentPageHeader';
-import ContactEditorFields from './components/ContactEditorFields';
+import StatusMessage from '@/admin/components/ui/StatusMessage';
+import ContactMainSections from './components/layout/ContactMainSections';
+import ContactSidebar from './components/layout/ContactSidebar';
 import { useContactPageEditor } from './hooks/useContactPageEditor';
 
 export default function ContactPageEditor() {
-  const { content, error, isLoading, isSaving, notice, saveContent, updateContent } =
+  const { content, error, isDefault, isLoading, isSaving, notice, resetContent, saveContent, updateContent } =
     useContactPageEditor();
+  const isBusy = isLoading || isSaving;
 
   return (
     <AppShell title="Contact">
-      <section className="flex-1">
-        <div className="border-b border-[#E2E8F0] bg-white px-6 py-6">
-          <ContentPageHeader
-            breadcrumbs={[{ label: 'Content' }, { label: 'Contact' }]}
-            title=""
-            description=""
-          />
-        </div>
+      <section className="w-full space-y-5 p-6">
+        <ContentPageHeader
+          breadcrumbs={[{ label: 'Content' }, { label: 'Contact' }]}
+          title="Contact"
+          description="Manage the public Contact page content, office details, and contact form labels."
+        />
 
         {error && (
-          <div
-            role="alert"
-            className="mx-6 mt-4 rounded-lg border border-[#3C50E0]/20 bg-[#3C50E0]/10 px-4 py-3 text-sm text-[#3C50E0]"
-          >
-            {error}
+          <div className="rounded-lg border border-[#E2E8F0] bg-white px-5 py-3">
+            <StatusMessage tone="error">{error}</StatusMessage>
           </div>
         )}
 
         {notice && (
-          <div
-            role="status"
-            className="mx-6 mt-4 rounded-lg border border-[#10B981]/20 bg-[#10B981]/10 px-4 py-3 text-sm text-[#047857]"
-          >
-            {notice}
+          <div className="rounded-lg border border-[#E2E8F0] bg-white px-5 py-3">
+            <StatusMessage tone="success">{notice}</StatusMessage>
           </div>
         )}
 
-        <ContactEditorFields
-          content={content}
-          isLoading={isLoading}
-          isSaving={isSaving}
-          onSave={saveContent}
-          updateContent={updateContent}
-        />
+        {isLoading ? (
+          <div className="rounded-lg border border-[#E2E8F0] bg-white p-8 text-center text-sm text-[#64748B]">
+            Loading Contact page...
+          </div>
+        ) : (
+          <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+            <ContactMainSections
+              content={content}
+              isBusy={isBusy}
+              updateContent={updateContent}
+            />
+            <ContactSidebar
+              isBusy={isBusy}
+              isDefault={isDefault}
+              isLoading={isLoading}
+              isSaving={isSaving}
+              onReset={resetContent}
+              onSave={saveContent}
+            />
+          </div>
+        )}
       </section>
     </AppShell>
   );

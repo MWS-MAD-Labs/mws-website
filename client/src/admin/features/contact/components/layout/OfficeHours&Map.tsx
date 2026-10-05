@@ -7,6 +7,7 @@ import type { ContactEditorSectionProps } from "./types";
 
 export default function OfficeHoursMap({
   content,
+  isBusy = false,
   updateContent,
 }: ContactEditorSectionProps) {
   return (
@@ -16,6 +17,7 @@ export default function OfficeHoursMap({
       </h2>
       <TextField
         label="Office Hours Title"
+        disabled={isBusy}
         value={content.officeHours.title}
         onChange={(value) =>
           updateContent((current) => ({
@@ -27,6 +29,7 @@ export default function OfficeHoursMap({
       <div className="mt-4">
         <TextAreaField
           label="Office Hours Items"
+          disabled={isBusy}
           rows={5}
           value={officeRowsToText(content.officeHours.items)}
           onChange={(value) =>
@@ -43,6 +46,7 @@ export default function OfficeHoursMap({
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         <TextField
           label="Map Section Title"
+          disabled={isBusy}
           value={content.map.title}
           onChange={(value) =>
             updateContent((current) => ({
@@ -53,6 +57,7 @@ export default function OfficeHoursMap({
         />
         <TextField
           label="Map Iframe Title"
+          disabled={isBusy}
           value={content.map.titleAttr}
           onChange={(value) =>
             updateContent((current) => ({
@@ -65,6 +70,7 @@ export default function OfficeHoursMap({
       <div className="mt-4">
         <TextAreaField
           label="Map Embed URL"
+          disabled={isBusy}
           rows={4}
           value={content.map.src}
           onChange={(value) =>
