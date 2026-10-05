@@ -83,7 +83,7 @@ export default function NewsTags({
     setForm((current) => ({
       ...current,
       name: value,
-      slug: current.slug ? current.slug : slugify(value),
+      slug: !current.slug || current.slug === slugify(current.name) ? slugify(value) : current.slug,
     }));
     setErrors((current) => ({ ...current, name: undefined }));
   }
@@ -334,7 +334,7 @@ function TagTableRow({
         <div className="flex items-center justify-end gap-1.5">
           <Button
             aria-label={`Edit ${tag.name}`}
-            className="h-9 w-9 rounded-md p-0"
+            className="h-90 w-90 rounded-md p-0"
             size="sm"
             type="button"
             variant="outline"
@@ -342,10 +342,9 @@ function TagTableRow({
           >
             <Pencil size={14} />
           </Button>
-
           <Button
             aria-label={`Delete ${tag.name}`}
-            className="h-9 w-9 rounded-md p-0"
+            className="h-90 w-90 rounded-md p-0"
             disabled={deletingId === tag.id}
             size="sm"
             type="button"

@@ -327,6 +327,15 @@ function NewsTableRow({
       {/* Actions */}
       <td className="px-5 py-4 align-middle">
         <div className="flex items-center justify-end gap-1.5">
+          <Link
+            to={`${NEWS_LIST_PATH}/${post.id}/edit`}
+            target="_blank"
+            rel="opener"
+            aria-label={`Edit ${post.title} in a new tab`}
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md border border-[#E2E8F0] px-3 text-xs font-semibold text-[#1C2434] transition-colors hover:border-[#3C50E0]/30 hover:bg-[#3C50E0]/5 hover:text-[#3C50E0]"
+          >
+            <Pencil size={14} />
+          </Link>
           <Button
             aria-label={`Delete ${post.title}`}
             className="h-50 w-50 rounded-md p-0"
@@ -338,16 +347,6 @@ function NewsTableRow({
           >
             <Trash2 size={15} />
           </Button>
-
-          <Link
-            to={`${NEWS_LIST_PATH}/${post.id}/edit`}
-            target="_blank"
-            rel="opener"
-            aria-label={`Edit ${post.title} in a new tab`}
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md border border-[#E2E8F0] px-3 text-xs font-semibold text-[#1C2434] transition-colors hover:border-[#3C50E0]/30 hover:bg-[#3C50E0]/5 hover:text-[#3C50E0]"
-          >
-            <Pencil size={14} />
-          </Link>
         </div>
       </td>
     </tr>

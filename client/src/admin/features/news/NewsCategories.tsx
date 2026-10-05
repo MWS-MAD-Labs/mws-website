@@ -90,7 +90,7 @@ export default function NewsCategories({
     setForm((current) => ({
       ...current,
       name: value,
-      slug: current.slug ? current.slug : slugify(value),
+      slug: !current.slug || current.slug === slugify(current.name) ? slugify(value) : current.slug,
     }));
     setErrors((current) => ({ ...current, name: undefined }));
   }
@@ -393,7 +393,7 @@ function CategoryTableRow({
         <div className="flex items-center justify-end gap-1.5">
           <Button
             aria-label={`Edit ${category.name}`}
-            className="h-9 w-9 rounded-md p-0"
+            className="h-90 w-90 rounded-md p-0"
             size="sm"
             type="button"
             variant="outline"
@@ -404,7 +404,7 @@ function CategoryTableRow({
 
           <Button
             aria-label={`Delete ${category.name}`}
-            className="h-9 w-9 rounded-md p-0"
+            className="h-90 w-90 rounded-md p-0"
             disabled={deletingId === category.id}
             size="sm"
             type="button"

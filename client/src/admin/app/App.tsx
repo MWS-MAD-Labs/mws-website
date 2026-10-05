@@ -49,6 +49,7 @@ import CreateUpdateNews from '../features/news/components/CreateUpdateNews';
 import NewsCategories from '../features/news/NewsCategories';
 import NewsTags from '../features/news/NewsTags';
 import { getErrorMessage } from '../features/news/newsUtils';
+import PartnersPage from '../features/partners/pages/PartnersPage';
 
 type RouteMessage = {
   text: string;
@@ -599,6 +600,17 @@ export default function AdminApp() {
             <RequireAuth>
               <RequireContentPermission>
                 <AcademicLevelEditorPage />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="academic/partners"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <PartnersPage />
               </RequireContentPermission>
             </RequireAuth>
           }

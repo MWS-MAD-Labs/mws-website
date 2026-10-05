@@ -76,38 +76,40 @@ export default function Navbar() {
     isHome && isHidden && !isOpen && '-translate-y-full',
   );
 
-  const topNavClassName = ({ isActive }: { isActive: boolean }) =>
-    cx(
-      'relative flex items-center',
-      'font-[var(--f-head)] text-[16px] font-bold',
-      'transition-colors duration-300',
+const topNavClassName = ({ isActive }: { isActive: boolean }) =>
+  cx(
+    'relative flex items-center',
+    'font-[var(--f-head)] text-[16px] font-bold',
+    'transition-colors duration-300',
 
-      useTransparentHomeHeader ? 'text-white' : 'text-[var(--charcoal)]',
+    useTransparentHomeHeader ? 'text-white' : 'text-[var(--charcoal)]',
 
-      'after:absolute after:-bottom-1 after:left-0',
-      'after:h-[2px]',
-      'after:transition-[width,background-color] after:duration-300',
-      'after:content-[""]',
+    'after:absolute after:-bottom-1 after:left-0',
+    'after:h-[2px]',
+    'after:transition-[width,background-color] after:duration-300',
+    'after:content-[""]',
 
-      useTransparentHomeHeader ? 'after:bg-white' : 'after:bg-[var(--burgundy)]',
+    useTransparentHomeHeader ? 'after:bg-white' : 'after:bg-[var(--burgundy)]',
 
-      useTransparentHomeHeader ? 'hover:text-white' : 'hover:text-[var(--burgundy)]',
+    useTransparentHomeHeader ? 'hover:text-white' : 'hover:text-[var(--burgundy)]',
 
-      'hover:after:w-full',
+    'hover:after:w-full',
 
-      isActive && 'font-extrabold after:w-full',
+    isActive && 'font-extrabold after:w-full',
 
-      // Mobile
-      'max-[980px]:min-h-11',
-      'max-[980px]:w-full',
-      'max-[980px]:px-3',
-      'max-[980px]:py-2.5',
-      'max-[980px]:text-[14px]',
-      'max-[980px]:font-bold',
-      'max-[980px]:leading-tight',
-      'max-[980px]:after:hidden',
-      'max-[980px]:hover:bg-[rgba(126,21,24,0.06)]',
-    );
+    // Mobile
+    'max-[980px]:min-h-11',
+    'max-[980px]:w-full',
+    'max-[980px]:px-3',
+    'max-[980px]:py-2.5',
+    'max-[980px]:text-[14px]',
+    'max-[980px]:font-bold',
+    'max-[980px]:leading-tight',
+    'max-[980px]:after:hidden',
+    'max-[980px]:text-[var(--charcoal)]',
+    'max-[980px]:hover:text-[var(--burgundy)]',
+    'max-[980px]:hover:bg-[rgba(126,21,24,0.06)]',
+  );
 
   const dropdownLinkClassName = ({ isActive }: { isActive: boolean }) =>
     cx(
@@ -403,7 +405,7 @@ export default function Navbar() {
                   ].join(' ')
                 : [
                     'max-[980px]:max-h-0',
-                    'max-[980px]:-translate-y-2',
+                    'max-[980px]:-translate-y-3',
                     'max-[980px]:overflow-hidden',
                     'max-[980px]:opacity-0',
                     'max-[980px]:pointer-events-none',

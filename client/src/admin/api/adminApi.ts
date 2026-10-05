@@ -356,6 +356,25 @@ export type AdminNewsPayload = Omit<
   "id" | "createdAt" | "updatedAt"
 >;
 
+export type Partner = {
+  id: string;
+  name: string;
+  description: string;
+  logo: string;
+  link: string | null;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type PartnerPayload = {
+  name: string;
+  description: string;
+  logo: string;
+  link?: string | null;
+  status: string;
+};
+
 export type NewsStatus = "ARCHIVED" | "DRAFT" | "PUBLISHED";
 
 export type NewsCategory = {
@@ -954,6 +973,31 @@ export const adminApi = {
     await apiRequest(`/admin/community-stories/news/${id}`, {
       method: "DELETE",
     });
+  },
+
+  async partners(): Promise<Partner[]> {
+    const response = await apiRequest<{ data: Partner[] }>("/admin/partners");
+    return response?.data ?? [];
+  },
+
+  async createPartner(data: PartnerPayload): Promise<Partner> {
+    const response = await apiRequest<{ data: Partner }>("/admin/partners", {
+      method: "POST",
+      body: data,
+    });
+    return response!.data;
+  },
+
+  async updatePartner(id: string, data: Partial<PartnerPayload>): Promise<Partner> {
+    const response = await apiRequest<{ data: Partner }>("/admin/partners/" + id, {
+      method: "PATCH",
+      body: data,
+    });
+    return response!.data;
+  },
+
+  async deletePartner(id: string): Promise<void> {
+    await apiRequest("/admin/partners/" + id, { method: "DELETE" });
   },
 
   async newsPosts(filters: NewsPostFilters = {}): Promise<NewsPostList> {

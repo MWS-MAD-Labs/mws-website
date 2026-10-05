@@ -382,6 +382,17 @@ model GalleryVideo {
   gallery Gallery @relation(fields: [galleryId], references: [id])
 }
 
+model Partner {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @db.VarChar(225)
+  description String   @db.VarChar(225)
+  logo        String   @db.Text
+  link        String?  @db.Text
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 
 // Not Clear DB
 

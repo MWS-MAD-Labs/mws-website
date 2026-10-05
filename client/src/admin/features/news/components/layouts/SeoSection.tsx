@@ -1,3 +1,4 @@
+// UNUSED — SAFE TO DELETE: SEO fields are now rendered inside ArticleSection for the active CreateUpdateNews page.
 import Field from '@/admin/components/ui/Field';
 import {
   NEWS_INPUT_CLASS,

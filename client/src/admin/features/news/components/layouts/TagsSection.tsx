@@ -1,3 +1,4 @@
+// UNUSED — SAFE TO DELETE: tag selection is now rendered inside PublicationSection for the active CreateUpdateNews page.
 import type { NewsTag } from '@/admin/api/adminApi';
 import EditorSection from './EditorSection';
 

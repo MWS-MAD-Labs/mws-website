@@ -131,6 +131,13 @@ export const menuSections: MenuSection[] = [
             enabled: true,
             requiredPermission: 'content:manage',
           },
+          {
+            label: 'partners',
+            href: '/admin/academic/partners',
+            Icon: Users,
+            enabled: true,
+            requiredPermission: 'content:manage',
+          },
         ],
       },
       {

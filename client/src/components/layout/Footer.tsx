@@ -106,14 +106,7 @@ export default function Footer() {
         <div className="flex items-center justify-between gap-6 pt-8 text-[13px] text-[rgba(248,247,243,0.4)] max-[680px]:flex-col max-[680px]:items-start">
           <p className="m-0">
             &copy;{" "}
-            <Link
-              to="/admin"
-              aria-label="Admin"
-              className="inline-block cursor-pointer px-1 opacity-20 hover:opacity-60"
-            >
-              M
-            </Link>
-            illennia World School. All rights reserved.
+            Millennia World School. All rights reserved.
           </p>
           <div>
             <Link

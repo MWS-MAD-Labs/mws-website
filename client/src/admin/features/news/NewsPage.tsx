@@ -170,6 +170,8 @@ export default function NewsPage() {
     }
   }
 
+
+
   return (
     <AppShell title="News">
       <section className="space-y-5 p-6">

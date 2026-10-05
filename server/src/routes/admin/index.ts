@@ -21,6 +21,7 @@ import { adminNewsRoute } from "./news-route";
 import { adminOurSchoolRoute } from "./our-school-route";
 import { adminAcademicLevelRoute } from "./academic-level-route";
 import { adminAcademicCrudRoute } from "./academic-crud-route";
+import { partnersRoute } from "./partners-route";
 
 export const adminRoute = new Hono<{ Variables: SessionVariables }>();
 
@@ -96,3 +97,5 @@ adminRoute.route("/our-school", adminOurSchoolRoute);
 adminRoute.route("/academic-levels", adminAcademicLevelRoute);
 adminRoute.route("/academic-crud", adminAcademicCrudRoute);
 adminRoute.route("/news", adminNewsRoute);
+
+adminRoute.route("/partners", partnersRoute);

@@ -62,9 +62,10 @@ export default function ProgramAcademic({ programs = defaultPrograms }: ProgramA
             return (
               <article
                 key={program.id}
-                className={`group relative overflow-hidden transition-[flex] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
-                  isActive ? 'flex-[5]' : 'flex-[1]'
-                }`}
+                style={{
+                  flexGrow: isActive ? 5 : 1,
+                }}
+                className="group relative basis-0 overflow-hidden transition-[flex-grow] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
               >
                 {/* Image */}
                 <img

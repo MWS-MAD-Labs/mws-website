@@ -1,15 +1,17 @@
-import { Plus, Trash2 } from 'lucide-react';
-
 import Button from '@/admin/components/ui/Button';
-import EditorSection from './EditorSection';
+import type { NewsForm } from '@/admin/features/news/newsEditorModel';
 
-import { NEWS_INPUT_CLASS, type NewsArticlePhoto } from '@/admin/features/news/newsEditorModel';
+import FormSection from './FormSection';
+import ImageThumb from './ImageThumb';
+import { inputClass } from './formStyles';
+
+type ArticlePhotoField = 'alt' | 'caption';
 
 type ArticlePhotosSectionProps = {
-  photos: NewsArticlePhoto[];
+  photos: NewsForm['articlePhotos'];
   onOpenAssetPicker: () => void;
   onRemovePhoto: (id: string) => void;
-  onChangePhoto: (id: string, field: 'alt' | 'caption', value: string) => void;
+  onChangePhoto: (id: string, field: ArticlePhotoField, value: string) => void;
 };
 
 export default function ArticlePhotosSection({
@@ -19,94 +21,46 @@ export default function ArticlePhotosSection({
   onChangePhoto,
 }: ArticlePhotosSectionProps) {
   return (
-    <EditorSection
-      title="Article Photos"
-      description="Add additional photos that appear with this news article."
+    <FormSection
+      title="Article photos"
       action={
-        <Button type="button" onClick={onOpenAssetPicker}>
-          <Plus size={16} />
-          Add Photo
+        <Button type="button" variant="outline" onClick={onOpenAssetPicker}>
+          Add photo
         </Button>
       }
     >
-      <div className="p-5">
-        {photos.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-[#E2E8F0] bg-[#F1F5F9] px-5 py-8 text-center">
-            <p className="text-sm font-medium text-[#1C2434]">No article photos added</p>
+      {photos.length ? (
+        <ul className="divide-y divide-[#E2E8F0] rounded-lg border border-[#E2E8F0]">
+          {photos.map((photo) => (
+            <li key={photo.id} className="flex items-center gap-3 p-3">
+              <ImageThumb src={photo.previewUrl} alt={photo.alt} className="h-12 w-16" />
 
-            <p className="mt-1 text-sm text-[#64748B]">
-              Add photos that are different from the cover image.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {photos.map((photo, index) => (
-              <div key={photo.id} className="rounded-lg border border-[#E2E8F0] bg-white p-4">
-                <div className="mb-4 flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-[#1C2434]">Photo {index + 1}</p>
-
-                    <p className="mt-0.5 text-xs text-[#64748B]">Additional article image</p>
-                  </div>
-
-                  <Button type="button" variant="ghost" onClick={() => onRemovePhoto(photo.id)}>
-                    <Trash2 size={16} />
-                    Remove
-                  </Button>
-                </div>
-
-                <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)]">
-                  <div className="overflow-hidden rounded-lg border border-[#E2E8F0] bg-[#F1F5F9]">
-                    <div className="aspect-[4/3]">
-                      <img
-                        src={photo.previewUrl}
-                        alt={photo.alt || `Photo ${index + 1}`}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div>
-                      <label
-                        className="mb-1.5 block text-sm font-medium text-[#1C2434]"
-                        htmlFor={`${photo.id}-alt`}
-                      >
-                        Alternative text
-                      </label>
-
-                      <input
-                        id={`${photo.id}-alt`}
-                        className={NEWS_INPUT_CLASS}
-                        placeholder="Describe the image"
-                        value={photo.alt}
-                        onChange={(event) => onChangePhoto(photo.id, 'alt', event.target.value)}
-                      />
-                    </div>
-
-                    <div>
-                      <label
-                        className="mb-1.5 block text-sm font-medium text-[#1C2434]"
-                        htmlFor={`${photo.id}-caption`}
-                      >
-                        Caption
-                      </label>
-
-                      <textarea
-                        id={`${photo.id}-caption`}
-                        className={`${NEWS_INPUT_CLASS} min-h-24 resize-y`}
-                        placeholder="Optional image caption"
-                        value={photo.caption}
-                        onChange={(event) => onChangePhoto(photo.id, 'caption', event.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
+              <div className="grid min-w-0 flex-1 gap-2 sm:grid-cols-2">
+                <input
+                  type="text"
+                  value={photo.alt}
+                  onChange={(event) => onChangePhoto(photo.id, 'alt', event.target.value)}
+                  placeholder="Alt text"
+                  className={inputClass}
+                />
+                <input
+                  type="text"
+                  value={photo.caption}
+                  onChange={(event) => onChangePhoto(photo.id, 'caption', event.target.value)}
+                  placeholder="Caption"
+                  className={inputClass}
+                />
               </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </EditorSection>
+
+              <Button type="button" variant="ghost" onClick={() => onRemovePhoto(photo.id)}>
+                Remove
+              </Button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-sm text-[#64748B]">No article photos yet.</p>
+      )}
+    </FormSection>
   );
 }
