@@ -1,10 +1,15 @@
-import { Image, Maximize2, Trash2 } from "lucide-react";
+import { Image, Trash2 } from "lucide-react";
+
+import Button from "@/admin/components/ui/Button";
+import { publicAssetUrl } from "@/lib/api";
+
 import { TextAreaField, TextField } from "./ContactEditorControls";
 import type { ContactEditorSectionProps } from "./types";
 
 export default function Hero({
   content,
   isBusy = false,
+  onChooseHeroImage,
   updateContent,
 }: ContactEditorSectionProps) {
   return (
@@ -50,20 +55,23 @@ export default function Hero({
             }
           />
 
-          <TextField
-            label="Image"
-            disabled={isBusy}
-            value={content.hero.image}
-            onChange={(value) =>
-              updateContent((current) => ({
-                ...current,
-                hero: {
-                  ...current.hero,
-                  image: value,
-                },
-              }))
-            }
-          />
+          <div>
+            <label className="block text-sm font-semibold text-[#1C2434]">Image</label>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <Button
+                disabled={isBusy}
+                size="sm"
+                type="button"
+                variant="outline"
+                onClick={onChooseHeroImage}
+              >
+                {content.hero.image ? "Change Image" : "Choose Image"}
+              </Button>
+              <span className="min-w-0 truncate text-xs text-[#817678]">
+                {content.hero.image || "No image selected"}
+              </span>
+            </div>
+          </div>
 
           <TextField
             label="Image Alt"
@@ -90,18 +98,21 @@ export default function Hero({
             {content.hero.image ? (
               <>
                 <img
-                  src={content.hero.image}
+                  src={publicAssetUrl(content.hero.image)}
                   alt={content.hero.imageAlt || "Contact page image"}
                   className="aspect-[4/3] w-full object-cover"
                 />
 
-                <button
-                  type="button"
-                  className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-md bg-black/50 text-white opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100"
-                  aria-label="Preview image"
-                >
-                  <Maximize2 size={14} />
-                </button>
+                {onChooseHeroImage ? (
+                  <button
+                    type="button"
+                    disabled={isBusy}
+                    className="absolute bottom-3 right-3 rounded-md bg-black/60 px-3 py-2 text-xs font-semibold text-white backdrop-blur-sm transition-opacity hover:bg-black/70 disabled:cursor-not-allowed disabled:opacity-50"
+                    onClick={onChooseHeroImage}
+                  >
+                    Change Image
+                  </button>
+                ) : null}
               </>
             ) : (
               <div className="flex aspect-[4/3] items-center justify-center">

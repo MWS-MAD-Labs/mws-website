@@ -26,10 +26,16 @@ type InfoSectionProps = {
 const infoShape =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240'%3E%3Cpath fill='%237E1518' fill-opacity='0.08' d='M48.7,-69.6C64.6,-60.1,79.9,-48.5,86.6,-33C93.2,-17.6,91.1,1.7,84,18.5C76.9,35.2,64.8,49.4,50.1,62.4C35.3,75.3,17.6,87.1,0.5,86.4C-16.7,85.8,-33.4,72.7,-49.5,60.1C-65.6,47.5,-81.1,35.4,-85.9,19.8C-90.7,4.2,-84.7,-14.9,-75.7,-31.1C-66.6,-47.3,-54.5,-60.5,-39.5,-70.5C-24.6,-80.4,-12.3,-87.1,2,-89.9C16.4,-92.7,32.8,-79.2,48.7,-69.6Z' transform='translate(120 120)'/%3E%3C/svg%3E\")";
 
+const ALL_FILTER_VALUE = 'all';
+
 export default function InfoSection({ title, filters, cards }: InfoSectionProps) {
-  const [activeFilter, setActiveFilter] = useState(filters[0]?.value ?? '');
+  const [activeFilter, setActiveFilter] = useState(ALL_FILTER_VALUE);
   const slickListRef = useRef<HTMLDivElement>(null);
-  const visibleCards = cards.filter((card) => card.category === activeFilter);
+  const renderedFilters = [{ label: 'All', value: ALL_FILTER_VALUE }, ...filters];
+  const visibleCards =
+    activeFilter === ALL_FILTER_VALUE
+      ? cards
+      : cards.filter((card) => card.category === activeFilter);
 
   return (
     <section
@@ -56,7 +62,7 @@ export default function InfoSection({ title, filters, cards }: InfoSectionProps)
             role="tablist"
             aria-label="Information categories"
           >
-            {filters.map((item) => (
+            {renderedFilters.map((item) => (
               <button
                 key={item.value}
                 className={`relative cursor-pointer border-0 bg-transparent pb-4 text-base font-[var(--f-body)] font-medium text-[var(--charcoal-muted)] outline-none transition-colors duration-200 hover:text-[var(--charcoal-muted)] max-[980px]:flex-[0_0_auto] max-[980px]:text-sm ${
@@ -112,7 +118,7 @@ export default function InfoSection({ title, filters, cards }: InfoSectionProps)
             className="w-full overflow-x-auto scroll-smooth pl-[max(24px,calc((100vw-1200px)/2))] pr-6 [-ms-overflow-style:none] [scrollbar-width:none] max-[980px]:px-5 [&::-webkit-scrollbar]:hidden"
             ref={slickListRef}
           >
-            <div className="flex flex-nowrap gap-0">
+            <div className="flex flex-nowrap gap-3">
               {visibleCards.map((card) => (
                 <div
                   className="group relative w-[300px] flex-[0_0_300px] cursor-pointer overflow-hidden max-[980px]:w-[clamp(230px,42vw,300px)] max-[980px]:flex-[0_0_clamp(230px,42vw,300px)] max-[680px]:w-[min(78vw,280px)] max-[680px]:flex-[0_0_min(78vw,280px)] max-[430px]:w-[min(84vw,260px)] max-[430px]:flex-[0_0_min(84vw,260px)]"

@@ -1,6 +1,8 @@
 import DOMPurify from 'dompurify';
 
+import ContactInquiryForm from '@/features/contact/components/ContactInquiryForm';
 import type { ContactPageContent } from '@/features/contact/contactPageData';
+import { publicAssetUrl } from '@/lib/api';
 
 type ContactPageViewProps = {
   content: ContactPageContent;
@@ -15,7 +17,7 @@ export default function ContactPageView({ content, preview = false }: ContactPag
           <div className="grid items-center gap-8 md:gap-12 lg:grid-cols-[0.9fr_1.1fr ] lg:gap-16">
             <div className="overflow-hidden">
               <img
-                src={content.hero.image}
+                src={publicAssetUrl(content.hero.image)}
                 alt={content.hero.imageAlt}
                 className="block h-[280px] w-full object-cover sm:h-[360px] lg:h-[460px]"
               />
@@ -27,7 +29,7 @@ export default function ContactPageView({ content, preview = false }: ContactPag
               </h1>
 
               <div
-                className="mt-6 text-base leading-7 text-[var(--charcoal-muted)] sm:text-lg sm:leading-8"
+                className="public-rich-text mt-6 text-base leading-7 text-[var(--charcoal-muted)] sm:text-lg sm:leading-8"
                 dangerouslySetInnerHTML={{
                   __html: DOMPurify.sanitize(content.intro || ''),
                 }}
@@ -37,98 +39,98 @@ export default function ContactPageView({ content, preview = false }: ContactPag
         </div>
       </section>
 
-      {/* Contact Information */}
-      <section className="pb-14 md:pb-20">
+      {/* Inquiry Form */}
+      <section id="contact-form" className="pb-14 md:pb-20">
         <div className="wrap">
-          <div className="border-t border-[rgba(36,23,24,0.14)]">
-            <div className="border-b border-[rgba(36,23,24,0.14)] py-6">
-              <h2 className="text-2xl font-semibold tracking-tight text-[var(--charcoal)] sm:text-3xl">
-                {content.directContacts.title}
-              </h2>
-            </div>
+          <div className="mx-auto max-w-3xl border-t border-[rgba(36,23,24,0.14)] pt-10 md:pt-14">
+            <h2 className="text-2xl font-semibold tracking-tight text-[var(--charcoal)] sm:text-3xl">
+              {content.form.title}
+            </h2>
 
-            <div className="grid divide-y divide-[rgba(36,23,24,0.12)] md:grid-cols-2 md:divide-x md:divide-y-0">
-              <div className="py-7 md:py-9 md:pr-10">
-                <h3 className="text-xl font-semibold text-[var(--charcoal)]">
-                  {content.directContacts.heading}
-                </h3>
-
-                <div className="mt-5 space-y-3 text-sm leading-7 text-[var(--charcoal-muted)]">
-                  <p>
-                    Phone:{' '}
-                    <a
-                      href={`tel:${content.directContacts.phone.replace(/[^\d+]/g, '')}`}
-                      className="text-[var(--charcoal)] underline decoration-[rgba(126,21,24,0.25)] underline-offset-4 hover:text-[var(--burgundy)]"
-                    >
-                      {content.directContacts.phone}
-                    </a>
-                  </p>
-
-                  <p>
-                    WhatsApp:{' '}
-                    <a
-                      href={`https://wa.me/${content.directContacts.whatsapp.replace(/\D/g, '')}`}
-                      className="text-[var(--charcoal)] underline decoration-[rgba(126,21,24,0.25)] underline-offset-4 hover:text-[var(--burgundy)]"
-                    >
-                      {content.directContacts.whatsapp}
-                    </a>
-                  </p>
-
-                  <p>
-                    Email:{' '}
-                    <a
-                      href={`mailto:${content.directContacts.email}`}
-                      className="break-words text-[var(--charcoal)] underline decoration-[rgba(126,21,24,0.25)] underline-offset-4 hover:text-[var(--burgundy)]"
-                    >
-                      {content.directContacts.email}
-                    </a>
-                  </p>
-                </div>
-              </div>
-
-              <div className="py-7 md:py-9 md:pl-10">
-                <h3 className="text-xl font-semibold text-[var(--charcoal)]">
-                  {content.address.title}
-                </h3>
-
-                <div className="mt-5 text-sm leading-7 text-[var(--charcoal-muted)]">
-                  <strong className="font-semibold text-[var(--charcoal)]">
-                    {content.address.name}
-                  </strong>
-
-                  {content.address.lines.map((line, index) => (
-                    <span key={`${line}-${index}`} className="block">
-                      {line}
-                    </span>
-                  ))}
-                </div>
-              </div>
+            <div className="mt-6 min-w-0">
+              <ContactInquiryForm form={content.form} preview={preview} />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Opening Hours */}
+      {/* Contact Information & Office Hours */}
       <section className="border-y border-[rgba(36,23,24,0.1)] bg-[#faf8f5] py-14 sm:py-16 md:py-20">
         <div className="wrap">
-          <div className="grid gap-8 md:grid-cols-[0.7fr_1.3fr] md:gap-12 lg:gap-20">
-            <div>
-              <h2 className="text-2xl font-semibold tracking-tight text-[var(--charcoal)] sm:text-3xl">
-                {content.officeHours.title}
-              </h2>
+          <h2 className="text-2xl font-semibold tracking-tight text-[var(--charcoal)] sm:text-3xl">
+            {content.directContacts.title}
+          </h2>
+
+          <div className="mt-8 grid divide-y divide-[rgba(36,23,24,0.12)] border-t border-[rgba(36,23,24,0.14)] md:grid-cols-3 md:divide-x md:divide-y-0">
+            <div className="min-w-0 py-7 md:py-9 md:pr-8 lg:pr-10">
+              <h3 className="text-xl font-semibold text-[var(--charcoal)]">
+                {content.directContacts.heading}
+              </h3>
+
+              <div className="mt-5 space-y-3 text-sm leading-7 text-[var(--charcoal-muted)]">
+                <p>
+                  Phone:{' '}
+                  <a
+                    href={`tel:${content.directContacts.phone.replace(/[^\d+]/g, '')}`}
+                    className="text-[var(--charcoal)] underline decoration-[rgba(126,21,24,0.25)] underline-offset-4 hover:text-[var(--burgundy)]"
+                  >
+                    {content.directContacts.phone}
+                  </a>
+                </p>
+
+                <p>
+                  WhatsApp:{' '}
+                  <a
+                    href={`https://wa.me/${content.directContacts.whatsapp.replace(/\D/g, '')}`}
+                    className="text-[var(--charcoal)] underline decoration-[rgba(126,21,24,0.25)] underline-offset-4 hover:text-[var(--burgundy)]"
+                  >
+                    {content.directContacts.whatsapp}
+                  </a>
+                </p>
+
+                <p>
+                  Email:{' '}
+                  <a
+                    href={`mailto:${content.directContacts.email}`}
+                    className="break-words text-[var(--charcoal)] underline decoration-[rgba(126,21,24,0.25)] underline-offset-4 hover:text-[var(--burgundy)]"
+                  >
+                    {content.directContacts.email}
+                  </a>
+                </p>
+              </div>
             </div>
 
-            <div className="border-t border-[rgba(36,23,24,0.14)]">
-              {content.officeHours.items.map((item, index) => (
-                <div
-                  key={`${item.title}-${index}`}
-                  className="grid gap-2 border-b border-[rgba(36,23,24,0.12)] py-5 sm:grid-cols-[180px_1fr] sm:gap-8"
-                >
-                  <p className="font-semibold text-[var(--charcoal)]">{item.title}</p>
+            <div className="min-w-0 py-7 md:px-8 md:py-9 lg:px-10">
+              <h3 className="text-xl font-semibold text-[var(--charcoal)]">
+                {content.address.title}
+              </h3>
 
-                  <p className="text-sm leading-6 text-[var(--charcoal-muted)]">{item.text}</p>
-                </div>
-              ))}
+              <div className="mt-5 text-sm leading-7 text-[var(--charcoal-muted)]">
+                <strong className="font-semibold text-[var(--charcoal)]">
+                  {content.address.name}
+                </strong>
+
+                {content.address.lines.map((line, index) => (
+                  <span key={`${line}-${index}`} className="block">
+                    {line}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="min-w-0 py-7 md:py-9 md:pl-8 lg:pl-10">
+              <h3 className="text-xl font-semibold text-[var(--charcoal)]">
+                {content.officeHours.title}
+              </h3>
+
+              <dl className="mt-5 space-y-3 text-sm leading-6">
+                {content.officeHours.items.map((item, index) => (
+                  <div key={`${item.title}-${index}`}>
+                    <dt className="font-semibold text-[var(--charcoal)]">{item.title}</dt>
+                    <dd className="text-[var(--charcoal-muted)]">{item.text}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
           </div>
         </div>

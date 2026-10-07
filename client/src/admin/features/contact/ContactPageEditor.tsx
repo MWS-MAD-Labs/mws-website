@@ -1,14 +1,32 @@
+import { useState } from 'react';
+
 import AppShell from '@/admin/components/layout/AppShell';
 import ContentPageHeader from '@/admin/components/ui/ContentPageHeader';
 import StatusMessage from '@/admin/components/ui/StatusMessage';
+import CoverImagePickerModal from '@/admin/features/news/components/layouts/CoverImagePickerModal';
 import ContactMainSections from './components/layout/ContactMainSections';
 import ContactSidebar from './components/layout/ContactSidebar';
 import { useContactPageEditor } from './hooks/useContactPageEditor';
 
 export default function ContactPageEditor() {
-  const { content, error, isDefault, isLoading, isSaving, notice, resetContent, saveContent, updateContent } =
-    useContactPageEditor();
-  const isBusy = isLoading || isSaving;
+  const [isHeroImagePickerOpen, setIsHeroImagePickerOpen] = useState(false);
+  const {
+    content,
+    error,
+    galleries,
+    hasPendingMap,
+    isDefault,
+    isLoading,
+    isSaving,
+    isUploadingImage,
+    notice,
+    resetContent,
+    saveContent,
+    updateContent,
+    updateMapPending,
+    uploadHeroImage,
+  } = useContactPageEditor();
+  const isBusy = isLoading || isSaving || isUploadingImage;
 
   return (
     <AppShell title="Contact">
@@ -40,18 +58,40 @@ export default function ContactPageEditor() {
             <ContactMainSections
               content={content}
               isBusy={isBusy}
+              onChooseHeroImage={() => setIsHeroImagePickerOpen(true)}
               updateContent={updateContent}
+              onMapPendingChange={updateMapPending}
             />
             <ContactSidebar
+              hasPendingMap={hasPendingMap}
               isBusy={isBusy}
               isDefault={isDefault}
               isLoading={isLoading}
               isSaving={isSaving}
+              isUploadingImage={isUploadingImage}
               onReset={resetContent}
               onSave={saveContent}
             />
           </div>
         )}
+
+        <CoverImagePickerModal
+          galleries={galleries}
+          open={isHeroImagePickerOpen}
+          title="Choose contact image"
+          onClose={() => setIsHeroImagePickerOpen(false)}
+          onSelect={(selection) => {
+            updateContent((current) => ({
+              ...current,
+              hero: {
+                ...current.hero,
+                image: selection.path,
+                imageAlt: selection.alt || current.hero.imageAlt,
+              },
+            }));
+          }}
+          onSelectLocalFile={(file) => void uploadHeroImage(file)}
+        />
       </section>
     </AppShell>
   );

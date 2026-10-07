@@ -1,17 +1,26 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Eye, ImagePlus, Pencil, Plus, RotateCcw, Save, Trash2 } from 'lucide-react';
-import { adminApi, type GalleryItem, type HeroSlideFormData } from '@/admin/api/adminApi';
+import {
+  adminApi,
+  type CampusSpotlightItem,
+  type GalleryItem,
+  type HeroSlideFormData,
+  type NewsCategory,
+} from '@/admin/api/adminApi';
 import AppShell from '@/admin/components/layout/AppShell';
 import Button from '@/admin/components/ui/Button';
 import Field from '@/admin/components/ui/Field';
 import StatusMessage from '@/admin/components/ui/StatusMessage';
 import GalleryAssetPickerModal from '@/admin/features/gallery/components/GalleryAssetPickerModal';
+import { uploadImageForPicker } from '@/admin/features/gallery/utils/uploadImageForPicker';
+import CoverImagePickerModal from '@/admin/features/news/components/layouts/CoverImagePickerModal';
 import type {
   HeroSlideMediaType,
   HeroSlideSourceType,
   ResolvedHeroSlide,
 } from '@/features/hero/heroData';
 import HeaderHero from './components/layouts/HeaderHero';
+import { useToastState } from '@/admin/components/ui/toastContext';
 
 type FormState = {
   caption: string;
@@ -52,6 +61,38 @@ const emptyForm: FormState = {
   sortOrder: '0',
   sourceType: 'MANUAL',
   title: '',
+};
+
+const heroCtaLinkOptions = [
+  { label: 'Default: Admission', value: '' },
+  { label: 'Admission', value: '/admission' },
+  { label: 'Book a Tour', value: '/book-a-tour' },
+  { label: 'Academic', value: '/academic' },
+  { label: 'Our School', value: '/our-school' },
+  { label: 'News', value: '/news' },
+  { label: 'Community Stories', value: '/community-stories' },
+  { label: 'Contact', value: '/contact' },
+  { label: 'Admission FAQ', value: '/admission/faq' },
+  { label: 'Admission Guidelines', value: '/admission/guidelines' },
+];
+
+type HomeSettingsForm = {
+  infoSectionCategoryIds: string[];
+  infoSectionTitle: string;
+};
+
+type SpotlightForm = {
+  cite: string;
+  isActive: boolean;
+  sortOrder: string;
+  text: string;
+};
+
+const emptySpotlightForm: SpotlightForm = {
+  cite: '',
+  isActive: true,
+  sortOrder: '0',
+  text: '',
 };
 
 function optionalText(value: string) {
@@ -213,12 +254,22 @@ function HomeHeroPreview({
 export default function HeroSlidesPage() {
   const [slides, setSlides] = useState<ResolvedHeroSlide[]>([]);
   const [galleries, setGalleries] = useState<GalleryItem[]>([]);
+  const [newsCategories, setNewsCategories] = useState<NewsCategory[]>([]);
+  const [homeSettings, setHomeSettings] = useState<HomeSettingsForm>({
+    infoSectionCategoryIds: [],
+    infoSectionTitle: 'Everything you need to know about joining MWS.',
+  });
+  const [spotlights, setSpotlights] = useState<CampusSpotlightItem[]>([]);
+  const [editingSpotlightId, setEditingSpotlightId] = useState<string | null>(null);
+  const [spotlightForm, setSpotlightForm] = useState<SpotlightForm>(emptySpotlightForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
+  const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
   const [isAssetPickerOpen, setIsAssetPickerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [message, setMessage] = useToastState<string | null>(null);
 
   const editingSlide = useMemo(
     () => slides.find((slide) => slide.id === editingId) ?? null,
@@ -228,15 +279,25 @@ export default function HeroSlidesPage() {
   const previewSlide = previewFromForm(form);
   const activeSlideCount = slides.filter((slide) => slide.isActive).length;
   const readySlideCount = slides.filter((slide) => slideStatus(slide) === 'Ready').length;
+  const isBusy = isLoading || isSaving || isUploadingImage;
 
   async function loadSlides() {
-    const [nextSlides, nextGalleries] = await Promise.all([
+    const [nextSlides, nextGalleries, homeContent] = await Promise.all([
       adminApi.heroSlides(),
       adminApi.galleries(),
+      adminApi.homeContent(),
     ]);
 
     setSlides(nextSlides);
     setGalleries(nextGalleries);
+    setNewsCategories(homeContent.categories);
+    setSpotlights(homeContent.spotlights);
+    setHomeSettings({
+      infoSectionCategoryIds:
+        homeContent.settings.infoSectionCategoryIds ??
+        (homeContent.settings.infoSectionCategoryId ? [homeContent.settings.infoSectionCategoryId] : []),
+      infoSectionTitle: homeContent.settings.infoSectionTitle,
+    });
 
     return nextSlides;
   }
@@ -257,7 +318,7 @@ export default function HeroSlidesPage() {
         )
         .finally(() => setIsLoading(false));
     });
-  }, []);
+  }, [setMessage]);
 
   function startNewSlide() {
     setEditingId(null);
@@ -327,6 +388,130 @@ export default function HeroSlidesPage() {
     }
   }
 
+  async function uploadHeroImage(file: File) {
+    setIsUploadingImage(true);
+    setMessage(null);
+
+    try {
+      const uploaded = await uploadImageForPicker({
+        caption: form.title || 'Home hero slide',
+        fallbackGalleryTitle: 'Home Hero Images',
+        file,
+        galleries,
+      });
+
+      setGalleries(uploaded.galleries);
+      setForm((current) => ({
+        ...current,
+        mediaAlt: uploaded.alt,
+        mediaPath: uploaded.path,
+        mediaType: 'IMAGE',
+        posterPath: '',
+      }));
+      setMessage('Hero image uploaded. Save slide to publish it.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Failed to upload hero image.');
+    } finally {
+      setIsUploadingImage(false);
+    }
+  }
+
+  async function saveHomeSettings() {
+    setIsSaving(true);
+    setMessage(null);
+
+    try {
+      const data = await adminApi.updateHomeContentSettings({
+        infoSectionTitle: homeSettings.infoSectionTitle,
+        infoSectionCategoryIds: homeSettings.infoSectionCategoryIds,
+      });
+      setNewsCategories(data.categories);
+      setSpotlights(data.spotlights);
+      setHomeSettings({
+        infoSectionCategoryIds:
+          data.settings.infoSectionCategoryIds ??
+          (data.settings.infoSectionCategoryId ? [data.settings.infoSectionCategoryId] : []),
+        infoSectionTitle: data.settings.infoSectionTitle,
+      });
+      setMessage('Home info section settings saved.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Failed to save home settings.');
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  function editSpotlight(spotlight: CampusSpotlightItem) {
+    setEditingSpotlightId(spotlight.id);
+    setSpotlightForm({
+      cite: spotlight.cite,
+      isActive: spotlight.isActive,
+      sortOrder: String(spotlight.sortOrder),
+      text: spotlight.text,
+    });
+  }
+
+  function startNewSpotlight() {
+    setEditingSpotlightId(null);
+    setSpotlightForm({
+      ...emptySpotlightForm,
+      sortOrder: String(spotlights.length),
+    });
+  }
+
+  async function saveSpotlight(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsSaving(true);
+    setMessage(null);
+
+    try {
+      const payload = {
+        cite: spotlightForm.cite,
+        isActive: spotlightForm.isActive,
+        sortOrder: Number.parseInt(spotlightForm.sortOrder, 10) || 0,
+        text: spotlightForm.text,
+      };
+      if (editingSpotlightId) {
+        await adminApi.updateCampusSpotlight(editingSpotlightId, payload);
+        setMessage('Campus spotlight updated.');
+      } else {
+        await adminApi.createCampusSpotlight(payload);
+        setMessage('Campus spotlight created.');
+      }
+      setEditingSpotlightId(null);
+      setSpotlightForm(emptySpotlightForm);
+      const data = await adminApi.homeContent();
+      setSpotlights(data.spotlights);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Failed to save campus spotlight.');
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function deleteSpotlight(id: string) {
+    const confirmed = window.confirm('Delete this campus spotlight? This action cannot be undone.');
+    if (!confirmed) return;
+
+    setIsSaving(true);
+    setMessage(null);
+
+    try {
+      await adminApi.deleteCampusSpotlight(id);
+      if (editingSpotlightId === id) {
+        setEditingSpotlightId(null);
+        setSpotlightForm(emptySpotlightForm);
+      }
+      const data = await adminApi.homeContent();
+      setSpotlights(data.spotlights);
+      setMessage('Campus spotlight deleted.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Failed to delete campus spotlight.');
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   return (
     <AppShell title="Home Hero">
       <section className="space-y-5 p-6">
@@ -335,7 +520,7 @@ export default function HeroSlidesPage() {
 
           <Button
             className="inline-flex items-center gap-2"
-            disabled={isSaving || isLoading}
+            disabled={isBusy}
             type="button"
             onClick={startNewSlide}
           >
@@ -557,13 +742,22 @@ export default function HeroSlidesPage() {
 
                   <Button
                     className="inline-flex items-center gap-2"
-                    disabled={isSaving || isLoading}
+                    disabled={isBusy}
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsImagePickerOpen(true)}
+                  >
+                    <ImagePlus size={15} />
+                    Choose Image
+                  </Button>
+                  <Button
+                    className="inline-flex items-center gap-2"
+                    disabled={isBusy}
                     type="button"
                     variant="outline"
                     onClick={() => setIsAssetPickerOpen(true)}
                   >
-                    <ImagePlus size={15} />
-                    Choose
+                    Choose Video
                   </Button>
                 </div>
 
@@ -612,6 +806,29 @@ export default function HeroSlidesPage() {
                     }
                   />
                 </Field>
+
+                <Field label="Button Link">
+                  <select
+                    className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
+                    value={form.ctaUrl}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        ctaUrl: event.target.value,
+                      }))
+                    }
+                  >
+                    {heroCtaLinkOptions.map((option) => (
+                      <option key={option.label} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                    {form.ctaUrl &&
+                    !heroCtaLinkOptions.some((option) => option.value === form.ctaUrl) ? (
+                      <option value={form.ctaUrl}>Current custom link: {form.ctaUrl}</option>
+                    ) : null}
+                  </select>
+                </Field>
               </div>
 
               <div className="grid gap-3 rounded-lg border border-[#E2E8F0] p-4 text-sm text-[#1C2434]">
@@ -651,28 +868,279 @@ export default function HeroSlidesPage() {
 
                 <Button
                   className="inline-flex items-center gap-2"
-                  disabled={isSaving}
+                  disabled={isBusy}
                   type="submit"
                 >
                   <Save size={15} />
-                  {isSaving ? 'Saving...' : 'Save'}
+                  {isUploadingImage ? 'Uploading...' : isSaving ? 'Saving...' : 'Save'}
                 </Button>
               </div>
             </div>
           </form>
         </div>
 
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
+          <section className="rounded-lg border border-[#E2E8F0] bg-white">
+            <div className="border-b border-[#E2E8F0] px-5 py-4">
+              <h2 className="text-base font-semibold text-[#1C2434]">Info Section</h2>
+              <p className="mt-1 text-sm text-[#64748B]">
+                Choose the News category used by the Home information cards.
+              </p>
+            </div>
+            <div className="grid gap-4 p-5">
+              <Field label="Section title">
+                <input
+                  className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
+                  disabled={isBusy}
+                  value={homeSettings.infoSectionTitle}
+                  onChange={(event) =>
+                    setHomeSettings((current) => ({
+                      ...current,
+                      infoSectionTitle: event.target.value,
+                    }))
+                  }
+                />
+              </Field>
+              <Field as="div" label="News categories">
+                <div className="grid gap-2 rounded-lg border border-[#E2E8F0] p-3">
+                  <p className="text-xs text-[#64748B]">
+                    Choose up to 5 categories. Public Home will show these as Info Section tabs.
+                  </p>
+                  {newsCategories.map((category) => {
+                    const isSelected = homeSettings.infoSectionCategoryIds.includes(category.id);
+                    const isLimitReached =
+                      !isSelected && homeSettings.infoSectionCategoryIds.length >= 5;
+
+                    return (
+                      <label
+                        className={[
+                          'flex items-center gap-2 text-sm',
+                          isLimitReached ? 'text-[#94A3B8]' : 'text-[#1C2434]',
+                        ].join(' ')}
+                        key={category.id}
+                      >
+                        <input
+                          checked={isSelected}
+                          disabled={isBusy || isLimitReached}
+                          type="checkbox"
+                          onChange={(event) =>
+                            setHomeSettings((current) => {
+                              if (event.target.checked) {
+                                return {
+                                  ...current,
+                                  infoSectionCategoryIds: [
+                                    ...current.infoSectionCategoryIds,
+                                    category.id,
+                                  ].slice(0, 5),
+                                };
+                              }
+
+                              return {
+                                ...current,
+                                infoSectionCategoryIds: current.infoSectionCategoryIds.filter(
+                                  (categoryId) => categoryId !== category.id,
+                                ),
+                              };
+                            })
+                          }
+                        />
+                        <span className="flex min-w-0 flex-1 items-center justify-between gap-3">
+                          <span className="truncate">
+                            {category.name}
+                            {category.isActive ? '' : ' (inactive)'}
+                          </span>
+                          <span className="shrink-0 rounded-md bg-[#F1F5F9] px-2 py-0.5 text-xs font-semibold text-[#64748B]">
+                            {category._count?.posts ?? 0}
+                          </span>
+                        </span>
+                      </label>
+                    );
+                  })}
+                  <div className="flex items-center justify-between border-t border-[#E2E8F0] pt-2 text-xs text-[#64748B]">
+                    <span>{homeSettings.infoSectionCategoryIds.length}/5 selected</span>
+                    {homeSettings.infoSectionCategoryIds.length ? (
+                      <button
+                        className="font-semibold text-[#3C50E0]"
+                        disabled={isBusy}
+                        type="button"
+                        onClick={() =>
+                          setHomeSettings((current) => ({
+                            ...current,
+                            infoSectionCategoryIds: [],
+                          }))
+                        }
+                      >
+                        Use default cards
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+              </Field>
+              <div className="flex justify-end">
+                <Button disabled={isBusy} type="button" onClick={() => void saveHomeSettings()}>
+                  {isSaving ? 'Saving...' : 'Save Info Section'}
+                </Button>
+              </div>
+            </div>
+          </section>
+
+          <form className="rounded-lg border border-[#E2E8F0] bg-white" onSubmit={saveSpotlight}>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-4">
+              <div>
+                <h2 className="text-base font-semibold text-[#1C2434]">Campus Spotlight</h2>
+                <p className="mt-1 text-sm text-[#64748B]">
+                  Text-only spotlight content shown on Home.
+                </p>
+              </div>
+              <Button disabled={isBusy} size="sm" type="button" variant="outline" onClick={startNewSpotlight}>
+                <Plus size={15} />
+                New
+              </Button>
+            </div>
+            <div className="grid gap-4 p-5">
+              <Field label="Text">
+                <textarea
+                  className="min-h-24 rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
+                  disabled={isBusy}
+                  required
+                  value={spotlightForm.text}
+                  onChange={(event) =>
+                    setSpotlightForm((current) => ({
+                      ...current,
+                      text: event.target.value,
+                    }))
+                  }
+                />
+              </Field>
+              <Field label="Cite">
+                <input
+                  className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
+                  disabled={isBusy}
+                  required
+                  value={spotlightForm.cite}
+                  onChange={(event) =>
+                    setSpotlightForm((current) => ({
+                      ...current,
+                      cite: event.target.value,
+                    }))
+                  }
+                />
+              </Field>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Field label="Sort order">
+                  <input
+                    className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
+                    disabled={isBusy}
+                    type="number"
+                    value={spotlightForm.sortOrder}
+                    onChange={(event) =>
+                      setSpotlightForm((current) => ({
+                        ...current,
+                        sortOrder: event.target.value,
+                      }))
+                    }
+                  />
+                </Field>
+                <label className="mt-6 flex items-center gap-2 text-sm text-[#1C2434]">
+                  <input
+                    checked={spotlightForm.isActive}
+                    disabled={isBusy}
+                    type="checkbox"
+                    onChange={(event) =>
+                      setSpotlightForm((current) => ({
+                        ...current,
+                        isActive: event.target.checked,
+                      }))
+                    }
+                  />
+                  Active
+                </label>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button disabled={isBusy} type="submit">
+                  {isSaving ? 'Saving...' : editingSpotlightId ? 'Update Spotlight' : 'Create Spotlight'}
+                </Button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <section className="overflow-hidden rounded-lg border border-[#E2E8F0] bg-white">
+          <div className="border-b border-[#E2E8F0] px-5 py-4">
+            <h2 className="text-base font-semibold text-[#1C2434]">Campus Spotlight List</h2>
+          </div>
+          {!spotlights.length ? (
+            <div className="p-5 text-sm text-[#64748B]">No campus spotlight content yet.</div>
+          ) : (
+            <div className="divide-y divide-[#E2E8F0]">
+              {spotlights.map((spotlight) => (
+                <div
+                  key={spotlight.id}
+                  className="grid gap-3 px-5 py-4 md:grid-cols-[minmax(0,1fr)_120px_150px] md:items-center"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-[#1C2434]">
+                      {spotlight.cite}
+                    </p>
+                    <p className="truncate text-sm text-[#64748B]">{spotlight.text}</p>
+                  </div>
+                  <span className="text-sm text-[#64748B]">
+                    {spotlight.isActive ? 'Active' : 'Hidden'}
+                  </span>
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      disabled={isBusy}
+                      size="sm"
+                      type="button"
+                      variant="danger"
+                      onClick={() => void deleteSpotlight(spotlight.id)}
+                    >
+                      Delete
+                    </Button>
+                    <Button
+                      disabled={isBusy}
+                      size="sm"
+                      type="button"
+                      variant="outline"
+                      onClick={() => editSpotlight(spotlight)}
+                    >
+                      Edit
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <CoverImagePickerModal
+          galleries={galleries}
+          open={isImagePickerOpen}
+          title="Choose Hero Image"
+          onClose={() => setIsImagePickerOpen(false)}
+          onSelect={(asset) =>
+            setForm((current) => ({
+              ...current,
+              mediaAlt: asset.alt,
+              mediaPath: asset.path,
+              mediaType: 'IMAGE',
+              posterPath: '',
+            }))
+          }
+          onSelectLocalFile={(file) => void uploadHeroImage(file)}
+        />
         <GalleryAssetPickerModal
+          allowedKinds={['VIDEO']}
           galleries={galleries}
           open={isAssetPickerOpen}
-          title="Choose Hero Media"
+          title="Choose Hero Video"
           onClose={() => setIsAssetPickerOpen(false)}
           onSelect={(asset) =>
             setForm((current) => ({
               ...current,
               mediaAlt: asset.alt,
               mediaPath: asset.path,
-              mediaType: asset.kind,
+              mediaType: 'VIDEO',
             }))
           }
         />

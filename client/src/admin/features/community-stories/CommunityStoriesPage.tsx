@@ -11,9 +11,11 @@ import ContentPageHeader from '@/admin/components/ui/ContentPageHeader';
 import Button from '@/admin/components/ui/Button';
 import Field from '@/admin/components/ui/Field';
 import StatusMessage from '@/admin/components/ui/StatusMessage';
-import GalleryAssetPickerModal from '@/admin/features/gallery/components/GalleryAssetPickerModal';
 import GalleryPickerModal from '@/admin/features/gallery/components/GalleryPickerModal';
 import GalleryThumb from '@/admin/features/gallery/components/GalleryThumb';
+import { uploadImageForPicker } from '@/admin/features/gallery/utils/uploadImageForPicker';
+import CoverImagePickerModal from '@/admin/features/news/components/layouts/CoverImagePickerModal';
+import { useToastState } from '@/admin/components/ui/toastContext';
 
 type PageForm = {
   galleryId: string | null;
@@ -110,7 +112,8 @@ export default function CommunityStoriesPage() {
   const [isNewsAssetPickerOpen, setIsNewsAssetPickerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [message, setMessage] = useToastState<string | null>(null);
 
   const selectedGallery = useMemo(
     () => galleries.find((gallery) => gallery.id === pageForm?.galleryId) ?? null,
@@ -140,7 +143,7 @@ export default function CommunityStoriesPage() {
         )
         .finally(() => setIsLoading(false));
     });
-  }, []);
+  }, [setMessage]);
 
   async function savePage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -213,6 +216,68 @@ export default function CommunityStoriesPage() {
     }
   }
 
+  async function uploadPageHeroImage(file: File) {
+    if (!pageForm) return;
+
+    setIsUploadingImage(true);
+    setMessage(null);
+
+    try {
+      const uploaded = await uploadImageForPicker({
+        caption: pageForm.title,
+        fallbackGalleryTitle: 'Community Stories Images',
+        file,
+        galleries,
+        preferredGalleryId: pageForm.galleryId,
+      });
+
+      setGalleries(uploaded.galleries);
+      setPageForm((current) =>
+        current
+          ? {
+              ...current,
+              galleryId: current.galleryId ?? uploaded.galleryId,
+              heroImageAlt: uploaded.alt,
+              heroImagePath: uploaded.path,
+            }
+          : current,
+      );
+      setMessage('Hero image uploaded. Save page to publish it.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Failed to upload hero image.');
+    } finally {
+      setIsUploadingImage(false);
+    }
+  }
+
+  async function uploadNewsImage(file: File) {
+    setIsUploadingImage(true);
+    setMessage(null);
+
+    try {
+      const uploaded = await uploadImageForPicker({
+        caption: newsForm.title || 'Community news image',
+        fallbackGalleryTitle: 'Community Stories Images',
+        file,
+        galleries,
+        preferredGalleryId: newsForm.galleryId,
+      });
+
+      setGalleries(uploaded.galleries);
+      setNewsForm((current) => ({
+        ...current,
+        galleryId: current.galleryId ?? uploaded.galleryId,
+        imageAlt: uploaded.alt,
+        imagePath: uploaded.path,
+      }));
+      setMessage('News image uploaded. Save news to publish it.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Failed to upload news image.');
+    } finally {
+      setIsUploadingImage(false);
+    }
+  }
+
   return (
     <AppShell title="Community Stories">
       <section className="space-y-5 p-6">
@@ -243,8 +308,8 @@ export default function CommunityStoriesPage() {
                   <h1 className="text-lg font-semibold text-[#1C2434]">Page Content</h1>
                   <p className="text-sm text-[#64748B]">Hero, intro copy, and connected gallery.</p>
                 </div>
-                <Button disabled={isSaving} type="submit">
-                  {isSaving ? 'Saving...' : 'Save Page'}
+                <Button disabled={isSaving || isUploadingImage} type="submit">
+                  {isUploadingImage ? 'Uploading...' : isSaving ? 'Saving...' : 'Save Page'}
                 </Button>
               </div>
 
@@ -273,6 +338,7 @@ export default function CommunityStoriesPage() {
                         size="sm"
                         type="button"
                         variant="outline"
+                        disabled={isSaving || isUploadingImage}
                         onClick={() => setIsHeroAssetPickerOpen(true)}
                       >
                         Choose Image
@@ -425,6 +491,7 @@ export default function CommunityStoriesPage() {
                         size="sm"
                         type="button"
                         variant="outline"
+                        disabled={isSaving || isUploadingImage}
                         onClick={() => setIsNewsAssetPickerOpen(true)}
                       >
                         Choose Image
@@ -509,8 +576,8 @@ export default function CommunityStoriesPage() {
                   >
                     Clear
                   </Button>
-                  <Button disabled={isSaving} type="submit">
-                    {isSaving ? 'Saving...' : 'Save News'}
+                  <Button disabled={isSaving || isUploadingImage} type="submit">
+                    {isUploadingImage ? 'Uploading...' : isSaving ? 'Saving...' : 'Save News'}
                   </Button>
                 </div>
               </div>
@@ -584,10 +651,8 @@ export default function CommunityStoriesPage() {
           onClose={() => setIsNewsGalleryPickerOpen(false)}
           onSelect={(galleryId) => setNewsForm((current) => ({ ...current, galleryId }))}
         />
-        <GalleryAssetPickerModal
-          allowedKinds={['IMAGE']}
+        <CoverImagePickerModal
           galleries={galleries}
-          initialGalleryId={pageForm?.galleryId ?? null}
           open={isHeroAssetPickerOpen}
           title="Choose Hero Image"
           onClose={() => setIsHeroAssetPickerOpen(false)}
@@ -603,11 +668,10 @@ export default function CommunityStoriesPage() {
                 : current,
             )
           }
+          onSelectLocalFile={(file) => void uploadPageHeroImage(file)}
         />
-        <GalleryAssetPickerModal
-          allowedKinds={['IMAGE']}
+        <CoverImagePickerModal
           galleries={galleries}
-          initialGalleryId={newsForm.galleryId}
           open={isNewsAssetPickerOpen}
           title="Choose News Image"
           onClose={() => setIsNewsAssetPickerOpen(false)}
@@ -619,6 +683,7 @@ export default function CommunityStoriesPage() {
               imagePath: asset.path,
             }))
           }
+          onSelectLocalFile={(file) => void uploadNewsImage(file)}
         />
       </section>
     </AppShell>

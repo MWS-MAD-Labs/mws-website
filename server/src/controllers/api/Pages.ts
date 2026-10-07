@@ -47,6 +47,18 @@ export class PublicPagesController {
       return c.json({ data: toJsonSafe(await PageDataService.getAdmissions()) });
     }
 
+    if (slug === "admission-faq") {
+      return c.json({
+        data: toJsonSafe(await PageDataService.getAdmissionFaq()),
+      });
+    }
+
+    if (slug === "admission-guidelines") {
+      return c.json({
+        data: toJsonSafe(await PageDataService.getAdmissionGuidelines()),
+      });
+    }
+
     if (slug === "our-school") {
       return c.json({ data: toJsonSafe(await PageDataService.getOurSchool()) });
     }
@@ -54,6 +66,12 @@ export class PublicPagesController {
     if (slug === "community-stories") {
       return c.json({
         data: toJsonSafe(await PageDataService.getCommunityStories()),
+      });
+    }
+
+    if (slug === "academic-overview") {
+      return c.json({
+        data: toJsonSafe(await PageDataService.getAcademicOverview()),
       });
     }
 

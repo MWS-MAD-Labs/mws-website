@@ -1,7 +1,8 @@
 import AppShell from '@/admin/components/layout/AppShell';
 import ContentPageHeader from '@/admin/components/ui/ContentPageHeader';
 import StatusMessage from '@/admin/components/ui/StatusMessage';
-import GalleryAssetPickerModal from '@/admin/features/gallery/components/GalleryAssetPickerModal';
+import GalleryPickerModal from '@/admin/features/gallery/components/GalleryPickerModal';
+import CoverImagePickerModal from '@/admin/features/news/components/layouts/CoverImagePickerModal';
 
 import AdmissionsProgramsForm from './components/layout/AdmissionsProgramsForm';
 import AdmissionsSidebar from './components/layout/AdmissionsSidebar';
@@ -10,13 +11,17 @@ import { useAdmissionsEditor } from './hooks/useAdmissionsEditor';
 export default function AdmissionsPage() {
   const editor = useAdmissionsEditor();
   const {
-    assetPickerProgramId,
+    activeImageTarget,
     galleries,
+    galleryId,
+    isGalleryPickerOpen,
     isLoading,
     message,
-    selectedProgram,
-    selectProgramImage,
-    setAssetPickerProgramId,
+    selectGallery,
+    selectImage,
+    setActiveImageTarget,
+    setIsGalleryPickerOpen,
+    uploadImage,
   } = editor;
 
   return (
@@ -45,17 +50,25 @@ export default function AdmissionsPage() {
           </div>
         )}
 
-        <GalleryAssetPickerModal
-          allowedKinds={['IMAGE']}
+        <GalleryPickerModal
           galleries={galleries}
-          initialGalleryId={selectedProgram?.galleryId ?? null}
-          open={assetPickerProgramId !== null}
-          title="Choose Program Image"
-          onClose={() => setAssetPickerProgramId(null)}
+          isLoading={isLoading}
+          open={isGalleryPickerOpen}
+          selectedGalleryId={galleryId}
+          onClose={() => setIsGalleryPickerOpen(false)}
+          onSelect={selectGallery}
+        />
+
+        <CoverImagePickerModal
+          galleries={galleries}
+          open={activeImageTarget !== null}
+          title="Choose Image"
+          onClose={() => setActiveImageTarget(null)}
           onSelect={(asset) => {
-            selectProgramImage(asset);
-            setAssetPickerProgramId(null);
+            selectImage(asset);
+            setActiveImageTarget(null);
           }}
+          onSelectLocalFile={(file) => void uploadImage(file)}
         />
       </section>
     </AppShell>

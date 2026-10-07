@@ -43,6 +43,85 @@ const defaultPrograms = [
   },
 ];
 
+const defaultAdmissionsContent = {
+  heroTitle: "Start your journey at MWS",
+  heroSubtitle:
+    "A caring place where your child can grow academically, socially, and personally.",
+  heroImage: asset("DSC04079.jpg"),
+  heroImageAlt: "Students and families at Millennia World School",
+  menuTitle: "Admission",
+  readyTitle: "Are you ready to begin your journey?",
+  introTitle: "Choosing a school is a family decision.",
+  introBody: [
+    "Millennia World School welcomes families who are looking for a caring environment where students can grow academically, socially, and personally.",
+    "Our admissions team supports each family personally, from the first message to the first day of school.",
+  ],
+  introMedia: {
+    type: "image",
+    src: asset("DSC09500.jpg"),
+    alt: "Learning spaces at Millennia World School",
+  },
+  processTitle: "Admission process",
+  processIntro: "",
+  steps: [
+    {
+      title: "Say hello",
+      description: "Send a message or book a tour.",
+      detail:
+        "Contact admissions or book a school tour so our team can understand your family, preferred level, and timeline.",
+      image: "",
+      imageAlt: "",
+    },
+    {
+      title: "Come and see",
+      description: "Visit the campus and meet our team.",
+      detail:
+        "Meet the admissions team, explore the learning environment, and discuss the program that best fits your child.",
+      image: "",
+      imageAlt: "",
+    },
+    {
+      title: "Share your documents",
+      description: "Send what we need, we are here to help.",
+      detail:
+        "Share the required student and family documents for review by the school administration team.",
+      image: "",
+      imageAlt: "",
+    },
+    {
+      title: "Welcome to MWS",
+      description: "We guide you through the first days.",
+      detail:
+        "After review and confirmation, our team will guide you through final enrollment and onboarding details.",
+      image: "",
+      imageAlt: "",
+    },
+  ],
+  infoTiles: [
+    {
+      title: "Frequently asked questions",
+      description: "Quick answers to what families ask us most about joining MWS.",
+      linkLabel: "Read the FAQ",
+      linkUrl: "/admission/faq",
+      image: asset("_DSC7101.jpg"),
+    },
+    {
+      title: "Academic calendar",
+      description: "See term dates, holidays, and key school events for the year.",
+      linkLabel: "View the calendar",
+      linkUrl: "/school-calendar",
+      image: asset("Elementary.jpg"),
+    },
+    {
+      title: "Admission guidelines",
+      description: "Requirements, document checklist, and how placement works.",
+      linkLabel: "Read the guidelines",
+      linkUrl: "/admission/guidelines",
+      image: asset("JH.jpg"),
+    },
+  ],
+};
+
 const defaultInfoCards = [
   {
     category: "admissions",
@@ -101,6 +180,31 @@ const defaultSpotlightSlides = [
     cite: "Student Life & Culture",
   },
 ];
+
+const defaultAdmissionGuidelinesContent = {
+  title: "Admission Guidelines",
+  hero: {
+    title: "Admission Guidelines",
+    description:
+      "Review the requirements, documents, and next steps for joining Millennia World School.",
+  },
+  body:
+    "<p>Our admissions team will guide your family through every step, from initial consultation to enrollment confirmation.</p>",
+  checklist: [
+    "Contact the admissions team or book a school tour.",
+    "Prepare the student and family documents requested by the school.",
+    "Complete the placement and review process with our team.",
+  ],
+  documents: [
+    "Student birth certificate or family card",
+    "Previous school report, if available",
+    "Parent or guardian contact information",
+  ],
+  cta: {
+    label: "Message admissions",
+    href: "/admission",
+  },
+};
 
 const defaultPartnerLogos = [
   "https://millenniaws.sch.id/wp-content/uploads/2023/11/CharterForCompassion.jpg",
@@ -189,6 +293,47 @@ const defaultCommunityStoriesContent = {
   ],
 };
 
+const defaultAcademicOverview = {
+  title: "Academic",
+  description:
+    "A connected learning journey that helps students build strong foundations, explore their interests, and grow into confident independent learners.",
+  coverImage: asset("DSC09500.jpg"),
+  content: {
+    intro: {
+      title: "Learning should grow with the learner.",
+      body:
+        "<p>At Millennia World School, students build strong academic foundations while gradually developing the confidence and independence to take ownership of their learning.</p>",
+      image: asset("_DSC7101.jpg"),
+      imageAlt: "MWS students learning together",
+    },
+    experience: {
+      title: "From guided learning to greater independence.",
+      body:
+        "<p>Our classrooms give students opportunities to learn through direct instruction, inquiry, discussion, projects, and collaboration. Teachers guide students closely while gradually giving them more responsibility for their ideas, decisions, and progress.</p><p>This balance allows students to develop strong academic foundations while also becoming thoughtful, curious, and responsible learners.</p>",
+      image: asset("_DSC7101.jpg"),
+      imageAlt: "MWS students learning together",
+    },
+    approach: [
+      {
+        title: "Learning through inquiry",
+        body:
+          "Students ask questions, explore ideas, collaborate with others, and connect what they learn with experiences beyond the classroom.",
+      },
+      {
+        title: "Guided at first, independent over time",
+        body:
+          "Teachers guide students closely, then gradually hand over more responsibility for their ideas, decisions, and progress.",
+      },
+      {
+        title: "Many ways to learn",
+        body:
+          "Direct instruction, discussion, projects, and teamwork all have a place in the classroom, so every student has room to grow.",
+      },
+    ],
+  },
+  galleryId: null as string | null,
+};
+
 const defaultGalleryImages = Array.from({ length: 8 }, (_, index) => ({
   id: `default-gallery-${index + 1}`,
   src: asset(index % 2 === 0 ? "Elementary.jpg" : "DSC04079.jpg"),
@@ -262,6 +407,21 @@ function newsResponse(news: NewsPostWithGallery) {
   };
 }
 
+function infoCardFromNews(news: NewsPostWithGallery) {
+  const category = news.category;
+
+  return {
+    category: category?.slug ?? "news",
+    image: imagePath(news.coverImage, asset("DSC04079.jpg")),
+    alt: news.coverImageAlt || news.title,
+    title: news.title,
+    tag: category?.name ?? "News",
+    text: news.excerpt || "Read the latest story from Millennia World School.",
+    path: `/news/${news.slug}`,
+    action: "Read Story",
+  };
+}
+
 function galleryImagesFromPage(page: CommunityStoriesPageRecord | null) {
   const images = page?.gallery?.images ?? [];
   if (!images.length) return defaultGalleryImages;
@@ -304,7 +464,177 @@ function ourSchoolContent(record: OurSchoolPageRecord | null) {
   };
 }
 
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+function asString(value: unknown, fallback: string) {
+  return typeof value === "string" && value.trim() ? value : fallback;
+}
+
+function admissionIntroMedia(value: unknown) {
+  const media = asRecord(value);
+  const fallback = defaultAdmissionsContent.introMedia;
+
+  return {
+    type: media.type === "video" ? "video" : "image",
+    src: asString(media.src, fallback.src),
+    ...(typeof media.poster === "string" && media.poster.trim()
+      ? { poster: media.poster }
+      : {}),
+    alt: asString(media.alt, fallback.alt),
+  };
+}
+
+function admissionSteps(value: unknown) {
+  const items =
+    Array.isArray(value) && value.length ? value : defaultAdmissionsContent.steps;
+
+  return items.map((item, index) => {
+    const step = asRecord(item);
+    const fallback =
+      defaultAdmissionsContent.steps[index] ?? defaultAdmissionsContent.steps[0]!;
+
+    return {
+      title: asString(step.title, fallback.title),
+      description: asString(step.description, fallback.description),
+      detail: asString(step.detail, fallback.detail ?? fallback.description),
+      image: typeof step.image === "string" ? step.image : fallback.image,
+      imageAlt: typeof step.imageAlt === "string" ? step.imageAlt : fallback.imageAlt,
+    };
+  });
+}
+
+function admissionInfoTiles(value: unknown) {
+  const items =
+    Array.isArray(value) && value.length
+      ? value
+      : defaultAdmissionsContent.infoTiles;
+
+  return items.map((item, index) => {
+    const tile = asRecord(item);
+    const fallback =
+      defaultAdmissionsContent.infoTiles[index] ??
+      defaultAdmissionsContent.infoTiles[0]!;
+
+    return {
+      title: asString(tile.title, fallback.title),
+      description: asString(tile.description, fallback.description),
+      linkLabel: asString(tile.linkLabel, fallback.linkLabel),
+      linkUrl: asString(tile.linkUrl, fallback.linkUrl),
+      image: typeof tile.image === "string" ? tile.image : fallback.image,
+    };
+  });
+}
+
+function admissionsContent(value: unknown) {
+  const content = asRecord(value);
+
+  return {
+    ...defaultAdmissionsContent,
+    heroTitle: asString(content.heroTitle, defaultAdmissionsContent.heroTitle),
+    heroSubtitle: asString(content.heroSubtitle, defaultAdmissionsContent.heroSubtitle),
+    heroImage: asString(content.heroImage, defaultAdmissionsContent.heroImage),
+    heroImageAlt: asString(content.heroImageAlt, defaultAdmissionsContent.heroImageAlt),
+    menuTitle: asString(content.menuTitle, defaultAdmissionsContent.menuTitle),
+    readyTitle: asString(content.readyTitle, defaultAdmissionsContent.readyTitle),
+    introTitle: asString(content.introTitle, defaultAdmissionsContent.introTitle),
+    introBody: asStringArray(content.introBody, defaultAdmissionsContent.introBody),
+    introMedia: admissionIntroMedia(content.introMedia),
+    processTitle: asString(content.processTitle, defaultAdmissionsContent.processTitle),
+    processIntro: asString(content.processIntro, defaultAdmissionsContent.processIntro),
+    steps: admissionSteps(content.steps),
+    infoTiles: admissionInfoTiles(content.infoTiles),
+  };
+}
+
+function admissionGuidelinesContent(value: unknown) {
+  const content = asRecord(value);
+  const hero = asRecord(content.hero);
+  const cta = asRecord(content.cta);
+
+  return {
+    ...defaultAdmissionGuidelinesContent,
+    title: asString(content.title, defaultAdmissionGuidelinesContent.title),
+    hero: {
+      ...defaultAdmissionGuidelinesContent.hero,
+      title: asString(hero.title, defaultAdmissionGuidelinesContent.hero.title),
+      description: asString(
+        hero.description,
+        defaultAdmissionGuidelinesContent.hero.description,
+      ),
+    },
+    body: asString(content.body, defaultAdmissionGuidelinesContent.body),
+    checklist: asStringArray(
+      content.checklist,
+      defaultAdmissionGuidelinesContent.checklist,
+    ),
+    documents: asStringArray(
+      content.documents,
+      defaultAdmissionGuidelinesContent.documents,
+    ),
+    cta: {
+      ...defaultAdmissionGuidelinesContent.cta,
+      label: asString(cta.label, defaultAdmissionGuidelinesContent.cta.label),
+      href: asString(cta.href, defaultAdmissionGuidelinesContent.cta.href),
+    },
+  };
+}
+
+function academicOverviewContent(value: unknown) {
+  const content = asRecord(value);
+  const intro = asRecord(content.intro);
+  const experience = asRecord(content.experience);
+  const approach = Array.isArray(content.approach) && content.approach.length
+    ? content.approach.map(asRecord)
+    : defaultAcademicOverview.content.approach;
+
+  return {
+    intro: {
+      ...defaultAcademicOverview.content.intro,
+      title: asString(intro.title, defaultAcademicOverview.content.intro.title),
+      body: asString(intro.body, defaultAcademicOverview.content.intro.body),
+      image: asString(intro.image, defaultAcademicOverview.content.intro.image),
+      imageAlt: asString(intro.imageAlt, defaultAcademicOverview.content.intro.imageAlt),
+    },
+    experience: {
+      ...defaultAcademicOverview.content.experience,
+      title: asString(experience.title, defaultAcademicOverview.content.experience.title),
+      body: asString(experience.body, defaultAcademicOverview.content.experience.body),
+      image: asString(experience.image, defaultAcademicOverview.content.experience.image),
+      imageAlt: asString(
+        experience.imageAlt,
+        defaultAcademicOverview.content.experience.imageAlt,
+      ),
+    },
+    approach: approach.map((item, index) => {
+      const fallback =
+        defaultAcademicOverview.content.approach[index] ??
+        defaultAcademicOverview.content.approach[0]!;
+
+      return {
+        title: asString(item.title, fallback.title),
+        body: asString(item.body, fallback.body),
+      };
+    }),
+  };
+}
+
 export class PageDataService {
+  static async getAcademicOverview() {
+    const record = await PageDataRepository.getLatestAcademicOverview();
+
+    return {
+      title: record?.title || defaultAcademicOverview.title,
+      description: record?.description || defaultAcademicOverview.description,
+      coverImage: imagePath(record?.coverImage, defaultAcademicOverview.coverImage),
+      content: academicOverviewContent(record?.content),
+      galleryId: record?.galleryId ?? defaultAcademicOverview.galleryId,
+    };
+  }
+
   static async getHeroSlides() {
     const slides = await HeroSlideRepository.listActive();
     return slides
@@ -313,18 +643,48 @@ export class PageDataService {
   }
 
   static async getHome() {
-    const [heroSlides, programs, voices] = await Promise.all([
+    const [heroSlides, programs, voices, settings, spotlights] = await Promise.all([
       this.getHeroSlides(),
       PageDataRepository.listActivePrograms(),
       PageDataRepository.listCommunityVoices(),
+      PageDataRepository.getHomePageSettings(),
+      PageDataRepository.listActiveCampusSpotlights(),
     ]);
+    const selectedCategories = settings?.infoSectionCategories.length
+      ? settings.infoSectionCategories.map((item) => item.category)
+      : settings?.infoSectionCategory
+        ? [settings.infoSectionCategory]
+        : [];
+    const categoryNewsGroups = selectedCategories.length
+      ? await Promise.all(
+          selectedCategories.map((category) =>
+            PageDataRepository.listPublishedNewsByCategory(category.id, 5),
+          ),
+        )
+      : [];
+    const categoryNews = categoryNewsGroups.flat();
 
     return {
       heroSlides,
       background: {
         body: "In the 21st century, every educational system faces the challenge of preparing young generations for a life that is not only complex, but constantly changing as well. Millennia World School (MWS) offers a developmentally appropriate experiential approach towards education.",
       },
-      infoCards: defaultInfoCards,
+      infoTitle:
+        settings?.infoSectionTitle || "Everything you need to know about joining MWS.",
+      infoFilters: selectedCategories.length
+        ? selectedCategories.map((category) => ({
+            label: category.name,
+            value: category.slug,
+          }))
+        : [
+            { label: "Admissions", value: "admissions" },
+            { label: "Campuses", value: "campuses" },
+            { label: "Academic", value: "academic" },
+            { label: "News", value: "news" },
+          ],
+      infoCards: categoryNews.length
+        ? categoryNews.map(infoCardFromNews)
+        : defaultInfoCards,
       programs: programs.length
         ? programs.map(programResponse)
         : defaultPrograms,
@@ -344,17 +704,49 @@ export class PageDataService {
         logos: defaultPartnerLogos,
         logosLabel: "In partnership with",
       },
-      spotlightSlides: defaultSpotlightSlides,
+      spotlightSlides: spotlights.length
+        ? spotlights.map((spotlight) => ({
+            image: asset("_DSC4760.jpg"),
+            alt: spotlight.cite,
+            quote: spotlight.text,
+            cite: spotlight.cite,
+          }))
+        : defaultSpotlightSlides,
     };
   }
 
   static async getAdmissions() {
-    const programs = await PageDataRepository.listActivePrograms();
+    const [programs, page] = await Promise.all([
+      PageDataRepository.listActivePrograms(),
+      PageDataRepository.getAdmissionsPage(),
+    ]);
+
     return {
+      content: admissionsContent(page?.content),
       programs: programs.length
         ? programs.map(programResponse)
         : defaultPrograms,
     };
+  }
+
+  static async getAdmissionFaq() {
+    const items = await PageDataRepository.listAdmissionFaqs();
+
+    return {
+      title: "Admission FAQ",
+      description:
+        "Answers to common questions families ask before joining Millennia World School.",
+      items: items.map((item) => ({
+        id: item.id,
+        question: item.question,
+        answer: item.answer,
+      })),
+    };
+  }
+
+  static async getAdmissionGuidelines() {
+    const page = await PageDataRepository.getCmsPage("admission-guidelines");
+    return admissionGuidelinesContent(page?.body);
   }
 
   static async getOurSchool() {

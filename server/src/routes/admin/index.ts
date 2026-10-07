@@ -14,14 +14,17 @@ import {
   adminGalleryRoute,
   adminGalleryVideoRoute,
 } from "./gallery-route";
+import { adminAdmissionGuidelinesRoute } from "./admission-guidelines-route";
 import { adminAdmissionRoute } from "./admission-route";
 import { adminCommunityStoriesRoute } from "./community-stories-route";
+import { adminHomeContentRoute } from "./home-content-route";
 import { adminHeroSlideRoute } from "./hero-slide-route";
 import { adminNewsRoute } from "./news-route";
 import { adminOurSchoolRoute } from "./our-school-route";
 import { adminAcademicLevelRoute } from "./academic-level-route";
 import { adminAcademicCrudRoute } from "./academic-crud-route";
 import { partnersRoute } from "./partners-route";
+import { adminContactInquiryRoute } from "./contact-inquiry-route";
 
 export const adminRoute = new Hono<{ Variables: SessionVariables }>();
 
@@ -91,7 +94,9 @@ adminRoute.route("/galleries", adminGalleryRoute);
 adminRoute.route("/gallery-images", adminGalleryImageRoute);
 adminRoute.route("/gallery-videos", adminGalleryVideoRoute);
 adminRoute.route("/hero-slides", adminHeroSlideRoute);
+adminRoute.route("/home-content", adminHomeContentRoute);
 adminRoute.route("/admissions", adminAdmissionRoute);
+adminRoute.route("/admission-guidelines", adminAdmissionGuidelinesRoute);
 adminRoute.route("/community-stories", adminCommunityStoriesRoute);
 adminRoute.route("/our-school", adminOurSchoolRoute);
 adminRoute.route("/academic-levels", adminAcademicLevelRoute);
@@ -99,3 +104,4 @@ adminRoute.route("/academic-crud", adminAcademicCrudRoute);
 adminRoute.route("/news", adminNewsRoute);
 
 adminRoute.route("/partners", partnersRoute);
+adminRoute.route("/contact-inquiries", adminContactInquiryRoute);

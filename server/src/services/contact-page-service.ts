@@ -25,7 +25,7 @@ export const defaultContactPageContent = {
     ],
   },
   intro:
-    "Sint velit deserunt non sit in irure primis nibh amet eiusmod. Luctus exercitation reprehenderit vel suscipit laboris aliquip.",
+    "Welcome to our website. We are glad to have you around. Please feel free to reach out to us for any inquiries regarding our programs, admissions, or campus visits.",
   address: {
     title: "Campus Address",
     name: "Millennia World School",
@@ -37,8 +37,8 @@ export const defaultContactPageContent = {
   directContacts: {
     title: "Direct Contacts",
     heading: "Administration & Admission:",
-    phone: "+62 21-7463-3333",
-    whatsapp: "+62 812-1111-2222",
+    phone: "+62 821-1150-7100",
+    whatsapp: "+62 821-1150-7100",
     email: "info@millennia21.id",
   },
   officeHours: {
@@ -110,17 +110,59 @@ const contactPageContentSchema = z.object({
 
 export type ContactPageContent = z.infer<typeof contactPageContentSchema>;
 
+/**
+ * Turns what an editor pastes (the full `<iframe>` code from Google Maps or
+ * just its URL) into an embeddable Google Maps URL. Anything else, such as a
+ * share link Google refuses to show inside an iframe, returns null.
+ */
+export function normalizeMapEmbedSrc(input: string): string | null {
+  const trimmed = input.trim();
+  const iframeSrc = trimmed.match(/<iframe[^>]*\ssrc\s*=\s*["']([^"']+)["']/i)?.[1];
+  const candidate = (iframeSrc ?? trimmed).replace(/&amp;/g, "&");
+
+  let url: URL;
+  try {
+    url = new URL(candidate);
+  } catch {
+    return null;
+  }
+
+  const host = url.hostname.replace(/^www\./, "");
+  const isEmbedPath = host === "google.com" && url.pathname.startsWith("/maps/embed");
+  const isLegacyEmbed =
+    (host === "google.com" || host === "maps.google.com") &&
+    url.pathname === "/maps" &&
+    url.searchParams.get("output") === "embed";
+
+  if (url.protocol !== "https:" || !(isEmbedPath || isLegacyEmbed)) return null;
+  return url.toString();
+}
+
 function parseContent(payload: unknown): ContactPageContent {
   const result = contactPageContentSchema.safeParse(payload);
   if (!result.success) {
     throw new ResponseError(400, "Invalid contact page content.");
   }
-  return result.data;
+
+  const mapSrc = normalizeMapEmbedSrc(result.data.map.src);
+  if (!mapSrc) {
+    throw new ResponseError(
+      400,
+      "Map must be a Google Maps embed. In Google Maps use Share → Embed a map → Copy HTML.",
+    );
+  }
+
+  return { ...result.data, map: { ...result.data.map, src: mapSrc } };
 }
 
 function resolveContent(payload: unknown): ContactPageContent {
   const result = contactPageContentSchema.safeParse(payload);
-  return result.success ? result.data : defaultContactPageContent;
+  if (!result.success) return defaultContactPageContent;
+
+  // Content saved before embeds were checked may hold a link that cannot be
+  // shown in an iframe; fall back to the default map instead of a broken one.
+  const mapSrc = normalizeMapEmbedSrc(result.data.map.src) ?? defaultContactPageContent.map.src;
+  return { ...result.data, map: { ...result.data.map, src: mapSrc } };
 }
 
 function pageResponse(page: {

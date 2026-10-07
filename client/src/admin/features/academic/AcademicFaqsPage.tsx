@@ -13,14 +13,19 @@ import Field from '@/admin/components/ui/Field';
 import Modal from '@/admin/components/ui/Modal';
 import SearchInput from '@/admin/components/ui/SearchInput';
 import StatusMessage from '@/admin/components/ui/StatusMessage';
+import { useToastState } from '@/admin/components/ui/toastContext';
 
 type FaqForm = {
+  admissionSortOrder: string;
+  isAdmissionFaq: boolean;
   question: string;
   answer: string;
   isActive: boolean;
 };
 
 const emptyForm: FaqForm = {
+  admissionSortOrder: '0',
+  isAdmissionFaq: false,
   question: '',
   answer: '',
   isActive: true,
@@ -38,13 +43,18 @@ export default function AcademicFaqsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useToastState<string | null>(null);
 
   const filteredItems = useMemo(() => {
     const query = search.trim().toLowerCase();
     if (!query) return items;
     return items.filter((item) =>
-      [item.question, item.answer, item.isActive ? 'active' : 'inactive']
+      [
+        item.question,
+        item.answer,
+        item.isActive ? 'active' : 'inactive',
+        item.isAdmissionFaq ? 'admission' : '',
+      ]
         .join(' ')
         .toLowerCase()
         .includes(query),
@@ -74,7 +84,7 @@ export default function AcademicFaqsPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [setMessage]);
 
   function openCreate() {
     setEditingItem(null);
@@ -85,8 +95,10 @@ export default function AcademicFaqsPage() {
   function openEdit(item: AcademicFaqItem) {
     setEditingItem(item);
     setForm({
+      admissionSortOrder: String(item.admissionSortOrder ?? 0),
       question: item.question,
       answer: item.answer,
+      isAdmissionFaq: item.isAdmissionFaq,
       isActive: item.isActive,
     });
     setIsFormOpen(true);
@@ -104,6 +116,8 @@ export default function AcademicFaqsPage() {
     const payload: AcademicFaqPayload = {
       question: form.question.trim(),
       answer: form.answer.trim(),
+      admissionSortOrder: Number.parseInt(form.admissionSortOrder, 10) || 0,
+      isAdmissionFaq: form.isAdmissionFaq,
       isActive: form.isActive,
     };
 
@@ -160,10 +174,10 @@ export default function AcademicFaqsPage() {
     <AppShell title="Academic FAQ">
       <div className="grid gap-5 px-6 py-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <ContentPageHeader
+        <ContentPageHeader
             breadcrumbs={[{ label: 'Academic' }, { label: 'FAQ' }]}
             title="Academic FAQ"
-            description="Manage reusable FAQ items for Kindergarten, Elementary, and Junior High."
+            description="Manage reusable FAQ items for Academic pages and Admission FAQ."
           />
           <Button
             disabled={Boolean(savingId) || Boolean(deletingId) || isLoading}
@@ -207,6 +221,9 @@ export default function AcademicFaqsPage() {
                       Status
                     </th>
                     <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-[#64748B]">
+                      Admission
+                    </th>
+                    <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-[#64748B]">
                       Attached
                     </th>
                     <th className="w-[100px] px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-[#64748B]">
@@ -246,6 +263,12 @@ export default function AcademicFaqsPage() {
                             ].join(' ')}
                           >
                             {item.isActive ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+
+                        <td className="px-5 py-4 align-top">
+                          <span className="text-sm text-[#64748B]">
+                            {item.isAdmissionFaq ? `Yes (${item.admissionSortOrder})` : '-'}
                           </span>
                         </td>
 
@@ -327,6 +350,29 @@ export default function AcademicFaqsPage() {
               />
               Active
             </label>
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <input
+                checked={form.isAdmissionFaq}
+                disabled={Boolean(savingId)}
+                type="checkbox"
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, isAdmissionFaq: event.target.checked }))
+                }
+              />
+              Show on Admission FAQ
+            </label>
+            <Field label="Admission order">
+              <input
+                className={fieldClass}
+                disabled={Boolean(savingId) || !form.isAdmissionFaq}
+                min={0}
+                type="number"
+                value={form.admissionSortOrder}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, admissionSortOrder: event.target.value }))
+                }
+              />
+            </Field>
             <div className="flex justify-end gap-2 border-t border-[#E2E8F0] pt-4">
               <Button
                 disabled={Boolean(savingId)}

@@ -7,5 +7,6 @@ export type ContactContentUpdater = (
 export type ContactEditorSectionProps = {
   content: ContactPageContent;
   isBusy?: boolean;
+  onChooseHeroImage?: () => void;
   updateContent: ContactContentUpdater;
 };

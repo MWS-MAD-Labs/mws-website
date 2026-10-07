@@ -15,14 +15,18 @@ import { useAuth } from '@/admin/auth/useAuth';
 import AppShell from '@/admin/components/layout/AppShell';
 import ContentPageHeader from '@/admin/components/ui/ContentPageHeader';
 import StatusMessage from '@/admin/components/ui/StatusMessage';
+import ToastProvider from '@/admin/components/ui/ToastProvider';
+import { useToastMessage } from '@/admin/components/ui/toastContext';
 import { hasCmsPermission } from '@/admin/types/auth';
 
 import AdmissionsPage from '@/admin/features/admissions/AdmissionsPage';
+import AdmissionGuidelinesPage from '@/admin/features/admissions/AdmissionGuidelinesPage';
 import AcademicFaqsPage from '@/admin/features/academic/AcademicFaqsPage';
 import AcademicLevelEditorPage from '@/admin/features/academic/AcademicLevelEditorPage';
 import AcademicOverviewPage from '@/admin/features/academic/AcademicOverviewPage';
 import ContactPageEditor from '@/admin/features/contact/ContactPageEditor';
 import CommunityStoriesPage from '@/admin/features/community-stories/CommunityStoriesPage';
+import CommunityVoicesPage from '@/admin/features/community-voices/CommunityVoicesPage';
 import HeroSlidesPage from '@/admin/features/home/HeroSlidesPage';
 import PageEditorPage from '@/admin/features/page/PageEditorPage';
 import PagesManagementPage from '@/admin/features/page/PagesManagementPage';
@@ -52,6 +56,7 @@ import NewsCategories from '../features/news/NewsCategories';
 import NewsTags from '../features/news/NewsTags';
 import { getErrorMessage } from '../features/news/newsUtils';
 import PartnersPage from '../features/partners/pages/PartnersPage';
+import InquiriesPage from '../features/inquiries/InquiriesPage';
 
 type RouteMessage = {
   text: string;
@@ -83,6 +88,7 @@ function NewsCategoriesRoute() {
   const [search, setSearch] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState<RouteMessage>(null);
+  useToastMessage(message);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -260,6 +266,7 @@ function NewsTagsRoute() {
   const [search, setSearch] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState<RouteMessage>(null);
+  useToastMessage(message);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -435,6 +442,7 @@ function RouteMessageBanner({ message }: { message: RouteMessage }) {
 export default function AdminApp() {
   return (
     <AuthProvider>
+      <ToastProvider>
       <Routes>
         {/* Authentication */}
         <Route path="login" element={<LoginPage />} />
@@ -484,6 +492,17 @@ export default function AdminApp() {
         />
 
         <Route
+          path="content/admission-guidelines"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <AdmissionGuidelinesPage />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+
+        <Route
           path="content/our-school"
           element={
             <RequireAuth>
@@ -500,6 +519,17 @@ export default function AdminApp() {
             <RequireAuth>
               <RequireContentPermission>
                 <CommunityStoriesPage />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="content/community-voices"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <CommunityVoicesPage />
               </RequireContentPermission>
             </RequireAuth>
           }
@@ -720,13 +750,7 @@ export default function AdminApp() {
 
         <Route
           path="VoiceComunity"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <MaintenancePage title="Voice Comunity" />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
+          element={<Navigate to="/admin/content/community-voices" replace />}
         />
 
         <Route
@@ -816,9 +840,21 @@ export default function AdminApp() {
           }
         />
 
+        <Route
+          path="inquiries"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <InquiriesPage />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>
+      </ToastProvider>
     </AuthProvider>
   );
 }

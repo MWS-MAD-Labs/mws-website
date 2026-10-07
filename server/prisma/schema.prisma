@@ -111,6 +111,8 @@ model NewsCategory {
   updatedAt   DateTime @updatedAt
 
   posts NewsPost[]
+  homePageSettings HomePageSettings[]
+  homeInfoSectionCategories HomeInfoSectionCategory[]
 }
 
 model NewsTag {
@@ -179,6 +181,7 @@ model Academic {
   title       String   @db.VarChar(255)
   description String?
   coverImage     String?  @db.VarChar(1000)
+  content     Json?
   galleryId   String?  @db.Uuid
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -279,6 +282,8 @@ model Faq {
   question  String   @db.VarChar(500)
   answer    String
   isActive  Boolean  @default(true)
+  isAdmissionFaq Boolean @default(false)
+  admissionSortOrder Int @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -287,6 +292,7 @@ model Faq {
   juniorHighs   JuniorHighFaq[]
 
   @@index([isActive])
+  @@index([isAdmissionFaq, admissionSortOrder])
 }
 
 model KindergartenFaq {
@@ -345,6 +351,7 @@ model Gallery {
   affiliations Affiliation[]
 
   academics     Academic[]
+  admissionPages AdmissionPage[]
   ourSchools    OurSchool[]
   contacts      Contact[]
   kindergartens Kindergarten[]
@@ -434,6 +441,19 @@ model Admission {
   updatedAt   DateTime @updatedAt
 
   program Program  @relation(fields: [programId], references: [id])
+  gallery Gallery? @relation(fields: [galleryId], references: [id])
+}
+
+model AdmissionPage {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @db.VarChar(255)
+  description String?
+  content     Json?
+  galleryId   String?  @db.Uuid
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
   gallery Gallery? @relation(fields: [galleryId], references: [id])
 }
 
@@ -562,6 +582,46 @@ model CommunityVoice {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model HomePageSettings {
+  id                    String   @id @default(uuid()) @db.Uuid
+  infoSectionTitle      String   @default("Information for every step.") @db.VarChar(255)
+  infoSectionCategoryId String?  @db.Uuid
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  infoSectionCategory NewsCategory? @relation(fields: [infoSectionCategoryId], references: [id])
+  infoSectionCategories HomeInfoSectionCategory[]
+
+  @@index([infoSectionCategoryId])
+}
+
+model HomeInfoSectionCategory {
+  homePageSettingsId String @db.Uuid
+  categoryId         String @db.Uuid
+  sortOrder          Int    @default(0)
+
+  homePageSettings HomePageSettings @relation(fields: [homePageSettingsId], references: [id], onDelete: Cascade)
+  category         NewsCategory     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([homePageSettingsId, categoryId])
+  @@index([categoryId])
+  @@index([homePageSettingsId, sortOrder])
+}
+
+model CampusSpotlight {
+  id        String    @id @default(uuid()) @db.Uuid
+  text      String
+  cite      String    @db.VarChar(255)
+  sortOrder Int       @default(0)
+  isActive  Boolean   @default(true)
+  activeFrom DateTime?
+  activeUntil DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([isActive, sortOrder])
 }
 
 model AuditLog {

@@ -3,6 +3,7 @@ import { Download } from 'lucide-react';
 
 import AdmissionsCta from '@/components/layout/AdmissionsCta';
 import FaqAccordion from '@/components/ui/FaqAccordion';
+import { publicAssetUrl } from '@/lib/api';
 
 type RichText = string | string[];
 
@@ -44,6 +45,7 @@ function RichTextContent({ content }: { content: RichText }) {
 
   return (
     <div
+      className="public-rich-text"
       dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content || '') }}
     />
   );
@@ -65,12 +67,12 @@ export default function LevelPage({
   return (
     <main>
       {/* Intro */}
-      <section className="subpage-section">
+      <section className="subpage-section !pt-8 sm:!pt-10 md:!pt-12">
         <div className="wrap">
           <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
             {/* Text */}
             <div className="subpage-body">
-              <h2>{introTitle}</h2>
+              <h2 className="!mt-0">{introTitle}</h2>
 
               <RichTextContent content={intro} />
             </div>
@@ -99,7 +101,7 @@ export default function LevelPage({
             {curriculumFile && (
               <div className="mt-6 flex justify-end">
                 <a
-                  href={curriculumFile}
+                  href={publicAssetUrl(curriculumFile)}
                   download
                   className="inline-flex items-center gap-2 border border-[var(--burgundy)] px-5 py-2.5 text-sm font-medium text-[var(--burgundy)] transition-colors duration-200 hover:bg-[var(--burgundy)] hover:text-white"
                 >

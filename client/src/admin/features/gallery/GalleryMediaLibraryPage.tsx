@@ -12,6 +12,7 @@ import Field from '@/admin/components/ui/Field';
 import Modal from '@/admin/components/ui/Modal';
 import SearchInput from '@/admin/components/ui/SearchInput';
 import StatusMessage from '@/admin/components/ui/StatusMessage';
+import { useToastState } from '@/admin/components/ui/toastContext';
 
 type MediaKind = 'images' | 'videos';
 type VideoType = GalleryVideoItem['sourceType'];
@@ -121,7 +122,7 @@ export default function GalleryMediaLibraryPage({ kind }: { kind: MediaKind }) {
   const [formMode, setFormMode] = useState<'create' | 'edit' | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useToastState<string | null>(null);
 
   const imageRows = useMemo<ImageRow[]>(
     () => galleries.flatMap((gallery) => gallery.images.map((image) => ({ ...image, gallery }))),
@@ -166,7 +167,7 @@ export default function GalleryMediaLibraryPage({ kind }: { kind: MediaKind }) {
         )
         .finally(() => setIsLoading(false));
     });
-  }, []);
+  }, [setMessage]);
 
   function resetForm() {
     const firstGalleryId = galleries[0]?.id ?? '';

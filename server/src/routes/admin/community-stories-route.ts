@@ -23,3 +23,17 @@ adminCommunityStoriesRoute.delete(
   "/news/:id",
   AdminCommunityStoriesController.deleteNews,
 );
+adminCommunityStoriesRoute.get("/voices", AdminCommunityStoriesController.listVoices);
+adminCommunityStoriesRoute.post("/voices", AdminCommunityStoriesController.createVoice);
+adminCommunityStoriesRoute.patch(
+  "/voices/:id",
+  AdminCommunityStoriesController.updateVoice,
+);
+adminCommunityStoriesRoute.put(
+  "/voices/:id",
+  AdminCommunityStoriesController.updateVoice,
+);
+adminCommunityStoriesRoute.delete(
+  "/voices/:id",
+  AdminCommunityStoriesController.deleteVoice,
+);

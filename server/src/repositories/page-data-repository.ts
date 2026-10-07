@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client";
+import type { Academic, Prisma } from "@prisma/client";
 import { getPrisma } from "../lib/prisma";
 
 const galleryInclude = {
@@ -28,6 +28,10 @@ const communityPageInclude = {
   gallery: { include: galleryInclude },
 };
 
+const admissionPageInclude = {
+  gallery: { include: galleryInclude },
+};
+
 const newsInclude = {
   category: true,
 };
@@ -44,11 +48,21 @@ export type CommunityStoriesPageRecord = Prisma.CommunityStoriesPageGetPayload<{
   include: typeof communityPageInclude;
 }>;
 
+export type AdmissionPageRecord = Prisma.AdmissionPageGetPayload<{
+  include: typeof admissionPageInclude;
+}>;
+
 export type NewsPostWithGallery = Prisma.NewsPostGetPayload<{
   include: typeof newsInclude;
 }>;
 
 export class PageDataRepository {
+  static async getLatestAcademicOverview(): Promise<Academic | null> {
+    return getPrisma().academic.findFirst({
+      orderBy: { updatedAt: "desc" },
+    });
+  }
+
   static async listActivePrograms(): Promise<ProgramWithAdmissions[]> {
     return getPrisma().program.findMany({
       where: { isActive: true },
@@ -86,9 +100,34 @@ export class PageDataRepository {
     });
   }
 
+  static async getAdmissionsPage(): Promise<AdmissionPageRecord | null> {
+    return getPrisma().admissionPage.findFirst({
+      where: { isPublished: true },
+      include: admissionPageInclude,
+      orderBy: { updatedAt: "desc" },
+    });
+  }
+
   static async listPublishedNews(limit = 4): Promise<NewsPostWithGallery[]> {
     return getPrisma().newsPost.findMany({
       where: {
+        status: "PUBLISHED",
+        isPublished: true,
+        publishedAt: { not: null, lte: new Date() },
+      },
+      include: newsInclude,
+      orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+      take: limit,
+    });
+  }
+
+  static async listPublishedNewsByCategory(
+    categoryId: string,
+    limit = 8,
+  ): Promise<NewsPostWithGallery[]> {
+    return getPrisma().newsPost.findMany({
+      where: {
+        categoryId,
         status: "PUBLISHED",
         isPublished: true,
         publishedAt: { not: null, lte: new Date() },
@@ -103,6 +142,54 @@ export class PageDataRepository {
     return getPrisma().communityVoice.findMany({
       where: { isActive: true },
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+    });
+  }
+
+  static async getHomePageSettings() {
+    return getPrisma().homePageSettings.findFirst({
+      include: {
+        infoSectionCategory: true,
+        infoSectionCategories: {
+          include: { category: true },
+          orderBy: [{ sortOrder: "asc" }, { category: { name: "asc" } }],
+        },
+      },
+      orderBy: { updatedAt: "desc" },
+    });
+  }
+
+  static async listActiveCampusSpotlights() {
+    const now = new Date();
+    return getPrisma().campusSpotlight.findMany({
+      where: {
+        isActive: true,
+        AND: [
+          { OR: [{ activeFrom: null }, { activeFrom: { lte: now } }] },
+          { OR: [{ activeUntil: null }, { activeUntil: { gte: now } }] },
+        ],
+      },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+    });
+  }
+
+  static async listAdmissionFaqs() {
+    return getPrisma().faq.findMany({
+      where: {
+        isActive: true,
+        isAdmissionFaq: true,
+      },
+      orderBy: [{ admissionSortOrder: "asc" }, { updatedAt: "desc" }],
+    });
+  }
+
+  static async getCmsPage(slug: string) {
+    return getPrisma().cmsPage.findFirst({
+      where: {
+        slug,
+        status: "PUBLISHED",
+        deletedAt: null,
+      },
+      orderBy: { updatedAt: "desc" },
     });
   }
 }

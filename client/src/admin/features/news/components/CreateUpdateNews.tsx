@@ -35,6 +35,7 @@ import {
   type NewsForm,
 } from '../newsEditorModel';
 import { NEWS_STATUS_OPTIONS, notifyNewsListReturn } from '../newsUtils';
+import { useToastState } from '@/admin/components/ui/toastContext';
 
 export default function CreateUpdateNews() {
   const navigate = useNavigate();
@@ -54,7 +55,7 @@ export default function CreateUpdateNews() {
   const [slugWasEdited, setSlugWasEdited] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useToastState<string | null>(null);
   const articlePhotoPreviewUrlsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
@@ -102,7 +103,7 @@ export default function CreateUpdateNews() {
     return () => {
       cancelled = true;
     };
-  }, [newsId]);
+  }, [newsId, setMessage]);
 
   useEffect(() => {
     return () => {

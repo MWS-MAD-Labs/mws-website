@@ -16,6 +16,7 @@ import Panel from '@/admin/components/ui/Panel';
 import Select from '@/admin/components/ui/Select';
 import StatusMessage from '@/admin/components/ui/StatusMessage';
 import type { CmsRoleName } from '@/admin/types/auth';
+import { useToastState } from '@/admin/components/ui/toastContext';
 
 type CmsUsersState = {
   users: CmsUserListItem[];
@@ -46,7 +47,7 @@ export default function CmsUsersPage() {
     invitations: [],
     roles: [],
   });
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useToastState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [savingUserId, setSavingUserId] = useState<string | null>(null);
   const [inviteOpen, setInviteOpen] = useState(false);
@@ -80,7 +81,7 @@ export default function CmsUsersPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [setMessage]);
 
   const adminRoles = useMemo(
     () => data.roles.filter((role) => role.name === 'ADMIN'),

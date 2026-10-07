@@ -41,7 +41,7 @@ function PublicAnnouncementPopup() {
 
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         closePopup();
@@ -63,7 +63,7 @@ function PublicAnnouncementPopup() {
   return (
     <PopupInfo
       title="Book a Personalised MWS Tour"
-      description="Meet our team, explore the learning spaces, and see how Mutiara Waldorf School supports each child with warmth, rhythm, and purpose."
+      description="Meet our team, explore the learning spaces, and see how Millennia World School supports each child with warmth, rhythm, and purpose."
       buttonText="Book Now"
       buttonTo="/contact"
       onClose={closePopup}

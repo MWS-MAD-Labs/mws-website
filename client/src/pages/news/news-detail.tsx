@@ -173,12 +173,12 @@ export default function NewsDetails() {
                   </figure>
 
                   {/* Content */}
-	                  <div
-	                    className="prose prose-gray prose-headings:font-sans prose-headings:font-semibold prose-headings:text-[#241718] prose-p:font-sans prose-p:leading-[1.8] prose-p:text-[#241718] prose-strong:text-[#241718] prose-a:text-[#7e1518] prose-a:break-words prose-blockquote:border-l-[#7e1518] prose-blockquote:text-[#625759] prose-ul:text-[#241718] prose-ol:text-[#241718] prose-li:text-[#241718] prose-img:mx-auto prose-img:max-w-full prose-hr:border-black/10 prose-table:block prose-table:max-w-full prose-table:overflow-x-auto prose-video:max-w-full prose-iframe:max-w-full mt-10 max-w-none break-words [&_a]:[overflow-wrap:anywhere] [&_code]:break-words [&_code]:[overflow-wrap:anywhere] [&_pre]:max-w-full [&_pre]:overflow-x-auto"
-	                    dangerouslySetInnerHTML={{
-	                      __html: DOMPurify.sanitize(post.content?.text || ''),
-	                    }}
-	                  />
+                  <div
+                    className="public-rich-text mt-10 max-w-none break-words font-sans leading-[1.8] text-[#241718]"
+                    dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize(post.content?.text || ''),
+                    }}
+                  />
 
                   {/* Additional Images */}
                   {post.media

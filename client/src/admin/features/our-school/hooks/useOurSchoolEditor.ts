@@ -8,6 +8,8 @@ import {
   type OurSchoolImageField,
   type OurSchoolStatus,
 } from '../lib/ourSchoolEditor';
+import { useToastState } from '@/admin/components/ui/toastContext';
+import { uploadImageForPicker } from '@/admin/features/gallery/utils/uploadImageForPicker';
 
 export function useOurSchoolEditor() {
   const [pageId, setPageId] = useState<string | null>(null);
@@ -20,7 +22,8 @@ export function useOurSchoolEditor() {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [message, setMessage] = useToastState<string | null>(null);
 
   const selectedGallery = useMemo(
     () => galleries.find((gallery) => gallery.id === galleryId) ?? null,
@@ -65,7 +68,7 @@ export function useOurSchoolEditor() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [setMessage]);
 
   async function persist(nextStatus: OurSchoolStatus) {
     setIsSaving(true);
@@ -152,6 +155,32 @@ export function useOurSchoolEditor() {
     setGalleryId((current) => current ?? gallery);
   }
 
+  async function uploadImage(file: File) {
+    if (!activeImageField) return;
+
+    setIsUploadingImage(true);
+    setMessage(null);
+
+    try {
+      const uploaded = await uploadImageForPicker({
+        caption: content.hero.title,
+        fallbackGalleryTitle: 'Our School Images',
+        file,
+        galleries,
+        preferredGalleryId: galleryId,
+      });
+
+      selectImage(uploaded.path, uploaded.galleryId, uploaded.alt);
+      setGalleries(uploaded.galleries);
+      setGalleryId((current) => current ?? uploaded.galleryId);
+      setMessage('Image uploaded. Save changes to publish it.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Failed to upload image.');
+    } finally {
+      setIsUploadingImage(false);
+    }
+  }
+
   function updateParagraph(
     section: 'background' | 'visionMission' | 'philosophy',
     index: number,
@@ -194,7 +223,7 @@ export function useOurSchoolEditor() {
     setOpenFaqIndex(null);
   }
 
-  const isBusy = isLoading || isSaving;
+  const isBusy = isLoading || isSaving || isUploadingImage;
 
   return {
     activeImageField,
@@ -207,6 +236,7 @@ export function useOurSchoolEditor() {
     isGalleryPickerOpen,
     isLoading,
     isSaving,
+    isUploadingImage,
     message,
     openFaqIndex,
     pageId,
@@ -222,6 +252,7 @@ export function useOurSchoolEditor() {
     setOpenFaqIndex,
     updateContent,
     updateParagraph,
+    uploadImage,
   };
 }
 

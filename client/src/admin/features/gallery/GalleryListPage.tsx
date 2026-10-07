@@ -7,6 +7,7 @@ import Field from '@/admin/components/ui/Field';
 import Modal from '@/admin/components/ui/Modal';
 import SearchInput from '@/admin/components/ui/SearchInput';
 import StatusMessage from '@/admin/components/ui/StatusMessage';
+import { useToastState } from '@/admin/components/ui/toastContext';
 
 type GalleryFormState = {
   description: string;
@@ -38,7 +39,7 @@ export default function GalleryListPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useToastState<string | null>(null);
 
   const filteredGalleries = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -60,7 +61,7 @@ export default function GalleryListPage() {
         )
         .finally(() => setIsLoading(false));
     });
-  }, []);
+  }, [setMessage]);
 
   function openCreateForm() {
     setEditingGallery(null);

@@ -16,6 +16,7 @@ import {
   academicLevelOrder,
   findMasterLevel,
 } from './academicCrudModel';
+import { useToastState } from '@/admin/components/ui/toastContext';
 
 type LevelForm = {
   id: string | null;
@@ -56,7 +57,7 @@ export default function AcademicLevelsPage() {
   const [forms, setForms] = useState<Record<string, LevelForm>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [savingKey, setSavingKey] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useToastState<string | null>(null);
 
   async function loadData() {
     const levels = await adminApi.academicMasterLevels();
@@ -81,7 +82,7 @@ export default function AcademicLevelsPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [setMessage]);
 
   function updateForm(key: string, patch: Partial<LevelForm>) {
     setForms((current) => ({

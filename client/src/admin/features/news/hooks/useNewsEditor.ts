@@ -14,6 +14,7 @@ import {
 } from '@/admin/features/news/newsEditorModel';
 import { getErrorMessage } from '@/admin/features/news/newsUtils';
 import { apiClient } from '@/lib/api';
+import { useToastState } from '@/admin/components/ui/toastContext';
 
 export type ImagePickerTarget = 'cover' | 'article-photo';
 export type ArticlePhotoField = 'alt' | 'caption';
@@ -52,7 +53,7 @@ export function useNewsEditor({ newsId, onSaved }: UseNewsEditorOptions) {
   const [slugWasEdited, setSlugWasEdited] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useToastState<string | null>(null);
 
   // Latest photos, readable from the unmount cleanup below.
   const articlePhotosRef = useRef(form.articlePhotos);
@@ -97,7 +98,7 @@ export function useNewsEditor({ newsId, onSaved }: UseNewsEditorOptions) {
     return () => {
       cancelled = true;
     };
-  }, [newsId]);
+  }, [newsId, setMessage]);
 
   // Revoke the cover preview whenever it is replaced or the editor closes.
   useEffect(() => {

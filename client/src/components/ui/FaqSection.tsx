@@ -54,7 +54,7 @@ export default function FaqSection({ id, items }: FaqSectionProps) {
                 >
                   <div className="overflow-hidden">
                     <div
-                      className="max-w-[760px] pb-6 text-[15px] leading-7 text-[var(--charcoal-muted)]"
+                      className="public-rich-text max-w-[760px] pb-6 text-[15px] leading-7 text-[var(--charcoal-muted)]"
                       dangerouslySetInnerHTML={{
                         __html: DOMPurify.sanitize(item.answer || ''),
                       }}

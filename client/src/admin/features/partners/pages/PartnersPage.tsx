@@ -7,6 +7,7 @@ import SearchInput from '@/admin/components/ui/SearchInput';
 import StatusMessage from '@/admin/components/ui/StatusMessage';
 import { getErrorMessage } from '@/admin/features/news/newsUtils';
 import ModalCreateUpdate from './components/ModalCreateUpdate';
+import { useToastState } from '@/admin/components/ui/toastContext';
 
 function formatStatus(status: string) {
   const normalized = status.trim().toLowerCase();
@@ -28,7 +29,7 @@ export default function PartnersPage() {
   const [search, setSearch] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useToastState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'update'>('create');
   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
@@ -93,7 +94,7 @@ export default function PartnersPage() {
     return () => {
       isCurrent = false;
     };
-  }, []);
+  }, [setMessage]);
 
   async function deletePartner(partner: Partner) {
     const confirmed = window.confirm('Delete "' + partner.name + '"?');

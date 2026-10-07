@@ -1,73 +1,67 @@
-import { TextField } from "./ContactEditorControls";
-import type { ContactEditorSectionProps } from "./types";
+import { SectionCard, TextField } from './ContactEditorControls';
+import type { ContactEditorSectionProps } from './types';
+
+type DirectContactKey = keyof ContactEditorSectionProps['content']['directContacts'];
 
 export default function DirectContact({
   content,
   isBusy = false,
   updateContent,
 }: ContactEditorSectionProps) {
+  function update(key: DirectContactKey, value: string) {
+    updateContent((current) => ({
+      ...current,
+      directContacts: { ...current.directContacts, [key]: value },
+    }));
+  }
+
   return (
-    <div className="rounded-lg border border-[#E2E8F0] bg-white p-5 shadow-sm">
-      <h2 className="mb-4 text-lg font-semibold text-[#1C2434]">
-        Contact Information
-      </h2>
+    <SectionCard
+      number="03"
+      title="Contact Information"
+      description="The first column of the Get in Touch section. Admissions and Book a Tour also use this WhatsApp number."
+    >
       <div className="grid gap-4 md:grid-cols-2">
         <TextField
-          label="Title"
+          label="Section title"
           disabled={isBusy}
           value={content.directContacts.title}
-          onChange={(value) =>
-            updateContent((current) => ({
-              ...current,
-              directContacts: { ...current.directContacts, title: value },
-            }))
-          }
+          placeholder="Get in Touch"
+          onChange={(value) => update('title', value)}
         />
         <TextField
           label="Heading"
           disabled={isBusy}
           value={content.directContacts.heading}
-          onChange={(value) =>
-            updateContent((current) => ({
-              ...current,
-              directContacts: { ...current.directContacts, heading: value },
-            }))
-          }
+          placeholder="Administration & Admission:"
+          onChange={(value) => update('heading', value)}
         />
         <TextField
           label="Phone"
+          type="tel"
           disabled={isBusy}
           value={content.directContacts.phone}
-          onChange={(value) =>
-            updateContent((current) => ({
-              ...current,
-              directContacts: { ...current.directContacts, phone: value },
-            }))
-          }
+          placeholder="+62 21-7463-3333"
+          onChange={(value) => update('phone', value)}
         />
         <TextField
           label="WhatsApp"
+          type="tel"
+          hint="Include the country code, e.g. +62."
           disabled={isBusy}
           value={content.directContacts.whatsapp}
-          onChange={(value) =>
-            updateContent((current) => ({
-              ...current,
-              directContacts: { ...current.directContacts, whatsapp: value },
-            }))
-          }
+          placeholder="+62 812-0000-0000"
+          onChange={(value) => update('whatsapp', value)}
         />
         <TextField
           label="Email"
+          type="email"
           disabled={isBusy}
           value={content.directContacts.email}
-          onChange={(value) =>
-            updateContent((current) => ({
-              ...current,
-              directContacts: { ...current.directContacts, email: value },
-            }))
-          }
+          placeholder="info@millennia21.id"
+          onChange={(value) => update('email', value)}
         />
       </div>
-    </div>
+    </SectionCard>
   );
 }

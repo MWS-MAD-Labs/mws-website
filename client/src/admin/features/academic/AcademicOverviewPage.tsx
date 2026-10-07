@@ -1,8 +1,8 @@
 import AppShell from '@/admin/components/layout/AppShell';
 import ContentPageHeader from '@/admin/components/ui/ContentPageHeader';
 import StatusMessage from '@/admin/components/ui/StatusMessage';
-import GalleryAssetPickerModal from '@/admin/features/gallery/components/GalleryAssetPickerModal';
 import GalleryPickerModal from '@/admin/features/gallery/components/GalleryPickerModal';
+import CoverImagePickerModal from '@/admin/features/news/components/layouts/CoverImagePickerModal';
 import AcademicOverviewMainForm from './components/layout/AcademicOverviewMainForm';
 import AcademicOverviewSidebar from './components/layout/AcademicOverviewSidebar';
 import { useAcademicOverviewEditor } from './hooks/useAcademicOverviewEditor';
@@ -10,15 +10,16 @@ import { useAcademicOverviewEditor } from './hooks/useAcademicOverviewEditor';
 export default function AcademicOverviewPage() {
   const editor = useAcademicOverviewEditor();
   const {
+    activeImageField,
     form,
     galleries,
-    isAssetPickerOpen,
     isGalleryPickerOpen,
     isLoading,
     message,
-    selectCoverImage,
-    setIsAssetPickerOpen,
+    selectImage,
+    setActiveImageField,
     setIsGalleryPickerOpen,
+    uploadImage,
     updateForm,
   } = editor;
 
@@ -56,14 +57,13 @@ export default function AcademicOverviewPage() {
           onSelect={(galleryId) => updateForm('galleryId', galleryId)}
         />
 
-        <GalleryAssetPickerModal
-          allowedKinds={['IMAGE']}
+        <CoverImagePickerModal
           galleries={galleries}
-          initialGalleryId={form.galleryId}
-          open={isAssetPickerOpen}
-          title="Choose Cover Image"
-          onClose={() => setIsAssetPickerOpen(false)}
-          onSelect={(asset) => selectCoverImage(asset.path, asset.galleryId)}
+          open={Boolean(activeImageField)}
+          title="Choose Image"
+          onClose={() => setActiveImageField(null)}
+          onSelect={(asset) => selectImage(asset.path, asset.galleryId)}
+          onSelectLocalFile={(file) => void uploadImage(file)}
         />
       </section>
     </AppShell>

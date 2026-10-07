@@ -68,6 +68,7 @@ const defaultOurSchoolContent: OurSchoolPageData = {
 function RichTextBlock({ content }: { content: string }) {
   return (
     <div
+      className="public-rich-text"
       dangerouslySetInnerHTML={{
         __html: DOMPurify.sanitize(content || ''),
       }}

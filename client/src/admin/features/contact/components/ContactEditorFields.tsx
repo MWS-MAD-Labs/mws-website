@@ -263,7 +263,7 @@ export default function ContactEditorFields({
                   />
 
                   <div className="mt-5 space-y-4 text-sm leading-7">
-                    <div>
+                    {/* <div>
                       <span className="mb-1 block text-xs font-medium uppercase tracking-[0.08em] text-[#64748B]">
                         Phone
                       </span>
@@ -279,7 +279,7 @@ export default function ContactEditorFields({
                           }))
                         }
                       />
-                    </div>
+                    </div> */}
 
                     <div>
                       <span className="mb-1 block text-xs font-medium uppercase tracking-[0.08em] text-[#64748B]">

@@ -27,6 +27,8 @@ import {
   withAlternatingImages,
   type ImageField,
 } from '../lib/academicLevelEditor';
+import { useToastState } from '@/admin/components/ui/toastContext';
+import { uploadImageForPicker } from '@/admin/features/gallery/utils/uploadImageForPicker';
 
 export function useAcademicLevelEditor() {
   const location = useLocation();
@@ -53,7 +55,9 @@ export function useAcademicLevelEditor() {
   const [faqSearch, setFaqSearch] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [isUploadingDocument, setIsUploadingDocument] = useState(false);
+  const [message, setMessage] = useToastState<string | null>(null);
 
   const availableFaqs = useMemo(() => {
     const attachedIds = new Set(attachedFaqs.map((item) => item.faqId));
@@ -122,7 +126,7 @@ export function useAcademicLevelEditor() {
     return () => {
       cancelled = true;
     };
-  }, [config.title, loadData]);
+  }, [config.title, loadData, setMessage]);
 
   function updateContent(updater: (current: AcademicLevelContent) => AcademicLevelContent) {
     setContent((current) => updater(current));
@@ -304,6 +308,50 @@ export function useAcademicLevelEditor() {
     setGalleryId((current) => current ?? gallery);
   }
 
+  async function uploadImage(file: File) {
+    if (!activeImageField) return;
+
+    setIsUploadingImage(true);
+    setMessage(null);
+
+    try {
+      const uploaded = await uploadImageForPicker({
+        caption: content.hero.title || config.title,
+        fallbackGalleryTitle: `${config.title} Images`,
+        file,
+        galleries,
+        preferredGalleryId: galleryId,
+      });
+
+      selectImage(uploaded.path, uploaded.galleryId, uploaded.alt);
+      setGalleries(uploaded.galleries);
+      setGalleryId((current) => current ?? uploaded.galleryId);
+      setMessage('Image uploaded. Save changes to publish it.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Failed to upload image.');
+    } finally {
+      setIsUploadingImage(false);
+    }
+  }
+
+  async function uploadDocument(file: File) {
+    setIsUploadingDocument(true);
+    setMessage(null);
+
+    try {
+      const uploaded = await adminApi.uploadAcademicLevelAsset(config.key, 'document', file);
+      updateOverview({
+        curriculumFile: uploaded.path,
+        curriculumLabel: content.overview.curriculumLabel || uploaded.filename.replace(/\.[^.]+$/, ''),
+      });
+      setMessage('Document uploaded. Save changes to publish it.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Failed to upload document.');
+    } finally {
+      setIsUploadingDocument(false);
+    }
+  }
+
   async function attachFaq(faqId: string) {
     if (!faqId) return;
     if (!itemId) {
@@ -397,7 +445,7 @@ export function useAcademicLevelEditor() {
     );
   }
 
-  const isBusy = isSaving || isLoading;
+  const isBusy = isSaving || isLoading || isUploadingImage || isUploadingDocument;
   const isPublished = status === 'PUBLISHED';
 
   return {
@@ -420,6 +468,8 @@ export function useAcademicLevelEditor() {
     isLoading,
     isPublished,
     isSaving,
+    isUploadingImage,
+    isUploadingDocument,
     itemId,
     message,
     moveFaq,
@@ -439,6 +489,8 @@ export function useAcademicLevelEditor() {
     updateHero,
     updateOverview,
     updateSection,
+    uploadDocument,
+    uploadImage,
     updatedAt,
   };
 }

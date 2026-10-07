@@ -5,6 +5,7 @@ import {
   GalleryVerticalEndIcon,
   GraduationCap,
   Images,
+  Inbox,
   LayoutDashboard,
   LucideHome,
   MessageSquare,
@@ -41,6 +42,13 @@ export const menuSections: MenuSection[] = [
         enabled: true,
         requiredPermission: 'dashboard:read',
       },
+      {
+        label: 'Inquiries',
+        href: '/admin/inquiries',
+        Icon: Inbox,
+        enabled: true,
+        requiredPermission: 'content:manage',
+      },
     ],
   },
 
@@ -68,6 +76,13 @@ export const menuSections: MenuSection[] = [
             requiredPermission: 'content:manage',
           },
           {
+            label: 'Admission Guidelines',
+            href: '/admin/content/admission-guidelines',
+            Icon: Files,
+            enabled: true,
+            requiredPermission: 'content:manage',
+          },
+          {
             label: 'Our School',
             href: '/admin/content/our-school',
             Icon: School,
@@ -78,6 +93,13 @@ export const menuSections: MenuSection[] = [
             label: 'Community Stories',
             href: '/admin/content/community-stories',
             Icon: Images,
+            enabled: true,
+            requiredPermission: 'content:manage',
+          },
+          {
+            label: 'Community Voices',
+            href: '/admin/content/community-voices',
+            Icon: MessageSquare,
             enabled: true,
             requiredPermission: 'content:manage',
           },
@@ -197,13 +219,6 @@ export const menuSections: MenuSection[] = [
             requiredPermission: 'content:manage',
           },
         ],
-      },
-      {
-        label: 'Voice Comunity',
-        href: '/admin/VoiceComunity',
-        Icon: Files,
-        enabled: true,
-        requiredPermission: 'content:manage',
       },
       {
         label: 'Calendar',

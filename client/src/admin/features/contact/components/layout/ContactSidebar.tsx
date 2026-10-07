@@ -3,19 +3,23 @@ import { RotateCcw } from 'lucide-react';
 import Button from '@/admin/components/ui/Button';
 
 type ContactSidebarProps = {
+  hasPendingMap: boolean;
   isBusy: boolean;
   isDefault: boolean;
   isLoading: boolean;
   isSaving: boolean;
+  isUploadingImage: boolean;
   onReset: () => Promise<void>;
   onSave: () => Promise<void>;
 };
 
 export default function ContactSidebar({
+  hasPendingMap,
   isBusy,
   isDefault,
   isLoading,
   isSaving,
+  isUploadingImage,
   onReset,
   onSave,
 }: ContactSidebarProps) {
@@ -38,7 +42,13 @@ export default function ContactSidebar({
           <div className="flex items-center justify-between gap-3">
             <dt className="text-[#64748B]">Status</dt>
             <dd className="font-medium text-[#1C2434]">
-              {isSaving ? 'Saving...' : isLoading ? 'Loading...' : 'Published'}
+              {isUploadingImage
+                ? 'Uploading image...'
+                : isSaving
+                  ? 'Saving...'
+                  : isLoading
+                    ? 'Loading...'
+                    : 'Published'}
             </dd>
           </div>
           <div className="flex items-center justify-between gap-3">
@@ -48,9 +58,14 @@ export default function ContactSidebar({
         </dl>
 
         <div className="mt-4 grid gap-2">
-          <Button disabled={isBusy} type="button" onClick={() => void onSave()}>
+          <Button disabled={isBusy || hasPendingMap} type="button" onClick={() => void onSave()}>
             {isSaving ? 'Saving...' : 'Save Changes'}
           </Button>
+          {hasPendingMap ? (
+            <p className="text-xs text-[#B45309]">
+              A new map is waiting in the Map section. Use it or cancel it to save.
+            </p>
+          ) : null}
           <Button
             disabled={isLoading}
             type="button"

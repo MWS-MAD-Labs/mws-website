@@ -2,6 +2,10 @@ import { apiRequest } from "@/lib/api";
 import type { OurSchoolPageData } from "@/api/pageApi";
 import { env } from "@/config/env";
 import type {
+  AdmissionPageContent,
+  AdmissionPageStatus,
+} from "@/features/admissions/admissionPageData";
+import type {
   ContactPage,
   ContactPageContent,
 } from "@/features/contact/contactPageData";
@@ -125,6 +129,47 @@ export type HeroSlideFormData = {
   isActive?: boolean;
 };
 
+export type HomeContentSettings = {
+  id: string | null;
+  infoSectionTitle: string;
+  infoSectionCategoryId: string | null;
+  infoSectionCategoryIds: string[];
+  updatedAt: string | null;
+};
+
+export type CampusSpotlightItem = {
+  id: string;
+  text: string;
+  cite: string;
+  sortOrder: number;
+  isActive: boolean;
+  activeFrom: string | null;
+  activeUntil: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type HomeContentData = {
+  settings: HomeContentSettings;
+  categories: NewsCategory[];
+  spotlights: CampusSpotlightItem[];
+};
+
+export type HomeContentSettingsPayload = {
+  infoSectionTitle?: string;
+  infoSectionCategoryId?: string | null;
+  infoSectionCategoryIds?: string[];
+};
+
+export type CampusSpotlightPayload = {
+  text: string;
+  cite: string;
+  sortOrder?: number;
+  isActive?: boolean;
+  activeFrom?: string | null;
+  activeUntil?: string | null;
+};
+
 export type GalleryImageItem = {
   id: string;
   galleryId: string;
@@ -212,8 +257,24 @@ export type AdminAdmissionProgram = {
 };
 
 export type AdminAdmissionsData = {
+  page: {
+    id: string | null;
+    title: string;
+    description: string | null;
+    content: (AdmissionPageContent & { status?: AdmissionPageStatus }) | null;
+    galleryId: string | null;
+    isPublished: boolean;
+    updatedAt: string | null;
+  };
   programs: AdminAdmissionProgram[];
   galleries: GalleryItem[];
+};
+
+export type AdminAdmissionsPayload = {
+  content?: (AdmissionPageContent & { status?: AdmissionPageStatus }) | null;
+  galleryId?: string | null;
+  isPublished?: boolean;
+  programs: AdminAdmissionProgram[];
 };
 
 export type AcademicLevelKey = "kindergarten" | "elementary" | "high-school";
@@ -223,16 +284,37 @@ export type AcademicOverviewItem = {
   title: string;
   description: string | null;
   coverImage: string | null;
+  content: AcademicOverviewContent | null;
   galleryId: string | null;
   gallery?: GalleryItem | null;
   createdAt: string;
   updatedAt: string;
 };
 
+export type AcademicOverviewContent = {
+  intro: {
+    title: string;
+    body: string;
+    image: string;
+    imageAlt: string;
+  };
+  experience: {
+    title: string;
+    body: string;
+    image: string;
+    imageAlt: string;
+  };
+  approach: Array<{
+    title: string;
+    body: string;
+  }>;
+};
+
 export type AcademicOverviewPayload = {
   title: string;
   description?: string | null;
   coverImage?: string | null;
+  content?: AcademicOverviewContent | null;
   galleryId?: string | null;
 };
 
@@ -251,11 +333,23 @@ export type AcademicMasterLevelPayload = {
 
 export type AcademicLevelJson = unknown;
 
+export type AcademicAssetType = "image" | "document";
+
+export type AcademicAssetUploadResult = {
+  path: string;
+  objectName: string;
+  filename: string;
+  contentType: string;
+  size: number;
+};
+
 export type AcademicFaqItem = {
   id: string;
   question: string;
   answer: string;
   isActive: boolean;
+  isAdmissionFaq: boolean;
+  admissionSortOrder: number;
   createdAt: string;
   updatedAt: string;
   _count?: {
@@ -269,6 +363,8 @@ export type AcademicFaqPayload = {
   question: string;
   answer: string;
   isActive?: boolean;
+  isAdmissionFaq?: boolean;
+  admissionSortOrder?: number;
 };
 
 export type AcademicLevelFaqLink = {
@@ -344,6 +440,55 @@ export type AdminCommunityStoriesData = {
   page: AdminCommunityStoriesPage;
   galleries: GalleryItem[];
   news: AdminNewsPost[];
+  voices: AdminCommunityVoice[];
+};
+
+export type AdminCommunityVoice = {
+  id: string;
+  role: string;
+  name: string;
+  grade: string | null;
+  quote: string;
+  imagePath: string;
+  sortOrder: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AdminCommunityVoicePayload = {
+  role: string;
+  name: string;
+  grade?: string | null;
+  quote: string;
+  imagePath: string;
+  sortOrder?: number;
+  isActive?: boolean;
+};
+
+export type AdmissionGuidelinesPage = {
+  id: string | null;
+  slug: string;
+  title: string;
+  body: AdmissionGuidelinesContent | null;
+  status: "DRAFT" | "PUBLISHED";
+  publishedAt: string | null;
+  updatedAt: string | null;
+};
+
+export type AdmissionGuidelinesContent = {
+  title: string;
+  hero: {
+    title: string;
+    description: string;
+  };
+  body: string;
+  checklist: string[];
+  documents: string[];
+  cta: {
+    label: string;
+    href: string;
+  };
 };
 
 export type AdminCommunityStoriesPagePayload = Omit<
@@ -497,6 +642,41 @@ export type NewsPostList = {
   };
 };
 
+export type ContactInquiryStatus = "NEW" | "IN_PROGRESS" | "RESOLVED" | "SPAM";
+
+export type ContactInquiry = {
+  id: string;
+  name: string;
+  email: string;
+  subject: string;
+  category: string | null;
+  message: string;
+  status: ContactInquiryStatus;
+  source: string | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ContactInquiryFilters = {
+  page?: number;
+  pageSize?: number;
+  status?: ContactInquiryStatus | "";
+  search?: string;
+};
+
+export type ContactInquiryList = {
+  items: ContactInquiry[];
+  statusCounts: Partial<Record<ContactInquiryStatus, number>>;
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
+};
+
 export const adminApi = {
   async dashboard(): Promise<AdminDashboardData> {
     const response = await apiRequest<{ data: AdminDashboardData }>(
@@ -632,6 +812,59 @@ export const adminApi = {
     await apiRequest(`/admin/hero-slides/${id}`, { method: "DELETE" });
   },
 
+  async homeContent(): Promise<HomeContentData> {
+    const response = await apiRequest<{ data: HomeContentData }>(
+      "/admin/home-content",
+    );
+    return response!.data;
+  },
+
+  async updateHomeContentSettings(
+    data: HomeContentSettingsPayload,
+  ): Promise<HomeContentData> {
+    const response = await apiRequest<{ data: HomeContentData }>(
+      "/admin/home-content/settings",
+      {
+        method: "PUT",
+        body: data,
+      },
+    );
+    return response!.data;
+  },
+
+  async createCampusSpotlight(
+    data: CampusSpotlightPayload,
+  ): Promise<CampusSpotlightItem> {
+    const response = await apiRequest<{ data: CampusSpotlightItem }>(
+      "/admin/home-content/spotlights",
+      {
+        method: "POST",
+        body: data,
+      },
+    );
+    return response!.data;
+  },
+
+  async updateCampusSpotlight(
+    id: string,
+    data: Partial<CampusSpotlightPayload>,
+  ): Promise<CampusSpotlightItem> {
+    const response = await apiRequest<{ data: CampusSpotlightItem }>(
+      `/admin/home-content/spotlights/${id}`,
+      {
+        method: "PATCH",
+        body: data,
+      },
+    );
+    return response!.data;
+  },
+
+  async deleteCampusSpotlight(id: string): Promise<void> {
+    await apiRequest(`/admin/home-content/spotlights/${id}`, {
+      method: "DELETE",
+    });
+  },
+
   async galleries(): Promise<GalleryItem[]> {
     const response = await apiRequest<{ data: GalleryItem[] }>("/admin/galleries");
     return response?.data ?? [];
@@ -710,14 +943,12 @@ export const adminApi = {
     return response!.data;
   },
 
-  async updateAdmissions(
-    programs: AdminAdmissionProgram[],
-  ): Promise<AdminAdmissionsData> {
+  async updateAdmissions(data: AdminAdmissionsPayload): Promise<AdminAdmissionsData> {
     const response = await apiRequest<{ data: AdminAdmissionsData }>(
       "/admin/admissions",
       {
         method: "PUT",
-        body: { programs },
+        body: data,
       },
     );
     return response!.data;
@@ -801,6 +1032,26 @@ export const adminApi = {
     await apiRequest(`/admin/academic-crud/academic-levels/${id}`, {
       method: "DELETE",
     });
+  },
+
+  async uploadAcademicLevelAsset(
+    levelKey: AcademicLevelKey,
+    type: AcademicAssetType,
+    file: File,
+  ): Promise<AcademicAssetUploadResult> {
+    const body = new FormData();
+    body.append("file", file);
+    body.append("type", type);
+
+    const response = await apiRequest<{ data: AcademicAssetUploadResult }>(
+      `/admin/academic-levels/${levelKey}/assets`,
+      {
+        method: "POST",
+        body,
+      },
+    );
+
+    return response!.data;
   },
 
   async academicFaqs(): Promise<AcademicFaqItem[]> {
@@ -975,6 +1226,67 @@ export const adminApi = {
     });
   },
 
+  async communityVoices(): Promise<AdminCommunityVoice[]> {
+    const response = await apiRequest<{ data: AdminCommunityVoice[] }>(
+      "/admin/community-stories/voices",
+    );
+    return response!.data;
+  },
+
+  async createCommunityVoice(
+    data: AdminCommunityVoicePayload,
+  ): Promise<AdminCommunityVoice> {
+    const response = await apiRequest<{ data: AdminCommunityVoice }>(
+      "/admin/community-stories/voices",
+      {
+        method: "POST",
+        body: data,
+      },
+    );
+    return response!.data;
+  },
+
+  async updateCommunityVoice(
+    id: string,
+    data: Partial<AdminCommunityVoicePayload>,
+  ): Promise<AdminCommunityVoice> {
+    const response = await apiRequest<{ data: AdminCommunityVoice }>(
+      `/admin/community-stories/voices/${id}`,
+      {
+        method: "PATCH",
+        body: data,
+      },
+    );
+    return response!.data;
+  },
+
+  async deleteCommunityVoice(id: string): Promise<void> {
+    await apiRequest(`/admin/community-stories/voices/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  async admissionGuidelines(): Promise<AdmissionGuidelinesPage> {
+    const response = await apiRequest<{ data: AdmissionGuidelinesPage }>(
+      "/admin/admission-guidelines",
+    );
+    return response!.data;
+  },
+
+  async updateAdmissionGuidelines(data: {
+    body: AdmissionGuidelinesContent;
+    status: "DRAFT" | "PUBLISHED";
+  }): Promise<AdmissionGuidelinesPage> {
+    const response = await apiRequest<{ data: AdmissionGuidelinesPage }>(
+      "/admin/admission-guidelines",
+      {
+        method: "PUT",
+        body: data,
+      },
+    );
+    return response!.data;
+  },
+
   async partners(): Promise<Partner[]> {
     const response = await apiRequest<{ data: Partner[] }>("/admin/partners");
     return response?.data ?? [];
@@ -998,6 +1310,39 @@ export const adminApi = {
 
   async deletePartner(id: string): Promise<void> {
     await apiRequest("/admin/partners/" + id, { method: "DELETE" });
+  },
+
+  async contactInquiries(filters: ContactInquiryFilters = {}): Promise<ContactInquiryList> {
+    const query = new URLSearchParams();
+
+    if (filters.page) query.set("page", String(filters.page));
+    if (filters.pageSize) query.set("pageSize", String(filters.pageSize));
+    if (filters.status) query.set("status", filters.status);
+    if (filters.search?.trim()) query.set("search", filters.search.trim());
+
+    const suffix = query.size ? `?${query.toString()}` : "";
+    const response = await apiRequest<{ data: ContactInquiryList }>(
+      `/admin/contact-inquiries${suffix}`,
+    );
+    return response!.data;
+  },
+
+  async contactInquiry(id: string): Promise<ContactInquiry> {
+    const response = await apiRequest<{ data: ContactInquiry }>(
+      `/admin/contact-inquiries/${id}`,
+    );
+    return response!.data;
+  },
+
+  async updateContactInquiryStatus(
+    id: string,
+    status: ContactInquiryStatus,
+  ): Promise<ContactInquiry> {
+    const response = await apiRequest<{ data: ContactInquiry }>(
+      `/admin/contact-inquiries/${id}`,
+      { method: "PATCH", body: { status } },
+    );
+    return response!.data;
   },
 
   async newsPosts(filters: NewsPostFilters = {}): Promise<NewsPostList> {

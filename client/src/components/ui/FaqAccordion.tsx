@@ -1,4 +1,5 @@
 import { useState } from "react";
+import DOMPurify from "dompurify";
 
 type FaqItem = {
   question: string;
@@ -30,7 +31,12 @@ export default function FaqAccordion({ items }: FaqAccordionProps) {
             <span>+</span>
           </button>
           <div className="faq-content">
-            <p>{item.answer}</p>
+            <div
+              className="public-rich-text"
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(item.answer || ""),
+              }}
+            />
           </div>
         </div>
       ))}

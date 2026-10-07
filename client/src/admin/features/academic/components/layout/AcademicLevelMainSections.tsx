@@ -1,4 +1,5 @@
-import { ArrowDown, ArrowUp, ChevronDown, ChevronRight, Plus, Trash2 } from 'lucide-react';
+import { useRef, type ChangeEvent } from 'react';
+import { ArrowDown, ArrowUp, ChevronDown, ChevronRight, FileText, Plus, Trash2 } from 'lucide-react';
 
 import Tiptap from '@/admin/components/Tiptap';
 import Button from '@/admin/components/ui/Button';
@@ -38,7 +39,15 @@ export default function AcademicLevelMainSections({ editor }: AcademicLevelMainS
     updateHero,
     updateOverview,
     updateSection,
+    uploadDocument,
   } = editor;
+  const curriculumFileInputRef = useRef<HTMLInputElement>(null);
+
+  function chooseCurriculumFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (file) void uploadDocument(file);
+    event.target.value = '';
+  }
 
   return (
     <div className="min-w-0 space-y-5">
@@ -134,17 +143,46 @@ export default function AcademicLevelMainSections({ editor }: AcademicLevelMainS
           </Field>
           <div className="grid gap-4 md:grid-cols-2">
             <Field
+              as="div"
               label="Download file"
-              hint="Path or URL to the PDF. Leave empty to hide the download button."
+              hint="Choose a PDF, DOC, or DOCX document. Leave empty to hide the download button."
             >
               <input
-                className={inputClass}
-                placeholder="/documents/curriculum.pdf"
-                value={content.overview.curriculumFile ?? ''}
-                onChange={(event) =>
-                  updateOverview({ curriculumFile: event.target.value || null })
-                }
+                ref={curriculumFileInputRef}
+                className="sr-only"
+                type="file"
+                accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,.doc,.docx"
+                onChange={chooseCurriculumFile}
               />
+
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  disabled={isBusy}
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                  onClick={() => curriculumFileInputRef.current?.click()}
+                >
+                  <FileText size={15} />
+                  Choose Document
+                </Button>
+
+                {content.overview.curriculumFile ? (
+                  <Button
+                    disabled={isBusy}
+                    size="sm"
+                    type="button"
+                    variant="ghost"
+                    onClick={() => updateOverview({ curriculumFile: null })}
+                  >
+                    Remove
+                  </Button>
+                ) : null}
+              </div>
+
+              <p className="mt-2 truncate text-xs text-[#64748B]">
+                {content.overview.curriculumFile || 'No document selected.'}
+              </p>
             </Field>
             <Field label="Download label" hint='Shown as "Download {label}".'>
               <input

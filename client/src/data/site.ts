@@ -1,7 +1,6 @@
 export const asset = (fileName: string) => `/assets-mws/${fileName}`;
 
-export const logoUrl =
-  "https://millenniaws.sch.id/wp-content/uploads/2021/11/Millennia-World-School-Logo-Only.svg";
+export const logoUrl = '/Millennia-World-School-Logo-Only.svg';
 
 export const pageLinks = [
   {

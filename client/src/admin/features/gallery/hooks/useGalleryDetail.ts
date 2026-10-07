@@ -7,6 +7,7 @@ import {
   type GalleryPreviewState,
 } from "../types";
 import { filterAndSortAssets } from "../utils/galleryAssets";
+import { useToastState } from '@/admin/components/ui/toastContext';
 
 type UploadAssetData = {
   caption: string;
@@ -35,7 +36,7 @@ export function useGalleryDetail(galleryId: string | undefined) {
   const [selectedVideoIds, setSelectedVideoIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useToastState<string | null>(null);
 
   const visibleImages = useMemo(
     () =>
@@ -84,7 +85,7 @@ export function useGalleryDetail(galleryId: string | undefined) {
         )
         .finally(() => setIsLoading(false));
     });
-  }, [galleryId]);
+  }, [galleryId, setMessage]);
 
   useEffect(() => {
     if (!preview) return;

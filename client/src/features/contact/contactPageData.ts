@@ -1,4 +1,4 @@
-import { asset } from "@/data/site";
+import { asset } from '@/data/site';
 
 export type ContactPageContent = {
   hero: {
@@ -43,7 +43,7 @@ export type ContactPageContent = {
 
 export type ContactPage = {
   id: string | null;
-  slug: "contact";
+  slug: 'contact';
   title: string;
   template: string;
   status: string;
@@ -53,57 +53,57 @@ export type ContactPage = {
 };
 
 const mapSrc =
-  "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3965.7314275134707!2d106.7262070747513!3d-6.300282493688862!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69fa70d8a57eb7%3A0x6b10705a6ef6c3b6!2sMillennia%20World%20School!5e0!3m2!1sen!2sid!4v1715569420000!5m2!1sen!2sid";
+  'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3965.7314275134707!2d106.7262070747513!3d-6.300282493688862!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69fa70d8a57eb7%3A0x6b10705a6ef6c3b6!2sMillennia%20World%20School!5e0!3m2!1sen!2sid!4v1715569420000!5m2!1sen!2sid';
 
 export const defaultContactPageContent: ContactPageContent = {
   hero: {
-    title: "Discover more what MWS has to offer!",
-    image: asset("DSC05350.jpg"),
-    imageAlt: "MWS Main Office",
+    title: 'Discover more what MWS has to offer!',
+    image: asset('DSC05350.jpg'),
+    imageAlt: 'MWS Main Office',
   },
   form: {
-    title: "Send us a message",
+    title: 'Send us a message',
     successMessage:
-      "Message sent successfully! Our administrative office will get back to you within 24 hours.",
+      'Message sent successfully! Our administrative office will get back to you within 24 hours.',
     categories: [
-      { value: "general", label: "General Administration" },
-      { value: "admissions", label: "Admissions & Tours" },
-      { value: "finance", label: "Finance Office" },
-      { value: "hr", label: "Human Resources / Career" },
+      { value: 'general', label: 'General Administration' },
+      { value: 'admissions', label: 'Admissions & Tours' },
+      { value: 'finance', label: 'Finance Office' },
+      { value: 'hr', label: 'Human Resources / Career' },
     ],
   },
   intro:
-    "Sint velit deserunt non sit in irure primis nibh amet eiusmod. Luctus exercitation reprehenderit vel suscipit laboris aliquip.",
+    'Welcome to our website. We are glad to have you around. Please feel free to reach out to us for any inquiries regarding our programs, admissions, or campus visits.',
   address: {
-    title: "Campus Address",
-    name: "Millennia World School",
+    title: 'Campus Address',
+    name: 'Millennia World School',
     lines: [
-      "Jl. Merpati Raya No. 103, Sawah Lama, Ciputat,",
-      "Tangerang Selatan, Banten 15413, Indonesia",
+      'Jl. Merpati Raya No. 103, Sawah Lama, Ciputat,',
+      'Tangerang Selatan, Banten 15413, Indonesia',
     ],
   },
   directContacts: {
-    title: "Get in Touch",
-    heading: "Administration & Admission:",
-    phone: "+62 21-7463-3333",
-    whatsapp: "+62 812-1111-2222",
-    email: "info@millennia21.id",
+    title: 'Get in Touch',
+    heading: 'Administration & Admission:',
+    phone: '+62 21-7463-3333',
+    whatsapp: '+62 821-1150-7100',
+    email: 'info@millennia21.id',
   },
   officeHours: {
-    title: "Office Hours",
+    title: 'Office Hours',
     items: [
-      { title: "Monday - Friday", text: "07:30 AM - 04:00 PM" },
+      { title: 'Monday - Friday', text: '07:30 AM - 04:00 PM' },
       {
-        title: "Saturday",
-        text: "08:00 AM - 12:00 PM (Admissions office only)",
+        title: 'Saturday',
+        text: '08:00 AM - 12:00 PM (Admissions office only)',
       },
-      { title: "Sunday & Public Holidays", text: "Closed" },
+      { title: 'Sunday & Public Holidays', text: 'Closed' },
     ],
   },
   map: {
-    title: "Find Us",
+    title: 'Find Us',
     src: mapSrc,
-    titleAttr: "Millennia World School location map",
+    titleAttr: 'Millennia World School location map',
   },
 };
 

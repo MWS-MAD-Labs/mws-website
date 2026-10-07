@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { NewsPost } from "@prisma/client";
+import { Prisma, type NewsPost } from "@prisma/client";
 import { ResponseError } from "../error/response-error";
 import { getPrisma } from "../lib/prisma";
 import { GalleryService } from "./gallery-service";
@@ -30,7 +30,40 @@ const admissionProgramSchema = z.object({
 });
 
 const admissionsPayloadSchema = z.object({
+  content: z.custom<unknown>().nullable().optional(),
+  galleryId: z.string().uuid().nullable().optional(),
+  isPublished: z.boolean().optional(),
   programs: z.array(admissionProgramSchema).min(1),
+});
+
+const homeSettingsPayloadSchema = z.object({
+  infoSectionTitle: z.string().trim().min(1).max(255).optional(),
+  infoSectionCategoryId: z.string().uuid().nullable().optional(),
+  infoSectionCategoryIds: z.array(z.string().uuid()).max(5).optional(),
+});
+
+const campusSpotlightSchema = z.object({
+  text: z.string().trim().min(1),
+  cite: z.string().trim().min(1).max(255),
+  sortOrder: z.number().int().optional(),
+  isActive: z.boolean().optional(),
+  activeFrom: z.coerce.date().nullable().optional(),
+  activeUntil: z.coerce.date().nullable().optional(),
+});
+
+const communityVoiceSchema = z.object({
+  role: z.string().trim().min(1).max(100),
+  name: z.string().trim().min(1).max(255),
+  grade: z.string().trim().max(255).nullable().optional(),
+  quote: z.string().trim().min(1),
+  imagePath: z.string().trim().min(1).max(1000),
+  sortOrder: z.number().int().optional(),
+  isActive: z.boolean().optional(),
+});
+
+const cmsGuidelinesPayloadSchema = z.object({
+  body: z.custom<unknown>(),
+  status: z.enum(["DRAFT", "PUBLISHED"]).optional(),
 });
 
 const communityStoriesPayloadSchema = z.object({
@@ -63,6 +96,12 @@ function nullable(value: string | null | undefined) {
   return value?.trim() ? value.trim() : null;
 }
 
+function jsonRecord(value: unknown) {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+}
+
 function communityNewsResponse(news: NewsPost) {
   return {
     id: news.id,
@@ -76,6 +115,56 @@ function communityNewsResponse(news: NewsPost) {
     publishedAt: news.publishedAt,
     createdAt: news.createdAt,
     updatedAt: news.updatedAt,
+  };
+}
+
+function communityVoiceResponse(voice: {
+  id: string;
+  role: string;
+  name: string;
+  grade: string | null;
+  quote: string;
+  imagePath: string;
+  sortOrder: number;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}) {
+  return {
+    id: voice.id,
+    role: voice.role,
+    name: voice.name,
+    grade: voice.grade,
+    quote: voice.quote,
+    imagePath: voice.imagePath,
+    sortOrder: voice.sortOrder,
+    isActive: voice.isActive,
+    createdAt: voice.createdAt,
+    updatedAt: voice.updatedAt,
+  };
+}
+
+function campusSpotlightResponse(spotlight: {
+  id: string;
+  text: string;
+  cite: string;
+  sortOrder: number;
+  isActive: boolean;
+  activeFrom: Date | null;
+  activeUntil: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}) {
+  return {
+    id: spotlight.id,
+    text: spotlight.text,
+    cite: spotlight.cite,
+    sortOrder: spotlight.sortOrder,
+    isActive: spotlight.isActive,
+    activeFrom: spotlight.activeFrom,
+    activeUntil: spotlight.activeUntil,
+    createdAt: spotlight.createdAt,
+    updatedAt: spotlight.updatedAt,
   };
 }
 
@@ -173,21 +262,173 @@ function handleDatabaseError(error: unknown): never {
 }
 
 export class AdminPageEditorService {
+  static async getHomeContentAdmin() {
+    const prisma = getPrisma();
+    const [settings, categories, spotlights] = await Promise.all([
+      prisma.homePageSettings.findFirst({
+        include: {
+          infoSectionCategories: {
+            orderBy: [{ sortOrder: "asc" }],
+          },
+        },
+        orderBy: { updatedAt: "desc" },
+      }),
+      prisma.newsCategory.findMany({
+        include: { _count: { select: { posts: true } } },
+        orderBy: [{ isActive: "desc" }, { name: "asc" }],
+      }),
+      prisma.campusSpotlight.findMany({
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+      }),
+    ]);
+
+    return {
+      settings: {
+        id: settings?.id ?? null,
+        infoSectionTitle:
+          settings?.infoSectionTitle ?? "Everything you need to know about joining MWS.",
+        infoSectionCategoryId: settings?.infoSectionCategoryId ?? null,
+        infoSectionCategoryIds: settings?.infoSectionCategories.length
+          ? settings.infoSectionCategories.map((item) => item.categoryId)
+          : settings?.infoSectionCategoryId
+            ? [settings.infoSectionCategoryId]
+            : [],
+        updatedAt: settings?.updatedAt ?? null,
+      },
+      categories,
+      spotlights: spotlights.map(campusSpotlightResponse),
+    };
+  }
+
+  static async saveHomeSettings(payload: unknown) {
+    const parsed = homeSettingsPayloadSchema.safeParse(payload);
+    if (!parsed.success) throw new ResponseError(400, "Invalid home settings payload.");
+
+    const prisma = getPrisma();
+    const existing = await prisma.homePageSettings.findFirst({
+      orderBy: { updatedAt: "desc" },
+    });
+    const data = {
+      infoSectionTitle:
+        parsed.data.infoSectionTitle ?? "Everything you need to know about joining MWS.",
+      infoSectionCategoryId:
+        parsed.data.infoSectionCategoryIds?.[0] ??
+        parsed.data.infoSectionCategoryId ??
+        null,
+    };
+
+    try {
+      let settingsId: string;
+      if (existing) {
+        const updated = await prisma.homePageSettings.update({
+          where: { id: existing.id },
+          data,
+        });
+        settingsId = updated.id;
+      } else {
+        const created = await prisma.homePageSettings.create({ data });
+        settingsId = created.id;
+      }
+
+      if (parsed.data.infoSectionCategoryIds) {
+        await prisma.homeInfoSectionCategory.deleteMany({
+          where: { homePageSettingsId: settingsId },
+        });
+        if (parsed.data.infoSectionCategoryIds.length) {
+          await prisma.homeInfoSectionCategory.createMany({
+            data: parsed.data.infoSectionCategoryIds.map((categoryId, index) => ({
+              categoryId,
+              homePageSettingsId: settingsId,
+              sortOrder: index,
+            })),
+            skipDuplicates: true,
+          });
+        }
+      }
+      return this.getHomeContentAdmin();
+    } catch (error) {
+      handleDatabaseError(error);
+    }
+  }
+
+  static async createCampusSpotlight(payload: unknown) {
+    const parsed = campusSpotlightSchema.safeParse(payload);
+    if (!parsed.success)
+      throw new ResponseError(400, "Invalid campus spotlight payload.");
+
+    try {
+      const spotlight = await getPrisma().campusSpotlight.create({
+        data: {
+          text: parsed.data.text,
+          cite: parsed.data.cite,
+          sortOrder: parsed.data.sortOrder ?? 0,
+          isActive: parsed.data.isActive ?? true,
+          activeFrom: parsed.data.activeFrom ?? null,
+          activeUntil: parsed.data.activeUntil ?? null,
+        },
+      });
+      return campusSpotlightResponse(spotlight);
+    } catch (error) {
+      handleDatabaseError(error);
+    }
+  }
+
+  static async updateCampusSpotlight(id: string | undefined, payload: unknown) {
+    requireUuid(id);
+    const parsed = campusSpotlightSchema.partial().safeParse(payload);
+    if (!parsed.success)
+      throw new ResponseError(400, "Invalid campus spotlight payload.");
+
+    try {
+      const spotlight = await getPrisma().campusSpotlight.update({
+        where: { id },
+        data: parsed.data,
+      });
+      return campusSpotlightResponse(spotlight);
+    } catch (error) {
+      handleDatabaseError(error);
+    }
+  }
+
+  static async deleteCampusSpotlight(id: string | undefined) {
+    requireUuid(id);
+    try {
+      await getPrisma().campusSpotlight.delete({ where: { id } });
+    } catch (error) {
+      handleDatabaseError(error);
+    }
+  }
+
   static async getAdmissions() {
-    const [programs, galleries] = await Promise.all([
+    const [programs, galleries, record] = await Promise.all([
       getAdminPrograms(),
       GalleryService.listGalleries(),
+      getPrisma().admissionPage.findFirst({
+        orderBy: { updatedAt: "desc" },
+      }),
     ]);
+
+    const fallback = await PageDataService.getAdmissions();
+    const page = {
+      id: record?.id ?? null,
+      title: record?.title ?? "Admission",
+      description: record?.description ?? null,
+      content: record?.content ?? fallback.content,
+      galleryId: record?.galleryId ?? null,
+      isPublished: record?.isPublished ?? true,
+      updatedAt: record?.updatedAt ?? null,
+    };
 
     if (programs.length) {
       return {
+        page,
         programs: programs.map(adminProgramResponse),
         galleries,
       };
     }
 
-    const fallback = await PageDataService.getAdmissions();
     return {
+      page,
       programs: fallback.programs.map((program, index) => ({
         ...program,
         admissionId: null,
@@ -208,6 +449,45 @@ export class AdminPageEditorService {
     const prisma = getPrisma();
 
     try {
+      const existingPage = await prisma.admissionPage.findFirst({
+        orderBy: { updatedAt: "desc" },
+      });
+      const pageContent = jsonRecord(parsed.data.content);
+      const pageJsonContent = pageContent
+        ? (pageContent as Prisma.InputJsonValue)
+        : Prisma.JsonNull;
+      const pageTitle =
+        typeof pageContent?.heroTitle === "string" && pageContent.heroTitle.trim()
+          ? pageContent.heroTitle.trim()
+          : "Admission";
+      const pageDescription =
+        typeof pageContent?.heroSubtitle === "string"
+          ? nullable(pageContent.heroSubtitle)
+          : null;
+
+      if (existingPage) {
+        await prisma.admissionPage.update({
+          where: { id: existingPage.id },
+          data: {
+            title: pageTitle,
+            description: pageDescription,
+            content: pageJsonContent,
+            galleryId: parsed.data.galleryId ?? null,
+            isPublished: parsed.data.isPublished ?? false,
+          },
+        });
+      } else {
+        await prisma.admissionPage.create({
+          data: {
+            title: pageTitle,
+            description: pageDescription,
+            content: pageJsonContent,
+            galleryId: parsed.data.galleryId ?? null,
+            isPublished: parsed.data.isPublished ?? false,
+          },
+        });
+      }
+
       for (const [index, programData] of parsed.data.programs.entries()) {
         const program = await findOrCreateProgram(programData, index);
 
@@ -263,11 +543,14 @@ export class AdminPageEditorService {
   }
 
   static async getCommunityStoriesAdmin() {
-    const [publicPage, galleries, news] = await Promise.all([
+    const [publicPage, galleries, news, voices] = await Promise.all([
       PageDataService.getCommunityStories(),
       GalleryService.listGalleries(),
       getPrisma().newsPost.findMany({
         orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+      }),
+      getPrisma().communityVoice.findMany({
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
       }),
     ]);
 
@@ -290,7 +573,19 @@ export class AdminPageEditorService {
       },
       galleries,
       news: news.map(communityNewsResponse),
+      voices: voices.map(communityVoiceResponse),
     };
+  }
+
+  static async listCommunityVoicesAdmin() {
+    try {
+      const voices = await getPrisma().communityVoice.findMany({
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+      });
+      return voices.map(communityVoiceResponse);
+    } catch (error) {
+      handleDatabaseError(error);
+    }
   }
 
   static async saveCommunityStoriesPage(payload: unknown) {
@@ -384,6 +679,126 @@ export class AdminPageEditorService {
     requireUuid(id);
     try {
       await getPrisma().newsPost.delete({ where: { id } });
+    } catch (error) {
+      handleDatabaseError(error);
+    }
+  }
+
+  static async createCommunityVoice(payload: unknown) {
+    const parsed = communityVoiceSchema.safeParse(payload);
+    if (!parsed.success)
+      throw new ResponseError(400, "Invalid community voice payload.");
+
+    try {
+      const voice = await getPrisma().communityVoice.create({
+        data: {
+          role: parsed.data.role,
+          name: parsed.data.name,
+          grade: nullable(parsed.data.grade),
+          quote: parsed.data.quote,
+          imagePath: parsed.data.imagePath,
+          sortOrder: parsed.data.sortOrder ?? 0,
+          isActive: parsed.data.isActive ?? true,
+        },
+      });
+      return communityVoiceResponse(voice);
+    } catch (error) {
+      handleDatabaseError(error);
+    }
+  }
+
+  static async updateCommunityVoice(id: string | undefined, payload: unknown) {
+    requireUuid(id);
+    const parsed = communityVoiceSchema.partial().safeParse(payload);
+    if (!parsed.success)
+      throw new ResponseError(400, "Invalid community voice payload.");
+
+    try {
+      const voice = await getPrisma().communityVoice.update({
+        where: { id },
+        data: {
+          ...parsed.data,
+          grade:
+            parsed.data.grade === undefined
+              ? undefined
+              : nullable(parsed.data.grade),
+        },
+      });
+      return communityVoiceResponse(voice);
+    } catch (error) {
+      handleDatabaseError(error);
+    }
+  }
+
+  static async deleteCommunityVoice(id: string | undefined) {
+    requireUuid(id);
+    try {
+      await getPrisma().communityVoice.delete({ where: { id } });
+    } catch (error) {
+      handleDatabaseError(error);
+    }
+  }
+
+  static async getAdmissionGuidelinesAdmin() {
+    const page = await getPrisma().cmsPage.findFirst({
+      where: { slug: "admission-guidelines", deletedAt: null },
+      orderBy: { updatedAt: "desc" },
+    });
+
+    return {
+      id: page?.id ?? null,
+      slug: "admission-guidelines",
+      title: page?.title ?? "Admission Guidelines",
+      body: page?.body ?? null,
+      status: page?.status === "PUBLISHED" ? "PUBLISHED" : "DRAFT",
+      publishedAt: page?.publishedAt ?? null,
+      updatedAt: page?.updatedAt ?? null,
+    };
+  }
+
+  static async saveAdmissionGuidelines(payload: unknown) {
+    const parsed = cmsGuidelinesPayloadSchema.safeParse(payload);
+    if (!parsed.success)
+      throw new ResponseError(400, "Invalid admission guidelines payload.");
+
+    const prisma = getPrisma();
+    const existing = await prisma.cmsPage.findFirst({
+      where: { slug: "admission-guidelines", deletedAt: null },
+      orderBy: { updatedAt: "desc" },
+    });
+    const body = jsonRecord(parsed.data.body) ?? {};
+    const title =
+      typeof body.title === "string" && body.title.trim()
+        ? body.title.trim()
+        : "Admission Guidelines";
+    const status = parsed.data.status ?? "DRAFT";
+
+    try {
+      if (existing) {
+        await prisma.cmsPage.update({
+          where: { id: existing.id },
+          data: {
+            title,
+            body: body as Prisma.InputJsonValue,
+            template: "admission-guidelines",
+            status,
+            publishedAt: status === "PUBLISHED" ? new Date() : existing.publishedAt,
+          },
+        });
+      } else {
+        await prisma.cmsPage.create({
+          data: {
+            slug: "admission-guidelines",
+            title,
+            body: body as Prisma.InputJsonValue,
+            template: "admission-guidelines",
+            status,
+            publishedAt: status === "PUBLISHED" ? new Date() : null,
+          },
+        });
+      }
+
+      return this.getAdmissionGuidelinesAdmin();
     } catch (error) {
       handleDatabaseError(error);
     }

@@ -16,6 +16,7 @@ export default function AcademicOverviewSidebar({ editor }: AcademicOverviewSide
     form,
     isBusy,
     isSaving,
+    isUploadingImage,
     overviewId,
     saveOverview,
     selectedGallery,
@@ -47,7 +48,13 @@ export default function AcademicOverviewSidebar({ editor }: AcademicOverviewSide
 
         <div className="grid gap-2">
           <Button disabled={isBusy} type="button" onClick={() => void saveOverview()}>
-            {isSaving ? 'Saving...' : overviewId ? 'Update' : 'Save'}
+            {isUploadingImage
+              ? 'Uploading...'
+              : isSaving
+                ? 'Saving...'
+                : overviewId
+                  ? 'Update'
+                  : 'Save'}
           </Button>
 
           <Button

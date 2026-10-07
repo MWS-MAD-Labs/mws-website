@@ -1,7 +1,7 @@
 import AppShell from '@/admin/components/layout/AppShell';
 import ContentPageHeader from '@/admin/components/ui/ContentPageHeader';
 import StatusMessage from '@/admin/components/ui/StatusMessage';
-import GalleryAssetPickerModal from '@/admin/features/gallery/components/GalleryAssetPickerModal';
+import CoverImagePickerModal from '@/admin/features/news/components/layouts/CoverImagePickerModal';
 import AcademicLevelFaqPickerModal from './components/layout/AcademicLevelFaqPickerModal';
 import AcademicLevelMainSections from './components/layout/AcademicLevelMainSections';
 import AcademicLevelSidebar from './components/layout/AcademicLevelSidebar';
@@ -9,7 +9,7 @@ import { useAcademicLevelEditor } from './hooks/useAcademicLevelEditor';
 
 export default function AcademicLevelEditorPage() {
   const editor = useAcademicLevelEditor();
-  const { activeImageField, config, galleries, galleryId, isLoading, message } = editor;
+  const { activeImageField, config, galleries, isLoading, message } = editor;
 
   return (
     <AppShell title={`Academic / ${config.title}`}>
@@ -37,14 +37,13 @@ export default function AcademicLevelEditorPage() {
           </div>
         )}
 
-        <GalleryAssetPickerModal
-          allowedKinds={['IMAGE']}
+        <CoverImagePickerModal
           galleries={galleries}
-          initialGalleryId={galleryId}
           open={Boolean(activeImageField)}
           title="Choose Image"
           onClose={() => editor.setActiveImageField(null)}
           onSelect={(asset) => editor.selectImage(asset.path, asset.galleryId, asset.alt)}
+          onSelectLocalFile={(file) => void editor.uploadImage(file)}
         />
 
         <AcademicLevelFaqPickerModal editor={editor} />

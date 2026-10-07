@@ -24,6 +24,7 @@ import {
   getErrorMessage,
   getNewsStatusLabel,
 } from '@/admin/features/news/newsUtils';
+import { useToastState } from '@/admin/components/ui/toastContext';
 
 export default function NewsPage() {
   const [result, setResult] = useState<NewsPostList>(EMPTY_NEWS_RESULT);
@@ -36,7 +37,7 @@ export default function NewsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useToastState<string | null>(null);
   const lastReturnMarkerRef = useRef<string | null>(null);
   const preserveMessageForNextLoadRef = useRef(false);
 
@@ -72,7 +73,7 @@ export default function NewsPage() {
     return () => {
       isCurrent = false;
     };
-  }, []);
+  }, [setMessage]);
 
   useEffect(() => {
     const consumeReturnMarker = (marker: string | null) => {
@@ -111,7 +112,7 @@ export default function NewsPage() {
       window.removeEventListener('focus', refreshAfterReturningToTab);
       window.removeEventListener('storage', resetAfterEditorFinishes);
     };
-  }, [resetListToInitial]);
+  }, [resetListToInitial, setMessage]);
 
   useEffect(() => {
     let isCurrent = true;
@@ -145,7 +146,7 @@ export default function NewsPage() {
       isCurrent = false;
       window.clearTimeout(timer);
     };
-  }, [filters, page, refreshVersion]);
+  }, [filters, page, refreshVersion, setMessage]);
 
   async function deletePost(post: NewsPost) {
     const confirmed = window.confirm(`Delete "${post.title}"? This action cannot be undone.`);

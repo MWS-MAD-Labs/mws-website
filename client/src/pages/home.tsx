@@ -111,6 +111,9 @@ export default function Home() {
   const [heroIndex, setHeroIndex] = useState(0);
   const slides = homeData?.heroSlides ?? [];
   const cards = homeData?.infoCards.length ? homeData.infoCards : infoCards;
+  const infoSectionTitle =
+    homeData?.infoTitle || 'Everything you need to know about joining MWS.';
+  const infoSectionFilters = homeData?.infoFilters?.length ? homeData.infoFilters : filters;
   const programs = homeData?.programs.length ? homeData.programs : undefined;
   const voices = homeData?.communityVoices.length ? homeData.communityVoices : undefined;
   const affiliations = homeData?.affiliations ?? {
@@ -182,8 +185,8 @@ export default function Home() {
       />
 
       <InfoSection
-        title="Everything you need to know about joining MWS."
-        filters={filters}
+        title={infoSectionTitle}
+        filters={infoSectionFilters}
         cards={cards}
       />
 

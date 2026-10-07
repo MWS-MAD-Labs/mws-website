@@ -1,9 +1,9 @@
-import { Link } from "react-router-dom";
-import { logoUrl } from "../../data/site";
+import { Link } from 'react-router-dom';
+import { logoUrl } from '../../data/site';
 
 export default function Footer() {
   const footerLinkClassName =
-    "text-[14.5px] text-[rgba(248,247,243,0.75)] transition-colors duration-[250ms] hover:text-[var(--gold)]";
+    'text-[14.5px] text-[rgba(248,247,243,0.75)] transition-colors duration-[250ms] hover:text-[var(--gold)]';
 
   return (
     <footer
@@ -13,9 +13,9 @@ export default function Footer() {
     >
       <div className="mx-auto w-[min(100%_-_96px,1240px)] max-[980px]:w-[min(100%_-_56px,1240px)] max-[680px]:w-[min(100%_-_40px,1240px)] max-[430px]:w-[min(100%_-_32px,1240px)]">
         <div className="grid grid-cols-[1.4fr_1fr_1fr_1fr] gap-10 border-b border-[rgba(248,247,243,0.12)] pb-[60px] max-[1180px]:grid-cols-2 max-[1180px]:gap-9 max-[680px]:grid-cols-1">
-          <div className="max-w-[320px] font-[var(--f-head)] text-xl font-bold text-[var(--warm-white)]">
+          <div className="max-w-[320px] text-xl font-[var(--f-head)] font-bold text-[var(--warm-white)]">
             <Link
-              className="mb-[18px] inline-flex h-[72px] w-[72px] items-center justify-center bg-[rgba(248,247,243,0.92)]"
+              className="mb-[18px] inline-flex h-[72px] w-[72px] items-center justify-center"
               to="/#hero"
               aria-label="Millennia World School home"
             >
@@ -26,8 +26,9 @@ export default function Footer() {
               />
             </Link>
             <p className="max-w-[280px] text-[14.5px] font-normal leading-[1.8] text-[rgba(248,247,243,0.55)]">
-              Adipiscing sed voluptate, praesent posuere sunt primis
-              reprehenderit ex consectetur est quis. Anim faucibus nulla veniam.
+              Our curriculum utilizes the full range of activities that are designed to enrich
+              creative young minds. We use Finnish Waldorf Framework integrated with Indonesian
+              National Curriculum.
             </p>
           </div>
 
@@ -41,16 +42,10 @@ export default function Footer() {
             <Link className={`mt-3 ${footerLinkClassName}`} to="/academic">
               Academics
             </Link>
-            <Link
-              className={`mt-3 ${footerLinkClassName}`}
-              to="/#campus-spotlight"
-            >
+            <Link className={`mt-3 ${footerLinkClassName}`} to="/#campus-spotlight">
               Campus environment
             </Link>
-            <Link
-              className={`mt-3 ${footerLinkClassName}`}
-              to="/community-stories"
-            >
+            <Link className={`mt-3 ${footerLinkClassName}`} to="/community-stories">
               Community stories
             </Link>
           </div>
@@ -59,22 +54,13 @@ export default function Footer() {
             <h2 className="mb-[18px] text-[13px] font-semibold uppercase tracking-[0.08em] text-[rgba(248,247,243,0.42)]">
               Programs
             </h2>
-            <Link
-              className={footerLinkClassName}
-              to="/academic/kindergarten"
-            >
+            <Link className={footerLinkClassName} to="/academic/kindergarten">
               Kindergarten
             </Link>
-            <Link
-              className={`mt-3 ${footerLinkClassName}`}
-              to="/academic/elementary"
-            >
+            <Link className={`mt-3 ${footerLinkClassName}`} to="/academic/elementary">
               Elementary
             </Link>
-            <Link
-              className={`mt-3 ${footerLinkClassName}`}
-              to="/academic/high-school"
-            >
+            <Link className={`mt-3 ${footerLinkClassName}`} to="/academic/high-school">
               High School
             </Link>
             <Link className={`mt-3 ${footerLinkClassName}`} to="/kurikulum">
@@ -104,10 +90,7 @@ export default function Footer() {
         </div>
 
         <div className="flex items-center justify-between gap-6 pt-8 text-[13px] text-[rgba(248,247,243,0.4)] max-[680px]:flex-col max-[680px]:items-start">
-          <p className="m-0">
-            &copy;{" "}
-            Millennia World School. All rights reserved.
-          </p>
+          <p className="m-0">&copy; Millennia World School. All rights reserved.</p>
           <div>
             <Link
               className="text-[rgba(248,247,243,0.62)] transition-colors duration-[250ms] hover:text-[var(--gold)]"

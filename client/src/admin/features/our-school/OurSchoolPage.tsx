@@ -1,8 +1,8 @@
 import AppShell from '@/admin/components/layout/AppShell';
 import ContentPageHeader from '@/admin/components/ui/ContentPageHeader';
 import StatusMessage from '@/admin/components/ui/StatusMessage';
-import GalleryAssetPickerModal from '@/admin/features/gallery/components/GalleryAssetPickerModal';
 import GalleryPickerModal from '@/admin/features/gallery/components/GalleryPickerModal';
+import CoverImagePickerModal from '@/admin/features/news/components/layouts/CoverImagePickerModal';
 import OurSchoolMainSections from './components/layout/OurSchoolMainSections';
 import OurSchoolSidebar from './components/layout/OurSchoolSidebar';
 import { useOurSchoolEditor } from './hooks/useOurSchoolEditor';
@@ -20,6 +20,7 @@ export default function OurSchoolPage() {
     selectImage,
     setActiveImageField,
     setIsGalleryPickerOpen,
+    uploadImage,
   } = editor;
 
   return (
@@ -57,14 +58,13 @@ export default function OurSchoolPage() {
           onSelect={selectGallery}
         />
 
-        <GalleryAssetPickerModal
-          allowedKinds={['IMAGE']}
+        <CoverImagePickerModal
           galleries={galleries}
-          initialGalleryId={galleryId}
           open={Boolean(activeImageField)}
           title="Choose Image"
           onClose={() => setActiveImageField(null)}
           onSelect={(asset) => selectImage(asset.path, asset.galleryId, asset.alt)}
+          onSelectLocalFile={(file) => void uploadImage(file)}
         />
       </section>
     </AppShell>

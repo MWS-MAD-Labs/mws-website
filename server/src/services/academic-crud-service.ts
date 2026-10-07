@@ -14,12 +14,14 @@ const optionalText = (max?: number) => {
 const requiredJson = z.custom<unknown>((value) => value !== undefined, {
   message: "Required",
 });
+const optionalJson = z.custom<unknown>().nullable().optional();
 const optionalDate = z.coerce.date().nullable().optional();
 
 const academicSchema = z.strictObject({
   title: z.string().trim().min(1).max(255),
   description: optionalText(2000),
   coverImage: optionalText(1000),
+  content: optionalJson,
   galleryId: optionalUuid,
 });
 
@@ -32,6 +34,8 @@ const faqSchema = z.strictObject({
   question: z.string().trim().min(1).max(500),
   answer: z.string().trim().min(1).max(20000),
   isActive: z.boolean().optional(),
+  isAdmissionFaq: z.boolean().optional(),
+  admissionSortOrder: z.number().int().min(0).optional(),
 });
 
 const fixedLevelSchema = z.strictObject({
@@ -134,7 +138,12 @@ const academicCrudModels: Record<AcademicCrudResource, AcademicCrudModel> = {
         },
       },
     },
-    orderBy: [{ isActive: "desc" }, { updatedAt: "desc" }],
+    orderBy: [
+      { isActive: "desc" },
+      { isAdmissionFaq: "desc" },
+      { admissionSortOrder: "asc" },
+      { updatedAt: "desc" },
+    ],
   },
   kindergartens: {
     resource: "kindergartens",
