@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { communityVoices } from "../../data/site";
 
 export type Voice = {
   id?: string;
@@ -19,17 +18,120 @@ type CommunityVoicesProps = {
   showFooterLink?: boolean;
 };
 
-const defaultVoices: Voice[] = communityVoices;
+function youtubeEmbedUrl(url: string) {
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.replace("www.", "");
+
+    if (host === "youtu.be") {
+      return `https://www.youtube.com/embed/${parsed.pathname.slice(1)}`;
+    }
+
+    if (host.endsWith("youtube.com")) {
+      const watchId = parsed.searchParams.get("v");
+      if (watchId) return `https://www.youtube.com/embed/${watchId}`;
+
+      const parts = parsed.pathname.split("/").filter(Boolean);
+      if (parts[0] === "shorts" || parts[0] === "embed") {
+        return `https://www.youtube.com/embed/${parts[1]}`;
+      }
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+function isVideoAsset(path: string) {
+  return /\/videos\//.test(path) || /\.(mp4|webm|mov|m4v)(?:\?|$)/i.test(path);
+}
+
+function VoiceMedia({
+  alt,
+  className,
+  mode,
+  src,
+}: {
+  alt: string;
+  className: string;
+  mode: "card" | "modal";
+  src: string;
+}) {
+  const embedUrl = youtubeEmbedUrl(src);
+
+  if (embedUrl) {
+    return (
+      <iframe
+        className={`${className} ${mode === "card" ? "pointer-events-none" : ""}`}
+        src={embedUrl}
+        title={alt}
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+      />
+    );
+  }
+
+  if (isVideoAsset(src)) {
+    return (
+      <video
+        className={className}
+        src={src}
+        autoPlay={mode === "card"}
+        controls={mode === "modal"}
+        loop={mode === "card"}
+        muted
+        playsInline
+        preload="metadata"
+      />
+    );
+  }
+
+  return <img className={className} src={src} alt={alt} />;
+}
 
 export default function CommunityVoices({
-  voices = defaultVoices,
+  voices = [],
   showFooterLink = true,
 }: CommunityVoicesProps) {
-  const items = voices.length ? voices : defaultVoices;
+  const items = voices;
   const [selectedVoice, setSelectedVoice] = useState<Voice | null>(null);
+  const sectionRef = useRef<HTMLElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const lastFocusedRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!items.length || !sectionRef.current) return;
+
+    const section = sectionRef.current;
+    const reveal = () => {
+      section.setAttribute("data-revealed", "true");
+    };
+
+    if (
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      !("IntersectionObserver" in window)
+    ) {
+      reveal();
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          reveal();
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15 },
+    );
+
+    observer.observe(section);
+
+    return () => observer.disconnect();
+  }, [items.length]);
 
   useEffect(() => {
     if (!selectedVoice) return;
@@ -75,9 +177,12 @@ export default function CommunityVoices({
     };
   }, [selectedVoice]);
 
+  if (!items.length) return null;
+
   return (
     <>
       <section
+        ref={sectionRef}
         className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen max-w-none translate-y-7 bg-[var(--warm-white)] px-[max(48px,calc((100vw-1240px)/2+48px))] py-[124px] text-[var(--charcoal)] opacity-0 transition-[opacity,transform] duration-[900ms] ease-out data-[revealed=true]:translate-y-0 data-[revealed=true]:opacity-100 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-reduce:transition-none max-[980px]:px-6 max-[980px]:py-[78px] max-[680px]:px-4 max-[680px]:py-[62px]"
         id="community-voices"
         data-reveal
@@ -108,10 +213,11 @@ export default function CommunityVoices({
               }}
             >
               <div className="relative h-full w-full">
-                <img
+                <VoiceMedia
                   className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                   src={voice.image}
                   alt={`${voice.role} Voice`}
+                  mode="card"
                 />
                 <div className="absolute left-1/2 top-1/2 z-[2] flex h-[52px] w-[52px] -translate-x-1/2 -translate-y-1/2 scale-[0.85] items-center justify-center rounded-full bg-white/90 opacity-0 transition-all duration-300 group-hover:scale-100 group-hover:opacity-100">
                   <svg
@@ -174,10 +280,11 @@ export default function CommunityVoices({
 
             {/* Image — 9:16 */}
             <div className="relative aspect-[9/16] h-[min(82vh,720px)] shrink-0 bg-[var(--charcoal)] max-[768px]:aspect-[9/16] max-[768px]:h-auto max-[768px]:max-h-[55vh] max-[768px]:w-full">
-              <img
+              <VoiceMedia
                 className="h-full w-full object-cover"
                 src={selectedVoice.image}
                 alt={`${selectedVoice.role} Voice`}
+                mode="modal"
               />
 
               <div className="absolute inset-0 bg-[rgba(36,23,24,0.08)]" />

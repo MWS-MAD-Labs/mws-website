@@ -214,27 +214,6 @@ const defaultPartnerLogos = [
   "https://millenniaws.sch.id/wp-content/uploads/2023/11/ResponsiveClassroom.jpg",
 ];
 
-const defaultCommunityVoices = [
-  {
-    id: "default-voice-1",
-    role: "Student",
-    name: "Kianna A.",
-    grade: "Grade 7 Student",
-    image: asset("_DSC4760.jpg"),
-    quote:
-      "MWS gave me the confidence to speak up in front of people and explore my love for science projects.",
-  },
-  {
-    id: "default-voice-2",
-    role: "Parent",
-    name: "Sarah & David M.",
-    grade: "Parents of Grade 2 & 5",
-    image: asset("Elementary.jpg"),
-    quote:
-      "Finding a school that values character as much as academics was essential for us.",
-  },
-];
-
 const defaultOurSchoolContent = {
   hero: {
     title: "Our School",
@@ -291,6 +270,9 @@ const defaultCommunityStoriesContent = {
     "From everyday learning to special moments across the school, these are some of the experiences that bring the MWS community together.",
     "Explore moments from life at MWS through our community gallery.",
   ],
+  activityTitle: "School activities and everyday moments.",
+  activityDescription:
+    "Browse selected photos from learning, events, and life across the MWS community.",
 };
 
 const defaultAcademicOverview = {
@@ -333,13 +315,6 @@ const defaultAcademicOverview = {
   },
   galleryId: null as string | null,
 };
-
-const defaultGalleryImages = Array.from({ length: 8 }, (_, index) => ({
-  id: `default-gallery-${index + 1}`,
-  src: asset(index % 2 === 0 ? "Elementary.jpg" : "DSC04079.jpg"),
-  alt: "MWS school community",
-  size: index === 0 || index === 7 ? "large" : index === 5 ? "tall" : "normal",
-}));
 
 function imagePath(path: string | null | undefined, fallback: string) {
   return path || fallback;
@@ -424,12 +399,13 @@ function infoCardFromNews(news: NewsPostWithGallery) {
 
 function galleryImagesFromPage(page: CommunityStoriesPageRecord | null) {
   const images = page?.gallery?.images ?? [];
-  if (!images.length) return defaultGalleryImages;
+  if (!images.length) return [];
 
   return images.map((image, index) => ({
     id: image.id,
     src: galleryImageUrl(image),
     alt: image.title || image.caption || "MWS school community",
+    caption: image.caption || image.title || null,
     size:
       index === 0 || index === 7 ? "large" : index === 5 ? "tall" : "normal",
   }));
@@ -688,16 +664,14 @@ export class PageDataService {
       programs: programs.length
         ? programs.map(programResponse)
         : defaultPrograms,
-      communityVoices: voices.length
-        ? voices.map((voice) => ({
-            id: voice.id,
-            role: voice.role,
-            name: voice.name,
-            grade: voice.grade,
-            image: voice.imagePath,
-            quote: voice.quote,
-          }))
-        : defaultCommunityVoices,
+      communityVoices: voices.map((voice) => ({
+        id: voice.id,
+        role: voice.role,
+        name: voice.name,
+        grade: voice.grade,
+        image: voice.imagePath,
+        quote: voice.quote,
+      })),
       affiliations: {
         title: "Global partners in learning.",
         text: "MWS connects learning with wider communities and partners who support student growth.",
@@ -773,23 +747,13 @@ export class PageDataService {
         page?.introBody,
         defaultCommunityStoriesContent.introBody,
       ),
+      activityTitle:
+        page?.activityTitle || defaultCommunityStoriesContent.activityTitle,
+      activityDescription:
+        page?.activityDescription ||
+        defaultCommunityStoriesContent.activityDescription,
       galleryImages: galleryImagesFromPage(page),
-      news: news.length
-        ? news.map(newsResponse)
-        : [
-            {
-              id: "default-news-1",
-              title: "Learning through meaningful experiences",
-              image: asset("Elementary.jpg"),
-              path: "/news/learning-through-meaningful-experiences",
-            },
-            {
-              id: "default-news-2",
-              title: "Moments from our school community",
-              image: asset("DSC04079.jpg"),
-              path: "/news/moments-from-our-school-community",
-            },
-          ],
+      news: news.map(newsResponse),
     };
   }
 }

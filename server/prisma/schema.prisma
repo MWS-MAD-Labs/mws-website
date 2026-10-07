@@ -563,6 +563,8 @@ model CommunityStoriesPage {
   heroImageAlt  String? @db.VarChar(255)
   introTitle    String? @db.VarChar(500)
   introBody     Json?
+  activityTitle String? @db.VarChar(255)
+  activityDescription String?
   galleryId     String? @db.Uuid
   isPublished   Boolean @default(true)
   createdAt     DateTime @default(now())

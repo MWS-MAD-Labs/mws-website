@@ -26,7 +26,7 @@ import AcademicLevelEditorPage from '@/admin/features/academic/AcademicLevelEdit
 import AcademicOverviewPage from '@/admin/features/academic/AcademicOverviewPage';
 import ContactPageEditor from '@/admin/features/contact/ContactPageEditor';
 import CommunityStoriesPage from '@/admin/features/community-stories/CommunityStoriesPage';
-import CommunityVoicesPage from '@/admin/features/community-voices/CommunityVoicesPage';
+import CommunityVoicesPage from '@/admin/features/community-voices/pages/CommunityVoicesPage';
 import HeroSlidesPage from '@/admin/features/home/HeroSlidesPage';
 import PageEditorPage from '@/admin/features/page/PageEditorPage';
 import PagesManagementPage from '@/admin/features/page/PagesManagementPage';

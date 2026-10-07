@@ -66,41 +66,6 @@ export const programCards = [
   },
 ];
 
-export const communityVoices = [
-  {
-    role: "Student",
-    name: "Kianna A.",
-    grade: "Grade 7 Student",
-    image: asset("_DSC4760.jpg"),
-    quote:
-      "MWS gave me the confidence to speak up in front of people and explore my love for science projects.",
-  },
-  {
-    role: "Parent",
-    name: "Sarah & David M.",
-    grade: "Parents of Grade 2 & 5",
-    image: asset("Elementary.jpg"),
-    quote:
-      "Finding a school that values character as much as academics was essential for us. MWS exceeds every expectation.",
-  },
-  {
-    role: "Educator",
-    name: "Mr. Hendra",
-    grade: "Primary Homeroom Teacher",
-    image: asset("DSC04079.jpg"),
-    quote:
-      "Teaching here means watching children transform from curious thinkers into independent, compassionate leaders.",
-  },
-  {
-    role: "Staff",
-    name: "Ms. Maya",
-    grade: "Head of Student Care",
-    image: asset("_DSC4760.jpg"),
-    quote:
-      "Every child is known by name and supported individually so they feel safe to grow at their own pace.",
-  },
-];
-
 export const newsPosts = [
   {
     category: "School Life",

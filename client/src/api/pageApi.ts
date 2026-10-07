@@ -151,6 +151,7 @@ export type CommunityGalleryImageData = {
   id: string;
   src: string;
   alt: string;
+  caption: string | null;
   size: "large" | "tall" | "normal";
 };
 
@@ -165,6 +166,8 @@ export type CommunityStoriesPageData = {
   hero: { title: string; image: string; imageAlt: string };
   introTitle: string;
   introBody: string[];
+  activityTitle: string;
+  activityDescription: string;
   galleryImages: CommunityGalleryImageData[];
   news: CommunityNewsData[];
 };

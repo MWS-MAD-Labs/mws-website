@@ -265,6 +265,7 @@ describe("PageDataService", () => {
       quote: "CMS spotlight",
       cite: "Home CMS",
     });
+    expect(page.communityVoices).toEqual([]);
   });
 
   it("returns admissions programs with admin contact", async () => {
@@ -407,6 +408,8 @@ describe("PageDataService", () => {
       heroImageAlt: null,
       introTitle: "Community",
       introBody: ["Intro"],
+      activityTitle: "Activity Highlights",
+      activityDescription: "Photos from school activities.",
       galleryId: "55555555-5555-4555-8555-555555555555",
       isPublished: true,
       createdAt: new Date("2026-09-18T00:00:00.000Z"),
@@ -424,7 +427,7 @@ describe("PageDataService", () => {
             galleryId: "55555555-5555-4555-8555-555555555555",
             path: "gallery/images/photo.jpg",
             title: "Photo",
-            caption: null,
+            caption: "Students sharing activity moments.",
             sortOrder: 0,
             createdAt: new Date("2026-09-18T00:00:00.000Z"),
             updatedAt: new Date("2026-09-18T00:00:00.000Z"),
@@ -436,10 +439,23 @@ describe("PageDataService", () => {
 
     const page = await PageDataService.getCommunityStories();
 
+    expect(page.activityTitle).toBe("Activity Highlights");
+    expect(page.activityDescription).toBe("Photos from school activities.");
     expect(page.galleryImages[0]).toMatchObject({
       id: "66666666-6666-4666-8666-666666666666",
       src: "/api/gallery-images/66666666-6666-4666-8666-666666666666/file",
       alt: "Photo",
+      caption: "Students sharing activity moments.",
     });
+  });
+
+  it("does not fall back to static community stories media", async () => {
+    spyOn(PageDataRepository, "getCommunityStoriesPage").mockResolvedValue(null);
+    spyOn(PageDataRepository, "listPublishedNews").mockResolvedValue([]);
+
+    const page = await PageDataService.getCommunityStories();
+
+    expect(page.galleryImages).toEqual([]);
+    expect(page.news).toEqual([]);
   });
 });

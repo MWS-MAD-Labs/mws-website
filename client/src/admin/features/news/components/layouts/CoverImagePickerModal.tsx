@@ -1,27 +1,37 @@
 import { useMemo, useRef, useState, type ChangeEvent } from 'react';
 
-import { adminApi, type GalleryImageItem, type GalleryItem } from '@/admin/api/adminApi';
+import {
+  adminApi,
+  type GalleryImageItem,
+  type GalleryItem,
+  type GalleryVideoItem,
+} from '@/admin/api/adminApi';
 
 import Button from '@/admin/components/ui/Button';
 import Modal from '@/admin/components/ui/Modal';
 import SearchInput from '@/admin/components/ui/SearchInput';
 
-import type { GalleryAssetSelection } from '@/admin/features/gallery/components/GalleryAssetPickerModal';
+import type {
+  GalleryAssetKind,
+  GalleryAssetSelection,
+} from '@/admin/features/gallery/components/GalleryAssetPickerModal';
 
 type CoverImagePickerModalProps = {
   allowUpload?: boolean;
+  allowedKinds?: GalleryAssetKind[];
   galleries: GalleryItem[];
   open: boolean;
   title?: string;
   onClose: () => void;
   onSelect: (asset: GalleryAssetSelection) => void;
-  onSelectLocalFile: (file: File) => void;
+  onSelectLocalFile?: (file: File) => void;
 };
 
 type PickerMode = 'GALLERY' | 'UPLOAD';
 
 export default function CoverImagePickerModal({
   allowUpload = true,
+  allowedKinds = ['IMAGE'],
   galleries,
   open,
   title = 'Choose image',
@@ -33,6 +43,9 @@ export default function CoverImagePickerModal({
   const [activeGalleryId, setActiveGalleryId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const canSelectImages = allowedKinds.includes('IMAGE');
+  const canSelectVideos = allowedKinds.includes('VIDEO');
+  const canUploadImages = allowUpload && canSelectImages && Boolean(onSelectLocalFile);
 
   const filteredGalleries = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -45,7 +58,28 @@ export default function CoverImagePickerModal({
   }, [galleries, searchQuery]);
 
   const activeGallery = galleries.find((gallery) => gallery.id === activeGalleryId) ?? null;
-  const images = activeGallery?.images ?? [];
+  const assets = activeGallery
+    ? [
+        ...(canSelectImages
+          ? activeGallery.images.map((image) => ({
+              id: image.id,
+              kind: 'IMAGE' as const,
+              image,
+              label: image.title || image.caption || 'Gallery image',
+              selection: imageSelection(activeGallery, image),
+            }))
+          : []),
+        ...(canSelectVideos
+          ? activeGallery.videos.map((video) => ({
+              id: video.id,
+              kind: 'VIDEO' as const,
+              label: video.title || video.caption || 'Gallery video',
+              selection: videoSelection(activeGallery, video),
+              video,
+            }))
+          : []),
+      ]
+    : [];
 
   function close() {
     setMode('GALLERY');
@@ -57,7 +91,7 @@ export default function CoverImagePickerModal({
   function selectLocalFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
 
-    if (file) {
+    if (file && onSelectLocalFile) {
       onSelectLocalFile(file);
       close();
     }
@@ -65,15 +99,8 @@ export default function CoverImagePickerModal({
     event.target.value = '';
   }
 
-  function selectGalleryImage(gallery: GalleryItem, image: GalleryImageItem) {
-    onSelect({
-      alt: image.title || image.caption || gallery.title,
-      galleryId: gallery.id,
-      kind: 'IMAGE',
-      label: image.title || image.caption || 'Gallery image',
-      path: adminApi.galleryImagePublicPath(image),
-    });
-
+  function selectGalleryAsset(asset: GalleryAssetSelection) {
+    onSelect(asset);
     close();
   }
 
@@ -88,7 +115,7 @@ export default function CoverImagePickerModal({
               label="Gallery"
               onClick={() => setMode('GALLERY')}
             />
-            {allowUpload ? (
+            {canUploadImages ? (
               <PickerTab
                 active={mode === 'UPLOAD'}
                 label="Upload"
@@ -169,7 +196,7 @@ export default function CoverImagePickerModal({
                       </span>
 
                       <span className="flex shrink-0 items-center gap-2 text-xs text-[#64748B]">
-                        {gallery.images.length} {gallery.images.length === 1 ? 'image' : 'images'}
+                        {galleryAssetCount(gallery, allowedKinds)}
                         <ChevronIcon direction="right" />
                       </span>
                     </button>
@@ -180,7 +207,7 @@ export default function CoverImagePickerModal({
               </div>
             </div>
           ) : (
-            /* Step 2: images in the selected gallery */
+            /* Step 2: assets in the selected gallery */
             <div className="flex h-full flex-col">
               <div className="flex shrink-0 items-center gap-3 border-b border-[#E2E8F0] py-4">
                 <button
@@ -197,39 +224,51 @@ export default function CoverImagePickerModal({
                 </h3>
 
                 <span className="shrink-0 text-xs text-[#64748B]">
-                  {images.length} {images.length === 1 ? 'image' : 'images'}
+                  {assetCountLabel(assets.length, canSelectVideos && !canSelectImages ? 'video' : 'asset')}
                 </span>
               </div>
 
               <div className="flex min-h-0 flex-1 flex-col pt-4">
-                {!images.length ? (
-                  <EmptyState text="No images in this gallery." />
+                {!assets.length ? (
+                  <EmptyState
+                    text={
+                      canSelectVideos && !canSelectImages
+                        ? 'No videos in this gallery.'
+                        : 'No matching assets in this gallery.'
+                    }
+                  />
                 ) : (
                   <div className="grid min-h-0 flex-1 grid-cols-2 content-start gap-3 overflow-y-auto sm:grid-cols-3 lg:grid-cols-4">
-                    {images.map((image) => {
-                      const label = image.title || image.caption || 'Gallery image';
-
-                      return (
-                        <button
-                          key={image.id}
-                          type="button"
-                          onClick={() => selectGalleryImage(activeGallery, image)}
-                          className="group text-left"
-                        >
-                          <div className="aspect-[4/3] overflow-hidden rounded-md border border-[#E2E8F0] bg-[#F1F5F9] group-hover:border-[#3C50E0] group-focus-visible:border-[#3C50E0]">
+                    {assets.map((asset) => (
+                      <button
+                        key={`${asset.kind}-${asset.id}`}
+                        type="button"
+                        onClick={() => selectGalleryAsset(asset.selection)}
+                        className="group text-left"
+                      >
+                        <div className="relative aspect-[4/3] overflow-hidden rounded-md border border-[#E2E8F0] bg-[#F1F5F9] group-hover:border-[#3C50E0] group-focus-visible:border-[#3C50E0]">
+                          {asset.kind === 'IMAGE' ? (
                             <img
-                              src={adminApi.galleryImageUrl(image)}
-                              alt={image.title || image.caption || activeGallery.title}
+                              src={adminApi.galleryImageUrl(asset.image)}
+                              alt={asset.selection.alt}
                               className="h-full w-full object-cover"
                             />
-                          </div>
+                          ) : (
+                            <VideoPreview video={asset.video} />
+                          )}
 
-                          <span className="mt-1.5 block truncate text-xs text-[#64748B] group-hover:text-[#1C2434]">
-                            {label}
-                          </span>
-                        </button>
-                      );
-                    })}
+                          {asset.kind === 'VIDEO' ? (
+                            <span className="absolute left-2 top-2 rounded bg-black/70 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white">
+                              Video
+                            </span>
+                          ) : null}
+                        </div>
+
+                        <span className="mt-1.5 block truncate text-xs text-[#64748B] group-hover:text-[#1C2434]">
+                          {asset.label}
+                        </span>
+                      </button>
+                    ))}
                   </div>
                 )}
               </div>
@@ -245,6 +284,74 @@ export default function CoverImagePickerModal({
         </div>
       </div>
     </Modal>
+  );
+}
+
+function imageSelection(gallery: GalleryItem, image: GalleryImageItem): GalleryAssetSelection {
+  return {
+    alt: image.title || image.caption || gallery.title,
+    galleryId: gallery.id,
+    kind: 'IMAGE',
+    label: image.title || image.caption || 'Gallery image',
+    path: adminApi.galleryImagePublicPath(image),
+  };
+}
+
+function videoSelection(gallery: GalleryItem, video: GalleryVideoItem): GalleryAssetSelection {
+  return {
+    alt: video.title || video.caption || gallery.title,
+    galleryId: gallery.id,
+    kind: 'VIDEO',
+    label: video.title || video.caption || 'Gallery video',
+    path: adminApi.galleryVideoPublicPath(video),
+  };
+}
+
+function galleryAssetCount(gallery: GalleryItem, allowedKinds: GalleryAssetKind[]) {
+  const parts = [];
+
+  if (allowedKinds.includes('IMAGE')) {
+    parts.push(assetCountLabel(gallery.images.length, 'image'));
+  }
+
+  if (allowedKinds.includes('VIDEO')) {
+    parts.push(assetCountLabel(gallery.videos.length, 'video'));
+  }
+
+  return parts.join(' / ');
+}
+
+function assetCountLabel(count: number, noun: string) {
+  return `${count} ${count === 1 ? noun : `${noun}s`}`;
+}
+
+function VideoPreview({ video }: { video: GalleryVideoItem }) {
+  if (video.sourceType === 'UPLOAD') {
+    return (
+      <video
+        className="h-full w-full object-cover"
+        src={adminApi.galleryVideoUrl(video)}
+        muted
+      />
+    );
+  }
+
+  return (
+    <div className="flex h-full w-full flex-col items-center justify-center gap-2 px-3 text-center text-[#64748B]">
+      <span className="grid h-10 w-10 place-items-center rounded-full bg-white text-[#1C2434] shadow-sm">
+        <svg
+          viewBox="0 0 24 24"
+          className="ml-0.5 h-5 w-5"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path d="M8 5v14l11-7z" />
+        </svg>
+      </span>
+      <span className="line-clamp-2 text-xs font-medium">
+        {video.title || video.caption || 'YouTube video'}
+      </span>
+    </div>
   );
 }
 

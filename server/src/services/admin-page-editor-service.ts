@@ -72,6 +72,8 @@ const communityStoriesPayloadSchema = z.object({
   heroImageAlt: optionalText(255),
   introTitle: optionalText(500),
   introBody: z.array(z.string().trim().min(1)).min(1),
+  activityTitle: optionalText(255),
+  activityDescription: optionalText(),
   galleryId: z.string().uuid().nullable().optional(),
   isPublished: z.boolean().optional(),
 });
@@ -568,6 +570,9 @@ export class AdminPageEditorService {
         introBody: Array.isArray(record?.introBody)
           ? record.introBody
           : publicPage.introBody,
+        activityTitle: record?.activityTitle ?? publicPage.activityTitle,
+        activityDescription:
+          record?.activityDescription ?? publicPage.activityDescription,
         galleryId: record?.galleryId ?? null,
         isPublished: record?.isPublished ?? true,
       },
@@ -604,6 +609,8 @@ export class AdminPageEditorService {
       heroImageAlt: nullable(parsed.data.heroImageAlt),
       introTitle: nullable(parsed.data.introTitle),
       introBody: parsed.data.introBody,
+      activityTitle: nullable(parsed.data.activityTitle),
+      activityDescription: nullable(parsed.data.activityDescription),
       galleryId: parsed.data.galleryId ?? null,
       isPublished: parsed.data.isPublished ?? true,
     };

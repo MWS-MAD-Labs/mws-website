@@ -115,7 +115,7 @@ export default function Home() {
     homeData?.infoTitle || 'Everything you need to know about joining MWS.';
   const infoSectionFilters = homeData?.infoFilters?.length ? homeData.infoFilters : filters;
   const programs = homeData?.programs.length ? homeData.programs : undefined;
-  const voices = homeData?.communityVoices.length ? homeData.communityVoices : undefined;
+  const voices = homeData?.communityVoices ?? [];
   const affiliations = homeData?.affiliations ?? {
     title: 'Global partners in learning.',
     text: 'Consectetur ullamco primis cubilia, quis aliqua irure incididunt. Feugiat reprehenderit pretium consequat, ultrices est lorem sit cupidatat.',

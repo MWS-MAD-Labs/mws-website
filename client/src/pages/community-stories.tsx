@@ -4,6 +4,7 @@ import { pageApi, type CommunityStoriesPageData } from '@/api/pageApi';
 import ContentBreadcrumb from '@/components/ui/ContentBreadcrumb';
 import SubpageHero from '../components/ui/SubpageHero';
 import { asset } from '../data/site';
+import CommunityVoices from '../components/ui/CommunityVoices';
 
 const defaultCommunityStories: CommunityStoriesPageData = {
   hero: {
@@ -16,94 +17,11 @@ const defaultCommunityStories: CommunityStoriesPageData = {
     'From everyday learning to special moments across the school, these are some of the experiences that bring the MWS community together.',
     'Explore moments from life at MWS through our community gallery.',
   ],
-  galleryImages: [
-  {
-    id: '1',
-    src: asset('Elementary.jpg'),
-    alt: 'MWS student community',
-    size: 'large',
-  },
-  {
-    id: '2',
-    src: asset('DSC04079.jpg'),
-    alt: 'MWS school activity',
-    size: 'normal',
-  },
-  {
-    id: '3',
-    src: asset('Elementary.jpg'),
-    alt: 'MWS students learning together',
-    size: 'normal',
-  },
-  {
-    id: '4',
-    src: asset('DSC04079.jpg'),
-    alt: 'MWS school campus',
-    size: 'normal',
-  },
-  {
-    id: '5',
-    src: asset('Elementary.jpg'),
-    alt: 'MWS student activity',
-    size: 'normal',
-  },
-  {
-    id: '6',
-    src: asset('DSC04079.jpg'),
-    alt: 'MWS community activity',
-    size: 'tall',
-  },
-  {
-    id: '7',
-    src: asset('Elementary.jpg'),
-    alt: 'MWS learning experience',
-    size: 'normal',
-  },
-  {
-    id: '8',
-    src: asset('DSC04079.jpg'),
-    alt: 'MWS school community',
-    size: 'large',
-  },
-  {
-    id: '9',
-    src: asset('Elementary.jpg'),
-    alt: 'MWS students',
-    size: 'normal',
-  },
-  {
-    id: '10',
-    src: asset('DSC04079.jpg'),
-    alt: 'MWS school activity',
-    size: 'normal',
-  },
-  ],
-  news: [
-  {
-    id: '1',
-    title: 'Learning through meaningful experiences',
-    image: asset('Elementary.jpg'),
-    path: '/news/learning-through-meaningful-experiences',
-  },
-  {
-    id: '2',
-    title: 'Moments from our school community',
-    image: asset('DSC04079.jpg'),
-    path: '/news/moments-from-our-school-community',
-  },
-  {
-    id: '3',
-    title: 'Students exploring new ideas',
-    image: asset('Elementary.jpg'),
-    path: '/news/students-exploring-new-ideas',
-  },
-  {
-    id: '4',
-    title: 'Growing together at MWS',
-    image: asset('DSC04079.jpg'),
-    path: '/news/growing-together-at-mws',
-  },
-  ],
+  activityTitle: 'School activities and everyday moments.',
+  activityDescription:
+    'Browse selected photos from learning, events, and life across the MWS community.',
+  galleryImages: [],
+  news: [],
 };
 
 export default function CommunityStories() {
@@ -120,13 +38,7 @@ export default function CommunityStories() {
       .communityStories()
       .then((data) => {
         if (!isMounted) return;
-        setContent({
-          ...data,
-          galleryImages: data.galleryImages.length
-            ? data.galleryImages
-            : defaultCommunityStories.galleryImages,
-          news: data.news.length ? data.news : defaultCommunityStories.news,
-        });
+        setContent(data);
         setLoadError(null);
       })
       .catch((error) => {
@@ -210,37 +122,59 @@ export default function CommunityStories() {
         </div>
       </section>
 
+      <div>
+        <CommunityVoices />
+      </div>
+
       {/* Gallery */}
       <section className="w-full bg-[var(--warm-white)] px-6 py-[90px] max-[680px]:px-5 max-[680px]:py-[65px] md:px-10 md:py-[110px]">
         <div className="mx-auto w-full max-w-[1440px]">
-          <div className="grid auto-rows-[260px] grid-cols-4 gap-3 max-[1100px]:auto-rows-[220px] max-[1100px]:grid-cols-3 max-[760px]:auto-rows-[220px] max-[760px]:grid-cols-2 max-[500px]:auto-rows-[240px] max-[500px]:grid-cols-1">
-            {content.galleryImages.map((image) => {
-              const sizeClass =
-                image.size === 'large'
-                  ? 'col-span-2 row-span-2 max-[500px]:col-span-1 max-[500px]:row-span-1'
-                  : image.size === 'tall'
-                    ? 'row-span-2 max-[500px]:row-span-1'
-                    : '';
+          <div className="mx-auto mb-12 max-w-[1240px] max-[680px]:mb-8">
+            <h2 className="max-w-[760px] text-[clamp(36px,4vw,52px)] font-semibold leading-[1.02] tracking-[-0.03em] text-[var(--charcoal)]">
+              {content.activityTitle}
+            </h2>
 
-              return (
-                <button
-                  key={image.id}
-                  type="button"
-                  onClick={() => setSelectedImage(image)}
-                  className={`group relative block min-h-0 w-full cursor-pointer overflow-hidden bg-[var(--charcoal)] text-left ${sizeClass}`}
-                  aria-label={`View ${image.alt}`}
-                >
-                  <img
-                    src={image.src}
-                    alt={image.alt}
-                    className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
-                  />
-
-                  <span className="pointer-events-none absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/10" />
-                </button>
-              );
-            })}
+            <p className="mt-4 max-w-[640px] text-base leading-[1.8] text-[var(--charcoal-muted)]">
+              {content.activityDescription}
+            </p>
           </div>
+
+          {content.galleryImages.length ? (
+            <div className="grid auto-rows-[260px] grid-cols-4 gap-3 max-[1100px]:auto-rows-[220px] max-[1100px]:grid-cols-3 max-[760px]:auto-rows-[220px] max-[760px]:grid-cols-2 max-[500px]:auto-rows-[240px] max-[500px]:grid-cols-1">
+              {content.galleryImages.map((image) => {
+                const sizeClass =
+                  image.size === 'large'
+                    ? 'col-span-2 row-span-2 max-[500px]:col-span-1 max-[500px]:row-span-1'
+                    : image.size === 'tall'
+                      ? 'row-span-2 max-[500px]:row-span-1'
+                      : '';
+
+                return (
+                  <button
+                    key={image.id}
+                    type="button"
+                    onClick={() => setSelectedImage(image)}
+                    className={`group relative block min-h-0 w-full cursor-pointer overflow-hidden bg-[var(--charcoal)] text-left ${sizeClass}`}
+                    aria-label={`View ${image.alt}`}
+                  >
+                    <img
+                      src={image.src}
+                      alt={image.alt}
+                      className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+                    />
+
+                    <span className="pointer-events-none absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/10" />
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="mx-auto max-w-[1240px] border border-[rgba(36,23,24,0.12)] bg-white/60 px-6 py-10 text-center">
+              <p className="text-base leading-[1.8] text-[var(--charcoal-muted)]">
+                Activity photos will appear here after they are added from the CMS.
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -253,12 +187,22 @@ export default function CommunityStories() {
           aria-label="Image preview"
           onClick={() => setSelectedImage(null)}
         >
-          <img
-            src={selectedImage.src}
-            alt={selectedImage.alt}
-            className="max-h-[92vh] max-w-[92vw] object-contain"
+          <figure
+            className="max-w-[92vw]"
             onClick={(event) => event.stopPropagation()}
-          />
+          >
+            <img
+              src={selectedImage.src}
+              alt={selectedImage.alt}
+              className="max-h-[82vh] max-w-[92vw] object-contain"
+            />
+
+            {selectedImage.caption ? (
+              <figcaption className="mx-auto mt-4 max-w-[760px] text-center text-sm leading-6 text-white/85 md:text-base">
+                {selectedImage.caption}
+              </figcaption>
+            ) : null}
+          </figure>
         </div>
       )}
 
@@ -286,38 +230,48 @@ export default function CommunityStories() {
           </div>
 
           {/* Horizontal News */}
-          <div className="overflow-hidden">
-            <div className="flex gap-5 overflow-x-auto px-6 pb-5 [scrollbar-width:none] max-[680px]:px-5 md:px-10 [&::-webkit-scrollbar]:hidden">
-              {content.news.map((news) => (
-                <Link
-                  key={news.id}
-                  to={news.path}
-                  className="group w-[330px] shrink-0 md:w-[380px]"
-                >
-                  <div className="aspect-[16/10] overflow-hidden bg-[var(--warm-white)]">
-                    <img
-                      src={news.image}
-                      alt={news.title}
-                      className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
-                    />
-                  </div>
+          {content.news.length ? (
+            <div className="overflow-hidden">
+              <div className="flex gap-5 overflow-x-auto px-6 pb-5 [scrollbar-width:none] max-[680px]:px-5 md:px-10 [&::-webkit-scrollbar]:hidden">
+                {content.news.map((news) => (
+                  <Link
+                    key={news.id}
+                    to={news.path}
+                    className="group w-[330px] shrink-0 md:w-[380px]"
+                  >
+                    <div className="aspect-[16/10] overflow-hidden bg-[var(--warm-white)]">
+                      <img
+                        src={news.image}
+                        alt={news.title}
+                        className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+                      />
+                    </div>
 
-                  <div className="flex items-start justify-between gap-5 pt-5">
-                    <h3 className="max-w-[310px] text-[20px] font-semibold leading-[1.2] tracking-[-0.015em] text-[var(--charcoal)] transition-colors duration-200 group-hover:text-[var(--burgundy)]">
-                      {news.title}
-                    </h3>
+                    <div className="flex items-start justify-between gap-5 pt-5">
+                      <h3 className="max-w-[310px] text-[20px] font-semibold leading-[1.2] tracking-[-0.015em] text-[var(--charcoal)] transition-colors duration-200 group-hover:text-[var(--burgundy)]">
+                        {news.title}
+                      </h3>
 
-                    <span
-                      aria-hidden="true"
-                      className="pt-1 text-[var(--charcoal-muted)] transition-transform duration-300 group-hover:translate-x-1"
-                    >
-                      →
-                    </span>
-                  </div>
-                </Link>
-              ))}
+                      <span
+                        aria-hidden="true"
+                        className="pt-1 text-[var(--charcoal-muted)] transition-transform duration-300 group-hover:translate-x-1"
+                      >
+                        →
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="px-6 max-[680px]:px-5 md:px-10">
+              <div className="border border-[rgba(36,23,24,0.12)] bg-[var(--warm-white)] px-6 py-10 text-center">
+                <p className="text-base leading-[1.8] text-[var(--charcoal-muted)]">
+                  Published news will appear here after it is added from the CMS.
+                </p>
+              </div>
+            </div>
+          )}
 
           <div className="mt-5 px-6 max-[680px]:px-5 md:hidden md:px-10">
             <Link

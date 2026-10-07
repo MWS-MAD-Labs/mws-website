@@ -418,6 +418,8 @@ export type AdminCommunityStoriesPage = {
   heroImageAlt: string | null;
   introTitle: string | null;
   introBody: string[];
+  activityTitle: string | null;
+  activityDescription: string | null;
   galleryId: string | null;
   isPublished: boolean;
 };

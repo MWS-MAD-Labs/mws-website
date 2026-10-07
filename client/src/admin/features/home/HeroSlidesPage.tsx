@@ -11,7 +11,6 @@ import AppShell from '@/admin/components/layout/AppShell';
 import Button from '@/admin/components/ui/Button';
 import Field from '@/admin/components/ui/Field';
 import StatusMessage from '@/admin/components/ui/StatusMessage';
-import GalleryAssetPickerModal from '@/admin/features/gallery/components/GalleryAssetPickerModal';
 import { uploadImageForPicker } from '@/admin/features/gallery/utils/uploadImageForPicker';
 import CoverImagePickerModal from '@/admin/features/news/components/layouts/CoverImagePickerModal';
 import type {
@@ -1129,7 +1128,8 @@ export default function HeroSlidesPage() {
           }
           onSelectLocalFile={(file) => void uploadHeroImage(file)}
         />
-        <GalleryAssetPickerModal
+        <CoverImagePickerModal
+          allowUpload={false}
           allowedKinds={['VIDEO']}
           galleries={galleries}
           open={isAssetPickerOpen}
