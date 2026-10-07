@@ -3,6 +3,14 @@ import { ResponseError } from "../../error/response-error";
 import { toJsonSafe } from "../../lib/json-response";
 import { AcademicPageService } from "../../services/academic-page-service";
 
+async function readJson(c: Context) {
+  try {
+    return await c.req.json();
+  } catch {
+    throw new ResponseError(400, "Invalid JSON body.");
+  }
+}
+
 type MultipartValue = string | File;
 type MultipartBody = Record<string, MultipartValue | MultipartValue[]>;
 
@@ -45,7 +53,7 @@ export class AdminAcademicLevelsController {
   }
 
   static async update(c: Context) {
-    const body = await c.req.json();
+    const body = await readJson(c);
     return c.json({
       data: toJsonSafe(
         await AcademicPageService.saveLevel(c.req.param("levelKey"), body),

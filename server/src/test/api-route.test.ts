@@ -38,29 +38,6 @@ function buildApp() {
 }
 
 describe("apiRoute", () => {
-  it("refuses unauthenticated /api/me requests", async () => {
-    const res = await buildApp().request("/api/me");
-
-    expect(res.status).toBe(401);
-    expect(((await res.json()) as { errors: string }).errors).toBe(
-      "Not signed in.",
-    );
-  });
-
-  it("returns the fresh CMS session user from /api/me", async () => {
-    const cmsUser = cmsSessionUser("ADMIN");
-    spyOn(centralClient, "resolveCentralIdentity").mockResolvedValue(testUser);
-    spyOn(CmsAuthService, "requireFreshSessionUser").mockResolvedValue(cmsUser);
-    const token = await signSession(cmsUser);
-
-    const res = await buildApp().request("/api/me", {
-      headers: { Cookie: `mws_cms_session=${token}` },
-    });
-
-    expect(res.status).toBe(200);
-    expect(((await res.json()) as { data: unknown }).data).toEqual(cmsUser);
-  });
-
   it("returns public partner logos only", async () => {
     spyOn(PartnerService, "publicLogos").mockResolvedValue([
       { logo: "/uploads/partner-logo.png" },

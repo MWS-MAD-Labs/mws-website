@@ -1,17 +1,5 @@
 import type { ContactPageContent } from "@/features/contact/contactPageData";
 
-/** Still used by the unused legacy ContactEditorFields component. */
-export function linesToText(lines: string[]) {
-  return lines.join("\n");
-}
-
-export function textToLines(value: string) {
-  return value
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
-}
-
 export function slugify(value: string) {
   return value
     .toLowerCase()

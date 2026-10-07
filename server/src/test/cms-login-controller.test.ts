@@ -1,6 +1,6 @@
 import { afterEach, beforeAll, describe, expect, it, mock, spyOn } from "bun:test";
 import { Hono } from "hono";
-import { authRoute } from "../routes/auth-route";
+import { authRoute } from "../routes/auth";
 import { ResponseError } from "../error/response-error";
 import { AuthService } from "../services/auth-services";
 import { CmsAuthService } from "../services/cms-auth-service";

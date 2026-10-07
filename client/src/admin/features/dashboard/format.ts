@@ -42,14 +42,6 @@ export function formatRelativeTime(value: string, now = Date.now()) {
   return 'just now';
 }
 
-/** Round an axis maximum up to a clean number (5, 10, 20, 50, 100, …). */
-export function niceMax(value: number) {
-  if (value <= 5) return 5;
-  const magnitude = 10 ** Math.floor(Math.log10(value));
-  const step = [1, 2, 2.5, 5, 10].find((candidate) => candidate * magnitude >= value) ?? 10;
-  return step * magnitude;
-}
-
 const PAGE_LABELS: Record<string, string> = {
   '/': 'Home',
   '/our-school': 'Our School',

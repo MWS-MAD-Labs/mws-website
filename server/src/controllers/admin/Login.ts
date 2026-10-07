@@ -62,7 +62,9 @@ export class LoginController {
   }
 
   static async loginWithGoogle(c: Context) {
-    const { code } = await c.req.json<{ code?: string }>();
+    const { code } = await c.req
+      .json<{ code?: string }>()
+      .catch((): { code?: string } => ({}));
     if (!code) {
       throw new ResponseError(400, "Google auth code is required.");
     }

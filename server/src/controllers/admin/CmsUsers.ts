@@ -3,6 +3,14 @@ import { ResponseError } from "../../error/response-error";
 import { CmsAuthService } from "../../services/cms-auth-service";
 import type { SessionVariables } from "../../types/hono-context";
 
+async function readJson<T = unknown>(c: Context): Promise<T> {
+  try {
+    return await c.req.json<T>();
+  } catch {
+    throw new ResponseError(400, "Invalid JSON body.");
+  }
+}
+
 export class CmsUsersController {
   static async listUsers(c: Context<{ Variables: SessionVariables }>) {
     const query = {
@@ -20,7 +28,7 @@ export class CmsUsersController {
 
   static async updateUserRole(c: Context<{ Variables: SessionVariables }>) {
     const userId = c.req.param("id");
-    const body = await c.req.json<{ roleName?: string | null }>();
+    const body = await readJson<{ roleName?: string | null }>(c);
 
     if (!userId) {
       throw new ResponseError(400, "User id is required.");
@@ -41,7 +49,7 @@ export class CmsUsersController {
 
   static async updateUserStatus(c: Context<{ Variables: SessionVariables }>) {
     const userId = c.req.param("id");
-    const body = await c.req.json<{ isActive?: boolean }>();
+    const body = await readJson<{ isActive?: boolean }>(c);
 
     if (!userId) {
       throw new ResponseError(400, "User id is required.");
@@ -61,7 +69,7 @@ export class CmsUsersController {
   }
 
   static async inviteAdmin(c: Context<{ Variables: SessionVariables }>) {
-    const body = await c.req.json();
+    const body = await readJson(c);
     const invitation = await CmsAuthService.inviteAdmin(body, {
       id: c.var.user.id,
       name: c.var.user.name,

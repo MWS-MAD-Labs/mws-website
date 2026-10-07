@@ -1,6 +1,6 @@
 import { afterEach, beforeAll, describe, expect, it, mock, spyOn } from "bun:test";
 import { Hono } from "hono";
-import { adminRoute } from "../routes/admin-route";
+import { adminRoute } from "../routes/admin";
 import { ResponseError } from "../error/response-error";
 import { signSession } from "../lib/session";
 import { clearCentralIdentityCacheForTest } from "../middleware/admin-auth-middleware";

@@ -145,11 +145,6 @@ function handleDatabaseError(error: unknown): never {
 }
 
 export class HeroSlideService {
-  static async listPublic() {
-    const slides = await HeroSlideRepository.listActive();
-    return slides.map(heroSlideResponse);
-  }
-
   static async listAdmin() {
     const slides = await HeroSlideRepository.listAll();
     return slides.map(heroSlideResponse);

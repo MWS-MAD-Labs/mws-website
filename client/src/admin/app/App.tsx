@@ -592,17 +592,6 @@ export default function AdminApp() {
           }
         />
 
-        {/* <Route
-          path="academic/levels"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <AcademicLevelsPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        /> */}
-
         <Route
           path="academic/kindergarten"
           element={

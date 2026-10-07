@@ -934,10 +934,6 @@ export const adminApi = {
     return response!.data;
   },
 
-  async deleteOurSchool(id: string): Promise<void> {
-    await apiRequest(`/admin/our-school/${id}`, { method: "DELETE" });
-  },
-
   async admissions(): Promise<AdminAdmissionsData> {
     const response = await apiRequest<{ data: AdminAdmissionsData }>(
       "/admin/admissions",
@@ -1195,37 +1191,6 @@ export const adminApi = {
       },
     );
     return response!.data;
-  },
-
-  async createCommunityNews(data: AdminNewsPayload): Promise<AdminNewsPost> {
-    const response = await apiRequest<{ data: AdminNewsPost }>(
-      "/admin/community-stories/news",
-      {
-        method: "POST",
-        body: data,
-      },
-    );
-    return response!.data;
-  },
-
-  async updateCommunityNews(
-    id: string,
-    data: AdminNewsPayload,
-  ): Promise<AdminNewsPost> {
-    const response = await apiRequest<{ data: AdminNewsPost }>(
-      `/admin/community-stories/news/${id}`,
-      {
-        method: "PATCH",
-        body: data,
-      },
-    );
-    return response!.data;
-  },
-
-  async deleteCommunityNews(id: string): Promise<void> {
-    await apiRequest(`/admin/community-stories/news/${id}`, {
-      method: "DELETE",
-    });
   },
 
   async communityVoices(): Promise<AdminCommunityVoice[]> {
