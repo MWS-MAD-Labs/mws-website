@@ -11,3 +11,11 @@ AGENTS.md
 CLAUDE.md
 Plan.md
 plan.md
+
+# Secrets: environment files and Google service account keys
+.env
+.env.*
+!.env.example
+millennia-world-school-*.json
+*service-account*.json
+*-credentials.json

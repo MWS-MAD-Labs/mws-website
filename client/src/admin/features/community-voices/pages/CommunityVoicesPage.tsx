@@ -28,11 +28,13 @@ function optionalText(value: string) {
 function voiceToForm(voice: AdminCommunityVoice): VoiceForm {
   return {
     grade: voice.grade ?? '',
+    homeSortOrder: String(voice.homeSortOrder),
     imagePath: voice.imagePath,
     isActive: voice.isActive,
     name: voice.name,
     quote: voice.quote,
     role: voice.role,
+    showOnHome: voice.showOnHome,
     sortOrder: String(voice.sortOrder),
   };
 }
@@ -40,11 +42,13 @@ function voiceToForm(voice: AdminCommunityVoice): VoiceForm {
 function voicePayload(form: VoiceForm): AdminCommunityVoicePayload {
   return {
     grade: optionalText(form.grade),
+    homeSortOrder: Number.parseInt(form.homeSortOrder, 10) || 0,
     imagePath: form.imagePath.trim(),
     isActive: form.isActive,
     name: form.name.trim(),
     quote: form.quote.trim(),
     role: form.role.trim(),
+    showOnHome: form.showOnHome,
     sortOrder: Number.parseInt(form.sortOrder, 10) || 0,
   };
 }
@@ -181,7 +185,7 @@ export default function CommunityVoicesPage() {
         <ContentPageHeader
           breadcrumbs={[{ label: 'Content' }, { label: 'Community Voices' }]}
           title="Community Voices"
-          description="Manage parent, student, teacher, staff, alumni, and community voices shown on Home."
+          description="Manage parent, student, teacher, staff, alumni, and community voices. Select up to 5 for Home."
         />
 
         <div className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
@@ -216,7 +220,7 @@ export default function CommunityVoicesPage() {
           ) : null}
 
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[860px] border-collapse">
+            <table className="w-full min-w-[980px] border-collapse">
               <thead>
                 <tr className="border-b border-[#E2E8F0] bg-[#F1F5F9] text-left">
                   <th className="px-5 py-3.5 text-[10px] font-bold uppercase tracking-[0.08em] text-[#64748B]">
@@ -229,6 +233,10 @@ export default function CommunityVoicesPage() {
 
                   <th className="px-5 py-3.5 text-[10px] font-bold uppercase tracking-[0.08em] text-[#64748B]">
                     Order
+                  </th>
+
+                  <th className="px-5 py-3.5 text-[10px] font-bold uppercase tracking-[0.08em] text-[#64748B]">
+                    Home
                   </th>
 
                   <th className="px-5 py-3.5 text-[10px] font-bold uppercase tracking-[0.08em] text-[#64748B]">
@@ -272,6 +280,19 @@ export default function CommunityVoicesPage() {
                     </td>
 
                     <td className="px-5 py-4 text-sm text-[#64748B]">{voice.sortOrder}</td>
+
+                    <td className="px-5 py-4">
+                      <span
+                        className={
+                          'inline-flex rounded-full px-2 py-1 text-[11px] font-semibold ' +
+                          (voice.showOnHome
+                            ? 'bg-[#DBEAFE] text-[#1D4ED8]'
+                            : 'bg-[#F1F5F9] text-[#64748B]')
+                        }
+                      >
+                        {voice.showOnHome ? `Home #${voice.homeSortOrder}` : 'Stories only'}
+                      </span>
+                    </td>
 
                     <td className="px-5 py-4">
                       <span

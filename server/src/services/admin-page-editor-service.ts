@@ -45,6 +45,8 @@ const homeSettingsPayloadSchema = z.object({
 const campusSpotlightSchema = z.object({
   text: z.string().trim().min(1),
   cite: z.string().trim().min(1).max(255),
+  imagePath: optionalText(1000),
+  imageAlt: optionalText(255),
   sortOrder: z.number().int().optional(),
   isActive: z.boolean().optional(),
   activeFrom: z.coerce.date().nullable().optional(),
@@ -59,6 +61,8 @@ const communityVoiceSchema = z.object({
   imagePath: z.string().trim().min(1).max(1000),
   sortOrder: z.number().int().optional(),
   isActive: z.boolean().optional(),
+  showOnHome: z.boolean().optional(),
+  homeSortOrder: z.number().int().optional(),
 });
 
 const cmsGuidelinesPayloadSchema = z.object({
@@ -129,6 +133,8 @@ function communityVoiceResponse(voice: {
   imagePath: string;
   sortOrder: number;
   isActive: boolean;
+  showOnHome: boolean;
+  homeSortOrder: number;
   createdAt: Date;
   updatedAt: Date;
 }) {
@@ -141,15 +147,39 @@ function communityVoiceResponse(voice: {
     imagePath: voice.imagePath,
     sortOrder: voice.sortOrder,
     isActive: voice.isActive,
+    showOnHome: voice.showOnHome,
+    homeSortOrder: voice.homeSortOrder,
     createdAt: voice.createdAt,
     updatedAt: voice.updatedAt,
   };
+}
+
+async function assertHomeVoiceLimit(input: {
+  excludeId?: string;
+  isActive?: boolean;
+  showOnHome?: boolean;
+}) {
+  if (!input.showOnHome || input.isActive === false) return;
+
+  const selectedCount = await getPrisma().communityVoice.count({
+    where: {
+      isActive: true,
+      showOnHome: true,
+      ...(input.excludeId ? { id: { not: input.excludeId } } : {}),
+    },
+  });
+
+  if (selectedCount >= 5) {
+    throw new ResponseError(409, "Home can show up to 5 community voices.");
+  }
 }
 
 function campusSpotlightResponse(spotlight: {
   id: string;
   text: string;
   cite: string;
+  imagePath: string | null;
+  imageAlt: string | null;
   sortOrder: number;
   isActive: boolean;
   activeFrom: Date | null;
@@ -161,6 +191,8 @@ function campusSpotlightResponse(spotlight: {
     id: spotlight.id,
     text: spotlight.text,
     cite: spotlight.cite,
+    imagePath: spotlight.imagePath,
+    imageAlt: spotlight.imageAlt,
     sortOrder: spotlight.sortOrder,
     isActive: spotlight.isActive,
     activeFrom: spotlight.activeFrom,
@@ -363,6 +395,8 @@ export class AdminPageEditorService {
         data: {
           text: parsed.data.text,
           cite: parsed.data.cite,
+          imagePath: nullable(parsed.data.imagePath),
+          imageAlt: nullable(parsed.data.imageAlt),
           sortOrder: parsed.data.sortOrder ?? 0,
           isActive: parsed.data.isActive ?? true,
           activeFrom: parsed.data.activeFrom ?? null,
@@ -697,6 +731,11 @@ export class AdminPageEditorService {
       throw new ResponseError(400, "Invalid community voice payload.");
 
     try {
+      await assertHomeVoiceLimit({
+        isActive: parsed.data.isActive ?? true,
+        showOnHome: parsed.data.showOnHome ?? false,
+      });
+
       const voice = await getPrisma().communityVoice.create({
         data: {
           role: parsed.data.role,
@@ -706,6 +745,8 @@ export class AdminPageEditorService {
           imagePath: parsed.data.imagePath,
           sortOrder: parsed.data.sortOrder ?? 0,
           isActive: parsed.data.isActive ?? true,
+          showOnHome: parsed.data.showOnHome ?? false,
+          homeSortOrder: parsed.data.homeSortOrder ?? parsed.data.sortOrder ?? 0,
         },
       });
       return communityVoiceResponse(voice);
@@ -721,6 +762,18 @@ export class AdminPageEditorService {
       throw new ResponseError(400, "Invalid community voice payload.");
 
     try {
+      const existing = await getPrisma().communityVoice.findUnique({
+        where: { id },
+        select: { isActive: true, showOnHome: true },
+      });
+      if (!existing) throw new ResponseError(404, "Community voice not found.");
+
+      await assertHomeVoiceLimit({
+        excludeId: id,
+        isActive: parsed.data.isActive ?? existing.isActive,
+        showOnHome: parsed.data.showOnHome ?? existing.showOnHome,
+      });
+
       const voice = await getPrisma().communityVoice.update({
         where: { id },
         data: {

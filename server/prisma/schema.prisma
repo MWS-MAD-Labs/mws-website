@@ -43,6 +43,11 @@ enum NewsMediaType {
   DOCUMENT
 }
 
+enum AcademicCalendarEventType {
+  EVENT
+  HOLIDAY
+}
+
 // Clear DB
 
 model CmsRole {
@@ -293,6 +298,24 @@ model Faq {
 
   @@index([isActive])
   @@index([isAdmissionFaq, admissionSortOrder])
+}
+
+model AcademicCalendarEvent {
+  id          String                    @id @default(uuid()) @db.Uuid
+  title       String                    @db.VarChar(255)
+  description String?
+  type        AcademicCalendarEventType @default(EVENT)
+  startDate   DateTime                  @db.Date
+  endDate     DateTime?                 @db.Date
+  eventTime   String?                   @db.VarChar(100)
+  location    String?                   @db.VarChar(255)
+  isActive    Boolean                   @default(true)
+  sortOrder   Int                       @default(0)
+  createdAt   DateTime                  @default(now())
+  updatedAt   DateTime                  @updatedAt
+
+  @@index([isActive, startDate])
+  @@index([type, startDate])
 }
 
 model KindergartenFaq {
@@ -582,6 +605,8 @@ model CommunityVoice {
   imagePath String   @db.VarChar(1000)
   sortOrder Int      @default(0)
   isActive  Boolean  @default(true)
+  showOnHome Boolean @default(false)
+  homeSortOrder Int  @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -616,6 +641,8 @@ model CampusSpotlight {
   id        String    @id @default(uuid()) @db.Uuid
   text      String
   cite      String    @db.VarChar(255)
+  imagePath String?   @db.VarChar(1000)
+  imageAlt  String?   @db.VarChar(255)
   sortOrder Int       @default(0)
   isActive  Boolean   @default(true)
   activeFrom DateTime?

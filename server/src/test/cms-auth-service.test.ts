@@ -381,4 +381,42 @@ describe("CmsAuthService", () => {
     expect(createSpy).not.toHaveBeenCalled();
     expect(updateSpy).not.toHaveBeenCalled();
   });
+
+  it("deletes an ADMIN CMS user", async () => {
+    const adminUser = cmsUserWithRole(
+      { id: "cms-user-admin" },
+      { id: "role-admin", name: "ADMIN", description: "Admin" },
+    );
+    spyOn(CmsUserRepository, "findById").mockResolvedValue(adminUser);
+    const deleteSpy = spyOn(CmsUserRepository, "delete").mockResolvedValue(
+      adminUser,
+    );
+
+    await CmsAuthService.deleteUser(adminUser.id, "cms-user-super-admin");
+
+    expect(deleteSpy).toHaveBeenCalledWith(adminUser.id);
+  });
+
+  it("rejects deleting the current CMS account", async () => {
+    const user = cmsUserWithRole();
+    spyOn(CmsUserRepository, "findById").mockResolvedValue(user);
+    const deleteSpy = spyOn(CmsUserRepository, "delete");
+
+    await expect(
+      CmsAuthService.deleteUser(user.id, user.id),
+    ).rejects.toThrow("You cannot delete your own CMS account.");
+    expect(deleteSpy).not.toHaveBeenCalled();
+  });
+
+  it("rejects deleting the last active SUPER_ADMIN", async () => {
+    const user = cmsUserWithRole();
+    spyOn(CmsUserRepository, "findById").mockResolvedValue(user);
+    spyOn(CmsUserRepository, "countActiveSuperAdmins").mockResolvedValue(0);
+    const deleteSpy = spyOn(CmsUserRepository, "delete");
+
+    await expect(
+      CmsAuthService.deleteUser(user.id, "cms-user-other"),
+    ).rejects.toThrow("At least one active SUPER_ADMIN is required.");
+    expect(deleteSpy).not.toHaveBeenCalled();
+  });
 });

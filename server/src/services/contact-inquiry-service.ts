@@ -1,7 +1,14 @@
 import { z } from "zod";
 import { ResponseError } from "../error/response-error";
 import { getPrisma } from "../lib/prisma";
+import type { ContactInquiry } from "@prisma/client";
+import { sendMail, type MailResult } from "../lib/mailer";
 import { ContactInquiryRepository } from "../repositories/contact-inquiry-repository";
+import {
+  contactInquiryNotificationEmail,
+  inquiryNotifyRecipients,
+} from "./contact-inquiry-email";
+import { ContactPageService } from "./contact-page-service";
 
 export const CONTACT_INQUIRY_STATUSES = [
   "NEW",
@@ -84,11 +91,43 @@ export class ContactInquiryService {
       },
     });
 
+    // Not awaited: the visitor gets their confirmation right away, and a
+    // failed notification never fails the form (sendMail does not throw).
+    void ContactInquiryService.notifyNewInquiry(inquiry);
+
     return {
       id: inquiry.id,
       status: inquiry.status,
       createdAt: inquiry.createdAt,
     };
+  }
+
+  /** Emails INQUIRY_NOTIFY_EMAILS about a new inquiry. */
+  static async notifyNewInquiry(inquiry: ContactInquiry): Promise<MailResult> {
+    const recipients = inquiryNotifyRecipients();
+    if (!recipients.length) {
+      return { sent: false, reason: "INQUIRY_NOTIFY_EMAILS is not set." };
+    }
+
+    let categoryLabel: string | null = null;
+    if (inquiry.category) {
+      try {
+        const page = await ContactPageService.getPublic();
+        categoryLabel =
+          page.content.form.categories.find((item) => item.value === inquiry.category)?.label ??
+          null;
+      } catch {
+        // The raw category value is still shown in the email.
+      }
+    }
+
+    const result = await sendMail(
+      contactInquiryNotificationEmail({ to: recipients, inquiry, categoryLabel }),
+    );
+    if (!result.sent) {
+      console.warn(`[MAIL] Inquiry ${inquiry.id} notification not sent: ${result.reason}`);
+    }
+    return result;
   }
 
   static async list(rawQuery: Record<string, string | undefined>) {

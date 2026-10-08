@@ -22,6 +22,7 @@ import { hasCmsPermission } from '@/admin/types/auth';
 import AdmissionsPage from '@/admin/features/admissions/AdmissionsPage';
 import AdmissionGuidelinesPage from '@/admin/features/admissions/AdmissionGuidelinesPage';
 import AcademicFaqsPage from '@/admin/features/academic/AcademicFaqsPage';
+import AcademicCalendarPage from '@/admin/features/academic/AcademicCalendarPage';
 import AcademicLevelEditorPage from '@/admin/features/academic/AcademicLevelEditorPage';
 import AcademicOverviewPage from '@/admin/features/academic/AcademicOverviewPage';
 import ContactPageEditor from '@/admin/features/contact/ContactPageEditor';
@@ -36,7 +37,6 @@ import AuditLogsPage from '@/admin/features/placeholders/AuditLogsPage';
 import CampusTourPage from '@/admin/features/placeholders/CampusTourPage';
 import CurriculumPage from '@/admin/features/placeholders/CurriculumPage';
 import HelpPage from '@/admin/features/placeholders/HelpPage';
-import MaintenancePage from '@/admin/features/placeholders/MaintenancePage';
 import PermissionsPage from '@/admin/features/placeholders/PermissionsPage';
 
 import GalleryDetailPage from '@/admin/features/gallery/GalleryDetailPage';
@@ -747,7 +747,7 @@ export default function AdminApp() {
           element={
             <RequireAuth>
               <RequireContentPermission>
-                <MaintenancePage title="Calendar" />
+                <AcademicCalendarPage />
               </RequireContentPermission>
             </RequireAuth>
           }

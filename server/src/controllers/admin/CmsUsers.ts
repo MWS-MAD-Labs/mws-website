@@ -68,6 +68,17 @@ export class CmsUsersController {
     return c.json({ data: user });
   }
 
+  static async deleteUser(c: Context<{ Variables: SessionVariables }>) {
+    const userId = c.req.param("id");
+
+    if (!userId) {
+      throw new ResponseError(400, "User id is required.");
+    }
+
+    await CmsAuthService.deleteUser(userId, c.var.user.id);
+    return c.json({ data: { id: userId } });
+  }
+
   static async inviteAdmin(c: Context<{ Variables: SessionVariables }>) {
     const body = await readJson(c);
     const invitation = await CmsAuthService.inviteAdmin(body, {

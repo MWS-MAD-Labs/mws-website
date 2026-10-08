@@ -145,6 +145,14 @@ export class PageDataRepository {
     });
   }
 
+  static async listHomeCommunityVoices() {
+    return getPrisma().communityVoice.findMany({
+      where: { isActive: true, showOnHome: true },
+      orderBy: [{ homeSortOrder: "asc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
+      take: 5,
+    });
+  }
+
   static async getHomePageSettings() {
     return getPrisma().homePageSettings.findFirst({
       include: {

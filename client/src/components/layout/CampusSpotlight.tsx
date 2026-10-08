@@ -15,15 +15,16 @@ export default function CampusSpotlight({ slides }: CampusSpotlightProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
-  useEffect(() => {
-    if (slides.length <= 1 || isPaused) return;
+useEffect(() => {
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (slides.length <= 1 || isPaused || reduceMotion) return;
 
-    const interval = window.setInterval(() => {
-      setActiveIndex((current) => (current + 1) % slides.length);
-    }, 5500);
+  const interval = window.setInterval(() => {
+    setActiveIndex((current) => (current + 1) % slides.length);
+  }, 5500);
 
-    return () => window.clearInterval(interval);
-  }, [slides.length, isPaused]);
+  return () => window.clearInterval(interval);
+}, [slides.length, isPaused]);
 
   return (
     <section
@@ -35,7 +36,7 @@ export default function CampusSpotlight({ slides }: CampusSpotlightProps) {
       onFocus={() => setIsPaused(true)}
       onBlur={() => setIsPaused(false)}
     >
-      <div className="relative aspect-[16/4] w-full bg-[var(--charcoal)] max-[680px]:aspect-[4/3]">
+      <div className="relative h-[clamp(340px,28vw,460px)] w-full bg-[var(--charcoal)] max-[680px]:h-[440px]">
         <div className="relative h-full w-full">
           {slides.map((slide, index) => (
             <div
@@ -59,7 +60,7 @@ export default function CampusSpotlight({ slides }: CampusSpotlightProps) {
                   "{slide.quote}"
                 </blockquote>
 
-                <cite className="block text-[12px] font-semibold uppercase not-italic tracking-[1.5px] text-[var(--gold)]">
+                <cite className="block text-[12px] font-semibold uppercase not-italic tracking-[1.5px] text-[var(--white)]">
                   {slide.cite}
                 </cite>
               </div>
@@ -77,10 +78,16 @@ export default function CampusSpotlight({ slides }: CampusSpotlightProps) {
                 aria-label={`Go to quote ${index + 1}`}
                 aria-current={index === activeIndex ? 'true' : undefined}
                 onClick={() => setActiveIndex(index)}
-                className={`h-1.5 cursor-pointer rounded-full transition-all duration-500 ${
-                  index === activeIndex ? 'w-8 bg-white' : 'w-1.5 bg-white/45 hover:bg-white/75'
-                }`}
-              />
+                className="group flex h-6 cursor-pointer items-center px-1"
+              >
+                <span
+                  className={`block h-1.5 rounded-full transition-all duration-500 ${
+                    index === activeIndex
+                      ? 'w-8 bg-white'
+                      : 'w-1.5 bg-white/45 group-hover:bg-white/75'
+                  }`}
+                />
+              </button>
             ))}
           </div>
         )}

@@ -229,8 +229,8 @@ async function writeAuditLog(input: {
   oldValues?: unknown;
   newValues?: unknown;
 }) {
-  await getPrisma()
-    .auditLog.create({
+  try {
+    await getPrisma().auditLog.create({
       data: {
         cmsUserId: input.actorId ?? null,
         action: input.action,
@@ -239,8 +239,10 @@ async function writeAuditLog(input: {
         oldValues: input.oldValues ?? undefined,
         newValues: input.newValues ?? undefined,
       },
-    })
-    .catch(() => undefined);
+    });
+  } catch {
+    // Audit logging must not turn a successful CMS mutation into a failure.
+  }
 }
 
 /**
@@ -562,6 +564,40 @@ export class CmsAuthService {
 
     const updated = await CmsUserRepository.findById(user.id);
     return updated ? userListItem(updated) : null;
+  }
+
+  static async deleteUser(userId: string, actorId?: string) {
+    const user = await CmsUserRepository.findById(userId);
+    if (!user) throw new ResponseError(404, "CMS user not found.");
+
+    if (actorId && user.id === actorId) {
+      throw new ResponseError(409, "You cannot delete your own CMS account.");
+    }
+
+    if (user.role.name === "SUPER_ADMIN") {
+      const remainingSuperAdmins =
+        await CmsUserRepository.countActiveSuperAdmins(user.id);
+      if (remainingSuperAdmins < 1) {
+        throw new ResponseError(
+          409,
+          "At least one active SUPER_ADMIN is required.",
+        );
+      }
+    }
+
+    await CmsUserRepository.delete(user.id);
+    await writeAuditLog({
+      actorId,
+      action: "CMS_USER_DELETED",
+      entityType: "CmsUser",
+      entityId: user.id,
+      oldValues: {
+        email: user.email,
+        name: user.name,
+        role: user.role.name,
+        isActive: user.isActive,
+      },
+    });
   }
 
   static async inviteAdmin(

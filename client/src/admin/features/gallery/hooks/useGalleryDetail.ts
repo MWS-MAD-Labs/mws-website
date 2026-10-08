@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useEffectEvent, useMemo, useState } from "react";
 import { adminApi, type GalleryItem } from "@/admin/api/adminApi";
 import {
   type GalleryAssetSort,
@@ -77,7 +77,7 @@ export function useGalleryDetail(galleryId: string | undefined) {
 
   useEffect(() => {
     queueMicrotask(() => {
-      loadGallery()
+      (galleryId ? adminApi.gallery(galleryId).then(setGallery) : Promise.resolve())
         .catch((error) =>
           setMessage(
             error instanceof Error ? error.message : "Failed to load gallery.",
@@ -86,6 +86,11 @@ export function useGalleryDetail(galleryId: string | undefined) {
         .finally(() => setIsLoading(false));
     });
   }, [galleryId, setMessage]);
+
+  // Always steps from the current preview without re-subscribing on every render.
+  const stepPreview = useEffectEvent((direction: "next" | "previous") => {
+    goToPreviewAsset(direction);
+  });
 
   useEffect(() => {
     if (!preview) return;
@@ -98,19 +103,19 @@ export function useGalleryDetail(galleryId: string | undefined) {
 
       if (event.key === "ArrowLeft") {
         event.preventDefault();
-        goToPreviewAsset("previous");
+        stepPreview("previous");
         return;
       }
 
       if (event.key === "ArrowRight") {
         event.preventDefault();
-        goToPreviewAsset("next");
+        stepPreview("next");
       }
     }
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [preview, previewAssets, previewIndex]);
+  }, [preview]);
 
   async function runMutation(
     action: () => Promise<void>,

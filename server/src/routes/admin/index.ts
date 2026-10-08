@@ -25,6 +25,7 @@ import { adminAcademicLevelRoute } from "./academic-level-route";
 import { adminAcademicCrudRoute } from "./academic-crud-route";
 import { partnersRoute } from "./partners-route";
 import { adminContactInquiryRoute } from "./contact-inquiry-route";
+import { adminAcademicCalendarRoute } from "./academic-calendar-route";
 
 export const adminRoute = new Hono<{ Variables: SessionVariables }>();
 
@@ -58,6 +59,11 @@ adminRoute.patch(
   "/users/:id/status",
   requireCmsRole("SUPER_ADMIN"),
   CmsUsersController.updateUserStatus,
+);
+adminRoute.delete(
+  "/users/:id",
+  requireCmsRole("SUPER_ADMIN"),
+  CmsUsersController.deleteUser,
 );
 adminRoute.post(
   "/users/invitations",
@@ -105,3 +111,4 @@ adminRoute.route("/news", adminNewsRoute);
 
 adminRoute.route("/partners", partnersRoute);
 adminRoute.route("/contact-inquiries", adminContactInquiryRoute);
+adminRoute.route("/calendar", adminAcademicCalendarRoute);

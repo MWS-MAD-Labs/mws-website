@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import { pageApi, type AdmissionFaqPageData } from '@/api/pageApi';
 import ContentBreadcrumb from '@/components/ui/ContentBreadcrumb';
 import FaqSection from '@/components/ui/FaqSection';
+import SubpageHero from '@/components/ui/SubpageHero';
+import { asset } from '../data/site';
 
 const fallbackData: AdmissionFaqPageData = {
   title: 'Admission FAQ',
@@ -12,6 +14,7 @@ const fallbackData: AdmissionFaqPageData = {
 
 export default function AdmissionFaqPage() {
   const [data, setData] = useState<AdmissionFaqPageData>(fallbackData);
+  const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -27,6 +30,9 @@ export default function AdmissionFaqPage() {
       .catch((error) => {
         if (!mounted) return;
         setLoadError(error instanceof Error ? error.message : 'Unable to load admission FAQ.');
+      })
+      .finally(() => {
+        if (mounted) setIsLoading(false);
       });
 
     return () => {
@@ -36,37 +42,41 @@ export default function AdmissionFaqPage() {
 
   return (
     <main>
-      {loadError ? (
-        <p className="sr-only" role="status">
-          {loadError}
-        </p>
-      ) : null}
+      <SubpageHero
+        title={data.title}
+        image={asset('DSC05350.jpg')}
+        imageAlt="Admission FAQ at Millennia World School"
+      />
 
-      <section className="bg-[var(--warm-white)] pt-28 md:pt-36">
-        <div className="mx-auto w-full max-w-[1100px] px-5 sm:px-6 md:px-10">
-          <ContentBreadcrumb
-            items={[
-              { label: 'Home', path: '/' },
-              { label: 'Admission', path: '/admission' },
-              { label: 'FAQ' },
-            ]}
-          />
-          <div className="max-w-[760px] py-10 md:py-16">
-            <h1 className="text-[clamp(38px,8vw,72px)] font-semibold leading-none text-[var(--charcoal)]">
-              {data.title}
-            </h1>
-            <p className="mt-5 text-base leading-7 text-[var(--charcoal-muted)] md:text-lg">
-              {data.description}
-            </p>
+      <ContentBreadcrumb
+        items={[
+          { label: 'Home', path: '/' },
+          { label: 'Admission', path: '/admission' },
+          { label: 'FAQ' },
+        ]}
+      />
+
+      {isLoading ? (
+        <section className="bg-[var(--warm-white)] px-6 py-[90px] max-[680px]:px-5 md:px-10">
+          <div className="mx-auto w-full max-w-[1240px] border border-[var(--border)] bg-white px-6 py-10 text-center text-base text-[var(--charcoal-muted)]" role="status">
+            Loading admission FAQ...
           </div>
-        </div>
-      </section>
-
-      {data.items.length ? (
-        <FaqSection items={data.items} />
+        </section>
+      ) : loadError ? (
+        <section className="bg-[var(--warm-white)] px-6 py-[90px] max-[680px]:px-5 md:px-10">
+          <div className="mx-auto w-full max-w-[1240px] border border-[var(--border)] bg-white px-6 py-10 text-center text-base text-[var(--charcoal-muted)]" role="alert">
+            Unable to load admission FAQ right now. Please try again later.
+          </div>
+        </section>
+      ) : data.items.length ? (
+        <FaqSection
+          title="Frequently asked questions"
+          description={data.description}
+          items={data.items}
+        />
       ) : (
-        <section className="bg-[var(--warm-white)] py-20">
-          <div className="mx-auto w-full max-w-[1000px] px-5 text-sm text-[var(--charcoal-muted)] sm:px-6 md:px-10">
+        <section className="bg-[var(--warm-white)] px-6 py-[90px] max-[680px]:px-5 md:px-10">
+          <div className="mx-auto w-full max-w-[1240px] border border-[var(--border)] bg-white px-6 py-10 text-center text-base text-[var(--charcoal-muted)]">
             No admission FAQ is published yet.
           </div>
         </section>

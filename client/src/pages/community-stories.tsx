@@ -5,6 +5,7 @@ import ContentBreadcrumb from '@/components/ui/ContentBreadcrumb';
 import SubpageHero from '../components/ui/SubpageHero';
 import { asset } from '../data/site';
 import CommunityVoices from '../components/ui/CommunityVoices';
+import AdmissionsCta from '@/components/layout/AdmissionsCta';
 
 const defaultCommunityStories: CommunityStoriesPageData = {
   hero: {
@@ -21,6 +22,7 @@ const defaultCommunityStories: CommunityStoriesPageData = {
   activityDescription:
     'Browse selected photos from learning, events, and life across the MWS community.',
   galleryImages: [],
+  voices: [],
   news: [],
 };
 
@@ -122,14 +124,12 @@ export default function CommunityStories() {
         </div>
       </section>
 
-      <div>
-        <CommunityVoices />
-      </div>
+      <CommunityVoices maxItems={null} voices={content.voices} showFooterLink={false} />
 
       {/* Gallery */}
-      <section className="w-full bg-[var(--warm-white)] px-6 py-[90px] max-[680px]:px-5 max-[680px]:py-[65px] md:px-10 md:py-[110px]">
-        <div className="mx-auto w-full max-w-[1440px]">
-          <div className="mx-auto mb-12 max-w-[1240px] max-[680px]:mb-8">
+      <section className="w-full bg-white px-6 py-[90px] max-[680px]:px-5 max-[680px]:py-[65px] md:px-10 md:py-[110px]">
+        <div className="mx-auto w-full max-w-[1240px]">
+          <div className="mb-12 max-[680px]:mb-8">
             <h2 className="max-w-[760px] text-[clamp(36px,4vw,52px)] font-semibold leading-[1.02] tracking-[-0.03em] text-[var(--charcoal)]">
               {content.activityTitle}
             </h2>
@@ -140,7 +140,7 @@ export default function CommunityStories() {
           </div>
 
           {content.galleryImages.length ? (
-            <div className="grid auto-rows-[260px] grid-cols-4 gap-3 max-[1100px]:auto-rows-[220px] max-[1100px]:grid-cols-3 max-[760px]:auto-rows-[220px] max-[760px]:grid-cols-2 max-[500px]:auto-rows-[240px] max-[500px]:grid-cols-1">
+            <div className="grid grid-flow-dense auto-rows-[260px] grid-cols-4 gap-1 max-[1100px]:auto-rows-[220px] max-[1100px]:grid-cols-3 max-[760px]:auto-rows-[220px] max-[760px]:grid-cols-2 max-[500px]:auto-rows-[240px] max-[500px]:grid-cols-1">
               {content.galleryImages.map((image) => {
                 const sizeClass =
                   image.size === 'large'
@@ -187,10 +187,7 @@ export default function CommunityStories() {
           aria-label="Image preview"
           onClick={() => setSelectedImage(null)}
         >
-          <figure
-            className="max-w-[92vw]"
-            onClick={(event) => event.stopPropagation()}
-          >
+          <figure className="max-w-[92vw]" onClick={(event) => event.stopPropagation()}>
             <img
               src={selectedImage.src}
               alt={selectedImage.alt}
@@ -207,7 +204,7 @@ export default function CommunityStories() {
       )}
 
       {/* School News */}
-      <section className="w-full bg-white py-[100px] max-[680px]:py-[70px] md:py-[120px]">
+      <section className="w-full bg-[var(--warm-white)] py-[100px] max-[680px]:py-[70px] md:py-[120px]">
         <div className="mx-auto w-full max-w-[1240px]">
           <div className="mb-12 flex items-end justify-between gap-8 px-6 max-[680px]:mb-8 max-[680px]:px-5 md:px-10">
             <div>
@@ -284,6 +281,18 @@ export default function CommunityStories() {
           </div>
         </div>
       </section>
+
+      <AdmissionsCta
+        headline="Ready to begin your journey at MWS?"
+        primary={{
+          label: 'Start Your Application',
+          to: '/admission',
+        }}
+        secondary={{
+          label: 'Visit Our Campus',
+          to: '/contact',
+        }}
+      />
     </main>
   );
 }

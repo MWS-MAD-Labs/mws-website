@@ -97,6 +97,14 @@ export const CmsUserRepository = {
     });
   },
 
+  async delete(id: string): Promise<CmsUser> {
+    const prisma = getPrisma();
+
+    return prisma.cmsUser.delete({
+      where: { id },
+    });
+  },
+
   async listUsers(filters: {
     search?: string;
     status?: "active" | "inactive";

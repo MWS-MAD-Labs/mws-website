@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, mock, spyOn } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
 import type { CmsRole } from "@prisma/client";
 import * as mailer from "../lib/mailer";
 import {
@@ -9,13 +9,30 @@ import { cmsInvitationEmail } from "../services/cms-invitation-email";
 import { CmsAuthService } from "../services/cms-auth-service";
 
 const originalFrontendOrigin = process.env.FRONTEND_ORIGIN;
+const MAIL_ENV_KEYS = [
+  "GOOGLE_SA_CLIENT_EMAIL",
+  "GOOGLE_SA_PRIVATE_KEY",
+  "MAIL_SENDER",
+  "SMTP_HOST",
+  "SMTP_USER",
+  "SMTP_PASS",
+];
+const originalMailEnv = Object.fromEntries(MAIL_ENV_KEYS.map((key) => [key, process.env[key]]));
+
+// Bun loads server/.env into tests; never let these tests use real credentials.
+beforeEach(() => {
+  for (const key of MAIL_ENV_KEYS) delete process.env[key];
+  mailer.resetMailerForTest();
+});
 
 afterEach(() => {
   mock.restore();
   process.env.FRONTEND_ORIGIN = originalFrontendOrigin;
-  delete process.env.SMTP_HOST;
-  delete process.env.SMTP_USER;
-  delete process.env.SMTP_PASS;
+  for (const key of MAIL_ENV_KEYS) {
+    if (originalMailEnv[key] === undefined) delete process.env[key];
+    else process.env[key] = originalMailEnv[key];
+  }
+  mailer.resetMailerForTest();
 });
 
 const now = new Date("2026-01-01T00:00:00.000Z");
@@ -67,7 +84,7 @@ describe("cmsInvitationEmail", () => {
 });
 
 describe("sendMail", () => {
-  it("skips sending when SMTP is not configured", async () => {
+  it("skips sending when no email transport is configured", async () => {
     const result = await mailer.sendMail({
       to: "teacher@millennia21.id",
       subject: "x",
@@ -75,7 +92,7 @@ describe("sendMail", () => {
       html: "x",
     });
 
-    expect(result).toEqual({ sent: false, reason: "SMTP is not configured." });
+    expect(result).toEqual({ sent: false, reason: "Email is not configured." });
   });
 });
 

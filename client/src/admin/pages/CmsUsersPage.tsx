@@ -55,6 +55,7 @@ export default function CmsUsersPage() {
   const [isInviting, setIsInviting] = useState(false);
   const [resendingId, setResendingId] = useState<string | null>(null);
   const [revokingId, setRevokingId] = useState<string | null>(null);
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
 
   async function loadUsers() {
     const usersData = await adminApi.users();
@@ -129,6 +130,29 @@ export default function CmsUsersPage() {
       setMessage(error instanceof Error ? error.message : 'Status could not be updated.');
     } finally {
       setSavingUserId(null);
+    }
+  }
+
+  async function deleteUser(user: CmsUserListItem) {
+    const confirmed = window.confirm(
+      `Delete ${user.name}'s CMS account permanently? This action cannot be undone.`,
+    );
+    if (!confirmed) return;
+
+    setDeletingUserId(user.id);
+    setMessage(null);
+
+    try {
+      await adminApi.deleteUser(user.id);
+      setData((current) => ({
+        ...current,
+        users: current.users.filter((item) => item.id !== user.id),
+      }));
+      setMessage('CMS user deleted.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'CMS user could not be deleted.');
+    } finally {
+      setDeletingUserId(null);
     }
   }
 
@@ -246,7 +270,9 @@ export default function CmsUsersPage() {
                         <td className="px-3 py-3">
                           <Select
                             value={user.role?.name ?? ''}
-                            disabled={savingUserId === user.id || user.role?.name === 'SUPER_ADMIN'}
+                            disabled={
+                              savingUserId === user.id || deletingUserId === user.id || user.role?.name === 'SUPER_ADMIN'
+                            }
                             onChange={(event) => void updateRole(user, event.currentTarget.value)}
                           >
                             {user.role?.name === 'SUPER_ADMIN' ? (
@@ -267,10 +293,18 @@ export default function CmsUsersPage() {
                           <Button
                             size="sm"
                             variant="outline"
-                            disabled={savingUserId === user.id}
+                            disabled={savingUserId === user.id || deletingUserId === user.id}
                             onClick={() => void updateStatus(user)}
                           >
                             {user.isActive ? 'Deactivate' : 'Reactivate'}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={savingUserId === user.id || deletingUserId === user.id}
+                            onClick={() => void deleteUser(user)}
+                          >
+                            {deletingUserId === user.id ? 'Deleting...' : 'Delete'}
                           </Button>
                         </td>
                       </tr>

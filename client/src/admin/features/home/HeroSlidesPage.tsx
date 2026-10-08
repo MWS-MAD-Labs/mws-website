@@ -82,6 +82,8 @@ type HomeSettingsForm = {
 
 type SpotlightForm = {
   cite: string;
+  imageAlt: string;
+  imagePath: string;
   isActive: boolean;
   sortOrder: string;
   text: string;
@@ -89,6 +91,8 @@ type SpotlightForm = {
 
 const emptySpotlightForm: SpotlightForm = {
   cite: '',
+  imageAlt: '',
+  imagePath: '',
   isActive: true,
   sortOrder: '0',
   text: '',
@@ -265,6 +269,7 @@ export default function HeroSlidesPage() {
   const [form, setForm] = useState<FormState>(emptyForm);
   const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
   const [isAssetPickerOpen, setIsAssetPickerOpen] = useState(false);
+  const [isSpotlightImagePickerOpen, setIsSpotlightImagePickerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -444,6 +449,8 @@ export default function HeroSlidesPage() {
     setEditingSpotlightId(spotlight.id);
     setSpotlightForm({
       cite: spotlight.cite,
+      imageAlt: spotlight.imageAlt ?? '',
+      imagePath: spotlight.imagePath ?? '',
       isActive: spotlight.isActive,
       sortOrder: String(spotlight.sortOrder),
       text: spotlight.text,
@@ -466,6 +473,8 @@ export default function HeroSlidesPage() {
     try {
       const payload = {
         cite: spotlightForm.cite,
+        imageAlt: optionalText(spotlightForm.imageAlt),
+        imagePath: optionalText(spotlightForm.imagePath),
         isActive: spotlightForm.isActive,
         sortOrder: Number.parseInt(spotlightForm.sortOrder, 10) || 0,
         text: spotlightForm.text,
@@ -485,6 +494,32 @@ export default function HeroSlidesPage() {
       setMessage(error instanceof Error ? error.message : 'Failed to save campus spotlight.');
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  async function uploadSpotlightImage(file: File) {
+    setIsUploadingImage(true);
+    setMessage(null);
+
+    try {
+      const uploaded = await uploadImageForPicker({
+        caption: spotlightForm.cite || 'Campus spotlight image',
+        fallbackGalleryTitle: 'Campus Spotlight Images',
+        file,
+        galleries,
+      });
+
+      setGalleries(uploaded.galleries);
+      setSpotlightForm((current) => ({
+        ...current,
+        imageAlt: uploaded.alt || current.cite,
+        imagePath: uploaded.path,
+      }));
+      setMessage('Spotlight image uploaded. Save spotlight to publish it.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Failed to upload spotlight image.');
+    } finally {
+      setIsUploadingImage(false);
     }
   }
 
@@ -1025,6 +1060,68 @@ export default function HeroSlidesPage() {
                   }
                 />
               </Field>
+              <Field label="Image">
+                <div className="space-y-3">
+                  {spotlightForm.imagePath ? (
+                    <div className="overflow-hidden rounded-lg border border-[#E2E8F0] bg-[#F8FAFC]">
+                      <img
+                        alt={spotlightForm.imageAlt || spotlightForm.cite || 'Campus spotlight'}
+                        className="aspect-[16/7] w-full object-cover"
+                        src={adminApi.publicAssetUrl(spotlightForm.imagePath)}
+                      />
+                    </div>
+                  ) : (
+                    <div className="grid min-h-32 place-items-center rounded-lg border border-dashed border-[#CBD5E1] bg-[#F8FAFC] text-sm text-[#64748B]">
+                      No spotlight image selected
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      disabled={isBusy}
+                      size="sm"
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsSpotlightImagePickerOpen(true)}
+                    >
+                      <ImagePlus size={14} />
+                      Choose Image
+                    </Button>
+
+                    {spotlightForm.imagePath ? (
+                      <Button
+                        disabled={isBusy}
+                        size="sm"
+                        type="button"
+                        variant="ghost"
+                        onClick={() =>
+                          setSpotlightForm((current) => ({
+                            ...current,
+                            imageAlt: '',
+                            imagePath: '',
+                          }))
+                        }
+                      >
+                        Remove
+                      </Button>
+                    ) : null}
+                  </div>
+                </div>
+              </Field>
+              <Field label="Image alt text">
+                <input
+                  className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
+                  disabled={isBusy}
+                  maxLength={255}
+                  value={spotlightForm.imageAlt}
+                  onChange={(event) =>
+                    setSpotlightForm((current) => ({
+                      ...current,
+                      imageAlt: event.target.value,
+                    }))
+                  }
+                />
+              </Field>
               <div className="grid gap-3 sm:grid-cols-2">
                 <Field label="Sort order">
                   <input
@@ -1127,6 +1224,21 @@ export default function HeroSlidesPage() {
             }))
           }
           onSelectLocalFile={(file) => void uploadHeroImage(file)}
+        />
+        <CoverImagePickerModal
+          allowedKinds={['IMAGE']}
+          galleries={galleries}
+          open={isSpotlightImagePickerOpen}
+          title="Choose Spotlight Image"
+          onClose={() => setIsSpotlightImagePickerOpen(false)}
+          onSelect={(asset) =>
+            setSpotlightForm((current) => ({
+              ...current,
+              imageAlt: asset.alt || current.cite,
+              imagePath: asset.path,
+            }))
+          }
+          onSelectLocalFile={(file) => void uploadSpotlightImage(file)}
         />
         <CoverImagePickerModal
           allowUpload={false}

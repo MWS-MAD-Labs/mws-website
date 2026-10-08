@@ -169,6 +169,7 @@ export type CommunityStoriesPageData = {
   activityTitle: string;
   activityDescription: string;
   galleryImages: CommunityGalleryImageData[];
+  voices: CommunityVoiceData[];
   news: CommunityNewsData[];
 };
 

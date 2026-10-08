@@ -125,7 +125,7 @@ export default function CommunityStoriesPage() {
     () => galleries.find((gallery) => gallery.id === pageForm?.galleryId) ?? null,
     [galleries, pageForm?.galleryId],
   );
-  const activityImages = selectedGallery?.images ?? [];
+  const activityImages = useMemo(() => selectedGallery?.images ?? [], [selectedGallery]);
   const filteredImages = useMemo(() => {
     const query = search.trim().toLowerCase();
 

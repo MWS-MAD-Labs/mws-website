@@ -1,0 +1,3 @@
+ALTER TABLE "CampusSpotlight"
+ADD COLUMN "imagePath" VARCHAR(1000),
+ADD COLUMN "imageAlt" VARCHAR(255);

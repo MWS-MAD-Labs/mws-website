@@ -80,7 +80,6 @@ export default function AdmissionsProgramsForm({ editor }: AdmissionsProgramsFor
     saveAdmissions,
     setActiveImageTarget,
     updateContent,
-    updateInfoTile,
     updateIntroParagraph,
     updateStep,
   } = editor;
@@ -285,64 +284,6 @@ export default function AdmissionsProgramsForm({ editor }: AdmissionsProgramsFor
               </section>
             ))}
           </div>
-        </div>
-      </section>
-
-      <section className={cardClass}>
-        <div className={cardHeaderClass}>
-          <h2 className={cardTitleClass}>Info Tiles</h2>
-          <p className={cardHintClass}>Cards linking families to FAQ, calendar, and guidelines.</p>
-        </div>
-        <div className="grid gap-4 p-5">
-          {content.infoTiles.map((tile, index) => (
-            <section className="rounded-lg border border-[#E2E8F0] p-4" key={index}>
-              <h3 className="mb-4 text-sm font-semibold text-[#1C2434]">Tile {index + 1}</h3>
-              <div className="grid gap-4 lg:grid-cols-2">
-                <Field label="Title">
-                  <input
-                    className={inputClass}
-                    disabled={isBusy}
-                    value={tile.title}
-                    onChange={(event) => updateInfoTile(index, { title: event.target.value })}
-                  />
-                </Field>
-                <Field label="Link label">
-                  <input
-                    className={inputClass}
-                    disabled={isBusy}
-                    value={tile.linkLabel}
-                    onChange={(event) => updateInfoTile(index, { linkLabel: event.target.value })}
-                  />
-                </Field>
-                <Field label="Link URL">
-                  <input
-                    className={inputClass}
-                    disabled={isBusy}
-                    value={tile.linkUrl}
-                    onChange={(event) => updateInfoTile(index, { linkUrl: event.target.value })}
-                  />
-                </Field>
-                <Field label="Description">
-                  <textarea
-                    className={`${inputClass} min-h-24 resize-y leading-6`}
-                    disabled={isBusy}
-                    value={tile.description}
-                    onChange={(event) =>
-                      updateInfoTile(index, { description: event.target.value })
-                    }
-                  />
-                </Field>
-                <div className="lg:col-span-2">
-                  <ImageField
-                    disabled={isBusy}
-                    image={tile.image}
-                    onChoose={() => setActiveImageTarget({ type: 'infoTile', index })}
-                    onRemove={() => updateInfoTile(index, { image: '' })}
-                  />
-                </div>
-              </div>
-            </section>
-          ))}
         </div>
       </section>
 

@@ -141,6 +141,8 @@ export type CampusSpotlightItem = {
   id: string;
   text: string;
   cite: string;
+  imagePath: string | null;
+  imageAlt: string | null;
   sortOrder: number;
   isActive: boolean;
   activeFrom: string | null;
@@ -164,6 +166,8 @@ export type HomeContentSettingsPayload = {
 export type CampusSpotlightPayload = {
   text: string;
   cite: string;
+  imagePath?: string | null;
+  imageAlt?: string | null;
   sortOrder?: number;
   isActive?: boolean;
   activeFrom?: string | null;
@@ -367,6 +371,45 @@ export type AcademicFaqPayload = {
   admissionSortOrder?: number;
 };
 
+export type AcademicCalendarEventType = 'EVENT' | 'HOLIDAY';
+
+export type AcademicCalendarEvent = {
+  id: string;
+  title: string;
+  description: string | null;
+  type: AcademicCalendarEventType;
+  startDate: string;
+  endDate: string | null;
+  eventTime: string | null;
+  location: string | null;
+  isActive: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AcademicCalendarEventPayload = {
+  title: string;
+  description?: string | null;
+  type: AcademicCalendarEventType;
+  startDate: string;
+  endDate?: string | null;
+  eventTime?: string | null;
+  location?: string | null;
+  isActive: boolean;
+  sortOrder: number;
+};
+
+export type AcademicCalendarEventList = {
+  items: AcademicCalendarEvent[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
+};
+
 export type AcademicLevelFaqLink = {
   academicLevelId: string;
   faqId: string;
@@ -454,6 +497,8 @@ export type AdminCommunityVoice = {
   imagePath: string;
   sortOrder: number;
   isActive: boolean;
+  showOnHome: boolean;
+  homeSortOrder: number;
   createdAt: string;
   updatedAt: string;
 };
@@ -466,6 +511,8 @@ export type AdminCommunityVoicePayload = {
   imagePath: string;
   sortOrder?: number;
   isActive?: boolean;
+  showOnHome?: boolean;
+  homeSortOrder?: number;
 };
 
 export type AdmissionGuidelinesPage = {
@@ -725,6 +772,12 @@ export const adminApi = {
       },
     );
     return response!.data;
+  },
+
+  async deleteUser(userId: string): Promise<void> {
+    await apiRequest(`/admin/users/${userId}`, {
+      method: "DELETE",
+    });
   },
 
   async inviteCmsAdmin(email: string): Promise<CmsInvitationResult> {
@@ -1088,6 +1141,54 @@ export const adminApi = {
     await apiRequest(`/admin/academic-crud/faqs/${id}`, {
       method: "DELETE",
     });
+  },
+
+  async academicCalendarEvents(filters: {
+    page: number;
+    pageSize: number;
+    search?: string;
+    type?: AcademicCalendarEventType | '';
+    isActive?: boolean | '';
+  }): Promise<AcademicCalendarEventList> {
+    const params = new URLSearchParams({
+      page: String(filters.page),
+      pageSize: String(filters.pageSize),
+    });
+    if (filters.search?.trim()) params.set('search', filters.search.trim());
+    if (filters.type) params.set('type', filters.type);
+    if (filters.isActive !== '' && filters.isActive !== undefined) {
+      params.set('isActive', String(filters.isActive));
+    }
+
+    const response = await apiRequest<{ data: AcademicCalendarEventList }>(
+      `/admin/calendar?${params.toString()}`,
+    );
+    return response!.data;
+  },
+
+  async createAcademicCalendarEvent(
+    data: AcademicCalendarEventPayload,
+  ): Promise<AcademicCalendarEvent> {
+    const response = await apiRequest<{ data: AcademicCalendarEvent }>(
+      '/admin/calendar',
+      { method: 'POST', body: data },
+    );
+    return response!.data;
+  },
+
+  async updateAcademicCalendarEvent(
+    id: string,
+    data: Partial<AcademicCalendarEventPayload>,
+  ): Promise<AcademicCalendarEvent> {
+    const response = await apiRequest<{ data: AcademicCalendarEvent }>(
+      `/admin/calendar/${id}`,
+      { method: 'PATCH', body: data },
+    );
+    return response!.data;
+  },
+
+  async deleteAcademicCalendarEvent(id: string): Promise<void> {
+    await apiRequest(`/admin/calendar/${id}`, { method: 'DELETE' });
   },
 
   async fixedAcademicLevels(

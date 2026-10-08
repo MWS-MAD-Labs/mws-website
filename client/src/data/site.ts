@@ -17,7 +17,7 @@ export const pageLinks = [
   },
   {
     label: 'FAQ',
-    path: '/our-school#faq',
+    path: '/admission/faq',
   },
 ];
 

@@ -104,8 +104,8 @@ export default function AcademicFaqsPage() {
     setIsFormOpen(true);
   }
 
-  function closeForm() {
-    if (savingId) return;
+  function closeForm(force = false) {
+    if (savingId && !force) return;
     setIsFormOpen(false);
     setEditingItem(null);
     setForm(emptyForm);
@@ -138,7 +138,7 @@ export default function AcademicFaqsPage() {
         setMessage('FAQ created.');
       }
       await loadFaqs();
-      closeForm();
+      closeForm(true);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Failed to save FAQ.');
     } finally {
@@ -315,7 +315,7 @@ export default function AcademicFaqsPage() {
         <Modal
           open={isFormOpen}
           title={editingItem ? 'Edit FAQ' : 'Create FAQ'}
-          onClose={closeForm}
+          onClose={() => closeForm()}
         >
           <form className="grid gap-4" onSubmit={submitForm}>
             <Field label="Question">
@@ -378,7 +378,7 @@ export default function AcademicFaqsPage() {
                 disabled={Boolean(savingId)}
                 type="button"
                 variant="outline"
-                onClick={closeForm}
+                onClick={() => closeForm()}
               >
                 Cancel
               </Button>

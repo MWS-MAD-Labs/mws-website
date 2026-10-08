@@ -1,5 +1,5 @@
 import { Bell, ChevronDown, LogOut, User } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/admin/auth/useAuth';
 import Sidebar from '@/admin/components/layout/Sidebar';
 
@@ -11,6 +11,29 @@ type AppShellProps = {
 export default function AppShell({ children, title }: AppShellProps) {
   const { user, logout } = useAuth();
   const [profileOpen, setProfileOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!profileOpen) return;
+
+    function handlePointerDown(event: PointerEvent) {
+      if (!profileMenuRef.current?.contains(event.target as Node)) {
+        setProfileOpen(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setProfileOpen(false);
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [profileOpen]);
 
   const photoUrl = user?.central.photo_url;
 
@@ -42,7 +65,7 @@ export default function AppShell({ children, title }: AppShellProps) {
             </button>
 
             {/* User Dropdown */}
-            <div className="relative">
+            <div ref={profileMenuRef} className="relative">
               <button
                 type="button"
                 onClick={() => setProfileOpen((current) => !current)}

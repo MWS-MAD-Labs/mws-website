@@ -172,7 +172,22 @@ describe("PageDataService", () => {
   it("returns Home info cards from the selected news category and CMS spotlights", async () => {
     spyOn(HeroSlideRepository, "listActive").mockResolvedValue([]);
     spyOn(PageDataRepository, "listActivePrograms").mockResolvedValue([]);
-    spyOn(PageDataRepository, "listCommunityVoices").mockResolvedValue([]);
+    spyOn(PageDataRepository, "listHomeCommunityVoices").mockResolvedValue([
+      {
+        id: "66666666-6666-4666-8666-666666666666",
+        role: "Parent",
+        name: "CMS Voice",
+        grade: "Grade 5 Parent",
+        quote: "MWS feels like home.",
+        imagePath: "/api/gallery-images/77777777-7777-4777-8777-777777777777/file",
+        sortOrder: 3,
+        isActive: true,
+        showOnHome: true,
+        homeSortOrder: 1,
+        createdAt: new Date("2026-09-18T00:00:00.000Z"),
+        updatedAt: new Date("2026-09-18T00:00:00.000Z"),
+      },
+    ]);
     spyOn(PageDataRepository, "getHomePageSettings").mockResolvedValue({
       id: "11111111-1111-4111-8111-111111111111",
       infoSectionTitle: "Latest school stories",
@@ -243,6 +258,8 @@ describe("PageDataService", () => {
         id: "55555555-5555-4555-8555-555555555555",
         text: "CMS spotlight",
         cite: "Home CMS",
+        imagePath: "/api/gallery-images/99999999-9999-4999-8999-999999999999/file",
+        imageAlt: "Students learning on campus",
         sortOrder: 0,
         isActive: true,
         activeFrom: null,
@@ -262,10 +279,21 @@ describe("PageDataService", () => {
       path: "/news/cms-news",
     });
     expect(page.spotlightSlides[0]).toMatchObject({
+      image: "/api/gallery-images/99999999-9999-4999-8999-999999999999/file",
+      alt: "Students learning on campus",
       quote: "CMS spotlight",
       cite: "Home CMS",
     });
-    expect(page.communityVoices).toEqual([]);
+    expect(page.communityVoices).toEqual([
+      {
+        id: "66666666-6666-4666-8666-666666666666",
+        role: "Parent",
+        name: "CMS Voice",
+        grade: "Grade 5 Parent",
+        image: "/api/gallery-images/77777777-7777-4777-8777-777777777777/file",
+        quote: "MWS feels like home.",
+      },
+    ]);
   });
 
   it("returns admissions programs with admin contact", async () => {
@@ -436,6 +464,22 @@ describe("PageDataService", () => {
       },
     });
     spyOn(PageDataRepository, "listPublishedNews").mockResolvedValue([]);
+    spyOn(PageDataRepository, "listCommunityVoices").mockResolvedValue([
+      {
+        id: "77777777-7777-4777-8777-777777777777",
+        role: "Teacher",
+        name: "Stories Voice",
+        grade: "Elementary",
+        quote: "Every child is known here.",
+        imagePath: "/api/gallery-images/88888888-8888-4888-8888-888888888888/file",
+        sortOrder: 10,
+        isActive: true,
+        showOnHome: false,
+        homeSortOrder: 0,
+        createdAt: new Date("2026-09-18T00:00:00.000Z"),
+        updatedAt: new Date("2026-09-18T00:00:00.000Z"),
+      },
+    ]);
 
     const page = await PageDataService.getCommunityStories();
 
@@ -447,15 +491,27 @@ describe("PageDataService", () => {
       alt: "Photo",
       caption: "Students sharing activity moments.",
     });
+    expect(page.voices).toEqual([
+      {
+        id: "77777777-7777-4777-8777-777777777777",
+        role: "Teacher",
+        name: "Stories Voice",
+        grade: "Elementary",
+        image: "/api/gallery-images/88888888-8888-4888-8888-888888888888/file",
+        quote: "Every child is known here.",
+      },
+    ]);
   });
 
   it("does not fall back to static community stories media", async () => {
     spyOn(PageDataRepository, "getCommunityStoriesPage").mockResolvedValue(null);
     spyOn(PageDataRepository, "listPublishedNews").mockResolvedValue([]);
+    spyOn(PageDataRepository, "listCommunityVoices").mockResolvedValue([]);
 
     const page = await PageDataService.getCommunityStories();
 
     expect(page.galleryImages).toEqual([]);
+    expect(page.voices).toEqual([]);
     expect(page.news).toEqual([]);
   });
 });

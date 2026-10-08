@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChevronDown, Menu, X } from 'lucide-react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 
@@ -17,6 +17,7 @@ export default function Navbar() {
   const [isAtTop, setIsAtTop] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<MenuKey | null>(null);
+  const navigationRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isHome) {
@@ -238,6 +239,32 @@ const topNavClassName = ({ isActive }: { isActive: boolean }) =>
     setOpenMenu(null);
   };
 
+  useEffect(() => {
+    if (!isOpen && !openMenu) return;
+
+    function handlePointerDown(event: PointerEvent) {
+      if (!navigationRef.current?.contains(event.target as Node)) {
+        setIsOpen(false);
+        setOpenMenu(null);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+        setOpenMenu(null);
+      }
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, openMenu]);
+
   const toggleMenu = (menu: MenuKey) => {
     setOpenMenu((current) => (current === menu ? null : menu));
   };
@@ -309,7 +336,7 @@ const topNavClassName = ({ isActive }: { isActive: boolean }) =>
         >
           {/* Logo */}
           <div className="flex min-w-[120px] items-center max-[980px]:min-w-0">
-            <Link to="/#hero" aria-label="Millennia World School home" onClick={closeNav}>
+            <Link to="/" aria-label="Millennia World School home" onClick={closeNav}>
               <img
                 className={cx(
                   'block h-[54px] w-[54px] object-contain',
@@ -356,6 +383,7 @@ const topNavClassName = ({ isActive }: { isActive: boolean }) =>
 
           {/* Navigation Popup */}
           <div
+            ref={navigationRef}
             className={cx(
               // Desktop
               'ml-auto flex items-center gap-[30px]',
@@ -436,7 +464,7 @@ const topNavClassName = ({ isActive }: { isActive: boolean }) =>
               >
                 {/* Home */}
                 <li className="max-[980px]:grid max-[980px]:grid-cols-[minmax(0,1fr)]">
-                  <NavLink to="/#hero" className={topNavClassName}>
+                  <NavLink to="/" className={topNavClassName}>
                     Home
                   </NavLink>
                 </li>

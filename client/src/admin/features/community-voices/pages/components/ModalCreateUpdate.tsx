@@ -111,7 +111,7 @@ export default function ModalCreateUpdate({
               </h2>
 
               <p className="mt-0.5 text-sm text-gray-500">
-                {isUpdate ? 'Update community voice information.' : 'Add a new Home voice.'}
+                {isUpdate ? 'Update community voice information.' : 'Add a new community voice.'}
               </p>
             </div>
 
@@ -252,7 +252,19 @@ export default function ModalCreateUpdate({
                   />
                 </Field>
 
-                <label className="mt-6 flex items-center gap-2 text-sm font-medium text-gray-700">
+                <Field label="Home order">
+                  <input
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-[#7e1518] focus:ring-1 focus:ring-[#7e1518] disabled:bg-gray-50"
+                    disabled={isBusy || !form.showOnHome}
+                    type="number"
+                    value={form.homeSortOrder}
+                    onChange={(event) => updateField('homeSortOrder', event.target.value)}
+                  />
+                </Field>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
                   <input
                     checked={form.isActive}
                     className="h-4 w-4 accent-[#7e1518]"
@@ -260,7 +272,18 @@ export default function ModalCreateUpdate({
                     type="checkbox"
                     onChange={(event) => updateField('isActive', event.target.checked)}
                   />
-                  Active on Home
+                  Active
+                </label>
+
+                <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                  <input
+                    checked={form.showOnHome}
+                    className="h-4 w-4 accent-[#7e1518]"
+                    disabled={isBusy || !form.isActive}
+                    type="checkbox"
+                    onChange={(event) => updateField('showOnHome', event.target.checked)}
+                  />
+                  Show on Home
                 </label>
               </div>
             </div>

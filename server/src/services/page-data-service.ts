@@ -622,7 +622,7 @@ export class PageDataService {
     const [heroSlides, programs, voices, settings, spotlights] = await Promise.all([
       this.getHeroSlides(),
       PageDataRepository.listActivePrograms(),
-      PageDataRepository.listCommunityVoices(),
+      PageDataRepository.listHomeCommunityVoices(),
       PageDataRepository.getHomePageSettings(),
       PageDataRepository.listActiveCampusSpotlights(),
     ]);
@@ -680,8 +680,8 @@ export class PageDataService {
       },
       spotlightSlides: spotlights.length
         ? spotlights.map((spotlight) => ({
-            image: asset("_DSC4760.jpg"),
-            alt: spotlight.cite,
+            image: spotlight.imagePath || asset("_DSC4760.jpg"),
+            alt: spotlight.imageAlt || spotlight.cite,
             quote: spotlight.text,
             cite: spotlight.cite,
           }))
@@ -729,9 +729,10 @@ export class PageDataService {
   }
 
   static async getCommunityStories() {
-    const [page, news] = await Promise.all([
+    const [page, news, voices] = await Promise.all([
       PageDataRepository.getCommunityStoriesPage(),
       PageDataRepository.listPublishedNews(4),
+      PageDataRepository.listCommunityVoices(),
     ]);
 
     return {
@@ -753,6 +754,14 @@ export class PageDataService {
         page?.activityDescription ||
         defaultCommunityStoriesContent.activityDescription,
       galleryImages: galleryImagesFromPage(page),
+      voices: voices.map((voice) => ({
+        id: voice.id,
+        role: voice.role,
+        name: voice.name,
+        grade: voice.grade,
+        image: voice.imagePath,
+        quote: voice.quote,
+      })),
       news: news.map(newsResponse),
     };
   }
