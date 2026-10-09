@@ -12,11 +12,23 @@ import {
   type PublicNewsList,
 } from '@/features/news/newsData';
 import ContentBreadcrumb from '@/components/ui/ContentBreadcrumb';
+import { calendarApi, type GoogleCalendarEvent } from '@/api/calendarApi';
 
 const EMPTY_NEWS: PublicNewsList = {
   items: [],
   pagination: { page: 1, pageSize: 6, total: 0, totalPages: 0 },
 };
+
+function formatScheduleEvent(event: GoogleCalendarEvent) {
+  const value = event.allDay ? new Date(`${event.start}T00:00:00`) : new Date(event.start);
+  const formatted = new Intl.DateTimeFormat('en-US',
+    event.allDay
+      ? { weekday: 'long', month: 'short', day: 'numeric' }
+      : { weekday: 'long', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' },
+  ).format(value);
+
+  return event.location ? `${formatted} · ${event.location}` : formatted;
+}
 
 export default function SchoolNews() {
   const [news, setNews] = useState<PublicNewsList>(EMPTY_NEWS);
@@ -29,6 +41,9 @@ export default function SchoolNews() {
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [scheduleEvents, setScheduleEvents] = useState<GoogleCalendarEvent[]>([]);
+  const [isScheduleLoading, setIsScheduleLoading] = useState(true);
+  const [scheduleError, setScheduleError] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -66,6 +81,28 @@ export default function SchoolNews() {
 
     return () => controller.abort();
   }, [category, page, search]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    calendarApi
+      .upcomingEvents(2, controller.signal)
+      .then((result) => {
+        setScheduleEvents(result.events);
+        setScheduleError(false);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) {
+          setScheduleEvents([]);
+          setScheduleError(true);
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsScheduleLoading(false);
+      });
+
+    return () => controller.abort();
+  }, []);
 
   function submitSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -273,21 +310,28 @@ export default function SchoolNews() {
                 <h2 className="text-base font-semibold">Schedule Highlights</h2>
 
                 <div className="mt-5 divide-y divide-white/10">
-                  <div className="py-4 first:pt-0">
-                    <strong className="block text-sm font-medium text-[#d6a13a]">
-                      Parent Coffee Morning
-                    </strong>
+                  {isScheduleLoading ? (
+                    <p className="py-4 text-xs text-white/60">Loading schedule...</p>
+                  ) : scheduleError ? (
+                    <p className="py-4 text-xs text-white/60">Schedule is temporarily unavailable.</p>
+                  ) : scheduleEvents.length ? (
+                    scheduleEvents.map((event, index) => (
+                      <div
+                        key={event.id}
+                        className={index === 0 ? 'py-4 first:pt-0' : 'pb-0 pt-4'}
+                      >
+                        <strong className="block text-sm font-medium text-[#d6a13a]">
+                          {event.title}
+                        </strong>
 
-                    <span className="mt-1 block text-xs text-white/60">Tuesday - 09:00 AM</span>
-                  </div>
-
-                  <div className="pb-0 pt-4">
-                    <strong className="block text-sm font-medium text-[#d6a13a]">
-                      Student Exhibition
-                    </strong>
-
-                    <span className="mt-1 block text-xs text-white/60">Friday - Main Hall</span>
-                  </div>
+                        <span className="mt-1 block text-xs text-white/60">
+                          {formatScheduleEvent(event)}
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="py-4 text-xs text-white/60">No upcoming events scheduled.</p>
+                  )}
                 </div>
               </div>
 

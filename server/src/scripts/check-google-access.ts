@@ -18,6 +18,8 @@ if (!credentials) {
 }
 
 const mailSender = process.env.MAIL_SENDER?.trim();
+const calendarSubject = process.env.GOOGLE_CALENDAR_SUBJECT?.trim() || undefined;
+const calendarId = process.env.GOOGLE_CALENDAR_ID?.trim();
 
 const checks: Array<{ label: string; scope: string; subject?: string }> = [];
 if (mailSender) {
@@ -25,6 +27,14 @@ if (mailSender) {
     label: `Email: gmail.send as ${mailSender}`,
     scope: "https://www.googleapis.com/auth/gmail.send",
     subject: mailSender,
+  });
+}
+
+if (calendarId) {
+  checks.push({
+    label: `Calendar: calendar.readonly${calendarSubject ? ` as ${calendarSubject}` : " as service account"}`,
+    scope: "https://www.googleapis.com/auth/calendar.readonly",
+    subject: calendarSubject,
   });
 }
 
@@ -57,5 +67,5 @@ for (const check of checks) {
 }
 
 if (!checks.length) {
-  console.log("Nothing to check: set MAIL_SENDER.");
+  console.log("Nothing to check: set MAIL_SENDER or GOOGLE_CALENDAR_ID.");
 }
