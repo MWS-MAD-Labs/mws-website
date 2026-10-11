@@ -59,7 +59,7 @@ function setManagedAosAttributes(element: HTMLElement, index: number) {
 
 function applyPublicAosAttributes() {
   const sections = document.querySelectorAll<HTMLElement>(
-    ".site-content main > section:not(#hero), .site-content main > div, .site-content article, .site-content [data-public-reveal]",
+    ".site-content main > section:not(#hero):not([data-no-aos]), .site-content main > div:not([data-no-aos]), .site-content article:not([data-no-aos]), .site-content [data-public-reveal]:not([data-no-aos])",
   );
 
   sections.forEach((element, index) => setManagedAosAttributes(element, index));

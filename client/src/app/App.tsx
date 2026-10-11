@@ -16,6 +16,7 @@ import SchoolNews from '@/pages/news/school-news';
 import NewsDetail from '@/pages/news/news-detail';
 import CommunityStories from '@/pages/community-stories';
 import BookATour from '@/features/book-a-tour/BookATourPage';
+import AboutUs from '@/pages/aboutUS';
 
 export default function App() {
   return (
@@ -45,6 +46,7 @@ export default function App() {
         <Route path="community-stories" element={<CommunityStories />} />
         <Route path="contact" element={<Contact />} />
         <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path='/about-millennia' element={<AboutUs/>} />
       </Route>
     </Routes>
   );
