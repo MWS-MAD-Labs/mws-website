@@ -59,7 +59,7 @@ export class PublicPagesController {
       });
     }
 
-    if (slug === "our-school") {
+    if (slug === "about-millennia" || slug === "about-us" || slug === "our-school") {
       return c.json({ data: toJsonSafe(await PageDataService.getOurSchool()) });
     }
 

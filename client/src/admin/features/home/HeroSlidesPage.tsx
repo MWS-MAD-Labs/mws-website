@@ -67,7 +67,7 @@ const heroCtaLinkOptions = [
   { label: 'Admission', value: '/admission' },
   { label: 'Book a Tour', value: '/book-a-tour' },
   { label: 'Academic', value: '/academic' },
-  { label: 'Our School', value: '/our-school' },
+  { label: 'About MWS', value: '/about-millennia' },
   { label: 'News', value: '/news' },
   { label: 'Community Stories', value: '/community-stories' },
   { label: 'Contact', value: '/contact' },

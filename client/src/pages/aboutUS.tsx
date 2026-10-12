@@ -1,17 +1,50 @@
 import { useEffect, useRef, useState } from 'react';
-import { pageApi, type CommunityGalleryImageData } from '@/api/pageApi';
+import DOMPurify from 'dompurify';
+import { pageApi, type CommunityGalleryImageData, type OurSchoolPageData } from '@/api/pageApi';
 import ContentBreadcrumb from '@/components/ui/ContentBreadcrumb';
 import SubpageHero from '@/components/ui/SubpageHero';
 import AdmissionsCta from '@/components/layout/AdmissionsCta';
+import { asset } from '@/data/site';
 
 const LOGO_SRC =
   'https://millenniaws.sch.id/wp-content/uploads/2021/11/Millennia-World-School-Logo-Only.svg';
 
-const IMAGE_ACTIVITY = 'http://localhost:7001/assets-mws/DSC04079.jpg';
+const defaultAboutContent: OurSchoolPageData = {
+  hero: {
+    title: 'Our School',
+    image: 'about-us',
+    imageAlt: 'Millennia World School campus',
+  },
+  background: {
+    title: 'MWS BACKGROUND',
+    image: asset('DSC04079.jpg'),
+    imageAlt: 'Millennia World School campus',
+    paragraphs: [
+      'In the 21st century, every educational system faces the challenge of preparing young generations for a life of the future that is not only complex, but constantly changing as well, and hence, mostly unknown and unpredictable. However, it is clear that intellectual flexibility, creative thinking, independent judgment, moral discernment, refined written and oral communication skills, and the ability to collaborate effectively are essential to success in today’s ever changing world. Millennia World School (MWS) offers a developmentally appropriate, experiential approach towards education. We use Science to inspire artistic thinking and Art to inspire scientific thinking. Each subject is interlaced with every other subject while providing nuance, context and deeper meaning for each. Music, art and movement are as important to the curriculum as Math, Science and Languages. Through playful and engaging learning strategies we develop and create compassionate and critical thinkers. We also provide a safe, caring and nurturing environment in order for children to blossom. We aim to develop and inspire lifelong learners and enable them to fully develop their talents, dispositions and capabilities. Millennia World School’s Education is based on the principle that the subjects are not meant just to be read and tested on, but rather to be experienced. Through these deep, meaningful learning experiences children develop and cultivate intellectual, emotional, physical capabilities to become individuals who are trailblazers and future leaders. To fulfil this dream, Millennia World School was established in 2017.',
+      'In the 21st century, every educational system faces the challenge of preparing young generations for a life that is not only complex, but constantly changing as well. Millennia World School (MWS) offers a developmentally appropriate experiential approach towards education. We aim to develop and inspire lifelong learners and enable them to fully develop their talents, dispositions and capabilities.',
+    ],
+  },
+  visionMission: {
+    title: 'Our Vision & Mission',
+    image: asset('DSC04079.jpg'),
+    imageAlt: 'Students learning at Millennia World School',
+    paragraphs: [
+      'Discover and foster individual and group potential to achieve fulfilling lives.',
+      'A globalized society based on compassion where every individual connects to others using their maximum potential through the values of Truth, Beauty and Goodness to achieve happiness.',
+    ],
+  },
+  philosophy: {
+    title: 'Our Philosophy',
+    paragraphs: [
+      'Our Philosophy is based on profound understanding of human development that addresses the needs of growing children and aims at developing their love of learning, sense of meaning and purpose. At MWS, we emphasize the role of imagination in learning, striving to integrate holistically the intellectual, practical, and artistic development of students. At the heart of our philosophy lies the concept of H.A.P.P.I.N.E.S.S that covers the development of the following aspects: Health, Artistic Ability, Practical Skills, Passion, Intellect, and Naturalistic Ability. We aim to develop and inspire lifelong learners and enable them to fully develop their talents, dispositions and capabilities. Millennia World School\'s education is based on the principle that subjects are not meant just to be read and tested on, but rather to be experienced. Through these deep, meaningful learning experiences, children develop and cultivate their intellectual, emotional, and physical capabilities to become trailblazers and future leaders. To fulfill this dream, Millennia World School was established in 2017.',
+    ],
+  },
+  faq: [],
+};
 
 const DEFAULT_ACTIVITY_IMAGE: CommunityGalleryImageData = {
   id: 'default-activity',
-  src: IMAGE_ACTIVITY,
+  src: defaultAboutContent.visionMission.image,
   alt: 'Students learning at Millennia World School',
   caption: null,
   size: 'large',
@@ -29,11 +62,24 @@ const HAPPINESS = [
   { letter: 'S', label: 'SPIRITUAL WELL-BEING' },
 ];
 
+function RichTextBlock({ className, content }: { className: string; content: string }) {
+  return (
+    <div
+      className={className}
+      dangerouslySetInnerHTML={{
+        __html: DOMPurify.sanitize(content || ''),
+      }}
+    />
+  );
+}
+
 export default function AboutUs() {
+  const [content, setContent] = useState<OurSchoolPageData>(defaultAboutContent);
   const [activityImages, setActivityImages] = useState<CommunityGalleryImageData[]>([
     DEFAULT_ACTIVITY_IMAGE,
   ]);
   const [selectedImage, setSelectedImage] = useState<CommunityGalleryImageData | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const happinessSectionRef = useRef<HTMLElement>(null);
   const [visibleHappinessCount, setVisibleHappinessCount] = useState(1);
@@ -89,6 +135,26 @@ export default function AboutUs() {
     let isMounted = true;
 
     pageApi
+      .aboutMillennia()
+      .then((data) => {
+        if (!isMounted) return;
+        setContent(data);
+        setLoadError(null);
+      })
+      .catch((error) => {
+        if (!isMounted) return;
+        setLoadError(error instanceof Error ? error.message : 'Unable to load About MWS content.');
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    pageApi
       .communityStories()
       .then((data) => {
         if (!isMounted) return;
@@ -129,58 +195,47 @@ export default function AboutUs() {
 
   return (
     <main className="bg-white text-[var(--charcoal)]">
+      {loadError && (
+        <p className="sr-only" role="status">
+          {loadError}
+        </p>
+      )}
+
       <SubpageHero
-        title="Our School"
-        image="about-us"
-        imageAlt="Millennia World School campus"
+        title={content.hero.title}
+        image={content.hero.image}
+        imageAlt={content.hero.imageAlt}
       />
 
       <ContentBreadcrumb
         items={[
           { label: 'Home', path: '/' },
           { label: 'About MWS' },
-          { label: 'Our School' },
+          { label: content.hero.title },
         ]}
       />
 
       {/* MWS BACKGROUND */}
       <section className="mx-auto max-w-4xl px-6 py-16 md:py-24">
         <h2 className="text-center text-3xl font-bold leading-tight tracking-tight md:text-5xl">
-          MWS BACKGROUND
+          {content.background.title}
         </h2>
 
         <div className="mt-8 space-y-5 text-lg leading-8 text-[var(--charcoal)]/80">
-          <p className="text-justify">
-            In the 21st century, every educational system faces the challenge of preparing young
-            generations for a life of the future that is not only complex, but constantly changing
-            as well, and hence, mostly unknown and unpredictable. However, it is clear that
-            intellectual flexibility, creative thinking, independent judgment, moral discernment,
-            refined written and oral communication skills, and the ability to collaborate
-            effectively are essential to success in today’s ever changing world. Millennia World
-            School (MWS) offers a developmentally appropriate, experiential approach towards
-            education. We use Science to inspire artistic thinking and Art to inspire scientific
-            thinking. Each subject is interlaced with every other subject while providing nuance,
-            context and deeper meaning for each. Music, art and movement are as important to the
-            curriculum as Math, Science and Languages. Through playful and engaging learning
-            strategies we develop and create compassionate and critical thinkers. We also provide a
-            safe, caring and nurturing environment in order for children to blossom. We aim to
-            develop and inspire lifelong learners and enable them to fully develop their talents,
-            dispositions and capabilities. Millennia World School’s Education is based on the
-            principle that the subjects are not meant just to be read and tested on, but rather to
-            be experienced. Through these deep, meaningful learning experiences children develop and
-            cultivate intellectual, emotional, physical capabilities to become individuals who are
-            trailblazers and future leaders. To fulfil this dream, Millennia World School was
-            established in 2017.
-          </p>
+          <RichTextBlock
+            className="text-justify"
+            content={content.background.paragraphs[0] ?? defaultAboutContent.background.paragraphs[0]}
+          />
 
           <div className="bg-[var(--burgundy)] px-6 py-6">
-            <p className="text-justify text-base leading-7 text-[var(--white)] md:text-lg md:leading-8">
-              In the 21st century, every educational system faces the challenge of preparing young
-              generations for a life that is not only complex, but constantly changing as well.
-              Millennia World School (MWS) offers a developmentally appropriate experiential
-              approach towards education. We aim to develop and inspire lifelong learners and
-              enable them to fully develop their talents, dispositions and capabilities.
-            </p>
+            <RichTextBlock
+              className="text-justify text-base leading-7 text-[var(--white)] md:text-lg md:leading-8"
+              content={
+                content.background.paragraphs[1] ??
+                content.background.paragraphs[0] ??
+                defaultAboutContent.background.paragraphs[1]
+              }
+            />
           </div>
         </div>
       </section>
@@ -190,8 +245,8 @@ export default function AboutUs() {
         <div className="grid items-center gap-10 md:grid-cols-2 md:gap-16">
           <div className="flex justify-center md:justify-start">
             <img
-              src={IMAGE_ACTIVITY}
-              alt="Students learning at Millennia World School"
+              src={content.visionMission.image}
+              alt={content.visionMission.imageAlt}
               className="h-auto w-full max-w-lg object-cover"
             />
           </div>
@@ -202,9 +257,13 @@ export default function AboutUs() {
                 Our Mission
               </h2>
 
-              <p className="text-justify text-base leading-7 text-[var(--charcoal)]/80 md:text-lg md:leading-8">
-                Discover and foster individual and group potential to achieve fulfilling lives.
-              </p>
+              <RichTextBlock
+                className="text-justify text-base leading-7 text-[var(--charcoal)]/80 md:text-lg md:leading-8"
+                content={
+                  content.visionMission.paragraphs[0] ??
+                  defaultAboutContent.visionMission.paragraphs[0]
+                }
+              />
             </div>
 
             <div>
@@ -212,11 +271,13 @@ export default function AboutUs() {
                 Our Vision
               </h2>
 
-              <p className="text-justify text-base leading-7 text-[var(--charcoal)]/80 md:text-lg md:leading-8">
-                A globalized society based on compassion where every individual connects to others
-                using their maximum potential through the values of Truth, Beauty and Goodness to
-                achieve happiness.
-              </p>
+              <RichTextBlock
+                className="text-justify text-base leading-7 text-[var(--charcoal)]/80 md:text-lg md:leading-8"
+                content={
+                  content.visionMission.paragraphs[1] ??
+                  defaultAboutContent.visionMission.paragraphs[1]
+                }
+              />
             </div>
           </div>
         </div>
@@ -224,24 +285,13 @@ export default function AboutUs() {
         {/* OUR PHILOSOPHY */}
         <div className="mt-16 border-t border-[var(--charcoal)]/15 pt-12 md:mt-24 md:pt-16">
           <h2 className="mb-6 text-center text-3xl font-bold leading-tight tracking-tight md:text-4xl">
-            Our Philosophy
+            {content.philosophy.title}
           </h2>
 
-          <p className="text-justify text-base leading-7 text-[var(--charcoal)]/80 md:text-lg md:leading-8">
-            Our Philosophy is based on profound understanding of human development that addresses
-            the needs of growing children and aims at developing their love of learning, sense of
-            meaning and purpose. At MWS, we emphasize the role of imagination in learning, striving
-            to integrate holistically the intellectual, practical, and artistic development of
-            students. At the heart of our philosophy lies the concept of H.A.P.P.I.N.E.S.S that
-            covers the development of the following aspects: Health, Artistic Ability, Practical
-            Skills, Passion, Intellect, and Naturalistic Ability. We aim to develop and inspire
-            lifelong learners and enable them to fully develop their talents, dispositions and
-            capabilities. Millennia World School's education is based on the principle that
-            subjects are not meant just to be read and tested on, but rather to be experienced.
-            Through these deep, meaningful learning experiences, children develop and cultivate
-            their intellectual, emotional, and physical capabilities to become trailblazers and
-            future leaders. To fulfill this dream, Millennia World School was established in 2017.
-          </p>
+          <RichTextBlock
+            className="text-justify text-base leading-7 text-[var(--charcoal)]/80 md:text-lg md:leading-8"
+            content={content.philosophy.paragraphs[0] ?? defaultAboutContent.philosophy.paragraphs[0]}
+          />
         </div>
       </section>
 
@@ -360,14 +410,6 @@ export default function AboutUs() {
         </div>
       )}
 
-      <section className="mx-auto max-w-3xl px-6 py-16 text-center md:py-24">
-        <p className="text-xl leading-8 text-[var(--charcoal)]/80 md:text-2xl md:leading-10">
-          We aim to develop and inspire lifelong learners who fully develop their talents,
-          dispositions and capabilities. Through deep, meaningful learning experiences, children
-          become trailblazers and future leaders. To fulfil this dream, Millennia World School was
-          established in 2017.
-        </p>
-      </section>
 
       <AdmissionsCta
         headline="Ready to begin your journey at MWS?"

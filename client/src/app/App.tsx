@@ -24,6 +24,7 @@ export default function App() {
       <Route element={<PageLayout />}>
         <Route index element={<Home />} />
         <Route path="our-school" element={<OurSchool />} />
+        <Route path="about-millennia" element={<AboutUs />} />
         <Route path="admission" element={<Admission />} />
         <Route path="admission/faq" element={<AdmissionFaqPage />} />
         <Route path="admission/guidelines" element={<AdmissionGuidelinesPage />} />
@@ -46,7 +47,6 @@ export default function App() {
         <Route path="community-stories" element={<CommunityStories />} />
         <Route path="contact" element={<Contact />} />
         <Route path="*" element={<Navigate to="/" replace />} />
-        <Route path='/about-millennia' element={<AboutUs/>} />
       </Route>
     </Routes>
   );

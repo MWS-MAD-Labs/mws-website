@@ -89,8 +89,15 @@ export const managedPages: ManagedPage[] = [
     status: "Draft",
   },
   {
+    id: "about-millennia",
+    title: "About MWS",
+    path: "/about-millennia",
+    template: "Generic Page",
+    status: "Draft",
+  },
+  {
     id: "our-school",
-    title: "Our School",
+    title: "Our School (Legacy)",
     path: "/our-school",
     template: "Generic Page",
     status: "Draft",

@@ -507,7 +507,7 @@ export function getPageSections(page: ManagedPage): PageSection[] {
   if (page.id === "academic") return academicSections;
   if (page.id === "community-stories") return communitySections;
   if (page.id === "contact") return contactSections;
-  if (page.id === "our-school") return ourSchoolSections;
+  if (page.id === "about-millennia" || page.id === "our-school") return ourSchoolSections;
   if (page.id === "kurikulum") return kurikulumSections;
   if (page.id === "school-news") return schoolNewsSections;
 

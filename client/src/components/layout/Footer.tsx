@@ -36,7 +36,7 @@ export default function Footer() {
             <h2 className="mb-[18px] text-[13px] font-semibold uppercase tracking-[0.08em] text-[rgba(248,247,243,0.42)]">
               Explore
             </h2>
-            <Link className={footerLinkClassName} to="/our-school">
+            <Link className={footerLinkClassName} to="/about-millennia">
               About us
             </Link>
             <Link className={`mt-3 ${footerLinkClassName}`} to="/academic">

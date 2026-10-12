@@ -233,6 +233,7 @@ export const pageApi = {
   admissionFaq: () => getPage<AdmissionFaqPageData>("admission-faq"),
   admissionGuidelines: () =>
     getPage<AdmissionGuidelinesPageData>("admission-guidelines"),
+  aboutMillennia: () => getPage<OurSchoolPageData>("about-millennia"),
   ourSchool: () => getPage<OurSchoolPageData>("our-school"),
   communityStories: () =>
     getPage<CommunityStoriesPageData>("community-stories"),

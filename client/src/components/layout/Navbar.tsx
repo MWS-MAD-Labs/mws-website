@@ -469,20 +469,20 @@ const topNavClassName = ({ isActive }: { isActive: boolean }) =>
                   </NavLink>
                 </li>
 
-                {/* Our School */}
+                {/* About MWS */}
                 <li
                   className={navItemClassName(
                     isPagesActive && '[&>a]:font-semibold [&>a]:text-[var(--burgundy)]',
                   )}
                 >
-                  <NavLink to="/our-school" className={topNavClassName}>
-                    Our School
+                  <NavLink to="/about-millennia" className={topNavClassName}>
+                    About MWS
                   </NavLink>
 
                   <button
                     className={menuButtonClassName('pages')}
                     type="button"
-                    aria-label="Toggle Our School menu"
+                    aria-label="Toggle About MWS menu"
                     aria-expanded={openMenu === 'pages'}
                     onClick={() => toggleMenu('pages')}
                   >

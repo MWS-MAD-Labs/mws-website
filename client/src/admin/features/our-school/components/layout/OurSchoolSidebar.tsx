@@ -59,7 +59,7 @@ export default function OurSchoolSidebar({ editor }: OurSchoolSidebarProps) {
             disabled={isBusy}
             type="button"
             variant="ghost"
-            onClick={() => window.open('/our-school', '_blank', 'noopener,noreferrer')}
+            onClick={() => window.open('/about-millennia', '_blank', 'noopener,noreferrer')}
           >
             <Eye size={15} />
             Preview Live

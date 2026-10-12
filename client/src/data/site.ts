@@ -5,7 +5,7 @@ export const logoUrl = '/Millennia-World-School-Logo-Only.svg';
 export const pageLinks = [
   {
     label: 'About MWS',
-    path: '/our-school',
+    path: '/about-millennia',
   },
   {
     label: 'Admission',

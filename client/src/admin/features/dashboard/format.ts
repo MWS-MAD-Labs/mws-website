@@ -45,6 +45,7 @@ export function formatRelativeTime(value: string, now = Date.now()) {
 const PAGE_LABELS: Record<string, string> = {
   '/': 'Home',
   '/our-school': 'Our School',
+  '/about-millennia': 'About MWS',
   '/admission': 'Admission',
   '/book-a-tour': 'Book a Tour',
   '/academic': 'Academic',
