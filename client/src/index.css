@@ -131,6 +131,35 @@ a {
   font-style: normal;
 }
 
+
+.happiness-item {
+  opacity: 0;
+  transform: translateY(36px);
+  transition:
+    opacity 650ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 650ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.happiness-item-hidden {
+  opacity: 0;
+  transform: translateY(36px);
+  pointer-events: none;
+}
+
+.happiness-item-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .happiness-item {
+    transition: none;
+  }
+}
+
+
+
+
 /* Calon Hpus */
 
 .cms-auth-screen {
