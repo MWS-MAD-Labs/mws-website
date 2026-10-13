@@ -18,9 +18,10 @@ export function getPrisma(): PrismaClient {
   const adapter = new PrismaPg({ connectionString });
   const prisma = new PrismaClient({ adapter });
 
-  if (process.env.NODE_ENV !== "production") {
-    globalThis.__mwsWebsitePrisma = prisma;
-  }
+  // Reuse one client (and its connection pool) in every environment. A new
+  // client per call opens a new pool each time and exhausts Postgres
+  // connections ("sorry, too many clients already").
+  globalThis.__mwsWebsitePrisma = prisma;
 
   return prisma;
 }
