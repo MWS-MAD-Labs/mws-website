@@ -15,6 +15,10 @@ function readRuntimeEnv(key: string): string | undefined {
     : undefined;
 }
 
+function readBooleanEnv(key: string): boolean {
+  return readEnv(key).trim().toLowerCase() === "true";
+}
+
 function defaultApiBaseUrl(): string {
   if (typeof window !== "undefined") {
     return `${window.location.protocol}//${window.location.hostname}:4004`;
@@ -40,5 +44,6 @@ export const env = {
       defaultApiBaseUrl()),
   googleClientId: readEnv("VITE_GOOGLE_CLIENT_ID"),
   googleRedirectUri: readEnv("VITE_GOOGLE_REDIRECT_URI") || defaultGoogleRedirectUri(),
+  contactCaptchaEnabled: readBooleanEnv("VITE_CONTACT_CAPTCHA_ENABLED"),
   recaptchaSiteKey: readEnv("VITE_RECAPTCHA_SITE_KEY"),
 };

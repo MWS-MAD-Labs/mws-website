@@ -22,8 +22,11 @@ const ENV_KEYS = [
   "MAIL_TRANSPORT",
   "SMTP_PORT",
   "SMTP_FROM",
+  "CONTACT_CAPTCHA_ENABLED",
   "RECAPTCHA_SECRET_KEY",
   "RECAPTCHA_MIN_SCORE",
+  "CONTACT_RATE_LIMIT_PER_IP",
+  "CONTACT_RATE_LIMIT_PER_EMAIL",
 ];
 const originalEnv = Object.fromEntries(ENV_KEYS.map((key) => [key, process.env[key]]));
 
@@ -301,6 +304,96 @@ describe("ContactInquiryService.submit", () => {
         message: "Please wait before sending another message.",
       });
       expect(create).toHaveBeenCalledTimes(3);
+    } finally {
+      globalThis.__mwsWebsitePrisma = previousPrisma;
+    }
+  });
+
+  it("uses env-configured contact inquiry rate limits", async () => {
+    process.env.CONTACT_RATE_LIMIT_PER_EMAIL = "4";
+
+    const previousPrisma = globalThis.__mwsWebsitePrisma;
+    const create = mock(async () => inquiry());
+    globalThis.__mwsWebsitePrisma = {
+      contactInquiry: { create },
+    } as never;
+    spyOn(ContactInquiryService, "notifyNewInquiry").mockResolvedValue({ sent: true });
+
+    const payload = {
+      name: "Parent",
+      email: "parent@example.com",
+      subject: "Admission question",
+      category: "admissions",
+      message: "When does enrollment open?",
+    };
+
+    try {
+      await ContactInquiryService.submit(payload, { ipAddress: "10.0.0.1" });
+      await ContactInquiryService.submit(payload, { ipAddress: "10.0.0.2" });
+      await ContactInquiryService.submit(payload, { ipAddress: "10.0.0.3" });
+      await ContactInquiryService.submit(payload, { ipAddress: "10.0.0.4" });
+
+      await expect(
+        ContactInquiryService.submit(payload, { ipAddress: "10.0.0.5" }),
+      ).rejects.toMatchObject({
+        status: 429,
+        message: "Please wait before sending another message.",
+      });
+      expect(create).toHaveBeenCalledTimes(4);
+    } finally {
+      globalThis.__mwsWebsitePrisma = previousPrisma;
+    }
+  });
+
+  it("does not consume a rate-limit slot when captcha verification fails", async () => {
+    process.env.CONTACT_CAPTCHA_ENABLED = "true";
+    process.env.RECAPTCHA_SECRET_KEY = "captcha-secret";
+
+    const previousPrisma = globalThis.__mwsWebsitePrisma;
+    const create = mock(async () => inquiry());
+    globalThis.__mwsWebsitePrisma = {
+      contactInquiry: { create },
+    } as never;
+    spyOn(ContactInquiryService, "notifyNewInquiry").mockResolvedValue({ sent: true });
+
+    const fetch = spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(new Response(JSON.stringify({ success: false })))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ success: false })))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ success: false })))
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            action: "contact_inquiry",
+            score: 0.9,
+            success: true,
+          }),
+        ),
+      );
+
+    const payload = {
+      name: "Parent",
+      email: "parent@example.com",
+      subject: "Admission question",
+      category: "admissions",
+      message: "When does enrollment open?",
+      captchaToken: "token",
+    };
+
+    try {
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        await expect(
+          ContactInquiryService.submit(payload, { ipAddress: "10.0.0.1" }),
+        ).rejects.toMatchObject({
+          status: 400,
+          message: "Captcha verification failed. Please try again.",
+        });
+      }
+
+      await expect(
+        ContactInquiryService.submit(payload, { ipAddress: "10.0.0.1" }),
+      ).resolves.toMatchObject({ id: inquiry().id });
+      expect(create).toHaveBeenCalledTimes(1);
+      expect(fetch).toHaveBeenCalledTimes(4);
     } finally {
       globalThis.__mwsWebsitePrisma = previousPrisma;
     }

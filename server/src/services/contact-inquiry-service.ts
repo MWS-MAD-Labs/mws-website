@@ -49,10 +49,26 @@ function requireInquiryId(id: string | undefined): string {
 
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 const RATE_LIMIT_CLEANUP_INTERVAL_MS = 60 * 1000;
-const RATE_LIMIT_MAX_PER_IP = 5;
-const RATE_LIMIT_MAX_PER_EMAIL = 3;
+const DEFAULT_RATE_LIMIT_MAX_PER_IP = 5;
+const DEFAULT_RATE_LIMIT_MAX_PER_EMAIL = 3;
 const rateLimitBuckets = new Map<string, { count: number; resetAt: number }>();
 let nextRateLimitCleanupAt = 0;
+
+function positiveIntegerEnv(name: string, fallback: number) {
+  const rawValue = process.env[name]?.trim();
+  if (!rawValue) return fallback;
+
+  const value = Number(rawValue);
+  return Number.isInteger(value) && value > 0 ? value : fallback;
+}
+
+function contactRateLimitPerIp() {
+  return positiveIntegerEnv("CONTACT_RATE_LIMIT_PER_IP", DEFAULT_RATE_LIMIT_MAX_PER_IP);
+}
+
+function contactRateLimitPerEmail() {
+  return positiveIntegerEnv("CONTACT_RATE_LIMIT_PER_EMAIL", DEFAULT_RATE_LIMIT_MAX_PER_EMAIL);
+}
 
 function cleanupExpiredRateLimits(now: number) {
   if (now < nextRateLimitCleanupAt) return;
@@ -94,12 +110,18 @@ function recaptchaSecretKey() {
   return process.env["RECAPTCHA_SECRET_KEY"]?.trim() || "";
 }
 
+function contactCaptchaEnabled() {
+  return process.env["CONTACT_CAPTCHA_ENABLED"]?.trim().toLowerCase() === "true";
+}
+
 function recaptchaMinScore() {
   const value = Number(process.env["RECAPTCHA_MIN_SCORE"] ?? 0.5);
   return Number.isFinite(value) ? value : 0.5;
 }
 
 async function verifyCaptcha(token: string | undefined, ipAddress?: string | null) {
+  if (!contactCaptchaEnabled()) return;
+
   const secret = recaptchaSecretKey();
   if (!secret) return;
 
@@ -148,10 +170,11 @@ export class ContactInquiryService {
       throw new ResponseError(400, "Invalid contact inquiry payload.");
     }
 
-    const ipKey = meta.ipAddress ?? "unknown";
-    rateLimit(`contact:ip:${ipKey}`, RATE_LIMIT_MAX_PER_IP);
-    rateLimit(`contact:email:${parsed.data.email}`, RATE_LIMIT_MAX_PER_EMAIL);
     await verifyCaptcha(parsed.data.captchaToken, meta.ipAddress);
+
+    const ipKey = meta.ipAddress ?? "unknown";
+    rateLimit(`contact:ip:${ipKey}`, contactRateLimitPerIp());
+    rateLimit(`contact:email:${parsed.data.email}`, contactRateLimitPerEmail());
 
     const { captchaToken: _captchaToken, ...inquiryData } = parsed.data;
 

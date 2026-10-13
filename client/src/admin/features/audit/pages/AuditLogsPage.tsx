@@ -38,7 +38,7 @@ export default function AuditLogsPage() {
         <ContentPageHeader
           breadcrumbs={[{ label: 'Admin' }, { label: 'Audit Logs' }]}
           title="Audit Logs"
-          description="Review CMS user access and account-management activity."
+          description="Review every CMS change, sign-in, and account action."
         />
 
         <div className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-sm">

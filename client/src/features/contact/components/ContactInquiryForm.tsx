@@ -28,6 +28,8 @@ const EMPTY_VALUES: FormValues = {
   message: '',
 };
 
+const CAPTCHA_TOKEN_MAX_AGE_MS = 100 * 1000;
+
 function submitErrorMessage(error: unknown) {
   if (error instanceof ApiError && error.status === 429) {
     return 'You have sent several messages in a short time. Please wait a few minutes and try again.';
@@ -44,13 +46,48 @@ export default function ContactInquiryForm({ form, preview = false }: ContactInq
   const { executeRecaptcha } = useGoogleReCaptcha();
   const [values, setValues] = useState<FormValues>(EMPTY_VALUES);
   const [isSending, setIsSending] = useState(false);
+  const [isCheckingCaptcha, setIsCheckingCaptcha] = useState(false);
+  const [captcha, setCaptcha] = useState<{ token: string; verifiedAt: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSent, setIsSent] = useState(false);
   const idPrefix = preview ? 'previewContact' : 'contact';
-  const captchaSiteKey = preview ? '' : env.recaptchaSiteKey;
+  const captchaSiteKey = preview || !env.contactCaptchaEnabled ? '' : env.recaptchaSiteKey;
+  const isCaptchaFresh = isFreshCaptcha(captcha);
+
+  function isFreshCaptcha(candidate: typeof captcha) {
+    return Boolean(candidate) && Date.now() - candidate!.verifiedAt < CAPTCHA_TOKEN_MAX_AGE_MS;
+  }
 
   function updateValue(key: keyof FormValues, value: string) {
     setValues((current) => ({ ...current, [key]: value }));
+  }
+
+  async function verifyCaptcha() {
+    if (!captchaSiteKey || isCheckingCaptcha) return;
+
+    if (!executeRecaptcha) {
+      setError('Captcha is still loading. Please try again in a moment.');
+      return;
+    }
+
+    setIsCheckingCaptcha(true);
+    setError(null);
+
+    try {
+      const token = await executeRecaptcha('contact_inquiry');
+      if (!token) {
+        setCaptcha(null);
+        setError('Captcha verification failed. Please try again.');
+        return;
+      }
+
+      setCaptcha({ token, verifiedAt: Date.now() });
+    } catch {
+      setCaptcha(null);
+      setError('Captcha could not start. Please refresh the page and try again.');
+    } finally {
+      setIsCheckingCaptcha(false);
+    }
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -61,13 +98,8 @@ export default function ContactInquiryForm({ form, preview = false }: ContactInq
     setError(null);
 
     try {
-      const captchaToken =
-        captchaSiteKey && executeRecaptcha
-          ? await executeRecaptcha('contact_inquiry')
-          : undefined;
-
-      if (captchaSiteKey && !captchaToken) {
-        setError('Captcha is still loading. Please try again in a moment.');
+      if (captchaSiteKey && (!captcha || !isFreshCaptcha(captcha))) {
+        setError('Please verify the captcha before sending your message.');
         return;
       }
 
@@ -77,12 +109,14 @@ export default function ContactInquiryForm({ form, preview = false }: ContactInq
         subject: values.subject.trim(),
         category: values.category,
         message: values.message.trim(),
-        captchaToken,
+        captchaToken: captchaSiteKey ? captcha?.token : undefined,
         source: 'contact-page',
       });
       setValues(EMPTY_VALUES);
+      setCaptcha(null);
       setIsSent(true);
     } catch (submitError) {
+      if (captchaSiteKey) setCaptcha(null);
       setError(submitErrorMessage(submitError));
     } finally {
       setIsSending(false);
@@ -188,6 +222,26 @@ export default function ContactInquiryForm({ form, preview = false }: ContactInq
         />
       </div>
 
+      {captchaSiteKey ? (
+        <div className="mb-4 border border-[var(--border)] bg-[var(--warm-white)] p-4">
+          <button
+            type="button"
+            className="w-full border border-[var(--burgundy)] bg-white px-5 py-3 font-[var(--f-head)] text-sm font-semibold uppercase tracking-[0.08em] text-[var(--burgundy)] transition hover:bg-[var(--burgundy)] hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={isCheckingCaptcha || preview || !executeRecaptcha}
+            onClick={verifyCaptcha}
+          >
+            {isCheckingCaptcha
+              ? 'Checking Captcha...'
+              : isCaptchaFresh
+                ? 'Captcha Verified'
+                : 'Verify Captcha'}
+          </button>
+          <p className="mt-2 text-xs leading-5 text-[var(--charcoal-muted)]">
+            {isCaptchaFresh ? 'Verification is ready.' : 'Verification is required.'}
+          </p>
+        </div>
+      ) : null}
+
       {error ? (
         <p role="alert" className="mb-4 text-sm leading-6 text-[var(--burgundy)]">
           {error}
@@ -197,7 +251,7 @@ export default function ContactInquiryForm({ form, preview = false }: ContactInq
       <button
         type="submit"
         className="btn-submit disabled:cursor-not-allowed disabled:opacity-60"
-        disabled={isSending || preview}
+        disabled={isSending || preview || Boolean(captchaSiteKey && !isCaptchaFresh)}
       >
         {isSending ? 'Sending...' : 'Send Message'}
       </button>
