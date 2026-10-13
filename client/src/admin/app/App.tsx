@@ -25,15 +25,17 @@ import AcademicFaqsPage from '@/admin/features/academic/AcademicFaqsPage';
 import AcademicCalendarPage from '@/admin/features/academic/AcademicCalendarPage';
 import AcademicLevelEditorPage from '@/admin/features/academic/AcademicLevelEditorPage';
 import AcademicOverviewPage from '@/admin/features/academic/AcademicOverviewPage';
+import AuditLogsPage from '@/admin/features/audit/pages/AuditLogsPage';
 import ContactPageEditor from '@/admin/features/contact/ContactPageEditor';
 import CommunityStoriesPage from '@/admin/features/community-stories/CommunityStoriesPage';
 import CommunityVoicesPage from '@/admin/features/community-voices/pages/CommunityVoicesPage';
 import HeroSlidesPage from '@/admin/features/home/HeroSlidesPage';
 import PageEditorPage from '@/admin/features/page/PageEditorPage';
 import PagesManagementPage from '@/admin/features/page/PagesManagementPage';
+import PopupPromotedPage from '@/admin/features/popup-promoted/PopupPromotedPage';
+import QuotesPage from '@/admin/features/quotes/QuotesPage';
 
 import AffiliationsPage from '@/admin/features/placeholders/AffiliationsPage';
-import AuditLogsPage from '@/admin/features/placeholders/AuditLogsPage';
 import CampusTourPage from '@/admin/features/placeholders/CampusTourPage';
 import CurriculumPage from '@/admin/features/placeholders/CurriculumPage';
 import HelpPage from '@/admin/features/placeholders/HelpPage';
@@ -503,6 +505,17 @@ export default function AdminApp() {
         />
 
         <Route
+          path="content/about-mws"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <OurSchoolPage />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+
+        <Route
           path="content/our-school"
           element={
             <RequireAuth>
@@ -541,6 +554,28 @@ export default function AdminApp() {
             <RequireAuth>
               <RequireContentPermission>
                 <ContactPageEditor />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="content/Quotes"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <QuotesPage />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="content/popup-promoted"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <PopupPromotedPage />
               </RequireContentPermission>
             </RequireAuth>
           }
@@ -705,7 +740,7 @@ export default function AdminApp() {
         />
 
         <Route
-          path="gallery/Gambar"
+          path="gallery/images"
           element={
             <RequireAuth>
               <RequireContentPermission>
@@ -714,6 +749,8 @@ export default function AdminApp() {
             </RequireAuth>
           }
         />
+
+        <Route path="gallery/Gambar" element={<Navigate to="/admin/gallery/images" replace />} />
 
         <Route
           path="gallery/videos"
@@ -781,7 +818,9 @@ export default function AdminApp() {
           path="audit-logs"
           element={
             <RequireAuth>
-              <AuditLogsPage />
+              <RequireUsersPermission>
+                <AuditLogsPage />
+              </RequireUsersPermission>
             </RequireAuth>
           }
         />

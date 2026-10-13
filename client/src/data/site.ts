@@ -33,9 +33,9 @@ export const academicLinks = [
     description: 'Primary inquiry and foundations',
   },
   {
-    label: 'Junior High',
-    path: '/academic/junior-high',
-    description: 'Middle years exploration',
+    label: 'High School',
+    path: '/academic/high-school',
+    description: 'Secondary pathway',
   },
 ];
 

@@ -28,7 +28,7 @@ export default function ArticleSection({
       description="Write the story exactly as it should appear on the public website."
     >
       <div className="space-y-5 p-5">
-        <Field label="Title">
+        <Field label="Title" required>
           <input
             autoFocus
             className={NEWS_INPUT_CLASS}
@@ -70,7 +70,7 @@ export default function ArticleSection({
           </div>
 
           <div className="space-y-5">
-            <Field label="Article URL">
+            <Field label="Article URL" required>
               <div className="flex overflow-hidden rounded-lg border border-[#E2E8F0] bg-white focus-within:border-[#3C50E0] focus-within:ring-2 focus-within:ring-[#3C50E0]/10">
                 <span className="grid place-items-center border-r border-[#E2E8F0] bg-[#F1F5F9] px-3 text-sm text-[#64748B]">
                   /news/

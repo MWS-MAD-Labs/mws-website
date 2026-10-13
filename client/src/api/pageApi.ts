@@ -71,6 +71,20 @@ export type HomePageData = {
   spotlightSlides: SpotlightSlideData[];
 };
 
+export type PublicPopupPromoted = {
+  id: string;
+  title: string;
+  description: string | null;
+  posterImagePath: string | null;
+  posterImageAlt: string | null;
+  buttonText: string | null;
+  buttonUrl: string | null;
+  targetType: string | null;
+  targetId: string | null;
+  openInNewTab: boolean;
+  updatedAt: string;
+};
+
 export type AdmissionFaqPageData = {
   title: string;
   description: string;
@@ -247,4 +261,10 @@ export const pageApi = {
     getPage<AcademicLevelData>(
       `academic/${levelKey}${options.previewDraft ? "?preview=draft" : ""}`,
     ),
+  activePopupPromoted: async () => {
+    const response = await apiRequest<{ data: PublicPopupPromoted | null }>(
+      "/api/popup-promoted/active",
+    );
+    return response?.data ? normalizePublicAssetUrls(response.data) : null;
+  },
 };

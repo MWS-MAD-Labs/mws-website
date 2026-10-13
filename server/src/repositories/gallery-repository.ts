@@ -56,6 +56,22 @@ export type GalleryVideoUpdateData = {
   sortOrder?: number;
 };
 
+function galleryImagePublicPath(id: string) {
+  return `/api/gallery-images/${id}/file`;
+}
+
+function galleryVideoPublicPath(id: string) {
+  return `/api/gallery-images/videos/${id}/file`;
+}
+
+function like(value: string) {
+  return `%${value}%`;
+}
+
+function countTotal(values: Array<number | bigint>) {
+  return values.reduce<number>((total, value) => total + Number(value), 0);
+}
+
 export class GalleryRepository {
   static async listGalleries(): Promise<GalleryWithMedia[]> {
     return getPrisma().gallery.findMany({
@@ -168,6 +184,114 @@ export class GalleryRepository {
     return getPrisma().galleryImage.delete({ where: { id } });
   }
 
+  static async countImageReferences(image: GalleryImage): Promise<number> {
+    const prisma = getPrisma();
+    const publicPath = galleryImagePublicPath(image.id);
+    const pathMatches = [{ equals: publicPath }, { equals: image.path }];
+    const jsonPublicPath = like(publicPath);
+    const jsonObjectPath = like(image.path);
+
+    const [
+      ourSchools,
+      heroSlides,
+      popups,
+      newsPosts,
+      programs,
+      academics,
+      kindergartens,
+      elementaries,
+      juniorHighs,
+      communityStoriesPages,
+      communityVoices,
+      campusSpotlights,
+      jsonRows,
+    ] = await Promise.all([
+      prisma.ourSchool.count({ where: { featuredImageId: image.id } }),
+      prisma.heroSlide.count({
+        where: {
+          OR: [
+            ...pathMatches.map((match) => ({ mediaPath: match })),
+            ...pathMatches.map((match) => ({ posterPath: match })),
+          ],
+        },
+      }),
+      prisma.popupPromoted.count({
+        where: { OR: pathMatches.map((match) => ({ posterImagePath: match })) },
+      }),
+      prisma.newsPost.count({
+        where: { OR: pathMatches.map((match) => ({ coverImage: match })) },
+      }),
+      prisma.program.count({
+        where: { OR: pathMatches.map((match) => ({ imagePath: match })) },
+      }),
+      prisma.academic.count({
+        where: { OR: pathMatches.map((match) => ({ coverImage: match })) },
+      }),
+      prisma.kindergarten.count({
+        where: {
+          OR: [
+            ...pathMatches.map((match) => ({ coverImage: match })),
+            ...pathMatches.map((match) => ({ publishedCoverImage: match })),
+          ],
+        },
+      }),
+      prisma.elementary.count({
+        where: {
+          OR: [
+            ...pathMatches.map((match) => ({ coverImage: match })),
+            ...pathMatches.map((match) => ({ publishedCoverImage: match })),
+          ],
+        },
+      }),
+      prisma.juniorHigh.count({
+        where: {
+          OR: [
+            ...pathMatches.map((match) => ({ coverImage: match })),
+            ...pathMatches.map((match) => ({ publishedCoverImage: match })),
+          ],
+        },
+      }),
+      prisma.communityStoriesPage.count({
+        where: { OR: pathMatches.map((match) => ({ heroImagePath: match })) },
+      }),
+      prisma.communityVoice.count({
+        where: { OR: pathMatches.map((match) => ({ imagePath: match })) },
+      }),
+      prisma.campusSpotlight.count({
+        where: { OR: pathMatches.map((match) => ({ imagePath: match })) },
+      }),
+      prisma.$queryRaw<{ count: bigint }[]>`
+        SELECT
+          (
+            (SELECT COUNT(*) FROM "NewsPost" WHERE "content"::text LIKE ${jsonPublicPath} OR "content"::text LIKE ${jsonObjectPath}) +
+            (SELECT COUNT(*) FROM "AdmissionPage" WHERE "content"::text LIKE ${jsonPublicPath} OR "content"::text LIKE ${jsonObjectPath}) +
+            (SELECT COUNT(*) FROM "OurSchool" WHERE "content"::text LIKE ${jsonPublicPath} OR "content"::text LIKE ${jsonObjectPath}) +
+            (SELECT COUNT(*) FROM "CmsPage" WHERE "body"::text LIKE ${jsonPublicPath} OR "body"::text LIKE ${jsonObjectPath}) +
+            (SELECT COUNT(*) FROM "Academic" WHERE "content"::text LIKE ${jsonPublicPath} OR "content"::text LIKE ${jsonObjectPath}) +
+            (SELECT COUNT(*) FROM "Kindergarten" WHERE "hero"::text LIKE ${jsonPublicPath} OR "hero"::text LIKE ${jsonObjectPath} OR "overview"::text LIKE ${jsonPublicPath} OR "overview"::text LIKE ${jsonObjectPath} OR "sections"::text LIKE ${jsonPublicPath} OR "sections"::text LIKE ${jsonObjectPath} OR "publishedHero"::text LIKE ${jsonPublicPath} OR "publishedHero"::text LIKE ${jsonObjectPath} OR "publishedOverview"::text LIKE ${jsonPublicPath} OR "publishedOverview"::text LIKE ${jsonObjectPath} OR "publishedSections"::text LIKE ${jsonPublicPath} OR "publishedSections"::text LIKE ${jsonObjectPath}) +
+            (SELECT COUNT(*) FROM "Elementary" WHERE "hero"::text LIKE ${jsonPublicPath} OR "hero"::text LIKE ${jsonObjectPath} OR "overview"::text LIKE ${jsonPublicPath} OR "overview"::text LIKE ${jsonObjectPath} OR "sections"::text LIKE ${jsonPublicPath} OR "sections"::text LIKE ${jsonObjectPath} OR "publishedHero"::text LIKE ${jsonPublicPath} OR "publishedHero"::text LIKE ${jsonObjectPath} OR "publishedOverview"::text LIKE ${jsonPublicPath} OR "publishedOverview"::text LIKE ${jsonObjectPath} OR "publishedSections"::text LIKE ${jsonPublicPath} OR "publishedSections"::text LIKE ${jsonObjectPath}) +
+            (SELECT COUNT(*) FROM "JuniorHigh" WHERE "hero"::text LIKE ${jsonPublicPath} OR "hero"::text LIKE ${jsonObjectPath} OR "overview"::text LIKE ${jsonPublicPath} OR "overview"::text LIKE ${jsonObjectPath} OR "sections"::text LIKE ${jsonPublicPath} OR "sections"::text LIKE ${jsonObjectPath} OR "publishedHero"::text LIKE ${jsonPublicPath} OR "publishedHero"::text LIKE ${jsonObjectPath} OR "publishedOverview"::text LIKE ${jsonPublicPath} OR "publishedOverview"::text LIKE ${jsonObjectPath} OR "publishedSections"::text LIKE ${jsonPublicPath} OR "publishedSections"::text LIKE ${jsonObjectPath})
+          )::bigint AS count
+      `,
+    ]);
+
+    return countTotal([
+      ourSchools,
+      heroSlides,
+      popups,
+      newsPosts,
+      programs,
+      academics,
+      kindergartens,
+      elementaries,
+      juniorHighs,
+      communityStoriesPages,
+      communityVoices,
+      campusSpotlights,
+      jsonRows[0]?.count ?? 0,
+    ]);
+  }
+
   static async createVideo(
     data: GalleryVideoCreateData,
   ): Promise<GalleryVideo> {
@@ -187,5 +311,30 @@ export class GalleryRepository {
 
   static async deleteVideo(id: string): Promise<GalleryVideo> {
     return getPrisma().galleryVideo.delete({ where: { id } });
+  }
+
+  static async countVideoReferences(video: GalleryVideo): Promise<number> {
+    const prisma = getPrisma();
+    const publicPath = galleryVideoPublicPath(video.id);
+    const pathMatches = [{ equals: publicPath }, { equals: video.source }];
+    const jsonPublicPath = like(publicPath);
+    const jsonObjectPath = like(video.source);
+
+    const [heroSlides, jsonRows] = await Promise.all([
+      prisma.heroSlide.count({
+        where: { OR: pathMatches.map((match) => ({ mediaPath: match })) },
+      }),
+      prisma.$queryRaw<{ count: bigint }[]>`
+        SELECT
+          (
+            (SELECT COUNT(*) FROM "NewsPost" WHERE "content"::text LIKE ${jsonPublicPath} OR "content"::text LIKE ${jsonObjectPath}) +
+            (SELECT COUNT(*) FROM "AdmissionPage" WHERE "content"::text LIKE ${jsonPublicPath} OR "content"::text LIKE ${jsonObjectPath}) +
+            (SELECT COUNT(*) FROM "OurSchool" WHERE "content"::text LIKE ${jsonPublicPath} OR "content"::text LIKE ${jsonObjectPath}) +
+            (SELECT COUNT(*) FROM "CmsPage" WHERE "body"::text LIKE ${jsonPublicPath} OR "body"::text LIKE ${jsonObjectPath})
+          )::bigint AS count
+      `,
+    ]);
+
+    return countTotal([heroSlides, jsonRows[0]?.count ?? 0]);
   }
 }

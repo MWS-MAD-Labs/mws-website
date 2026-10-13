@@ -15,13 +15,13 @@ import {
   type GalleryWithMedia,
 } from "../repositories/gallery-repository";
 
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
-const MAX_VIDEO_SIZE = 200 * 1024 * 1024;
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const MAX_VIDEO_SIZE = 50 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = new Set([
+  "image/avif",
   "image/jpeg",
   "image/png",
   "image/webp",
-  "image/gif",
 ]);
 const ACCEPTED_VIDEO_TYPES = new Set([
   "video/mp4",
@@ -152,7 +152,7 @@ function galleryResponse(gallery: GalleryWithMedia) {
 
 function validateImageFile(file: File) {
   if (!ACCEPTED_IMAGE_TYPES.has(file.type)) {
-    throw new ResponseError(400, "Only JPEG, PNG, WebP, or GIF images are allowed.");
+    throw new ResponseError(400, "Only AVIF, WebP, JPEG, or PNG images are allowed. Use WebP/AVIF for photos.");
   }
 
   if (file.size <= 0) {
@@ -160,7 +160,7 @@ function validateImageFile(file: File) {
   }
 
   if (file.size > MAX_IMAGE_SIZE) {
-    throw new ResponseError(400, "Image file must be 10MB or smaller.");
+    throw new ResponseError(400, "Image file must be 5MB or smaller. Use WebP/AVIF for photos.");
   }
 }
 
@@ -174,7 +174,7 @@ function validateVideoFile(file: File) {
   }
 
   if (file.size > MAX_VIDEO_SIZE) {
-    throw new ResponseError(400, "Video file must be 200MB or smaller.");
+    throw new ResponseError(400, "Video file must be 50MB or smaller. Use YouTube for long videos and keep hero clips highly compressed.");
   }
 }
 
@@ -231,6 +231,25 @@ export class GalleryService {
     const referenceCount = await GalleryRepository.countReferences(id);
     if (referenceCount > 0) {
       throw new ResponseError(409, "Cannot delete a gallery that is referenced by content.");
+    }
+
+    for (const image of gallery.images) {
+      const imageReferenceCount = await GalleryRepository.countImageReferences(image);
+      if (imageReferenceCount > 0) {
+        throw new ResponseError(
+          409,
+          "Cannot delete this gallery because one or more images are still used by website content.",
+        );
+      }
+    }
+    for (const video of gallery.videos) {
+      const videoReferenceCount = await GalleryRepository.countVideoReferences(video);
+      if (videoReferenceCount > 0) {
+        throw new ResponseError(
+          409,
+          "Cannot delete this gallery because one or more videos are still used by website content.",
+        );
+      }
     }
 
     for (const image of gallery.images) {
@@ -311,6 +330,11 @@ export class GalleryService {
     requireUuid(id);
     const image = await GalleryRepository.findImageById(id);
     if (!image) return;
+
+    const referenceCount = await GalleryRepository.countImageReferences(image);
+    if (referenceCount > 0) {
+      throw new ResponseError(409, "Cannot delete this image because it is still used by website content.");
+    }
 
     await deleteImageObject(image.path);
     await GalleryRepository.deleteImage(id);
@@ -406,6 +430,11 @@ export class GalleryService {
     requireUuid(id);
     const video = await GalleryRepository.findVideoById(id);
     if (!video) return;
+
+    const referenceCount = await GalleryRepository.countVideoReferences(video);
+    if (referenceCount > 0) {
+      throw new ResponseError(409, "Cannot delete this video because it is still used by website content.");
+    }
 
     if (video.sourceType === "UPLOAD") {
       await deleteMinioObject(video.source);

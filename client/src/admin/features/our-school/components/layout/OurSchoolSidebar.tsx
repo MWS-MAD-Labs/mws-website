@@ -62,7 +62,7 @@ export default function OurSchoolSidebar({ editor }: OurSchoolSidebarProps) {
             onClick={() => window.open('/about-millennia', '_blank', 'noopener,noreferrer')}
           >
             <Eye size={15} />
-            Preview Live
+            Preview About MWS
           </Button>
         </div>
       </section>

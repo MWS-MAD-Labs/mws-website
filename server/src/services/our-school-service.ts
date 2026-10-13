@@ -136,7 +136,24 @@ export class OurSchoolService {
 
   static async create(payload: unknown) {
     const data = parseCreate(payload);
-    await validateFeaturedImageSelection(data.featuredImageId, data.galleryId);
+    const existing = await OurSchoolRepository.findSingleton();
+    const nextGalleryId =
+      data.galleryId !== undefined ? data.galleryId : existing?.galleryId;
+    const nextFeaturedImageId =
+      data.featuredImageId !== undefined
+        ? data.featuredImageId
+        : existing?.featuredImageId;
+    await validateFeaturedImageSelection(nextFeaturedImageId, nextGalleryId);
+
+    if (existing) {
+      try {
+        return ourSchoolResponse(
+          await OurSchoolRepository.update(existing.id, data),
+        );
+      } catch (error) {
+        handleDatabaseError(error);
+      }
+    }
 
     try {
       return ourSchoolResponse(await OurSchoolRepository.create(data));

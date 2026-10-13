@@ -94,15 +94,15 @@ const spotlightSlides = [
 ];
 
 const partnerLogos = [
-  'https://millenniaws.sch.id/wp-content/uploads/2023/11/CharterForCompassion.jpg',
-  'https://millenniaws.sch.id/wp-content/uploads/2023/11/ClimateChangeSchool.jpg',
-  'https://millenniaws.sch.id/wp-content/uploads/2023/11/ClimateActionProject.jpg',
-  'https://millenniaws.sch.id/wp-content/uploads/2023/11/CommonSenseEducation.jpg',
-  'https://millenniaws.sch.id/wp-content/uploads/2023/11/ResponsiveClassroom.jpg',
-  'https://millenniaws.sch.id/wp-content/uploads/2023/11/iEran.jpg',
-  'https://millenniaws.sch.id/wp-content/uploads/2023/11/Climate-Action.jpg',
-  'https://millenniaws.sch.id/wp-content/uploads/2023/11/EraseMeanness.jpg',
-  'https://millenniaws.sch.id/wp-content/uploads/2023/11/Empatico.jpg',
+  asset('CharterForCompassion.svg'),
+  asset('ClimateChangeSchool.svg'),
+  asset('ClimateActionProject.svg'),
+  asset('CommonSenseEducation.svg'),
+  asset('ResponsiveClassroom.svg'),
+  asset('iEran.svg'),
+  asset('Climate-Action.svg'),
+  asset('EraseMeanness.svg'),
+  asset('Empatico.svg'),
 ];
 
 export default function Home() {

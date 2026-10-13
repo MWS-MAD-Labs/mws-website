@@ -158,7 +158,7 @@ export default function ModalCreateUpdate({
                   htmlFor="partner-name"
                   className="mb-1.5 block text-sm font-medium text-gray-700"
                 >
-                  Partner Name
+                  Partner Name <span className="text-red-600">*</span>
                 </label>
 
                 <input
@@ -180,7 +180,7 @@ export default function ModalCreateUpdate({
                   htmlFor="partner-description"
                   className="mb-1.5 block text-sm font-medium text-gray-700"
                 >
-                  Description
+                  Description <span className="text-red-600">*</span>
                 </label>
 
                 <textarea
@@ -202,7 +202,9 @@ export default function ModalCreateUpdate({
 
               {/* Logo */}
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-gray-700">Logo</label>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                  Logo <span className="text-red-600">*</span>
+                </label>
 
                 {form.logo ? (
                   <div className="flex items-center gap-3 rounded-lg border border-gray-200 p-3">
@@ -266,7 +268,7 @@ export default function ModalCreateUpdate({
                   className="mb-1.5 block text-sm font-medium text-gray-700"
                 >
                   Link
-                  <span className="ml-1 font-normal text-gray-400">(Optional)</span>
+                  <span className="ml-1 text-xs font-normal text-gray-400">(opsional)</span>
                 </label>
 
                 <input
@@ -286,7 +288,7 @@ export default function ModalCreateUpdate({
                   htmlFor="partner-status"
                   className="mb-1.5 block text-sm font-medium text-gray-700"
                 >
-                  Status
+                  Status <span className="text-red-600">*</span>
                 </label>
 
                 <select

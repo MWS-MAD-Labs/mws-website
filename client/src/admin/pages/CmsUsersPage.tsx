@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { UserPlus } from 'lucide-react';
+
 import {
   adminApi,
   type CmsInvitationListItem,
@@ -7,6 +8,7 @@ import {
   type CmsRoleListItem,
   type CmsUserListItem,
 } from '@/admin/api/adminApi';
+
 import AppShell from '@/admin/components/layout/AppShell';
 import ContentPageHeader from '@/admin/components/ui/ContentPageHeader';
 import Button from '@/admin/components/ui/Button';
@@ -15,8 +17,9 @@ import Modal from '@/admin/components/ui/Modal';
 import Panel from '@/admin/components/ui/Panel';
 import Select from '@/admin/components/ui/Select';
 import StatusMessage from '@/admin/components/ui/StatusMessage';
-import type { CmsRoleName } from '@/admin/types/auth';
 import { useToastState } from '@/admin/components/ui/toastContext';
+
+import type { CmsRoleName } from '@/admin/types/auth';
 
 type CmsUsersState = {
   users: CmsUserListItem[];
@@ -29,16 +32,22 @@ const inputClass =
 
 function formatDate(value: string | null) {
   if (!value) return '-';
+
   return new Intl.DateTimeFormat('en-US', {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(new Date(value));
 }
 
-function invitationEmailMessage(action: string, invitation: CmsInvitationResult) {
-  return invitation.notification.sent
-    ? `${action} and emailed to ${invitation.email}.`
-    : `${action}, but the email could not be sent (${invitation.notification.reason}). Share the login link with ${invitation.email} directly: ${invitation.loginUrl}`;
+function invitationEmailMessage(
+  action: string,
+  invitation: CmsInvitationResult,
+) {
+  if (invitation.notification.sent) {
+    return `${action} and emailed to ${invitation.email}.`;
+  }
+
+  return `${action}, but the email could not be sent (${invitation.notification.reason}). Share the login link with ${invitation.email} directly: ${invitation.loginUrl}`;
 }
 
 export default function CmsUsersPage() {
@@ -47,15 +56,18 @@ export default function CmsUsersPage() {
     invitations: [],
     roles: [],
   });
+
   const [message, setMessage] = useToastState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [savingUserId, setSavingUserId] = useState<string | null>(null);
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
+
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [isInviting, setIsInviting] = useState(false);
+
   const [resendingId, setResendingId] = useState<string | null>(null);
   const [revokingId, setRevokingId] = useState<string | null>(null);
-  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
 
   async function loadUsers() {
     const usersData = await adminApi.users();
@@ -68,15 +80,23 @@ export default function CmsUsersPage() {
     adminApi
       .users()
       .then((usersData) => {
-        if (!cancelled) setData(usersData);
+        if (!cancelled) {
+          setData(usersData);
+        }
       })
       .catch((error) => {
         if (!cancelled) {
-          setMessage(error instanceof Error ? error.message : 'CMS users could not be loaded.');
+          setMessage(
+            error instanceof Error
+              ? error.message
+              : 'CMS users could not be loaded.',
+          );
         }
       })
       .finally(() => {
-        if (!cancelled) setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       });
 
     return () => {
@@ -89,23 +109,45 @@ export default function CmsUsersPage() {
     [data.roles],
   );
 
-  async function updateRole(user: CmsUserListItem, roleName: string) {
-    if (!roleName || user.role?.name === roleName) return;
-    const confirmed = window.confirm(`Change ${user.name}'s role to ${roleName}?`);
-    if (!confirmed) return;
+  async function updateRole(
+    user: CmsUserListItem,
+    roleName: string,
+  ) {
+    if (!roleName || user.role?.name === roleName) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Change ${user.name}'s role to ${roleName}?`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
 
     setSavingUserId(user.id);
     setMessage(null);
 
     try {
-      const updatedUser = await adminApi.updateUserRole(user.id, roleName as CmsRoleName);
+      const updatedUser = await adminApi.updateUserRole(
+        user.id,
+        roleName as CmsRoleName,
+      );
+
       setData((current) => ({
         ...current,
-        users: current.users.map((item) => (item.id === updatedUser.id ? updatedUser : item)),
+        users: current.users.map((item) =>
+          item.id === updatedUser.id ? updatedUser : item,
+        ),
       }));
+
       setMessage('CMS user role updated.');
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Role could not be updated.');
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : 'Role could not be updated.',
+      );
     } finally {
       setSavingUserId(null);
     }
@@ -113,21 +155,39 @@ export default function CmsUsersPage() {
 
   async function updateStatus(user: CmsUserListItem) {
     const nextStatus = !user.isActive;
-    const confirmed = window.confirm(`${nextStatus ? 'Reactivate' : 'Deactivate'} ${user.name}?`);
-    if (!confirmed) return;
+    const action = nextStatus ? 'Reactivate' : 'Deactivate';
+
+    const confirmed = window.confirm(`${action} ${user.name}?`);
+
+    if (!confirmed) {
+      return;
+    }
 
     setSavingUserId(user.id);
     setMessage(null);
 
     try {
-      const updatedUser = await adminApi.updateUserStatus(user.id, nextStatus);
+      const updatedUser = await adminApi.updateUserStatus(
+        user.id,
+        nextStatus,
+      );
+
       setData((current) => ({
         ...current,
-        users: current.users.map((item) => (item.id === updatedUser.id ? updatedUser : item)),
+        users: current.users.map((item) =>
+          item.id === updatedUser.id ? updatedUser : item,
+        ),
       }));
-      setMessage(`CMS user ${nextStatus ? 'reactivated' : 'deactivated'}.`);
+
+      setMessage(
+        `CMS user ${nextStatus ? 'reactivated' : 'deactivated'}.`,
+      );
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Status could not be updated.');
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : 'Status could not be updated.',
+      );
     } finally {
       setSavingUserId(null);
     }
@@ -137,20 +197,29 @@ export default function CmsUsersPage() {
     const confirmed = window.confirm(
       `Delete ${user.name}'s CMS account permanently? This action cannot be undone.`,
     );
-    if (!confirmed) return;
+
+    if (!confirmed) {
+      return;
+    }
 
     setDeletingUserId(user.id);
     setMessage(null);
 
     try {
       await adminApi.deleteUser(user.id);
+
       setData((current) => ({
         ...current,
         users: current.users.filter((item) => item.id !== user.id),
       }));
+
       setMessage('CMS user deleted.');
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'CMS user could not be deleted.');
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : 'CMS user could not be deleted.',
+      );
     } finally {
       setDeletingUserId(null);
     }
@@ -158,39 +227,65 @@ export default function CmsUsersPage() {
 
   async function inviteAdmin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
     setIsInviting(true);
     setMessage(null);
 
     try {
       const invitation = await adminApi.inviteCmsAdmin(inviteEmail);
+
       await loadUsers();
+
       setInviteEmail('');
       setInviteOpen(false);
-      setMessage(invitationEmailMessage('Invitation created', invitation));
+
+      setMessage(
+        invitationEmailMessage('Invitation created', invitation),
+      );
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Admin invitation could not be created.');
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : 'Admin invitation could not be created.',
+      );
     } finally {
       setIsInviting(false);
     }
   }
 
-  async function resendInvitation(invitation: CmsInvitationListItem) {
+  async function resendInvitation(
+    invitation: CmsInvitationListItem,
+  ) {
     setResendingId(invitation.id);
     setMessage(null);
 
     try {
       const result = await adminApi.resendCmsInvitation(invitation.id);
-      setMessage(invitationEmailMessage('Invitation resent', result));
+
+      setMessage(
+        invitationEmailMessage('Invitation resent', result),
+      );
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Invitation email could not be resent.');
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : 'Invitation email could not be resent.',
+      );
     } finally {
       setResendingId(null);
     }
   }
 
-  async function revokeInvitation(invitation: CmsInvitationListItem) {
-    const confirmed = window.confirm(`Revoke invitation for ${invitation.email}?`);
-    if (!confirmed) return;
+  async function revokeInvitation(
+    invitation: CmsInvitationListItem,
+  ) {
+    const confirmed = window.confirm(
+      `Revoke invitation for ${invitation.email}?`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
 
     setRevokingId(invitation.id);
     setMessage(null);
@@ -198,9 +293,14 @@ export default function CmsUsersPage() {
     try {
       await adminApi.revokeCmsInvitation(invitation.id);
       await loadUsers();
+
       setMessage('Invitation revoked.');
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Invitation could not be revoked.');
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : 'Invitation could not be revoked.',
+      );
     } finally {
       setRevokingId(null);
     }
@@ -210,7 +310,10 @@ export default function CmsUsersPage() {
     <AppShell title="CMS Users">
       <section className="space-y-5 p-6">
         <ContentPageHeader
-          breadcrumbs={[{ label: 'Admin' }, { label: 'CMS Users' }]}
+          breadcrumbs={[
+            { label: 'Admin' },
+            { label: 'CMS Users' },
+          ]}
           title="CMS Users"
           description="Manage approved CMS accounts, roles, and invitations."
         />
@@ -227,38 +330,75 @@ export default function CmsUsersPage() {
             </Button>
           }
         >
-          {isLoading ? <p className="text-sm text-[#64748B]">Loading CMS users...</p> : null}
+          {isLoading ? (
+            <p className="text-sm text-[#64748B]">
+              Loading CMS users...
+            </p>
+          ) : null}
 
           {!isLoading ? (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[920px] border-collapse text-left text-sm">
                 <thead className="border-b border-[#E2E8F0] text-xs uppercase text-[#64748B]">
                   <tr>
-                    <th className="px-3 py-3 font-semibold">User</th>
-                    <th className="px-3 py-3 font-semibold">Unit</th>
-                    <th className="px-3 py-3 font-semibold">Status</th>
-                    <th className="px-3 py-3 font-semibold">Last Sync</th>
-                    <th className="px-3 py-3 font-semibold">Role</th>
-                    <th className="px-3 py-3 font-semibold">access</th>
-                    <th className="px-3 py-3 font-semibold">Actions</th>
+                    <th className="px-3 py-3 font-semibold">
+                      User
+                    </th>
+                    <th className="px-3 py-3 font-semibold">
+                      Unit
+                    </th>
+                    <th className="px-3 py-3 font-semibold">
+                      Status
+                    </th>
+                    <th className="px-3 py-3 font-semibold">
+                      Last Sync
+                    </th>
+                    <th className="px-3 py-3 font-semibold">
+                      Role
+                    </th>
+                    <th className="px-3 py-3 font-semibold">
+                      Access
+                    </th>
+                    <th className="px-3 py-3 text-end font-semibold">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
+
                 <tbody>
                   {data.users.map((user) => {
+                    const isSaving = savingUserId === user.id;
+                    const isDeleting = deletingUserId === user.id;
+                    const isSuperAdmin =
+                      user.role?.name === 'SUPER_ADMIN';
+                    const isUserBusy = isSaving || isDeleting;
+
                     return (
                       <tr
                         key={user.id}
                         className="border-b border-[#E2E8F0] last:border-b-0"
                       >
                         <td className="px-3 py-3">
-                          <p className="font-medium text-[#1C2434]">{user.name}</p>
-                          <p className="text-xs text-[#64748B]">{user.email ?? '-'}</p>
+                          <p className="font-medium text-[#1C2434]">
+                            {user.name}
+                          </p>
+                          <p className="text-xs text-[#64748B]">
+                            {user.email ?? '-'}
+                          </p>
                         </td>
 
-                        <td className="px-3 py-3 text-[#64748B]">{user.unit}</td>
+                        <td className="px-3 py-3 text-[#64748B]">
+                          {user.unit}
+                        </td>
 
                         <td className="px-3 py-3">
-                          <span className={user.isActive ? 'text-[#047857]' : 'text-[#3C50E0]'}>
+                          <span
+                            className={
+                              user.isActive
+                                ? 'text-[#047857]'
+                                : 'text-[#3C50E0]'
+                            }
+                          >
                             {user.isActive ? 'Active' : 'Inactive'}
                           </span>
                         </td>
@@ -270,42 +410,57 @@ export default function CmsUsersPage() {
                         <td className="px-3 py-3">
                           <Select
                             value={user.role?.name ?? ''}
-                            disabled={
-                              savingUserId === user.id || deletingUserId === user.id || user.role?.name === 'SUPER_ADMIN'
+                            disabled={isUserBusy || isSuperAdmin}
+                            onChange={(event) =>
+                              void updateRole(
+                                user,
+                                event.currentTarget.value,
+                              )
                             }
-                            onChange={(event) => void updateRole(user, event.currentTarget.value)}
                           >
-                            {user.role?.name === 'SUPER_ADMIN' ? (
-                              <option value="SUPER_ADMIN">Super Admin</option>
+                            {isSuperAdmin ? (
+                              <option value="SUPER_ADMIN">
+                                Super Admin
+                              </option>
                             ) : null}
 
                             {adminRoles.map((role) => (
-                              <option key={role.name} value={role.name}>
+                              <option
+                                key={role.name}
+                                value={role.name}
+                              >
                                 {role.label ?? role.name}
                               </option>
                             ))}
                           </Select>
                         </td>
 
-                        <td></td>
+                        <td className="px-3 py-3 text-[#64748B]">
+                          -
+                        </td>
 
                         <td className="px-3 py-3">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={savingUserId === user.id || deletingUserId === user.id}
-                            onClick={() => void updateStatus(user)}
-                          >
-                            {user.isActive ? 'Deactivate' : 'Reactivate'}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={savingUserId === user.id || deletingUserId === user.id}
-                            onClick={() => void deleteUser(user)}
-                          >
-                            {deletingUserId === user.id ? 'Deleting...' : 'Delete'}
-                          </Button>
+                          <div className="flex items-center justify-end gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={isUserBusy}
+                              onClick={() => void updateStatus(user)}
+                            >
+                              {user.isActive
+                                ? 'Deactivate'
+                                : 'Reactivate'}
+                            </Button>
+
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={isUserBusy}
+                              onClick={() => void deleteUser(user)}
+                            >
+                              {isDeleting ? 'Deleting...' : 'Delete'}
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -314,7 +469,9 @@ export default function CmsUsersPage() {
               </table>
 
               {!data.users.length ? (
-                <p className="px-3 py-6 text-sm text-[#64748B]">No CMS users found.</p>
+                <p className="px-3 py-6 text-sm text-[#64748B]">
+                  No CMS users found.
+                </p>
               ) : null}
             </div>
           ) : null}
@@ -323,41 +480,70 @@ export default function CmsUsersPage() {
         <Panel title="Pending Invitations">
           <div className="space-y-3">
             {data.invitations
-              .filter((invitation) => invitation.status === 'PENDING')
-              .map((invitation) => (
-                <div
-                  key={invitation.id}
-                  className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E2E8F0] pb-3 last:border-b-0 last:pb-0"
-                >
-                  <div>
-                    <p className="font-medium text-[#1C2434]">{invitation.email}</p>
-                    <p className="text-sm text-[#64748B]">
-                      {invitation.role?.label ?? invitation.role?.name ?? 'Admin'} · Invited{' '}
-                      {formatDate(invitation.createdAt)}
-                    </p>
+              .filter(
+                (invitation) => invitation.status === 'PENDING',
+              )
+              .map((invitation) => {
+                const isResending =
+                  resendingId === invitation.id;
+                const isRevoking =
+                  revokingId === invitation.id;
+                const isInvitationBusy =
+                  isResending || isRevoking;
+
+                return (
+                  <div
+                    key={invitation.id}
+                    className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E2E8F0] pb-3 last:border-b-0 last:pb-0"
+                  >
+                    <div>
+                      <p className="font-medium text-[#1C2434]">
+                        {invitation.email}
+                      </p>
+
+                      <p className="text-sm text-[#64748B]">
+                        {invitation.role?.label ??
+                          invitation.role?.name ??
+                          'Admin'}{' '}
+                        · Invited {formatDate(invitation.createdAt)}
+                      </p>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={isInvitationBusy}
+                        onClick={() =>
+                          void resendInvitation(invitation)
+                        }
+                      >
+                        {isResending
+                          ? 'Sending...'
+                          : 'Resend Email'}
+                      </Button>
+
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={isInvitationBusy}
+                        onClick={() =>
+                          void revokeInvitation(invitation)
+                        }
+                      >
+                        {isRevoking ? 'Revoking...' : 'Revoke'}
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={resendingId === invitation.id || revokingId === invitation.id}
-                      onClick={() => void resendInvitation(invitation)}
-                    >
-                      {resendingId === invitation.id ? 'Sending...' : 'Resend Email'}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={revokingId === invitation.id || resendingId === invitation.id}
-                      onClick={() => void revokeInvitation(invitation)}
-                    >
-                      {revokingId === invitation.id ? 'Revoking...' : 'Revoke'}
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            {!data.invitations.some((invitation) => invitation.status === 'PENDING') ? (
-              <p className="text-sm text-[#64748B]">No pending invitations.</p>
+                );
+              })}
+
+            {!data.invitations.some(
+              (invitation) => invitation.status === 'PENDING',
+            ) ? (
+              <p className="text-sm text-[#64748B]">
+                No pending invitations.
+              </p>
             ) : null}
           </div>
         </Panel>
@@ -368,19 +554,23 @@ export default function CmsUsersPage() {
         title="Invite Admin"
         onClose={() => {
           if (isInviting) return;
+
           setInviteOpen(false);
         }}
       >
         <form className="space-y-4" onSubmit={inviteAdmin}>
-          <Field label="Email Address">
+          <Field label="Email Address" required>
             <input
               className={inputClass}
               type="email"
               value={inviteEmail}
-              onChange={(event) => setInviteEmail(event.currentTarget.value)}
+              onChange={(event) =>
+                setInviteEmail(event.currentTarget.value)
+              }
               required
             />
           </Field>
+
           <div className="flex justify-end gap-3">
             <Button
               disabled={isInviting}
@@ -390,6 +580,7 @@ export default function CmsUsersPage() {
             >
               Cancel
             </Button>
+
             <Button disabled={isInviting} type="submit">
               {isInviting ? 'Inviting...' : 'Invite Admin'}
             </Button>
@@ -399,3 +590,4 @@ export default function CmsUsersPage() {
     </AppShell>
   );
 }
+

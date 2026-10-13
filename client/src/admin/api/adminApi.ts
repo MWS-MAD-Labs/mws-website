@@ -112,6 +112,41 @@ export type CmsInvitationResult = CmsInvitationListItem & {
   loginUrl: string;
 };
 
+export type AuditLogItem = {
+  id: string;
+  action: string;
+  entityType: string;
+  entityId: string;
+  oldValues: unknown;
+  newValues: unknown;
+  ipAddress: string | null;
+  userAgent: string | null;
+  createdAt: string;
+  actor: { id: string; name: string; email: string | null } | null;
+};
+
+export type AuditLogList = {
+  items: AuditLogItem[];
+  filters: {
+    actions: string[];
+    entityTypes: string[];
+  };
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
+};
+
+export type AuditLogFilters = {
+  action?: string;
+  entityType?: string;
+  page?: number;
+  pageSize?: number;
+  search?: string;
+};
+
 export type HeroSlideFormData = {
   sourceType?: HeroSlideSourceType;
   sourceId?: string | null;
@@ -569,6 +604,41 @@ export type PartnerPayload = {
   status: string;
 };
 
+export type PopupPromoted = {
+  id: string;
+  title: string;
+  description: string | null;
+  posterImagePath: string | null;
+  posterImageAlt: string | null;
+  buttonText: string | null;
+  buttonUrl: string | null;
+  targetType: string | null;
+  targetId: string | null;
+  openInNewTab: boolean;
+  sortOrder: number;
+  isActive: boolean;
+  activeFrom: string | null;
+  activeUntil: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type PopupPromotedPayload = {
+  title: string;
+  description?: string | null;
+  posterImagePath?: string | null;
+  posterImageAlt?: string | null;
+  buttonText?: string | null;
+  buttonUrl?: string | null;
+  targetType?: string | null;
+  targetId?: string | null;
+  openInNewTab?: boolean;
+  sortOrder?: number;
+  isActive?: boolean;
+  activeFrom?: string | null;
+  activeUntil?: string | null;
+};
+
 export type NewsStatus = "ARCHIVED" | "DRAFT" | "PUBLISHED";
 
 export type NewsCategory = {
@@ -743,6 +813,22 @@ export const adminApi = {
 
   async users(): Promise<CmsUsersData> {
     const response = await apiRequest<{ data: CmsUsersData }>("/admin/users");
+    return response!.data;
+  },
+
+  async auditLogs(filters: AuditLogFilters = {}): Promise<AuditLogList> {
+    const params = new URLSearchParams();
+
+    if (filters.action) params.set("action", filters.action);
+    if (filters.entityType) params.set("entityType", filters.entityType);
+    if (filters.page) params.set("page", String(filters.page));
+    if (filters.pageSize) params.set("pageSize", String(filters.pageSize));
+    if (filters.search?.trim()) params.set("search", filters.search.trim());
+
+    const query = params.toString();
+    const response = await apiRequest<{ data: AuditLogList }>(
+      `/admin/audit-logs${query ? `?${query}` : ""}`,
+    );
     return response!.data;
   },
 
@@ -1378,6 +1464,37 @@ export const adminApi = {
 
   async deletePartner(id: string): Promise<void> {
     await apiRequest("/admin/partners/" + id, { method: "DELETE" });
+  },
+
+  async popupPromoted(): Promise<PopupPromoted[]> {
+    const response = await apiRequest<{ data: PopupPromoted[] }>("/admin/popup-promoted");
+    return response?.data ?? [];
+  },
+
+  async createPopupPromoted(data: PopupPromotedPayload): Promise<PopupPromoted> {
+    const response = await apiRequest<{ data: PopupPromoted }>("/admin/popup-promoted", {
+      method: "POST",
+      body: data,
+    });
+    return response!.data;
+  },
+
+  async updatePopupPromoted(
+    id: string,
+    data: Partial<PopupPromotedPayload>,
+  ): Promise<PopupPromoted> {
+    const response = await apiRequest<{ data: PopupPromoted }>(
+      "/admin/popup-promoted/" + id,
+      {
+        method: "PATCH",
+        body: data,
+      },
+    );
+    return response!.data;
+  },
+
+  async deletePopupPromoted(id: string): Promise<void> {
+    await apiRequest("/admin/popup-promoted/" + id, { method: "DELETE" });
   },
 
   async contactInquiries(filters: ContactInquiryFilters = {}): Promise<ContactInquiryList> {

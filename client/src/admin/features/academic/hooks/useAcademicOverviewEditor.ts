@@ -98,9 +98,14 @@ function payloadFromForm(form: AcademicOverviewForm): AcademicOverviewPayload {
   };
 }
 
+function serializeOverviewForm(form: AcademicOverviewForm) {
+  return JSON.stringify(form);
+}
+
 export function useAcademicOverviewEditor() {
   const [overviewId, setOverviewId] = useState<string | null>(null);
   const [form, setForm] = useState<AcademicOverviewForm>(defaultForm);
+  const [savedSnapshot, setSavedSnapshot] = useState(() => serializeOverviewForm(defaultForm));
   const [galleries, setGalleries] = useState<GalleryItem[]>([]);
   const [isGalleryPickerOpen, setIsGalleryPickerOpen] = useState(false);
   const [activeImageField, setActiveImageField] = useState<AcademicOverviewImageField | null>(
@@ -169,9 +174,11 @@ export function useAcademicOverviewEditor() {
       adminApi.galleries(),
     ]);
     const item = items[0] ?? null;
+    const nextForm = formFromItem(item);
 
     setOverviewId(item?.id ?? null);
-    setForm(formFromItem(item));
+    setForm(nextForm);
+    setSavedSnapshot(serializeOverviewForm(nextForm));
     setUpdatedAt(item?.updatedAt ?? null);
     setGalleries(nextGalleries);
   }
@@ -207,7 +214,9 @@ export function useAcademicOverviewEditor() {
         : await adminApi.createAcademicOverview(payload);
 
       setOverviewId(saved.id);
-      setForm(formFromItem(saved));
+      const nextForm = formFromItem(saved);
+      setForm(nextForm);
+      setSavedSnapshot(serializeOverviewForm(nextForm));
       setUpdatedAt(saved.updatedAt);
       setMessage('Academic overview saved.');
     } catch (error) {
@@ -229,6 +238,7 @@ export function useAcademicOverviewEditor() {
       await adminApi.deleteAcademicOverview(overviewId);
       setOverviewId(null);
       setForm(defaultForm);
+      setSavedSnapshot(serializeOverviewForm(defaultForm));
       setUpdatedAt(null);
       setMessage('Academic overview deleted.');
     } catch (error) {
@@ -280,6 +290,7 @@ export function useAcademicOverviewEditor() {
   }
 
   const isBusy = isSaving || isLoading || isUploadingImage;
+  const hasUnsavedChanges = !isLoading && serializeOverviewForm(form) !== savedSnapshot;
 
   return {
     deleteOverview,
@@ -291,6 +302,7 @@ export function useAcademicOverviewEditor() {
     isLoading,
     isSaving,
     isUploadingImage,
+    hasUnsavedChanges,
     message,
     overviewId,
     saveOverview,

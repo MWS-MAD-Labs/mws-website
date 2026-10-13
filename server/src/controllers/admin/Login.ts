@@ -2,7 +2,7 @@ import type { Context } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { ResponseError } from "../../error/response-error";
 import { GoogleAuth } from "../../lib/google-auth";
-import { sessionCookieName } from "../../lib/session";
+import { revokeSession, sessionCookieName } from "../../lib/session";
 import { AuthService } from "../../services/auth-services";
 import type { SessionVariables } from "../../types/hono-context";
 
@@ -62,11 +62,18 @@ export class LoginController {
   }
 
   static async loginWithGoogle(c: Context) {
-    const { code } = await c.req
-      .json<{ code?: string }>()
-      .catch((): { code?: string } => ({}));
+    const { code, state } = await c.req
+      .json<{ code?: string; state?: string }>()
+      .catch((): { code?: string; state?: string } => ({}));
     if (!code) {
       throw new ResponseError(400, "Google auth code is required.");
+    }
+
+    const expectedState = getCookie(c, OAUTH_STATE_COOKIE);
+    deleteCookie(c, OAUTH_STATE_COOKIE, oauthStateCookieOptions());
+
+    if (!state || !expectedState || state !== expectedState) {
+      throw new ResponseError(400, "Google auth state is invalid.");
     }
 
     const { token, user } = await AuthService.loginWithGoogle(code);
@@ -142,6 +149,17 @@ export class LoginController {
 
   static async logout(c: Context) {
     console.info("[AUTH] Logout");
+    const token = getCookie(c, sessionCookieName());
+    if (token) {
+      try {
+        await revokeSession(token);
+      } catch (error) {
+        // The cookie is still cleared below; the token expires on its own.
+        console.error("[AUTH] Session revocation failed", {
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
+      }
+    }
     deleteCookie(c, sessionCookieName(), cookieOptions());
 
     return c.json({ data: "Logged out successfully" });

@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
+import { CalendarPlus } from "lucide-react";
 import SubpageHero from "../components/ui/SubpageHero";
 import { calendarApi, type AcademicCalendarEvent } from "@/api/calendarApi";
 import { asset } from "../data/site";
+
+const GOOGLE_CALENDAR_SHARE_URL =
+  "https://calendar.google.com/calendar/u/0?cid=Y18xNjhlZmU5MzNiZWVjMmFmM2YzMThkZTU3MmRhOWI4MDk4OWRiNzhmZjJiYzlhOTNlZDA3ZjJlZTk0NmM3YWNjQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20";
 
 const typeLabel: Record<'school' | 'holiday', string> = {
   school: "Event",
@@ -100,7 +104,18 @@ export default function SchoolCalendar() {
                </p>
              </div>
 
-             <div className="flex items-center gap-3">
+             <div className="flex flex-wrap items-center justify-end gap-3 max-[680px]:justify-start">
+               <a
+                 href={GOOGLE_CALENDAR_SHARE_URL}
+                 target="_blank"
+                 rel="noreferrer"
+                 className="inline-flex items-center gap-2 border border-[var(--burgundy)] px-4 py-2 text-sm font-semibold text-[var(--burgundy)] transition-colors duration-200 hover:bg-[var(--burgundy)] hover:text-white"
+               >
+                 <CalendarPlus size={16} aria-hidden="true" />
+                 Add to Google Calendar
+               </a>
+
+               <div className="flex items-center gap-3">
                <button
                  type="button"
                  aria-label="Previous year"
@@ -120,6 +135,7 @@ export default function SchoolCalendar() {
                >
                  &#8250;
                </button>
+               </div>
              </div>
            </div>
 

@@ -86,6 +86,13 @@ type AcademicLevelRecord = {
   hero: Prisma.JsonValue;
   overview: Prisma.JsonValue;
   sections: Prisma.JsonValue;
+  publishedTitle: string | null;
+  publishedDescription: string | null;
+  publishedCoverImage: string | null;
+  publishedGalleryId: string | null;
+  publishedHero: Prisma.JsonValue | null;
+  publishedOverview: Prisma.JsonValue | null;
+  publishedSections: Prisma.JsonValue | null;
   status: string;
   publishedAt: Date | null;
   updatedAt: Date;
@@ -293,13 +300,13 @@ const defaultLevels = {
   AcademicPayload & { levelKey: AcademicLevelKey }
 >;
 
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const MAX_DOCUMENT_SIZE = 25 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = new Set([
+  "image/avif",
   "image/jpeg",
   "image/png",
   "image/webp",
-  "image/gif",
 ]);
 const ACCEPTED_DOCUMENT_TYPES = new Set([
   "application/pdf",
@@ -384,11 +391,41 @@ function pageResponse(
   };
 }
 
+function publishedRecord(record: AcademicLevelRecord): AcademicLevelRecord | null {
+  if (record.status === "PUBLISHED") return record;
+  if (!record.publishedHero || !record.publishedOverview || !record.publishedSections) {
+    return null;
+  }
+
+  return {
+    ...record,
+    title: record.publishedTitle ?? record.title,
+    description: record.publishedDescription,
+    coverImage: record.publishedCoverImage,
+    galleryId: record.publishedGalleryId,
+    hero: record.publishedHero,
+    overview: record.publishedOverview,
+    sections: record.publishedSections,
+    status: "PUBLISHED",
+    academicLevel: {
+      ...record.academicLevel,
+      title: record.publishedTitle ?? record.academicLevel.title,
+      description: record.publishedDescription,
+    },
+  };
+}
+
+function publicPageResponse(levelKey: AcademicLevelKey, record: AcademicLevelRecord | null) {
+  if (!record) return pageResponse(levelKey, null);
+  return pageResponse(levelKey, publishedRecord(record));
+}
+
 async function findLevelRecord(
   levelKey: AcademicLevelKey,
 ): Promise<AcademicLevelRecord | null> {
   const prisma = getPrisma();
   const query = {
+    where: { levelKey },
     include: {
       academicLevel: { select: { title: true, description: true } },
       faqs: {
@@ -443,11 +480,13 @@ async function ensureAcademicLevel(
 }
 
 function levelData(
+  levelKey: AcademicLevelKey,
   academicLevelId: string,
   data: AcademicPayload,
   status: AcademicStatus,
 ) {
-  return {
+  const dataToSave: Record<string, unknown> = {
+    levelKey,
     academicLevelId,
     title: data.program.title,
     description: nullable(data.program.description ?? data.page.hero.description),
@@ -457,8 +496,22 @@ function levelData(
     overview: data.page.overview as Prisma.InputJsonValue,
     sections: data.page.sections as Prisma.InputJsonValue,
     status,
-    publishedAt: status === "PUBLISHED" ? new Date() : null,
   };
+
+  if (status === "PUBLISHED") {
+    dataToSave.publishedAt = new Date();
+    dataToSave.publishedTitle = data.program.title;
+    dataToSave.publishedDescription = nullable(
+      data.program.description ?? data.page.hero.description,
+    );
+    dataToSave.publishedCoverImage = nullable(data.program.image ?? data.page.hero.image);
+    dataToSave.publishedGalleryId = data.page.galleryId ?? null;
+    dataToSave.publishedHero = data.page.hero as Prisma.InputJsonValue;
+    dataToSave.publishedOverview = data.page.overview as Prisma.InputJsonValue;
+    dataToSave.publishedSections = data.page.sections as Prisma.InputJsonValue;
+  }
+
+  return dataToSave;
 }
 
 async function findOrCreateFaq(item: { question: string; answer: string }) {
@@ -549,27 +602,42 @@ async function saveLevelRecord(
 ) {
   const prisma = getPrisma();
   const academicLevel = await ensureAcademicLevel(levelKey, existing, data.program);
-  const nextData = levelData(academicLevel.id, data, status);
+  const nextData = levelData(levelKey, academicLevel.id, data, status);
 
   if (levelKey === "kindergarten") {
     const saved = existing
-      ? prisma.kindergarten.update({ where: { id: existing.id }, data: nextData })
-      : prisma.kindergarten.create({ data: nextData });
+      ? prisma.kindergarten.update({
+          where: { id: existing.id },
+          data: nextData as Prisma.KindergartenUncheckedUpdateInput,
+        })
+      : prisma.kindergarten.create({
+          data: nextData as Prisma.KindergartenUncheckedCreateInput,
+        });
     const record = await saved;
     await syncLegacyFaqPayload(levelKey, record.id, data.page.faq);
     return record;
   }
   if (levelKey === "elementary") {
     const saved = existing
-      ? prisma.elementary.update({ where: { id: existing.id }, data: nextData })
-      : prisma.elementary.create({ data: nextData });
+      ? prisma.elementary.update({
+          where: { id: existing.id },
+          data: nextData as Prisma.ElementaryUncheckedUpdateInput,
+        })
+      : prisma.elementary.create({
+          data: nextData as Prisma.ElementaryUncheckedCreateInput,
+        });
     const record = await saved;
     await syncLegacyFaqPayload(levelKey, record.id, data.page.faq);
     return record;
   }
   const saved = existing
-    ? prisma.juniorHigh.update({ where: { id: existing.id }, data: nextData })
-    : prisma.juniorHigh.create({ data: nextData });
+    ? prisma.juniorHigh.update({
+        where: { id: existing.id },
+        data: nextData as Prisma.JuniorHighUncheckedUpdateInput,
+      })
+    : prisma.juniorHigh.create({
+        data: nextData as Prisma.JuniorHighUncheckedCreateInput,
+      });
   const record = await saved;
   await syncLegacyFaqPayload(levelKey, record.id, data.page.faq);
   return record;
@@ -608,7 +676,7 @@ function validateAssetFile(file: File, type: "image" | "document") {
     throw new ResponseError(
       400,
       type === "image"
-        ? "Only JPEG, PNG, WebP, or GIF images are allowed."
+        ? "Only AVIF, WebP, JPEG, or PNG images are allowed. Use WebP/AVIF for photos."
         : "Only PDF, DOC, or DOCX files are allowed.",
     );
   }
@@ -617,7 +685,7 @@ function validateAssetFile(file: File, type: "image" | "document") {
     throw new ResponseError(
       400,
       type === "image"
-        ? "Image file must be 10MB or smaller."
+        ? "Image file must be 5MB or smaller. Use WebP/AVIF for photos."
         : "Document file must be 25MB or smaller.",
     );
   }
@@ -636,8 +704,7 @@ export class AcademicPageService {
     const records = await Promise.all(LEVEL_KEYS.map(findLevelRecord));
 
     return LEVEL_KEYS.map((levelKey, index) => {
-      const response = pageResponse(levelKey, records[index] ?? null);
-      return response.page.isPublished ? response : defaultLevels[levelKey];
+      return publicPageResponse(levelKey, records[index] ?? null);
     });
   }
 
@@ -666,8 +733,7 @@ export class AcademicPageService {
     }
 
     const response = pageResponse(levelKey, record);
-    if (!response.page.isPublished) return defaultLevels[levelKey];
-    return response;
+    return response.page.isPublished ? response : publicPageResponse(levelKey, record);
   }
 
   static async saveLevel(rawLevelKey: string | undefined, payload: unknown) {

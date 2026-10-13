@@ -38,12 +38,12 @@ const imageUploadMetadataSchema = z.object({
   purpose: z.enum(["COVER", "ARTICLE"]).optional().default("ARTICLE"),
 });
 
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = new Set([
+  "image/avif",
   "image/jpeg",
   "image/png",
   "image/webp",
-  "image/gif",
 ]);
 
 const listQuerySchema = z.object({
@@ -164,7 +164,7 @@ function imageObjectKey(fileName: string) {
 
 function validateImageFile(file: File) {
   if (!ACCEPTED_IMAGE_TYPES.has(file.type)) {
-    throw new ResponseError(400, "Only JPEG, PNG, WebP, or GIF images are allowed.");
+    throw new ResponseError(400, "Only AVIF, WebP, JPEG, or PNG images are allowed. Use WebP/AVIF for photos.");
   }
 
   if (file.size <= 0) {
@@ -172,7 +172,7 @@ function validateImageFile(file: File) {
   }
 
   if (file.size > MAX_IMAGE_SIZE) {
-    throw new ResponseError(400, "Image file must be 10MB or smaller.");
+    throw new ResponseError(400, "Image file must be 5MB or smaller. Use WebP/AVIF for photos.");
   }
 }
 

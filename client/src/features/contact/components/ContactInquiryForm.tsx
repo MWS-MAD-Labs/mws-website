@@ -1,7 +1,9 @@
 import { useState, type FormEvent } from 'react';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 import { contactPageApi } from '@/api/contactPageApi';
 import type { ContactPageContent } from '@/features/contact/contactPageData';
+import { env } from '@/config/env';
 import { ApiError } from '@/lib/api';
 
 type ContactInquiryFormProps = {
@@ -28,22 +30,24 @@ const EMPTY_VALUES: FormValues = {
 
 function submitErrorMessage(error: unknown) {
   if (error instanceof ApiError && error.status === 429) {
-    return 'You have sent several messages in a short time. Please wait a minute and try again.';
+    return 'You have sent several messages in a short time. Please wait a few minutes and try again.';
   }
 
   if (error instanceof ApiError && error.status === 400) {
-    return 'Some fields are not valid. Please check your name, email, subject, and message.';
+    return error.message || 'Some fields are not valid. Please check your name, email, subject, and message.';
   }
 
   return 'Your message could not be sent. Please check your connection and try again.';
 }
 
 export default function ContactInquiryForm({ form, preview = false }: ContactInquiryFormProps) {
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const [values, setValues] = useState<FormValues>(EMPTY_VALUES);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSent, setIsSent] = useState(false);
   const idPrefix = preview ? 'previewContact' : 'contact';
+  const captchaSiteKey = preview ? '' : env.recaptchaSiteKey;
 
   function updateValue(key: keyof FormValues, value: string) {
     setValues((current) => ({ ...current, [key]: value }));
@@ -57,12 +61,23 @@ export default function ContactInquiryForm({ form, preview = false }: ContactInq
     setError(null);
 
     try {
+      const captchaToken =
+        captchaSiteKey && executeRecaptcha
+          ? await executeRecaptcha('contact_inquiry')
+          : undefined;
+
+      if (captchaSiteKey && !captchaToken) {
+        setError('Captcha is still loading. Please try again in a moment.');
+        return;
+      }
+
       await contactPageApi.submitInquiry({
         name: values.name.trim(),
         email: values.email.trim(),
         subject: values.subject.trim(),
         category: values.category,
         message: values.message.trim(),
+        captchaToken,
         source: 'contact-page',
       });
       setValues(EMPTY_VALUES);

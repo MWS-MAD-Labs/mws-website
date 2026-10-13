@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 120" role="img" aria-labelledby="title">
+  <title id="title">Climate Action</title>
+  <rect width="320" height="120" rx="10" fill="#f6fff8"/>
+  <circle cx="72" cy="60" r="28" fill="#15803d"/>
+  <path d="M56 66c16-24 28-24 42-2-16-4-27 1-42 2Z" fill="#ffffff"/>
+  <text x="122" y="69" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#241718">Climate Action</text>
+</svg>

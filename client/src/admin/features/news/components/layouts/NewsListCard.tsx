@@ -338,8 +338,9 @@ function NewsTableRow({
           </Link>
           <Button
             aria-label={`Delete ${post.title}`}
-            className="h-50 w-50 rounded-md p-0"
+            className="rounded-md"
             disabled={deletingId === post.id}
+            iconOnly
             size="sm"
             type="button"
             variant="danger"
@@ -394,8 +395,9 @@ function MobileNewsRow({
             <div className="flex shrink-0 items-center gap-1.5">
               <Button
                 aria-label={`Delete ${post.title}`}
-                className="h-8 w-8 rounded-md p-0"
+                className="rounded-md"
                 disabled={deletingId === post.id}
+                iconOnly
                 size="sm"
                 type="button"
                 variant="danger"

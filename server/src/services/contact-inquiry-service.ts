@@ -24,6 +24,7 @@ const contactInquirySchema = z.object({
   category: z.string().trim().max(100).nullable().optional(),
   message: z.string().trim().min(1).max(5000),
   source: z.string().trim().max(100).nullable().optional(),
+  captchaToken: z.string().trim().max(4096).optional(),
 });
 
 const uuidSchema = z.string().uuid();
@@ -46,12 +47,28 @@ function requireInquiryId(id: string | undefined): string {
   return id;
 }
 
-const RATE_LIMIT_WINDOW_MS = 60 * 1000;
-const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
+const RATE_LIMIT_CLEANUP_INTERVAL_MS = 60 * 1000;
+const RATE_LIMIT_MAX_PER_IP = 5;
+const RATE_LIMIT_MAX_PER_EMAIL = 3;
 const rateLimitBuckets = new Map<string, { count: number; resetAt: number }>();
+let nextRateLimitCleanupAt = 0;
 
-function rateLimit(key: string) {
+function cleanupExpiredRateLimits(now: number) {
+  if (now < nextRateLimitCleanupAt) return;
+
+  nextRateLimitCleanupAt = now + RATE_LIMIT_CLEANUP_INTERVAL_MS;
+  for (const [key, bucket] of rateLimitBuckets.entries()) {
+    if (bucket.resetAt <= now) {
+      rateLimitBuckets.delete(key);
+    }
+  }
+}
+
+function rateLimit(key: string, max: number) {
   const now = Date.now();
+  cleanupExpiredRateLimits(now);
+
   const current = rateLimitBuckets.get(key);
 
   if (!current || current.resetAt <= now) {
@@ -63,8 +80,61 @@ function rateLimit(key: string) {
   }
 
   current.count += 1;
-  if (current.count > RATE_LIMIT_MAX) {
+  if (current.count > max) {
     throw new ResponseError(429, "Please wait before sending another message.");
+  }
+}
+
+export function resetContactInquiryRateLimitForTest() {
+  rateLimitBuckets.clear();
+  nextRateLimitCleanupAt = 0;
+}
+
+function recaptchaSecretKey() {
+  return process.env["RECAPTCHA_SECRET_KEY"]?.trim() || "";
+}
+
+function recaptchaMinScore() {
+  const value = Number(process.env["RECAPTCHA_MIN_SCORE"] ?? 0.5);
+  return Number.isFinite(value) ? value : 0.5;
+}
+
+async function verifyCaptcha(token: string | undefined, ipAddress?: string | null) {
+  const secret = recaptchaSecretKey();
+  if (!secret) return;
+
+  if (!token) {
+    throw new ResponseError(400, "Captcha verification is required.");
+  }
+
+  const body = new URLSearchParams({
+    response: token,
+    secret,
+  });
+  if (ipAddress) body.set("remoteip", ipAddress);
+
+  let result: {
+    action?: string;
+    score?: number;
+    success?: boolean;
+    "error-codes"?: string[];
+  };
+  try {
+    const response = await fetch("https://www.google.com/recaptcha/api/siteverify", {
+      method: "POST",
+      body,
+    });
+    result = (await response.json()) as typeof result;
+  } catch {
+    throw new ResponseError(502, "Captcha verification is unavailable. Please try again.");
+  }
+
+  if (!result.success || result.action !== "contact_inquiry") {
+    throw new ResponseError(400, "Captcha verification failed. Please try again.");
+  }
+
+  if (typeof result.score === "number" && result.score < recaptchaMinScore()) {
+    throw new ResponseError(400, "Captcha score is too low. Please try again.");
   }
 }
 
@@ -78,14 +148,18 @@ export class ContactInquiryService {
       throw new ResponseError(400, "Invalid contact inquiry payload.");
     }
 
-    const rateKey = `${meta.ipAddress ?? "unknown"}:${parsed.data.email}`;
-    rateLimit(rateKey);
+    const ipKey = meta.ipAddress ?? "unknown";
+    rateLimit(`contact:ip:${ipKey}`, RATE_LIMIT_MAX_PER_IP);
+    rateLimit(`contact:email:${parsed.data.email}`, RATE_LIMIT_MAX_PER_EMAIL);
+    await verifyCaptcha(parsed.data.captchaToken, meta.ipAddress);
+
+    const { captchaToken: _captchaToken, ...inquiryData } = parsed.data;
 
     const inquiry = await getPrisma().contactInquiry.create({
       data: {
-        ...parsed.data,
-        category: parsed.data.category || null,
-        source: parsed.data.source || "contact-page",
+        ...inquiryData,
+        category: inquiryData.category || null,
+        source: inquiryData.source || "contact-page",
         ipAddress: meta.ipAddress || null,
         userAgent: meta.userAgent || null,
       },

@@ -237,7 +237,7 @@ export default function GalleryMediaLibraryPage({ kind }: { kind: MediaKind }) {
           sortOrder: toSortOrder(imageForm.sortOrder),
           title: optionalText(imageForm.title),
         });
-        setMessage('Gambar galeri updated.');
+        setMessage('Gallery image updated.');
       } else if (imageFile && imageForm.galleryId) {
         await adminApi.uploadGalleryImage(imageForm.galleryId, {
           caption: imageForm.caption.trim(),
@@ -245,7 +245,7 @@ export default function GalleryMediaLibraryPage({ kind }: { kind: MediaKind }) {
           sortOrder: imageForm.sortOrder,
           title: imageForm.title.trim(),
         });
-        setMessage('Gambar galeri created.');
+        setMessage('Gallery image created.');
       }
 
       resetForm();
@@ -269,7 +269,7 @@ export default function GalleryMediaLibraryPage({ kind }: { kind: MediaKind }) {
           sortOrder: toSortOrder(videoForm.sortOrder),
           title: optionalText(videoForm.title),
         });
-        setMessage('Video galeri updated.');
+        setMessage('Gallery video updated.');
       } else if (videoForm.galleryId) {
         if (videoForm.sourceType === 'YOUTUBE') {
           await adminApi.createYoutubeGalleryVideo(videoForm.galleryId, {
@@ -286,7 +286,7 @@ export default function GalleryMediaLibraryPage({ kind }: { kind: MediaKind }) {
             title: videoForm.title.trim(),
           });
         }
-        setMessage('Video galeri created.');
+        setMessage('Gallery video created.');
       }
 
       resetForm();
@@ -308,7 +308,7 @@ export default function GalleryMediaLibraryPage({ kind }: { kind: MediaKind }) {
     try {
       await adminApi.deleteGalleryImage(image.id);
       await loadGalleries();
-      setMessage('Gambar galeri deleted.');
+      setMessage('Gallery image deleted.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Failed to delete image.');
     } finally {
@@ -326,7 +326,7 @@ export default function GalleryMediaLibraryPage({ kind }: { kind: MediaKind }) {
     try {
       await adminApi.deleteGalleryVideo(video.id);
       await loadGalleries();
-      setMessage('Video galeri deleted.');
+      setMessage('Gallery video deleted.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Failed to delete video.');
     } finally {
@@ -334,8 +334,8 @@ export default function GalleryMediaLibraryPage({ kind }: { kind: MediaKind }) {
     }
   }
 
-  const title = isImages ? 'Photo Galeri' : 'Video Galeri';
-  const createLabel = isImages ? 'Tambah gambar galeri' : 'Tambah video galeri';
+  const title = isImages ? 'Gallery Images' : 'Gallery Videos';
+  const createLabel = isImages ? 'Add gallery image' : 'Add gallery video';
 
   return (
     <AppShell title={title}>
@@ -352,7 +352,7 @@ export default function GalleryMediaLibraryPage({ kind }: { kind: MediaKind }) {
             <div className="flex flex-1 flex-wrap items-center justify-end gap-3">
               <SearchInput
                 className="max-w-xs"
-                placeholder={isImages ? 'Cari gambar...' : 'Cari video...'}
+                placeholder={isImages ? 'Search images...' : 'Search videos...'}
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
               />
@@ -623,7 +623,7 @@ function ImagePreviewModal({ image, onClose }: { image: ImageRow | null; onClose
   if (!image) return null;
 
   return (
-    <Modal open title={image.title || 'Preview gambar'} onClose={onClose}>
+    <Modal open title={image.title || 'Image preview'} onClose={onClose}>
       <div className="space-y-4">
         <img
           alt={image.title || image.caption || 'Gallery image preview'}
@@ -719,10 +719,10 @@ function ImageFormModal({
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   return (
-    <Modal open={open} title={editingImage ? 'Ubah gambar galeri' : 'Tambah gambar galeri'} onClose={onClose}>
+    <Modal open={open} title={editingImage ? 'Edit gallery image' : 'Add gallery image'} onClose={onClose}>
       <form className="space-y-4" onSubmit={onSubmit}>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Judul">
+          <Field label="Title">
             <input
               className={FIELD_CLASS}
               disabled={isSaving}
@@ -731,7 +731,7 @@ function ImageFormModal({
             />
           </Field>
 
-          <Field label="Galeri">
+          <Field label="Gallery" required>
             <select
               className={FIELD_CLASS}
               disabled={isSaving || Boolean(editingImage)}
@@ -739,12 +739,12 @@ function ImageFormModal({
               value={form.galleryId}
               onChange={(event) => onFormChange((current) => ({ ...current, galleryId: event.target.value }))}
             >
-              <option value="">Pilih galeri</option>
+              <option value="">Choose gallery</option>
               {galleryOptions(galleries)}
             </select>
           </Field>
 
-          <Field label="Path/URL">
+          <Field label="Path/URL" required>
             {editingImage ? (
               <input className={FIELD_CLASS} disabled value={form.pathUrl} />
             ) : (
@@ -753,11 +753,16 @@ function ImageFormModal({
                 disabled={isSaving}
                 required
                 type="file"
-                accept="image/*"
+                accept="image/avif,image/webp,image/jpeg,image/png"
                 onChange={(event) => onFileChange(event.target.files?.[0] ?? null)}
               />
             )}
           </Field>
+          {!editingImage ? (
+            <p className="-mt-3 text-xs text-[#64748B]">
+              AVIF/WebP preferred for photos. JPEG/PNG allowed, max 5 MB.
+            </p>
+          ) : null}
 
           <Field label="Urutan">
             <input
@@ -770,7 +775,7 @@ function ImageFormModal({
           </Field>
 
           <div className="sm:col-span-2">
-            <Field label="Keterangan">
+            <Field label="Description">
               <textarea
                 className={`${FIELD_CLASS} min-h-28 resize-y`}
                 disabled={isSaving}
@@ -823,10 +828,10 @@ function VideoFormModal({
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   return (
-    <Modal open={open} title={editingVideo ? 'Ubah video galeri' : 'Tambah video galeri'} onClose={onClose}>
+    <Modal open={open} title={editingVideo ? 'Edit gallery video' : 'Add gallery video'} onClose={onClose}>
       <form className="space-y-4" onSubmit={onSubmit}>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Judul">
+          <Field label="Title">
             <input
               className={FIELD_CLASS}
               disabled={isSaving}
@@ -835,7 +840,7 @@ function VideoFormModal({
             />
           </Field>
 
-          <Field label="Galeri">
+          <Field label="Gallery" required>
             <select
               className={FIELD_CLASS}
               disabled={isSaving || Boolean(editingVideo)}
@@ -843,7 +848,7 @@ function VideoFormModal({
               value={form.galleryId}
               onChange={(event) => onFormChange((current) => ({ ...current, galleryId: event.target.value }))}
             >
-              <option value="">Pilih galeri</option>
+              <option value="">Choose gallery</option>
               {galleryOptions(galleries)}
             </select>
           </Field>
@@ -877,7 +882,7 @@ function VideoFormModal({
           </Field>
 
           <div className="sm:col-span-2">
-            <Field label="URL/Path">
+            <Field label="URL/Path" required>
               {editingVideo ? (
                 <input className={FIELD_CLASS} disabled value={form.pathUrl} />
               ) : form.sourceType === 'YOUTUBE' ? (
@@ -895,15 +900,20 @@ function VideoFormModal({
                   disabled={isSaving}
                   required
                   type="file"
-                  accept="video/*"
+                  accept="video/mp4,video/webm,video/quicktime"
                   onChange={(event) => onFileChange(event.target.files?.[0] ?? null)}
                 />
               )}
             </Field>
+            {!editingVideo ? (
+              <p className="-mt-3 text-xs text-[#64748B]">
+                MP4/WebM/MOV uploads are limited to 50 MB. Use YouTube for longer videos.
+              </p>
+            ) : null}
           </div>
 
           <div className="sm:col-span-2">
-            <Field label="Keterangan">
+            <Field label="Description">
               <textarea
                 className={`${FIELD_CLASS} min-h-28 resize-y`}
                 disabled={isSaving}
@@ -918,7 +928,7 @@ function VideoFormModal({
 
         <div className="flex justify-end gap-2 border-t border-[#E2E8F0] pt-4">
           <Button disabled={isSaving} type="button" variant="outline" onClick={onClose}>
-            Batal
+            Cancel
           </Button>
           <Button
             disabled={
@@ -929,7 +939,7 @@ function VideoFormModal({
             }
             type="submit"
           >
-            Simpan
+            Save
           </Button>
         </div>
       </form>

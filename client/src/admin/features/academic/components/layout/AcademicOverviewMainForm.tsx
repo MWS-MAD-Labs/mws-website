@@ -34,7 +34,7 @@ export default function AcademicOverviewMainForm({ editor }: AcademicOverviewMai
         </div>
 
         <div className="grid gap-4 p-5">
-          <Field label="Title">
+          <Field label="Title" required>
             <input
               required
               className={inputClass}

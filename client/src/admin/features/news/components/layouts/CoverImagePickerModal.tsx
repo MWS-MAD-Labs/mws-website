@@ -132,7 +132,7 @@ export default function CoverImagePickerModal({
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/jpeg,image/png,image/webp,image/gif"
+                accept="image/avif,image/webp,image/jpeg,image/png"
                 className="sr-only"
                 onChange={selectLocalFile}
               />
@@ -164,7 +164,7 @@ export default function CoverImagePickerModal({
                     Upload an image
                   </span>
                   <span className="mt-1 block text-xs text-[#64748B]">
-                    JPG, PNG, WEBP, or GIF · Max 10 MB
+                    AVIF/WebP preferred, JPEG/PNG allowed · Max 5 MB
                   </span>
                 </span>
 

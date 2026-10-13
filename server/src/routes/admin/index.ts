@@ -26,6 +26,7 @@ import { adminAcademicCrudRoute } from "./academic-crud-route";
 import { partnersRoute } from "./partners-route";
 import { adminContactInquiryRoute } from "./contact-inquiry-route";
 import { adminAcademicCalendarRoute } from "./academic-calendar-route";
+import { popupPromotedRoute } from "./popup-promoted-route";
 
 export const adminRoute = new Hono<{ Variables: SessionVariables }>();
 
@@ -81,6 +82,11 @@ adminRoute.post(
   CmsUsersController.resendInvitation,
 );
 adminRoute.get(
+  "/audit-logs",
+  requireCmsRole("SUPER_ADMIN"),
+  CmsUsersController.listAuditLogs,
+);
+adminRoute.get(
   "/contact-page",
   requireCmsPermission("content:manage"),
   AdminContactPageController.get,
@@ -110,5 +116,6 @@ adminRoute.route("/academic-crud", adminAcademicCrudRoute);
 adminRoute.route("/news", adminNewsRoute);
 
 adminRoute.route("/partners", partnersRoute);
+adminRoute.route("/popup-promoted", popupPromotedRoute);
 adminRoute.route("/contact-inquiries", adminContactInquiryRoute);
 adminRoute.route("/calendar", adminAcademicCalendarRoute);

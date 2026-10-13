@@ -6,10 +6,13 @@ import AcademicLevelFaqPickerModal from './components/layout/AcademicLevelFaqPic
 import AcademicLevelMainSections from './components/layout/AcademicLevelMainSections';
 import AcademicLevelSidebar from './components/layout/AcademicLevelSidebar';
 import { useAcademicLevelEditor } from './hooks/useAcademicLevelEditor';
+import { useUnsavedChangesGuard } from '@/admin/hooks/useUnsavedChangesGuard';
 
 export default function AcademicLevelEditorPage() {
   const editor = useAcademicLevelEditor();
-  const { activeImageField, config, galleries, isLoading, message } = editor;
+  const { activeImageField, config, galleries, hasUnsavedChanges, isLoading, isSaving, message } =
+    editor;
+  useUnsavedChangesGuard(hasUnsavedChanges && !isSaving);
 
   return (
     <AppShell title={`Academic / ${config.title}`}>

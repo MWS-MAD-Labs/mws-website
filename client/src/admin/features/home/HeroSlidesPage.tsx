@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Eye, ImagePlus, Pencil, Plus, RotateCcw, Save, Trash2 } from 'lucide-react';
 import {
   adminApi,
-  type CampusSpotlightItem,
   type GalleryItem,
   type HeroSlideFormData,
   type NewsCategory,
@@ -78,24 +77,6 @@ const heroCtaLinkOptions = [
 type HomeSettingsForm = {
   infoSectionCategoryIds: string[];
   infoSectionTitle: string;
-};
-
-type SpotlightForm = {
-  cite: string;
-  imageAlt: string;
-  imagePath: string;
-  isActive: boolean;
-  sortOrder: string;
-  text: string;
-};
-
-const emptySpotlightForm: SpotlightForm = {
-  cite: '',
-  imageAlt: '',
-  imagePath: '',
-  isActive: true,
-  sortOrder: '0',
-  text: '',
 };
 
 function optionalText(value: string) {
@@ -262,14 +243,10 @@ export default function HeroSlidesPage() {
     infoSectionCategoryIds: [],
     infoSectionTitle: 'Everything you need to know about joining MWS.',
   });
-  const [spotlights, setSpotlights] = useState<CampusSpotlightItem[]>([]);
-  const [editingSpotlightId, setEditingSpotlightId] = useState<string | null>(null);
-  const [spotlightForm, setSpotlightForm] = useState<SpotlightForm>(emptySpotlightForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
   const [isAssetPickerOpen, setIsAssetPickerOpen] = useState(false);
-  const [isSpotlightImagePickerOpen, setIsSpotlightImagePickerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -295,7 +272,6 @@ export default function HeroSlidesPage() {
     setSlides(nextSlides);
     setGalleries(nextGalleries);
     setNewsCategories(homeContent.categories);
-    setSpotlights(homeContent.spotlights);
     setHomeSettings({
       infoSectionCategoryIds:
         homeContent.settings.infoSectionCategoryIds ??
@@ -430,7 +406,6 @@ export default function HeroSlidesPage() {
         infoSectionCategoryIds: homeSettings.infoSectionCategoryIds,
       });
       setNewsCategories(data.categories);
-      setSpotlights(data.spotlights);
       setHomeSettings({
         infoSectionCategoryIds:
           data.settings.infoSectionCategoryIds ??
@@ -440,107 +415,6 @@ export default function HeroSlidesPage() {
       setMessage('Home info section settings saved.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Failed to save home settings.');
-    } finally {
-      setIsSaving(false);
-    }
-  }
-
-  function editSpotlight(spotlight: CampusSpotlightItem) {
-    setEditingSpotlightId(spotlight.id);
-    setSpotlightForm({
-      cite: spotlight.cite,
-      imageAlt: spotlight.imageAlt ?? '',
-      imagePath: spotlight.imagePath ?? '',
-      isActive: spotlight.isActive,
-      sortOrder: String(spotlight.sortOrder),
-      text: spotlight.text,
-    });
-  }
-
-  function startNewSpotlight() {
-    setEditingSpotlightId(null);
-    setSpotlightForm({
-      ...emptySpotlightForm,
-      sortOrder: String(spotlights.length),
-    });
-  }
-
-  async function saveSpotlight(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setIsSaving(true);
-    setMessage(null);
-
-    try {
-      const payload = {
-        cite: spotlightForm.cite,
-        imageAlt: optionalText(spotlightForm.imageAlt),
-        imagePath: optionalText(spotlightForm.imagePath),
-        isActive: spotlightForm.isActive,
-        sortOrder: Number.parseInt(spotlightForm.sortOrder, 10) || 0,
-        text: spotlightForm.text,
-      };
-      if (editingSpotlightId) {
-        await adminApi.updateCampusSpotlight(editingSpotlightId, payload);
-        setMessage('Campus spotlight updated.');
-      } else {
-        await adminApi.createCampusSpotlight(payload);
-        setMessage('Campus spotlight created.');
-      }
-      setEditingSpotlightId(null);
-      setSpotlightForm(emptySpotlightForm);
-      const data = await adminApi.homeContent();
-      setSpotlights(data.spotlights);
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Failed to save campus spotlight.');
-    } finally {
-      setIsSaving(false);
-    }
-  }
-
-  async function uploadSpotlightImage(file: File) {
-    setIsUploadingImage(true);
-    setMessage(null);
-
-    try {
-      const uploaded = await uploadImageForPicker({
-        caption: spotlightForm.cite || 'Campus spotlight image',
-        fallbackGalleryTitle: 'Campus Spotlight Images',
-        file,
-        galleries,
-      });
-
-      setGalleries(uploaded.galleries);
-      setSpotlightForm((current) => ({
-        ...current,
-        imageAlt: uploaded.alt || current.cite,
-        imagePath: uploaded.path,
-      }));
-      setMessage('Spotlight image uploaded. Save spotlight to publish it.');
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Failed to upload spotlight image.');
-    } finally {
-      setIsUploadingImage(false);
-    }
-  }
-
-  async function deleteSpotlight(id: string) {
-    const confirmed = window.confirm('Delete this campus spotlight? This action cannot be undone.');
-    if (!confirmed) return;
-
-    setIsSaving(true);
-    setMessage(null);
-
-    try {
-      await adminApi.deleteCampusSpotlight(id);
-      if (editingSpotlightId === id) {
-        setEditingSpotlightId(null);
-        setSpotlightForm(emptySpotlightForm);
-      }
-      const data = await adminApi.homeContent();
-      setSpotlights(data.spotlights);
-      setMessage('Campus spotlight deleted.');
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Failed to delete campus spotlight.');
     } finally {
       setIsSaving(false);
     }
@@ -913,300 +787,108 @@ export default function HeroSlidesPage() {
           </form>
         </div>
 
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
-          <section className="rounded-lg border border-[#E2E8F0] bg-white">
-            <div className="border-b border-[#E2E8F0] px-5 py-4">
-              <h2 className="text-base font-semibold text-[#1C2434]">Info Section</h2>
-              <p className="mt-1 text-sm text-[#64748B]">
-                Choose the News category used by the Home information cards.
-              </p>
-            </div>
-            <div className="grid gap-4 p-5">
-              <Field label="Section title">
-                <input
-                  className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
-                  disabled={isBusy}
-                  value={homeSettings.infoSectionTitle}
-                  onChange={(event) =>
-                    setHomeSettings((current) => ({
-                      ...current,
-                      infoSectionTitle: event.target.value,
-                    }))
-                  }
-                />
-              </Field>
-              <Field as="div" label="News categories">
-                <div className="grid gap-2 rounded-lg border border-[#E2E8F0] p-3">
-                  <p className="text-xs text-[#64748B]">
-                    Choose up to 5 categories. Public Home will show these as Info Section tabs.
-                  </p>
-                  {newsCategories.map((category) => {
-                    const isSelected = homeSettings.infoSectionCategoryIds.includes(category.id);
-                    const isLimitReached =
-                      !isSelected && homeSettings.infoSectionCategoryIds.length >= 5;
+        <section className="rounded-lg border border-[#E2E8F0] bg-white">
+          <div className="border-b border-[#E2E8F0] px-5 py-4">
+            <h2 className="text-base font-semibold text-[#1C2434]">Info Section</h2>
+            <p className="mt-1 text-sm text-[#64748B]">
+              Choose the News category used by the Home information cards.
+            </p>
+          </div>
+          <div className="grid gap-4 p-5">
+            <Field label="Section title">
+              <input
+                className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
+                disabled={isBusy}
+                value={homeSettings.infoSectionTitle}
+                onChange={(event) =>
+                  setHomeSettings((current) => ({
+                    ...current,
+                    infoSectionTitle: event.target.value,
+                  }))
+                }
+              />
+            </Field>
+            <Field as="div" label="News categories">
+              <div className="grid gap-2 rounded-lg border border-[#E2E8F0] p-3">
+                <p className="text-xs text-[#64748B]">
+                  Choose up to 5 categories. Public Home will show these as Info Section tabs.
+                </p>
+                {newsCategories.map((category) => {
+                  const isSelected = homeSettings.infoSectionCategoryIds.includes(category.id);
+                  const isLimitReached =
+                    !isSelected && homeSettings.infoSectionCategoryIds.length >= 5;
 
-                    return (
-                      <label
-                        className={[
-                          'flex items-center gap-2 text-sm',
-                          isLimitReached ? 'text-[#94A3B8]' : 'text-[#1C2434]',
-                        ].join(' ')}
-                        key={category.id}
-                      >
-                        <input
-                          checked={isSelected}
-                          disabled={isBusy || isLimitReached}
-                          type="checkbox"
-                          onChange={(event) =>
-                            setHomeSettings((current) => {
-                              if (event.target.checked) {
-                                return {
-                                  ...current,
-                                  infoSectionCategoryIds: [
-                                    ...current.infoSectionCategoryIds,
-                                    category.id,
-                                  ].slice(0, 5),
-                                };
-                              }
-
+                  return (
+                    <label
+                      className={[
+                        'flex items-center gap-2 text-sm',
+                        isLimitReached ? 'text-[#94A3B8]' : 'text-[#1C2434]',
+                      ].join(' ')}
+                      key={category.id}
+                    >
+                      <input
+                        checked={isSelected}
+                        disabled={isBusy || isLimitReached}
+                        type="checkbox"
+                        onChange={(event) =>
+                          setHomeSettings((current) => {
+                            if (event.target.checked) {
                               return {
                                 ...current,
-                                infoSectionCategoryIds: current.infoSectionCategoryIds.filter(
-                                  (categoryId) => categoryId !== category.id,
-                                ),
+                                infoSectionCategoryIds: [
+                                  ...current.infoSectionCategoryIds,
+                                  category.id,
+                                ].slice(0, 5),
                               };
-                            })
-                          }
-                        />
-                        <span className="flex min-w-0 flex-1 items-center justify-between gap-3">
-                          <span className="truncate">
-                            {category.name}
-                            {category.isActive ? '' : ' (inactive)'}
-                          </span>
-                          <span className="shrink-0 rounded-md bg-[#F1F5F9] px-2 py-0.5 text-xs font-semibold text-[#64748B]">
-                            {category._count?.posts ?? 0}
-                          </span>
-                        </span>
-                      </label>
-                    );
-                  })}
-                  <div className="flex items-center justify-between border-t border-[#E2E8F0] pt-2 text-xs text-[#64748B]">
-                    <span>{homeSettings.infoSectionCategoryIds.length}/5 selected</span>
-                    {homeSettings.infoSectionCategoryIds.length ? (
-                      <button
-                        className="font-semibold text-[#3C50E0]"
-                        disabled={isBusy}
-                        type="button"
-                        onClick={() =>
-                          setHomeSettings((current) => ({
-                            ...current,
-                            infoSectionCategoryIds: [],
-                          }))
-                        }
-                      >
-                        Use default cards
-                      </button>
-                    ) : null}
-                  </div>
-                </div>
-              </Field>
-              <div className="flex justify-end">
-                <Button disabled={isBusy} type="button" onClick={() => void saveHomeSettings()}>
-                  {isSaving ? 'Saving...' : 'Save Info Section'}
-                </Button>
-              </div>
-            </div>
-          </section>
+                            }
 
-          <form className="rounded-lg border border-[#E2E8F0] bg-white" onSubmit={saveSpotlight}>
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-4">
-              <div>
-                <h2 className="text-base font-semibold text-[#1C2434]">Campus Spotlight</h2>
-                <p className="mt-1 text-sm text-[#64748B]">
-                  Text-only spotlight content shown on Home.
-                </p>
+                            return {
+                              ...current,
+                              infoSectionCategoryIds: current.infoSectionCategoryIds.filter(
+                                (categoryId) => categoryId !== category.id,
+                              ),
+                            };
+                          })
+                        }
+                      />
+                      <span className="flex min-w-0 flex-1 items-center justify-between gap-3">
+                        <span className="truncate">
+                          {category.name}
+                          {category.isActive ? '' : ' (inactive)'}
+                        </span>
+                        <span className="shrink-0 rounded-md bg-[#F1F5F9] px-2 py-0.5 text-xs font-semibold text-[#64748B]">
+                          {category._count?.posts ?? 0}
+                        </span>
+                      </span>
+                    </label>
+                  );
+                })}
+                <div className="flex items-center justify-between border-t border-[#E2E8F0] pt-2 text-xs text-[#64748B]">
+                  <span>{homeSettings.infoSectionCategoryIds.length}/5 selected</span>
+                  {homeSettings.infoSectionCategoryIds.length ? (
+                    <button
+                      className="font-semibold text-[#3C50E0]"
+                      disabled={isBusy}
+                      type="button"
+                      onClick={() =>
+                        setHomeSettings((current) => ({
+                          ...current,
+                          infoSectionCategoryIds: [],
+                        }))
+                      }
+                    >
+                      Use default cards
+                    </button>
+                  ) : null}
+                </div>
               </div>
-              <Button disabled={isBusy} size="sm" type="button" variant="outline" onClick={startNewSpotlight}>
-                <Plus size={15} />
-                New
+            </Field>
+            <div className="flex justify-end">
+              <Button disabled={isBusy} type="button" onClick={() => void saveHomeSettings()}>
+                {isSaving ? 'Saving...' : 'Save Info Section'}
               </Button>
             </div>
-            <div className="grid gap-4 p-5">
-              <Field label="Text">
-                <textarea
-                  className="min-h-24 rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
-                  disabled={isBusy}
-                  required
-                  value={spotlightForm.text}
-                  onChange={(event) =>
-                    setSpotlightForm((current) => ({
-                      ...current,
-                      text: event.target.value,
-                    }))
-                  }
-                />
-              </Field>
-              <Field label="Cite">
-                <input
-                  className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
-                  disabled={isBusy}
-                  required
-                  value={spotlightForm.cite}
-                  onChange={(event) =>
-                    setSpotlightForm((current) => ({
-                      ...current,
-                      cite: event.target.value,
-                    }))
-                  }
-                />
-              </Field>
-              <Field label="Image">
-                <div className="space-y-3">
-                  {spotlightForm.imagePath ? (
-                    <div className="overflow-hidden rounded-lg border border-[#E2E8F0] bg-[#F8FAFC]">
-                      <img
-                        alt={spotlightForm.imageAlt || spotlightForm.cite || 'Campus spotlight'}
-                        className="aspect-[16/7] w-full object-cover"
-                        src={adminApi.publicAssetUrl(spotlightForm.imagePath)}
-                      />
-                    </div>
-                  ) : (
-                    <div className="grid min-h-32 place-items-center rounded-lg border border-dashed border-[#CBD5E1] bg-[#F8FAFC] text-sm text-[#64748B]">
-                      No spotlight image selected
-                    </div>
-                  )}
-
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      disabled={isBusy}
-                      size="sm"
-                      type="button"
-                      variant="outline"
-                      onClick={() => setIsSpotlightImagePickerOpen(true)}
-                    >
-                      <ImagePlus size={14} />
-                      Choose Image
-                    </Button>
-
-                    {spotlightForm.imagePath ? (
-                      <Button
-                        disabled={isBusy}
-                        size="sm"
-                        type="button"
-                        variant="ghost"
-                        onClick={() =>
-                          setSpotlightForm((current) => ({
-                            ...current,
-                            imageAlt: '',
-                            imagePath: '',
-                          }))
-                        }
-                      >
-                        Remove
-                      </Button>
-                    ) : null}
-                  </div>
-                </div>
-              </Field>
-              <Field label="Image alt text">
-                <input
-                  className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
-                  disabled={isBusy}
-                  maxLength={255}
-                  value={spotlightForm.imageAlt}
-                  onChange={(event) =>
-                    setSpotlightForm((current) => ({
-                      ...current,
-                      imageAlt: event.target.value,
-                    }))
-                  }
-                />
-              </Field>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <Field label="Sort order">
-                  <input
-                    className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
-                    disabled={isBusy}
-                    type="number"
-                    value={spotlightForm.sortOrder}
-                    onChange={(event) =>
-                      setSpotlightForm((current) => ({
-                        ...current,
-                        sortOrder: event.target.value,
-                      }))
-                    }
-                  />
-                </Field>
-                <label className="mt-6 flex items-center gap-2 text-sm text-[#1C2434]">
-                  <input
-                    checked={spotlightForm.isActive}
-                    disabled={isBusy}
-                    type="checkbox"
-                    onChange={(event) =>
-                      setSpotlightForm((current) => ({
-                        ...current,
-                        isActive: event.target.checked,
-                      }))
-                    }
-                  />
-                  Active
-                </label>
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button disabled={isBusy} type="submit">
-                  {isSaving ? 'Saving...' : editingSpotlightId ? 'Update Spotlight' : 'Create Spotlight'}
-                </Button>
-              </div>
-            </div>
-          </form>
-        </div>
-
-        <section className="overflow-hidden rounded-lg border border-[#E2E8F0] bg-white">
-          <div className="border-b border-[#E2E8F0] px-5 py-4">
-            <h2 className="text-base font-semibold text-[#1C2434]">Campus Spotlight List</h2>
           </div>
-          {!spotlights.length ? (
-            <div className="p-5 text-sm text-[#64748B]">No campus spotlight content yet.</div>
-          ) : (
-            <div className="divide-y divide-[#E2E8F0]">
-              {spotlights.map((spotlight) => (
-                <div
-                  key={spotlight.id}
-                  className="grid gap-3 px-5 py-4 md:grid-cols-[minmax(0,1fr)_120px_150px] md:items-center"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-[#1C2434]">
-                      {spotlight.cite}
-                    </p>
-                    <p className="truncate text-sm text-[#64748B]">{spotlight.text}</p>
-                  </div>
-                  <span className="text-sm text-[#64748B]">
-                    {spotlight.isActive ? 'Active' : 'Hidden'}
-                  </span>
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      disabled={isBusy}
-                      size="sm"
-                      type="button"
-                      variant="danger"
-                      onClick={() => void deleteSpotlight(spotlight.id)}
-                    >
-                      Delete
-                    </Button>
-                    <Button
-                      disabled={isBusy}
-                      size="sm"
-                      type="button"
-                      variant="outline"
-                      onClick={() => editSpotlight(spotlight)}
-                    >
-                      Edit
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </section>
 
         <CoverImagePickerModal
@@ -1224,21 +906,6 @@ export default function HeroSlidesPage() {
             }))
           }
           onSelectLocalFile={(file) => void uploadHeroImage(file)}
-        />
-        <CoverImagePickerModal
-          allowedKinds={['IMAGE']}
-          galleries={galleries}
-          open={isSpotlightImagePickerOpen}
-          title="Choose Spotlight Image"
-          onClose={() => setIsSpotlightImagePickerOpen(false)}
-          onSelect={(asset) =>
-            setSpotlightForm((current) => ({
-              ...current,
-              imageAlt: asset.alt || current.cite,
-              imagePath: asset.path,
-            }))
-          }
-          onSelectLocalFile={(file) => void uploadSpotlightImage(file)}
         />
         <CoverImagePickerModal
           allowUpload={false}

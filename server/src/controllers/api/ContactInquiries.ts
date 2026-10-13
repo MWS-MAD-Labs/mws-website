@@ -14,8 +14,9 @@ export class ContactInquiryController {
   static async submit(c: Context) {
     const body = await readJson(c);
     const ipAddress =
-      c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ||
+      c.req.header("cf-connecting-ip") ||
       c.req.header("x-real-ip") ||
+      c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ||
       null;
     const userAgent = c.req.header("user-agent") || null;
 

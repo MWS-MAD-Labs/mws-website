@@ -122,7 +122,7 @@ export default function UploadVidio({
             <input
               className="sr-only"
               type="file"
-              accept="video/*"
+              accept="video/mp4,video/webm,video/quicktime"
               onChange={handleFileChange}
             />
             {previewUrl ? (
@@ -130,13 +130,16 @@ export default function UploadVidio({
             ) : (
               <span className="text-sm font-medium text-[#64748B]">
                 Choose video
+                <span className="mt-1 block text-xs font-normal">
+                  MP4/WebM/MOV · Max 50 MB
+                </span>
               </span>
             )}
           </label>
           {file ? <div className="text-sm text-[#64748B]">{file.name}</div> : null}
         </>
       ) : (
-        <Field label="YouTube URL">
+        <Field label="YouTube URL" required={mode === "youtube"}>
           <input
             className="rounded border border-[#E2E8F0] px-3 py-2"
             placeholder="https://www.youtube.com/watch?v=..."

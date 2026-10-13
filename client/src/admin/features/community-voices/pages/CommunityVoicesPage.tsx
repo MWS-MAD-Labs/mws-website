@@ -309,8 +309,9 @@ export default function CommunityVoicesPage() {
                       <div className="flex items-center justify-end gap-1.5">
                         <Button
                           aria-label={`Delete ${voice.name}`}
-                          className="h-90 w-90 rounded-md p-0"
+                          className="rounded-md"
                           disabled={deletingId === voice.id || isSaving}
+                          iconOnly
                           size="sm"
                           type="button"
                           variant="danger"

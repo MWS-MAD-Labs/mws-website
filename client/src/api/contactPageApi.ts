@@ -7,6 +7,7 @@ export type ContactInquiryPayload = {
   subject: string;
   category: string;
   message: string;
+  captchaToken?: string;
   source?: string;
 };
 

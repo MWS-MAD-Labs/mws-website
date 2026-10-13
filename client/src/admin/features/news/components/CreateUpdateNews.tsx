@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import {
@@ -36,6 +36,11 @@ import {
 } from '../newsEditorModel';
 import { NEWS_STATUS_OPTIONS, notifyNewsListReturn } from '../newsUtils';
 import { useToastState } from '@/admin/components/ui/toastContext';
+import { useUnsavedChangesGuard } from '@/admin/hooks/useUnsavedChangesGuard';
+
+function serializeNewsDraft(form: NewsForm, removedMediaIds: string[]) {
+  return JSON.stringify({ form, removedMediaIds });
+}
 
 export default function CreateUpdateNews() {
   const navigate = useNavigate();
@@ -53,6 +58,9 @@ export default function CreateUpdateNews() {
   const [removedMediaIds, setRemovedMediaIds] = useState<string[]>([]);
 
   const [slugWasEdited, setSlugWasEdited] = useState(false);
+  const [savedSnapshot, setSavedSnapshot] = useState(() =>
+    serializeNewsDraft(createEmptyNewsForm(), []),
+  );
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useToastState<string | null>(null);
@@ -81,10 +89,14 @@ export default function CreateUpdateNews() {
         setRemovedMediaIds([]);
 
         if (post) {
-          setForm(newsFormFromPost(post));
+          const nextForm = newsFormFromPost(post);
+          setForm(nextForm);
+          setSavedSnapshot(serializeNewsDraft(nextForm, []));
           setSlugWasEdited(true);
         } else {
-          setForm(createEmptyNewsForm());
+          const nextForm = createEmptyNewsForm();
+          setForm(nextForm);
+          setSavedSnapshot(serializeNewsDraft(nextForm, []));
           setSlugWasEdited(false);
         }
       } catch (error) {
@@ -138,6 +150,16 @@ export default function CreateUpdateNews() {
       articlePhotoPreviewUrlsRef.current.clear();
     };
   }, []);
+
+  const hasUnsavedChanges = useMemo(
+    () =>
+      !loading &&
+      !saving &&
+      (serializeNewsDraft(form, removedMediaIds) !== savedSnapshot || Boolean(localCoverFile)),
+    [form, loading, localCoverFile, removedMediaIds, savedSnapshot, saving],
+  );
+
+  useUnsavedChangesGuard(hasUnsavedChanges);
 
   function updateForm<Key extends keyof NewsForm>(key: Key, value: NewsForm[Key]) {
     setForm((current) => ({
@@ -246,6 +268,10 @@ export default function CreateUpdateNews() {
   }
 
   function handleClose() {
+    if (hasUnsavedChanges && !window.confirm('You have unsaved changes. Leave this page?')) {
+      return;
+    }
+
     navigate('/admin/news');
   }
 
@@ -363,7 +389,7 @@ export default function CreateUpdateNews() {
                 </div>
 
                 <div className="space-y-5 p-5">
-                  <Field label="Title">
+                  <Field label="Title" required>
                     <input
                       autoFocus
                       className={`${NEWS_INPUT_CLASS} text-lg font-semibold`}
@@ -540,7 +566,7 @@ export default function CreateUpdateNews() {
                     </p>
                   </div>
 
-                  <Field label="Article URL">
+                  <Field label="Article URL" required>
                     <div className="flex overflow-hidden rounded-lg border border-[#E2E8F0] bg-white focus-within:border-[#3C50E0] focus-within:ring-2 focus-within:ring-[#3C50E0]/10">
                       <span className="grid place-items-center border-r border-[#E2E8F0] bg-[#F1F5F9] px-3 text-sm text-[#64748B]">
                         /news/

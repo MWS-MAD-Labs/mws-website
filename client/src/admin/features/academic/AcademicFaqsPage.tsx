@@ -318,7 +318,7 @@ export default function AcademicFaqsPage() {
           onClose={() => closeForm()}
         >
           <form className="grid gap-4" onSubmit={submitForm}>
-            <Field label="Question">
+            <Field label="Question" required>
               <input
                 className={fieldClass}
                 disabled={Boolean(savingId)}
@@ -329,7 +329,7 @@ export default function AcademicFaqsPage() {
                 }
               />
             </Field>
-            <Field label="Answer">
+            <Field label="Answer" required>
               <textarea
                 className={`${fieldClass} min-h-32`}
                 disabled={Boolean(savingId)}

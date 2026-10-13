@@ -22,6 +22,7 @@ export type OurSchoolWithGallery = Prisma.OurSchoolGetPayload<{
 }>;
 
 export type OurSchoolCreateData = {
+  singletonKey?: string | null;
   title: string;
   description?: string | null;
   content?: Prisma.InputJsonValue | null;
@@ -32,10 +33,19 @@ export type OurSchoolCreateData = {
 export type OurSchoolUpdateData = Partial<OurSchoolCreateData>;
 
 export class OurSchoolRepository {
+  static singletonKey = "main";
+
   static async list(): Promise<OurSchoolWithGallery[]> {
     return getPrisma().ourSchool.findMany({
       include: ourSchoolInclude,
       orderBy: { updatedAt: "desc" },
+    });
+  }
+
+  static async findSingleton(): Promise<OurSchoolWithGallery | null> {
+    return getPrisma().ourSchool.findUnique({
+      where: { singletonKey: OurSchoolRepository.singletonKey },
+      include: ourSchoolInclude,
     });
   }
 
@@ -60,7 +70,10 @@ export class OurSchoolRepository {
 
   static async create(data: OurSchoolCreateData): Promise<OurSchoolWithGallery> {
     return getPrisma().ourSchool.create({
-      data: data as Prisma.OurSchoolUncheckedCreateInput,
+      data: {
+        singletonKey: OurSchoolRepository.singletonKey,
+        ...data,
+      } as Prisma.OurSchoolUncheckedCreateInput,
       include: ourSchoolInclude,
     });
   }

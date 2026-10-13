@@ -4,15 +4,12 @@ import { pageApi, type CommunityGalleryImageData, type OurSchoolPageData } from 
 import ContentBreadcrumb from '@/components/ui/ContentBreadcrumb';
 import SubpageHero from '@/components/ui/SubpageHero';
 import AdmissionsCta from '@/components/layout/AdmissionsCta';
-import { asset } from '@/data/site';
-
-const LOGO_SRC =
-  'https://millenniaws.sch.id/wp-content/uploads/2021/11/Millennia-World-School-Logo-Only.svg';
+import { asset, logoUrl } from '@/data/site';
 
 const defaultAboutContent: OurSchoolPageData = {
   hero: {
-    title: 'Our School',
-    image: 'about-us',
+    title: 'About MWS',
+    image: asset('DSC04079.jpg'),
     imageAlt: 'Millennia World School campus',
   },
   background: {
@@ -202,8 +199,8 @@ export default function AboutUs() {
       )}
 
       <SubpageHero
-        title={content.hero.title}
-        image={content.hero.image}
+        title="About MWS"
+        image={content.hero.image || defaultAboutContent.hero.image}
         imageAlt={content.hero.imageAlt}
       />
 
@@ -211,7 +208,6 @@ export default function AboutUs() {
         items={[
           { label: 'Home', path: '/' },
           { label: 'About MWS' },
-          { label: content.hero.title },
         ]}
       />
 
@@ -305,7 +301,7 @@ export default function AboutUs() {
           <div className="relative hidden md:block">
             <div className="sticky top-0 flex h-screen items-center justify-center">
               <img
-                src={LOGO_SRC}
+                src={logoUrl}
                 alt="Millennia World School logo"
                 className="h-auto w-full max-w-[220px] object-contain lg:max-w-[260px]"
               />

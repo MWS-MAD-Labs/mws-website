@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 120" role="img" aria-labelledby="title">
+  <title id="title">Common Sense Education</title>
+  <rect width="320" height="120" rx="10" fill="#f7f5ff"/>
+  <circle cx="72" cy="60" r="28" fill="#5b46a8"/>
+  <path d="M57 49h30v8H57zm0 14h30v8H57z" fill="#ffffff"/>
+  <text x="122" y="54" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#241718">Common Sense</text>
+  <text x="122" y="79" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#241718">Education</text>
+</svg>

@@ -40,4 +40,5 @@ export const env = {
       defaultApiBaseUrl()),
   googleClientId: readEnv("VITE_GOOGLE_CLIENT_ID"),
   googleRedirectUri: readEnv("VITE_GOOGLE_REDIRECT_URI") || defaultGoogleRedirectUri(),
+  recaptchaSiteKey: readEnv("VITE_RECAPTCHA_SITE_KEY"),
 };

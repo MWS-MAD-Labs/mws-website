@@ -2,11 +2,13 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: 'danger' | 'ghost' | 'outline' | 'primary';
   size?: 'md' | 'sm';
   fullWidth?: boolean;
+  iconOnly?: boolean;
 };
 
 export default function Button({
   className = '',
   fullWidth = false,
+  iconOnly = false,
   size = 'md',
   type = 'button',
   variant = 'primary',
@@ -20,13 +22,20 @@ export default function Button({
     primary: 'border border-transparent bg-[#3C50E0] text-white hover:bg-[#2F3EC8]',
   }[variant];
 
-  const sizeClass = size === 'sm' ? 'px-4 py-2 text-[13px]' : 'px-4 py-3 text-[14px]';
+  const sizeClass = iconOnly
+    ? size === 'sm'
+      ? 'h-9 w-9 p-0 text-[13px]'
+      : 'h-10 w-10 p-0 text-[14px]'
+    : size === 'sm'
+      ? 'px-4 py-2 text-[13px]'
+      : 'px-4 py-3 text-[14px]';
 
   return (
     <button
       type={type}
       className={[
-        'inline-flex cursor-pointer items-center justify-center rounded-lg font-[var(--f-head)] font-bold transition-colors',
+        'inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg font-[var(--f-head)] font-bold transition-colors',
+        '[&>svg]:pointer-events-none [&>svg]:shrink-0 [&>svg]:stroke-current',
         'disabled:cursor-wait disabled:opacity-70',
         variantClass,
         sizeClass,

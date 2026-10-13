@@ -472,8 +472,9 @@ export default function CommunityStoriesPage() {
                       <div className="flex items-center justify-end gap-1.5">
                         <Button
                           aria-label={`Delete ${image.title || 'activity photo'}`}
-                          className="h-90 w-90 rounded-md p-0"
+                          className="rounded-md"
                           disabled={deletingId === image.id || isBusy}
+                          iconOnly
                           size="sm"
                           type="button"
                           variant="danger"
@@ -568,7 +569,7 @@ export default function CommunityStoriesPage() {
 
             <form onSubmit={savePage}>
               <div className="max-h-[calc(100dvh-180px)] space-y-5 overflow-y-auto px-6 py-5">
-                <Field label="Title">
+                <Field label="Title" required>
                   <input
                     className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-[#7e1518] focus:ring-1 focus:ring-[#7e1518] disabled:bg-gray-50"
                     disabled={isBusy}
@@ -813,9 +814,9 @@ export default function CommunityStoriesPage() {
                     alt={editingImage.title || editingImage.caption || 'Activity photo'}
                   />
                 ) : (
-                  <Field label="Image File">
+                  <Field label="Image File" required>
                     <input
-                      accept="image/*"
+                      accept="image/avif,image/webp,image/jpeg,image/png"
                       className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition file:mr-3 file:rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-gray-700"
                       disabled={isSaving}
                       required

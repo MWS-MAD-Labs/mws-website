@@ -6,6 +6,7 @@ import CoverImagePickerModal from '@/admin/features/news/components/layouts/Cove
 import AcademicOverviewMainForm from './components/layout/AcademicOverviewMainForm';
 import AcademicOverviewSidebar from './components/layout/AcademicOverviewSidebar';
 import { useAcademicOverviewEditor } from './hooks/useAcademicOverviewEditor';
+import { useUnsavedChangesGuard } from '@/admin/hooks/useUnsavedChangesGuard';
 
 export default function AcademicOverviewPage() {
   const editor = useAcademicOverviewEditor();
@@ -13,8 +14,10 @@ export default function AcademicOverviewPage() {
     activeImageField,
     form,
     galleries,
+    hasUnsavedChanges,
     isGalleryPickerOpen,
     isLoading,
+    isSaving,
     message,
     selectImage,
     setActiveImageField,
@@ -22,6 +25,7 @@ export default function AcademicOverviewPage() {
     uploadImage,
     updateForm,
   } = editor;
+  useUnsavedChangesGuard(hasUnsavedChanges && !isSaving);
 
   return (
     <AppShell title="Academic Overview">

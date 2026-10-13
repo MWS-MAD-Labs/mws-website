@@ -27,7 +27,13 @@ export function TextField({
 }: TextFieldProps) {
   return (
     <label className="block min-w-0">
-      <span className="block text-sm font-semibold text-[#1C2434]">{label}</span>
+      <span className="block text-sm font-semibold text-[#1C2434]">
+        {label}
+        {required ? <span className="ml-1 text-red-600">*</span> : null}
+        {!required ? (
+          <span className="ml-1 text-xs font-normal text-[#94A3B8]">(opsional)</span>
+        ) : null}
+      </span>
       <input
         type={type}
         value={value}
@@ -58,7 +64,13 @@ export function TextAreaField({
 }: TextAreaFieldProps) {
   return (
     <label className="block min-w-0">
-      <span className="block text-sm font-semibold text-[#1C2434]">{label}</span>
+      <span className="block text-sm font-semibold text-[#1C2434]">
+        {label}
+        {required ? <span className="ml-1 text-red-600">*</span> : null}
+        {!required ? (
+          <span className="ml-1 text-xs font-normal text-[#94A3B8]">(opsional)</span>
+        ) : null}
+      </span>
       <textarea
         value={value}
         disabled={disabled}

@@ -73,7 +73,7 @@ export default function UploadImages({
         <input
           className="sr-only"
           type="file"
-          accept="image/*"
+          accept="image/avif,image/webp,image/jpeg,image/png"
           onChange={handleFileChange}
         />
         {previewUrl ? (
@@ -83,7 +83,12 @@ export default function UploadImages({
             alt={file?.name ?? "Selected image preview"}
           />
         ) : (
-          <span className="text-sm font-medium text-[#64748B]">Choose image</span>
+          <span className="text-sm font-medium text-[#64748B]">
+            Choose image
+            <span className="mt-1 block text-xs font-normal">
+              AVIF/WebP preferred, JPEG/PNG allowed · Max 5 MB
+            </span>
+          </span>
         )}
       </label>
 

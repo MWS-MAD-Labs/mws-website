@@ -59,6 +59,10 @@ apiClient.interceptors.response.use(
       console.error(`[API][ERROR] message=${safeErrorMessage(error)}`);
     }
 
+    if (shouldRedirectToLogin(error)) {
+      window.location.assign("/admin/login?error=session_expired");
+    }
+
     return Promise.reject(error);
   },
 );
@@ -170,4 +174,14 @@ function safeUrl(url: string | undefined) {
 function safeErrorMessage(error: AxiosError) {
   const payloadMessage = getErrorMessage(error.response?.data);
   return payloadMessage || error.response?.statusText || error.message;
+}
+
+function shouldRedirectToLogin(error: AxiosError) {
+  if (typeof window === "undefined") return false;
+  if (error.response?.status !== 401) return false;
+  if (!window.location.pathname.startsWith("/admin")) return false;
+  if (window.location.pathname === "/admin/login") return false;
+
+  const requestUrl = safeUrl(error.config?.url);
+  return requestUrl !== "/auth/me" && !requestUrl.startsWith("/auth/google");
 }

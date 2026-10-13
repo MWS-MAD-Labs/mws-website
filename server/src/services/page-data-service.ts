@@ -207,11 +207,11 @@ const defaultAdmissionGuidelinesContent = {
 };
 
 const defaultPartnerLogos = [
-  "https://millenniaws.sch.id/wp-content/uploads/2023/11/CharterForCompassion.jpg",
-  "https://millenniaws.sch.id/wp-content/uploads/2023/11/ClimateChangeSchool.jpg",
-  "https://millenniaws.sch.id/wp-content/uploads/2023/11/ClimateActionProject.jpg",
-  "https://millenniaws.sch.id/wp-content/uploads/2023/11/CommonSenseEducation.jpg",
-  "https://millenniaws.sch.id/wp-content/uploads/2023/11/ResponsiveClassroom.jpg",
+  asset("CharterForCompassion.svg"),
+  asset("ClimateChangeSchool.svg"),
+  asset("ClimateActionProject.svg"),
+  asset("CommonSenseEducation.svg"),
+  asset("ResponsiveClassroom.svg"),
 ];
 
 const defaultOurSchoolContent = {

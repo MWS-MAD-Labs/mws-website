@@ -158,10 +158,10 @@ describe("AcademicPageService", () => {
 
     const createCalls = (juniorHigh.create.mock.calls as unknown[]) as unknown[][];
     const createArgs = createCalls[0]?.[0] as {
-      data: { academicLevelId: string; status: string; publishedAt: Date | null };
+      data: { academicLevelId: string; status: string; publishedAt?: Date | null };
     };
     expect(createArgs.data.academicLevelId).toBe("academic-level-1");
     expect(createArgs.data.status).toBe("DRAFT");
-    expect(createArgs.data.publishedAt).toBeNull();
+    expect(createArgs.data.publishedAt).toBeUndefined();
   });
 });

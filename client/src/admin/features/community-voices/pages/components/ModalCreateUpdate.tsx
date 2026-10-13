@@ -128,7 +128,7 @@ export default function ModalCreateUpdate({
 
           <form onSubmit={handleSubmit}>
             <div className="max-h-[calc(100dvh-180px)] space-y-5 overflow-y-auto px-6 py-5">
-              <Field label="Name">
+              <Field label="Name" required>
                 <input
                   className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-[#7e1518] focus:ring-1 focus:ring-[#7e1518] disabled:bg-gray-50"
                   disabled={isBusy}
@@ -141,7 +141,7 @@ export default function ModalCreateUpdate({
               </Field>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Role">
+                <Field label="Role" required>
                   <Select
                     className="w-full"
                     disabled={isBusy}
@@ -170,7 +170,7 @@ export default function ModalCreateUpdate({
                 </Field>
               </div>
 
-              <Field label="Quote">
+              <Field label="Quote" required>
                 <textarea
                   className="min-h-28 w-full resize-none rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-[#7e1518] focus:ring-1 focus:ring-[#7e1518] disabled:bg-gray-50"
                   disabled={isBusy}
@@ -183,7 +183,7 @@ export default function ModalCreateUpdate({
 
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-gray-700">
-                  Voice Media
+                  Voice Media <span className="text-red-600">*</span>
                 </label>
 
                 {form.imagePath ? (

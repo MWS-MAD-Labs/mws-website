@@ -30,6 +30,17 @@ import {
 import { useToastState } from '@/admin/components/ui/toastContext';
 import { uploadImageForPicker } from '@/admin/features/gallery/utils/uploadImageForPicker';
 
+function serializeAcademicLevelDraft(input: {
+  content: AcademicLevelContent;
+  description: string;
+  coverImage: string;
+  galleryId: string | null;
+  status: PageStatus;
+  publishedAt: string;
+}) {
+  return JSON.stringify(input);
+}
+
 export function useAcademicLevelEditor() {
   const location = useLocation();
   const levelKey = parseAcademicLevelKey(location.pathname);
@@ -45,6 +56,7 @@ export function useAcademicLevelEditor() {
   const [galleryId, setGalleryId] = useState<string | null>(null);
   const [status, setStatus] = useState<PageStatus>('DRAFT');
   const [publishedAt, setPublishedAt] = useState('');
+  const [savedSnapshot, setSavedSnapshot] = useState('');
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [galleries, setGalleries] = useState<GalleryItem[]>([]);
   const [allFaqs, setAllFaqs] = useState<AcademicFaqItem[]>([]);
@@ -77,17 +89,32 @@ export function useAcademicLevelEditor() {
     (item: FixedAcademicLevelItem | null, levels: AcademicMasterLevel[]) => {
       const nextContent = academicContentFromItem(levelKey, item);
       const nextMaster = item?.academicLevel ?? findMasterLevel(levels, levelKey);
+      const nextDescription = item?.description ?? nextContent.hero.description;
+      const nextCoverImage = item?.coverImage ?? nextContent.hero.image;
+      const nextGalleryId = item?.galleryId ?? null;
+      const nextStatus = item?.status === 'PUBLISHED' ? 'PUBLISHED' : 'DRAFT';
+      const nextPublishedAt = datetimeLocalValue(item?.publishedAt ?? null);
 
       setItemId(item?.id ?? null);
       setMasterLevel(nextMaster);
       setContent(nextContent);
-      setDescription(item?.description ?? nextContent.hero.description);
-      setCoverImage(item?.coverImage ?? nextContent.hero.image);
-      setGalleryId(item?.galleryId ?? null);
-      setStatus(item?.status === 'PUBLISHED' ? 'PUBLISHED' : 'DRAFT');
-      setPublishedAt(datetimeLocalValue(item?.publishedAt ?? null));
+      setDescription(nextDescription);
+      setCoverImage(nextCoverImage);
+      setGalleryId(nextGalleryId);
+      setStatus(nextStatus);
+      setPublishedAt(nextPublishedAt);
       setUpdatedAt(item?.updatedAt ?? null);
       setAttachedFaqs([...(item?.faqs ?? [])].sort((a, b) => a.sortOrder - b.sortOrder));
+      setSavedSnapshot(
+        serializeAcademicLevelDraft({
+          content: nextContent,
+          description: nextDescription,
+          coverImage: nextCoverImage,
+          galleryId: nextGalleryId,
+          status: nextStatus,
+          publishedAt: nextPublishedAt,
+        }),
+      );
     },
     [levelKey],
   );
@@ -447,6 +474,16 @@ export function useAcademicLevelEditor() {
 
   const isBusy = isSaving || isLoading || isUploadingImage || isUploadingDocument;
   const isPublished = status === 'PUBLISHED';
+  const hasUnsavedChanges =
+    !isLoading &&
+    serializeAcademicLevelDraft({
+      content,
+      description,
+      coverImage,
+      galleryId,
+      status,
+      publishedAt,
+    }) !== savedSnapshot;
 
   return {
     activeImageField,
@@ -463,6 +500,7 @@ export function useAcademicLevelEditor() {
     filteredAvailableFaqs,
     galleries,
     galleryId,
+    hasUnsavedChanges,
     isBusy,
     isFaqPickerOpen,
     isLoading,

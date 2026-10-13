@@ -74,7 +74,7 @@ export default function Dashboard() {
                 <LayoutPanelTop size={16} aria-hidden="true" />
                 Home hero
               </Link>
-              <Link to="/admin/gallery/Gambar" className={quickActionClass}>
+              <Link to="/admin/gallery/images" className={quickActionClass}>
                 <ImagePlus size={16} aria-hidden="true" />
                 Upload photos
               </Link>

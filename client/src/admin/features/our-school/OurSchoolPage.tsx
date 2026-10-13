@@ -24,12 +24,12 @@ export default function OurSchoolPage() {
   } = editor;
 
   return (
-    <AppShell title="Our School">
+    <AppShell title="About MWS">
       <section className="w-full space-y-5 p-6">
         <ContentPageHeader
-          breadcrumbs={[{ label: 'Content' }, { label: 'Our School' }]}
-          title="Our School"
-          description="Edit the public Our School page content."
+          breadcrumbs={[{ label: 'Content' }, { label: 'About MWS' }]}
+          title="About MWS"
+          description="Edit the public About MWS page content."
         />
 
         {message ? (

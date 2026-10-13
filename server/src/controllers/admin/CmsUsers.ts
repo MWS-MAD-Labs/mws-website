@@ -12,6 +12,18 @@ async function readJson<T = unknown>(c: Context): Promise<T> {
 }
 
 export class CmsUsersController {
+  static async listAuditLogs(c: Context<{ Variables: SessionVariables }>) {
+    const logs = await CmsAuthService.listAuditLogs({
+      action: c.req.query("action"),
+      entityType: c.req.query("entityType"),
+      page: c.req.query("page"),
+      pageSize: c.req.query("pageSize"),
+      search: c.req.query("search"),
+    });
+
+    return c.json({ data: logs });
+  }
+
   static async listUsers(c: Context<{ Variables: SessionVariables }>) {
     const query = {
       search: c.req.query("search"),

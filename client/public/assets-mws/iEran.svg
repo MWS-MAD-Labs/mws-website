@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 120" role="img" aria-labelledby="title">
+  <title id="title">iEARN</title>
+  <rect width="320" height="120" rx="10" fill="#f4fbff"/>
+  <circle cx="72" cy="60" r="28" fill="#0284c7"/>
+  <path d="M52 60a20 20 0 1 0 40 0 20 20 0 0 0-40 0Zm8 0h24M72 40c6 7 9 14 9 20s-3 13-9 20M72 40c-6 7-9 14-9 20s3 13 9 20" fill="none" stroke="#fff" stroke-width="4"/>
+  <text x="122" y="69" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#241718">iEARN</text>
+</svg>

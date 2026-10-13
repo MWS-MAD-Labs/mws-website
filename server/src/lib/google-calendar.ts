@@ -5,6 +5,7 @@ import {
 } from './google-service-account';
 
 const CALENDAR_READONLY_SCOPE = 'https://www.googleapis.com/auth/calendar.readonly';
+const CALENDAR_CACHE_TTL_MS = 5 * 60 * 1000;
 
 export type GoogleCalendarEvent = {
   id: string;
@@ -21,6 +22,11 @@ export type GoogleCalendarEventsResult = {
   configured: boolean;
   events: GoogleCalendarEvent[];
 };
+
+const calendarEventsCache = new Map<
+  string,
+  { expiresAt: number; result: GoogleCalendarEventsResult }
+>();
 
 function eventFromGoogle(
   event: { id?: string | null; summary?: string | null; description?: string | null; location?: string | null; htmlLink?: string | null; start?: { date?: string | null; dateTime?: string | null } | null; end?: { date?: string | null; dateTime?: string | null } | null },
@@ -54,6 +60,12 @@ export async function listUpcomingGoogleCalendarEvents(
 
   const maxResults = Math.min(Math.max(Math.trunc(limit) || 2, 1), 10);
   const subject = process.env.GOOGLE_CALENDAR_SUBJECT?.trim() || undefined;
+  const cacheKey = `${calendarId}:${subject ?? ''}:${maxResults}`;
+  const cached = calendarEventsCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.result;
+  }
+
   const auth = createServiceAccountClient(credentials, {
     scopes: [CALENDAR_READONLY_SCOPE],
     subject,
@@ -67,11 +79,18 @@ export async function listUpcomingGoogleCalendarEvents(
     orderBy: 'startTime',
   });
 
-  return {
+  const result = {
     configured: true,
     events: (response.data.items ?? [])
       .filter((event) => event.status !== 'cancelled')
       .map(eventFromGoogle)
       .filter((event): event is GoogleCalendarEvent => Boolean(event)),
   };
+
+  calendarEventsCache.set(cacheKey, {
+    expiresAt: Date.now() + CALENDAR_CACHE_TTL_MS,
+    result,
+  });
+
+  return result;
 }

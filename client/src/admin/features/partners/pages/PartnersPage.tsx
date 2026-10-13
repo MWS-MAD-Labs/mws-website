@@ -261,15 +261,16 @@ export default function PartnersPage() {
                     <td className="px-5 py-4">
                       <div className="flex items-center justify-end gap-1.5">
                         <Button
-                          aria-label={'Delete ' + partner.name}
-                          className="h-90 w-90 rounded-md p-0"
+                          aria-label={`Delete ${partner.name}`}
+                          className="rounded-md"
                           disabled={deletingId === partner.id}
+                          iconOnly
                           size="sm"
                           type="button"
                           variant="danger"
                           onClick={() => void deletePartner(partner)}
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={14} strokeWidth={2} />
                         </Button>
 
                         <button

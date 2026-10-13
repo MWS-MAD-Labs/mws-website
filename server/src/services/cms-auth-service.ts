@@ -1,4 +1,5 @@
 import { ResponseError } from "../error/response-error";
+import type { Prisma } from "@prisma/client";
 import { listActiveEmployees } from "../lib/central-client";
 import { z } from "zod";
 import { getUserUnitId, isMadLabsUser } from "../lib/admin-access";
@@ -218,6 +219,38 @@ function invitationListItem(
       : null,
     invitedBy: invitation.invitedBy,
     acceptedUser: invitation.acceptedUser,
+  };
+}
+
+function auditLogListItem(log: {
+  id: string;
+  action: string;
+  entityType: string;
+  entityId: string;
+  oldValues: unknown;
+  newValues: unknown;
+  ipAddress: string | null;
+  userAgent: string | null;
+  createdAt: Date;
+  cmsUser: { id: string; name: string; email: string | null } | null;
+}) {
+  return {
+    id: log.id,
+    action: log.action,
+    entityType: log.entityType,
+    entityId: log.entityId,
+    oldValues: log.oldValues ?? null,
+    newValues: log.newValues ?? null,
+    ipAddress: log.ipAddress,
+    userAgent: log.userAgent,
+    createdAt: log.createdAt,
+    actor: log.cmsUser
+      ? {
+          id: log.cmsUser.id,
+          name: log.cmsUser.name,
+          email: log.cmsUser.email,
+        }
+      : null,
   };
 }
 
@@ -481,6 +514,79 @@ export class CmsAuthService {
       name: roleName,
       label: ROLE_LABELS[roleName],
     }));
+  }
+
+  static async listAuditLogs(query: Record<string, string | undefined> = {}) {
+    const page = Math.max(Number.parseInt(query.page ?? "1", 10) || 1, 1);
+    const pageSize = Math.min(
+      Math.max(Number.parseInt(query.pageSize ?? "50", 10) || 50, 10),
+      100,
+    );
+    const search = query.search?.trim();
+    const action = query.action?.trim();
+    const entityType = query.entityType?.trim();
+
+    const where: Prisma.AuditLogWhereInput = {
+      ...(action ? { action } : {}),
+      ...(entityType ? { entityType } : {}),
+      ...(search
+        ? {
+            OR: [
+              { action: { contains: search, mode: "insensitive" } },
+              { entityType: { contains: search, mode: "insensitive" } },
+              { cmsUser: { name: { contains: search, mode: "insensitive" } } },
+              { cmsUser: { email: { contains: search, mode: "insensitive" } } },
+              ...(z.string().uuid().safeParse(search).success
+                ? [{ entityId: search }]
+                : []),
+            ],
+          }
+        : {}),
+    };
+
+    const prisma = getPrisma();
+    const [items, total, actions, entityTypes] = await Promise.all([
+      prisma.auditLog.findMany({
+        where,
+        include: {
+          cmsUser: {
+            select: {
+              email: true,
+              id: true,
+              name: true,
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      prisma.auditLog.count({ where }),
+      prisma.auditLog.findMany({
+        distinct: ["action"],
+        orderBy: { action: "asc" },
+        select: { action: true },
+      }),
+      prisma.auditLog.findMany({
+        distinct: ["entityType"],
+        orderBy: { entityType: "asc" },
+        select: { entityType: true },
+      }),
+    ]);
+
+    return {
+      items: items.map(auditLogListItem),
+      filters: {
+        actions: actions.map((item) => item.action),
+        entityTypes: entityTypes.map((item) => item.entityType),
+      },
+      pagination: {
+        page,
+        pageSize,
+        total,
+        totalPages: Math.max(Math.ceil(total / pageSize), 1),
+      },
+    };
   }
 
   static async updateUserRole(

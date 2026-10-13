@@ -12,9 +12,16 @@ import {
 } from "../utils/contactPageEditorUtils";
 import { uploadImageForPicker } from "@/admin/features/gallery/utils/uploadImageForPicker";
 
+function serializeContactContent(content: ContactPageContent) {
+  return JSON.stringify(content);
+}
+
 export function useContactPageEditor() {
   const [content, setContent] = useState<ContactPageContent>(
     defaultContactPageContent,
+  );
+  const [savedSnapshot, setSavedSnapshot] = useState(() =>
+    serializeContactContent(defaultContactPageContent),
   );
   const [galleries, setGalleries] = useState<GalleryItem[]>([]);
   const [isDefault, setIsDefault] = useState(true);
@@ -35,7 +42,9 @@ export function useContactPageEditor() {
     Promise.all([adminApi.contactPage(), adminApi.galleries()])
       .then(([page, nextGalleries]) => {
         if (cancelled) return;
-        setContent(withContactPageFallback(page.content));
+        const nextContent = withContactPageFallback(page.content);
+        setContent(nextContent);
+        setSavedSnapshot(serializeContactContent(nextContent));
         setGalleries(nextGalleries);
         setIsDefault(page.isDefault);
       })
@@ -78,7 +87,9 @@ export function useContactPageEditor() {
 
     try {
       const savedPage = await adminApi.updateContactPage(cleaned);
-      setContent(withContactPageFallback(savedPage.content));
+      const nextContent = withContactPageFallback(savedPage.content);
+      setContent(nextContent);
+      setSavedSnapshot(serializeContactContent(nextContent));
       setIsDefault(savedPage.isDefault);
       setNotice("Contact page saved.");
     } catch (saveError) {
@@ -101,6 +112,7 @@ export function useContactPageEditor() {
     try {
       await adminApi.resetContactPage();
       setContent(defaultContactPageContent);
+      setSavedSnapshot(serializeContactContent(defaultContactPageContent));
       setIsDefault(true);
       setNotice("Contact page reset to default.");
     } catch (resetError) {
@@ -152,6 +164,9 @@ export function useContactPageEditor() {
     error,
     galleries,
     hasPendingMap,
+    hasUnsavedChanges:
+      !isLoading &&
+      (serializeContactContent(content) !== savedSnapshot || hasPendingMap),
     isDefault,
     isLoading,
     isSaving,

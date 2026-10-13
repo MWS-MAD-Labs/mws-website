@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 120" role="img" aria-labelledby="title">
+  <title id="title">Responsive Classroom</title>
+  <rect width="320" height="120" rx="10" fill="#fff8f6"/>
+  <circle cx="72" cy="60" r="28" fill="#c2410c"/>
+  <path d="M56 74V50l16-9 16 9v24H56Z" fill="#ffffff"/>
+  <text x="122" y="54" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#241718">Responsive</text>
+  <text x="122" y="79" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#241718">Classroom</text>
+</svg>

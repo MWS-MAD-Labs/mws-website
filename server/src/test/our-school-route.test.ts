@@ -14,6 +14,7 @@ const galleryId = "11111111-1111-4111-8111-111111111111";
 const featuredImageId = "22222222-2222-4222-8222-222222222222";
 const ourSchool = {
   id,
+  singletonKey: "main",
   title: "Our School",
   description: "About school",
   content: null,

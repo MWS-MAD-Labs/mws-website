@@ -209,6 +209,7 @@ model AcademicLevel {
 
 model Kindergarten {
   id             String   @id @default(uuid()) @db.Uuid
+  levelKey       String?  @unique @default("kindergarten") @db.VarChar(40)
   academicLevelId String   @db.Uuid
 
   title          String   @db.VarChar(255)
@@ -220,6 +221,13 @@ model Kindergarten {
   hero           Json
   overview       Json
   sections       Json
+  publishedTitle       String?  @db.VarChar(255)
+  publishedDescription String?
+  publishedCoverImage  String?  @db.VarChar(1000)
+  publishedGalleryId   String?  @db.Uuid
+  publishedHero        Json?
+  publishedOverview    Json?
+  publishedSections    Json?
 
   status         String   @default("PUBLISHED") @db.VarChar(30)
   publishedAt    DateTime?
@@ -234,6 +242,7 @@ model Kindergarten {
 
 model Elementary {
   id             String   @id @default(uuid()) @db.Uuid
+  levelKey       String?  @unique @default("elementary") @db.VarChar(40)
   academicLevelId String   @db.Uuid
 
   title          String   @db.VarChar(255)
@@ -245,6 +254,13 @@ model Elementary {
   hero           Json
   overview       Json
   sections       Json
+  publishedTitle       String?  @db.VarChar(255)
+  publishedDescription String?
+  publishedCoverImage  String?  @db.VarChar(1000)
+  publishedGalleryId   String?  @db.Uuid
+  publishedHero        Json?
+  publishedOverview    Json?
+  publishedSections    Json?
 
   status         String   @default("PUBLISHED") @db.VarChar(30)
   publishedAt    DateTime?
@@ -259,6 +275,7 @@ model Elementary {
 
 model JuniorHigh {
   id             String   @id @default(uuid()) @db.Uuid
+  levelKey       String?  @unique @default("high-school") @db.VarChar(40)
   academicLevelId String   @db.Uuid
 
   title          String   @db.VarChar(255)
@@ -270,6 +287,13 @@ model JuniorHigh {
   hero           Json
   overview       Json
   sections       Json
+  publishedTitle       String?  @db.VarChar(255)
+  publishedDescription String?
+  publishedCoverImage  String?  @db.VarChar(1000)
+  publishedGalleryId   String?  @db.Uuid
+  publishedHero        Json?
+  publishedOverview    Json?
+  publishedSections    Json?
 
   status         String   @default("PUBLISHED") @db.VarChar(30)
   publishedAt    DateTime?
@@ -423,6 +447,37 @@ model Partner {
   updatedAt   DateTime @updatedAt
 }
 
+model PopupPromoted {
+  id              String    @id @default(uuid()) @db.Uuid
+  title           String    @db.VarChar(255)
+  description     String?
+  posterImagePath String?   @db.VarChar(1000)
+  posterImageAlt  String?   @db.VarChar(255)
+  buttonText      String?   @db.VarChar(100)
+  buttonUrl       String?   @db.VarChar(1000)
+  targetType      String?   @db.VarChar(50)
+  targetId        String?   @db.VarChar(255)
+  openInNewTab    Boolean   @default(false)
+  sortOrder       Int       @default(0)
+  isActive        Boolean   @default(true)
+  activeFrom      DateTime?
+  activeUntil     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([isActive, sortOrder])
+  @@index([activeFrom, activeUntil])
+  @@index([targetType, targetId])
+}
+
+// Sessions ended by logout. Rows expire with the JWT they revoke.
+model CmsRevokedSession {
+  jti       String   @id @db.VarChar(64)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([expiresAt])
+}
 
 // Not Clear DB
 
@@ -522,6 +577,7 @@ model Affiliation {
 
 model OurSchool {
   id              String   @id @default(uuid()) @db.Uuid
+  singletonKey    String?  @unique @default("main") @db.VarChar(40)
   title           String   @db.VarChar(255)
   description     String?
   content         Json?

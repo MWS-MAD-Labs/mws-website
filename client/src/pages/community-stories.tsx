@@ -98,14 +98,14 @@ export default function CommunityStories() {
       {/* Introduction */}
       <section className="w-full bg-white px-6 py-[90px] max-[680px]:px-5 max-[680px]:py-[65px] md:px-10 md:py-[110px]">
         <div className="mx-auto grid w-full max-w-[1240px] grid-cols-[1.1fr_0.9fr] items-end gap-16 max-[900px]:grid-cols-1 max-[900px]:gap-8">
-          <h1 className="max-w-[760px] text-[clamp(42px,5vw,70px)] font-semibold leading-[0.98] tracking-[-0.04em] text-[var(--charcoal)]">
+          <h2 className="max-w-[760px] text-[clamp(42px,5vw,70px)] font-semibold leading-[0.98] tracking-[-0.04em] text-[var(--charcoal)]">
             {content.introTitle.split('\n').map((line, index) => (
               <span key={line}>
                 {index > 0 && <br />}
                 {line}
               </span>
             ))}
-          </h1>
+          </h2>
 
           <div className="max-w-[520px]">
             {content.introBody.map((paragraph, index) => (

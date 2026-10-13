@@ -147,7 +147,7 @@ export default function NewsCategories({
         onClose={closeForm}
       >
         <form className="space-y-4" onSubmit={submitForm}>
-          <FormField error={errors.name} label="Name">
+          <FormField error={errors.name} label="Name" required>
             <input
               className={FIELD_CLASS}
               disabled={isSaving}
@@ -157,7 +157,7 @@ export default function NewsCategories({
             />
           </FormField>
 
-          <FormField error={errors.slug} label="Slug">
+          <FormField error={errors.slug} label="Slug" required>
             <input
               className={FIELD_CLASS}
               disabled={isSaving}
@@ -393,7 +393,8 @@ function CategoryTableRow({
         <div className="flex items-center justify-end gap-1.5">
           <Button
             aria-label={`Edit ${category.name}`}
-            className="h-90 w-90 rounded-md p-0"
+            className="rounded-md"
+            iconOnly
             size="sm"
             type="button"
             variant="outline"
@@ -404,8 +405,9 @@ function CategoryTableRow({
 
           <Button
             aria-label={`Delete ${category.name}`}
-            className="h-90 w-90 rounded-md p-0"
+            className="rounded-md"
             disabled={deletingId === category.id}
+            iconOnly
             size="sm"
             type="button"
             variant="danger"
@@ -455,7 +457,8 @@ function MobileCategoryRow({
 
           <Button
             aria-label={`Edit ${category.name}`}
-            className="h-8 w-8 rounded-md p-0"
+            className="rounded-md"
+            iconOnly
             size="sm"
             type="button"
             variant="outline"
@@ -466,8 +469,9 @@ function MobileCategoryRow({
 
           <Button
             aria-label={`Delete ${category.name}`}
-            className="h-8 w-8 rounded-md p-0"
+            className="rounded-md"
             disabled={deletingId === category.id}
+            iconOnly
             size="sm"
             type="button"
             variant="danger"
@@ -491,14 +495,22 @@ function FormField({
   children,
   error,
   label,
+  required = false,
 }: {
   children: ReactNode;
   error?: string;
   label: string;
+  required?: boolean;
 }) {
   return (
     <label className="block">
-      <span className="text-sm font-semibold text-[#1C2434]">{label}</span>
+      <span className="text-sm font-semibold text-[#1C2434]">
+        {label}
+        {required ? <span className="ml-1 text-red-600">*</span> : null}
+        {!required ? (
+          <span className="ml-1 text-xs font-normal text-[#94A3B8]">(opsional)</span>
+        ) : null}
+      </span>
 
       <div className="mt-1">{children}</div>
 

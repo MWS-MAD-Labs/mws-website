@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 120" role="img" aria-labelledby="title">
+  <title id="title">Charter for Compassion</title>
+  <rect width="320" height="120" rx="10" fill="#fffaf2"/>
+  <circle cx="72" cy="60" r="28" fill="#7e1518"/>
+  <path d="M58 62c8-18 20-18 28 0-8 14-20 14-28 0Z" fill="#d6a13a"/>
+  <text x="122" y="54" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#241718">Charter for</text>
+  <text x="122" y="79" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#241718">Compassion</text>
+</svg>

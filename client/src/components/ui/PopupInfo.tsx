@@ -3,9 +3,12 @@ import { Link } from 'react-router-dom';
 
 type PopupInfoProps = {
   title: string;
-  description: string;
+  description?: string | null;
   buttonText?: string;
   buttonTo?: string;
+  imageAlt?: string | null;
+  imageSrc?: string | null;
+  openInNewTab?: boolean;
   onClose: () => void;
 };
 
@@ -14,8 +17,15 @@ export default function PopupInfo({
   description,
   buttonText = 'Close',
   buttonTo,
+  imageAlt,
+  imageSrc,
+  openInNewTab = false,
   onClose,
 }: PopupInfoProps) {
+  const isExternalLink = Boolean(buttonTo && /^(https?:)?\/\//i.test(buttonTo));
+  const linkClassName =
+    'inline-flex min-h-[46px] min-w-[130px] items-center justify-center bg-[var(--burgundy)] px-7 py-3 text-xs font-[var(--f-head)] font-bold uppercase tracking-[0.1em] text-white transition-colors duration-200 hover:bg-[var(--burgundy-dark)] motion-reduce:transition-none';
+
   return (
     <div
       className="fixed inset-0 z-[10020] flex items-center justify-center bg-[rgba(36,23,24,0.58)] px-5 py-8 backdrop-blur-[4px]"
@@ -26,7 +36,7 @@ export default function PopupInfo({
         role="dialog"
         aria-modal="true"
         aria-labelledby="popup-info-title"
-        aria-describedby="popup-info-description"
+        aria-describedby={description ? 'popup-info-description' : undefined}
       >
         {/* Decorative background */}
         <div
@@ -70,6 +80,14 @@ export default function PopupInfo({
             Millennia World School
           </p>
 
+          {imageSrc ? (
+            <img
+              src={imageSrc}
+              alt={imageAlt || title}
+              className="mx-auto mt-5 max-h-[360px] w-full max-w-[360px] object-contain"
+            />
+          ) : null}
+
           <h2
             id="popup-info-title"
             className="mx-auto mt-4 max-w-[430px] text-[clamp(30px,4vw,42px)] font-[var(--f-head)] font-semibold leading-[1.08] tracking-[-0.025em] text-[var(--charcoal)]"
@@ -77,17 +95,29 @@ export default function PopupInfo({
             {title}
           </h2>
 
-          <p
-            id="popup-info-description"
-            className="mx-auto mt-5 max-w-[420px] text-[15px] leading-[1.75] text-[var(--charcoal-muted)] sm:text-base"
-          >
-            {description}
-          </p>
+          {description ? (
+            <p
+              id="popup-info-description"
+              className="mx-auto mt-5 max-w-[420px] text-[15px] leading-[1.75] text-[var(--charcoal-muted)] sm:text-base"
+            >
+              {description}
+            </p>
+          ) : null}
 
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            {buttonTo ? (
+            {buttonTo && isExternalLink ? (
+              <a
+                className={linkClassName}
+                href={buttonTo}
+                rel={openInNewTab ? 'noreferrer' : undefined}
+                target={openInNewTab ? '_blank' : undefined}
+                onClick={onClose}
+              >
+                {buttonText}
+              </a>
+            ) : buttonTo ? (
               <Link
-                className="inline-flex min-h-[46px] min-w-[130px] items-center justify-center bg-[var(--burgundy)] px-7 py-3 text-xs font-[var(--f-head)] font-bold uppercase tracking-[0.1em] text-white transition-colors duration-200 hover:bg-[var(--burgundy-dark)] motion-reduce:transition-none"
+                className={linkClassName}
                 to={buttonTo}
                 onClick={onClose}
               >
@@ -97,7 +127,7 @@ export default function PopupInfo({
               <button
                 type="button"
                 onClick={onClose}
-                className="inline-flex min-h-[46px] min-w-[130px] items-center justify-center bg-[var(--burgundy)] px-7 py-3 text-xs font-[var(--f-head)] font-bold uppercase tracking-[0.1em] text-white transition-colors duration-200 hover:bg-[var(--burgundy-dark)] motion-reduce:transition-none"
+                className={linkClassName}
               >
                 {buttonText}
               </button>

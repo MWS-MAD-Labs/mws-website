@@ -3,7 +3,10 @@ import type { ContactInquiry } from "@prisma/client";
 import { JWT } from "google-auth-library";
 import nodemailer from "nodemailer";
 import * as mailer from "../lib/mailer";
-import { ContactInquiryService } from "../services/contact-inquiry-service";
+import {
+  ContactInquiryService,
+  resetContactInquiryRateLimitForTest,
+} from "../services/contact-inquiry-service";
 import { ContactPageService, defaultContactPageContent } from "../services/contact-page-service";
 
 const ENV_KEYS = [
@@ -19,6 +22,8 @@ const ENV_KEYS = [
   "MAIL_TRANSPORT",
   "SMTP_PORT",
   "SMTP_FROM",
+  "RECAPTCHA_SECRET_KEY",
+  "RECAPTCHA_MIN_SCORE",
 ];
 const originalEnv = Object.fromEntries(ENV_KEYS.map((key) => [key, process.env[key]]));
 
@@ -27,11 +32,13 @@ const originalEnv = Object.fromEntries(ENV_KEYS.map((key) => [key, process.env[k
 beforeEach(() => {
   for (const key of ENV_KEYS) delete process.env[key];
   mailer.resetMailerForTest();
+  resetContactInquiryRateLimitForTest();
 });
 
 afterEach(() => {
   mock.restore();
   mailer.resetMailerForTest();
+  resetContactInquiryRateLimitForTest();
   for (const key of ENV_KEYS) {
     if (originalEnv[key] === undefined) delete process.env[key];
     else process.env[key] = originalEnv[key];
@@ -262,6 +269,39 @@ describe("ContactInquiryService.submit", () => {
       expect(notify).toHaveBeenCalledWith(saved);
     } finally {
       release();
+      globalThis.__mwsWebsitePrisma = previousPrisma;
+    }
+  });
+
+  it("rate-limits the same email across changing IP addresses", async () => {
+    const previousPrisma = globalThis.__mwsWebsitePrisma;
+    const create = mock(async () => inquiry());
+    globalThis.__mwsWebsitePrisma = {
+      contactInquiry: { create },
+    } as never;
+    spyOn(ContactInquiryService, "notifyNewInquiry").mockResolvedValue({ sent: true });
+
+    const payload = {
+      name: "Parent",
+      email: "parent@example.com",
+      subject: "Admission question",
+      category: "admissions",
+      message: "When does enrollment open?",
+    };
+
+    try {
+      await ContactInquiryService.submit(payload, { ipAddress: "10.0.0.1" });
+      await ContactInquiryService.submit(payload, { ipAddress: "10.0.0.2" });
+      await ContactInquiryService.submit(payload, { ipAddress: "10.0.0.3" });
+
+      await expect(
+        ContactInquiryService.submit(payload, { ipAddress: "10.0.0.4" }),
+      ).rejects.toMatchObject({
+        status: 429,
+        message: "Please wait before sending another message.",
+      });
+      expect(create).toHaveBeenCalledTimes(3);
+    } finally {
       globalThis.__mwsWebsitePrisma = previousPrisma;
     }
   });

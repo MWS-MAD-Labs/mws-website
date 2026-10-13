@@ -56,6 +56,12 @@ export type NewsPostWithGallery = Prisma.NewsPostGetPayload<{
   include: typeof newsInclude;
 }>;
 
+function isDraftOurSchool(record: OurSchoolPageRecord) {
+  const content = record.content;
+  if (!content || typeof content !== "object" || Array.isArray(content)) return false;
+  return "status" in content && content.status === "DRAFT";
+}
+
 export class PageDataRepository {
   static async getLatestAcademicOverview(): Promise<Academic | null> {
     return getPrisma().academic.findFirst({
@@ -72,24 +78,22 @@ export class PageDataRepository {
   }
 
   static async getLatestOurSchool(): Promise<OurSchoolPageRecord | null> {
+    const singleton = await getPrisma().ourSchool.findUnique({
+      where: { singletonKey: "main" },
+      include: ourSchoolInclude,
+    });
+
+    if (singleton && !isDraftOurSchool(singleton)) {
+      return singleton;
+    }
+
     const records = await getPrisma().ourSchool.findMany({
       include: ourSchoolInclude,
       orderBy: { updatedAt: "desc" },
       take: 20,
     });
 
-    return (
-      records.find((record) => {
-        const content = record.content;
-        return !(
-          content &&
-          typeof content === "object" &&
-          !Array.isArray(content) &&
-          "status" in content &&
-          content.status === "DRAFT"
-        );
-      }) ?? null
-    );
+    return records.find((record) => !isDraftOurSchool(record)) ?? null;
   }
 
   static async getCommunityStoriesPage(): Promise<CommunityStoriesPageRecord | null> {

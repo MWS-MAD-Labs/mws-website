@@ -65,6 +65,8 @@ function readableLoginError(errorCode: string | null): string | null {
       return "You are not authorized to access this dashboard.";
     case "login_failed":
       return "Sign-in could not be completed. Please try again.";
+    case "session_expired":
+      return "Your session has expired. Please sign in again.";
     default:
       return null;
   }

@@ -6,31 +6,63 @@ import Navbar from './Navbar';
 import { refreshPublicAos, syncPublicAos, watchPublicAos } from './publicAos';
 import { trackPageView } from '@/lib/analytics';
 import PopupInfo from '../ui/PopupInfo';
+import { pageApi, type PublicPopupPromoted } from '@/api/pageApi';
+import {
+  NOT_FOUND_PAGE_TITLE,
+  PUBLIC_SITE_NAME,
+  publicDocumentTitle,
+} from '@/constants/pageTitles';
 
-const ANNOUNCEMENT_SESSION_KEY = 'mws-public-announcement-dismissed';
+const ANNOUNCEMENT_SESSION_KEY_PREFIX = 'mws-public-popup-promoted-dismissed';
 
-function hasDismissedAnnouncement() {
+function announcementSessionKey(popup: PublicPopupPromoted) {
+  return `${ANNOUNCEMENT_SESSION_KEY_PREFIX}:${popup.id}:${popup.updatedAt}`;
+}
+
+function hasDismissedAnnouncement(popup: PublicPopupPromoted) {
   try {
-    return sessionStorage.getItem(ANNOUNCEMENT_SESSION_KEY) === 'true';
+    return sessionStorage.getItem(announcementSessionKey(popup)) === 'true';
   } catch {
     return false;
   }
 }
 
-function storeAnnouncementDismissal() {
+function storeAnnouncementDismissal(popup: PublicPopupPromoted) {
   try {
-    sessionStorage.setItem(ANNOUNCEMENT_SESSION_KEY, 'true');
+    sessionStorage.setItem(announcementSessionKey(popup), 'true');
   } catch {
     // Ignore blocked session storage; the popup can show again next visit.
   }
 }
 
 function PublicAnnouncementPopup() {
-  const [isOpen, setIsOpen] = useState(() => !hasDismissedAnnouncement());
+  const [popup, setPopup] = useState<PublicPopupPromoted | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   const closePopup = useCallback(() => {
-    storeAnnouncementDismissal();
+    if (popup) storeAnnouncementDismissal(popup);
     setIsOpen(false);
+  }, [popup]);
+
+  useEffect(() => {
+    let isCurrent = true;
+
+    pageApi
+      .activePopupPromoted()
+      .then((item) => {
+        if (!isCurrent || !item) return;
+        setPopup(item);
+        setIsOpen(!hasDismissedAnnouncement(item));
+      })
+      .catch(() => {
+        if (!isCurrent) return;
+        setPopup(null);
+        setIsOpen(false);
+      });
+
+    return () => {
+      isCurrent = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -56,19 +88,57 @@ function PublicAnnouncementPopup() {
     };
   }, [closePopup, isOpen]);
 
-  if (!isOpen) {
+  if (!isOpen || !popup) {
     return null;
   }
 
   return (
     <PopupInfo
-      title="Book a Personalised MWS Tour"
-      description="Meet our team, explore the learning spaces, and see how Millennia World School supports each child with warmth, rhythm, and purpose."
-      buttonText="Book Now"
-      buttonTo="/contact"
+      title={popup.title}
+      description={popup.description}
+      buttonText={popup.buttonText || 'Close'}
+      buttonTo={popup.buttonUrl || undefined}
+      imageAlt={popup.posterImageAlt}
+      imageSrc={popup.posterImagePath}
+      openInNewTab={popup.openInNewTab}
       onClose={closePopup}
     />
   );
+}
+
+const routeTitles: Record<string, string> = {
+  '/': PUBLIC_SITE_NAME,
+  '/about-millennia': 'About MWS',
+  '/our-school': 'Our School',
+  '/admission': 'Admission',
+  '/admission/faq': 'Admission FAQ',
+  '/admission/guidelines': 'Admission Guidelines',
+  '/book-a-tour': 'Book a Tour',
+  '/academic': 'Academic',
+  '/academic/kindergarten': 'Kindergarten',
+  '/academic/elementary': 'Elementary',
+  '/academic/high-school': 'High School',
+  '/academic/junior-high': 'Junior High',
+  '/kindergarten': 'Kindergarten',
+  '/elementary': 'Elementary',
+  '/high-school': 'High School',
+  '/junior-high': 'Junior High',
+  '/kurikulum': 'Curriculum',
+  '/school-calendar': 'School Calendar',
+  '/news': 'School News',
+  '/school-news': 'School News',
+  '/community-stories': 'Community Stories',
+  '/contact': 'Contact',
+};
+
+function titleFromPath(pathname: string) {
+  const normalizedPath = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
+
+  if (routeTitles[normalizedPath]) return routeTitles[normalizedPath];
+  if (/^\/news\/[^/]+$/.test(normalizedPath)) return 'School News';
+
+  // Every other public URL renders the 404 page.
+  return NOT_FOUND_PAGE_TITLE;
 }
 
 export default function PageLayout() {
@@ -76,17 +146,7 @@ export default function PageLayout() {
   const siteContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const pageName = pathname
-      .split('/')
-      .filter(Boolean)
-      .pop()
-      ?.replace(/-/g, '')
-      .replace(/\b\w/g, (char) => char.toUpperCase());
-
-    document.title =
-      pathname === '/'
-        ? 'Millennia World School'
-        : `${pageName ?? 'Page'} - Millennia World School`;
+    document.title = publicDocumentTitle(titleFromPath(pathname));
   }, [pathname]);
 
   useEffect(() => {

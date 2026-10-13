@@ -39,8 +39,11 @@ describe("CMS LoginController", () => {
 
     const res = await buildApp().request("/auth/google", {
       method: "POST",
-      body: JSON.stringify({ code: "google-code" }),
-      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: "google-code", state: "state-123" }),
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: "mws_cms_google_oauth_state=state-123",
+      },
     });
 
     expect(res.status).toBe(200);

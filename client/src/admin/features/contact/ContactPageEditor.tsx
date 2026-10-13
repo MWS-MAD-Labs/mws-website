@@ -7,6 +7,7 @@ import CoverImagePickerModal from '@/admin/features/news/components/layouts/Cove
 import ContactMainSections from './components/layout/ContactMainSections';
 import ContactSidebar from './components/layout/ContactSidebar';
 import { useContactPageEditor } from './hooks/useContactPageEditor';
+import { useUnsavedChangesGuard } from '@/admin/hooks/useUnsavedChangesGuard';
 
 export default function ContactPageEditor() {
   const [isHeroImagePickerOpen, setIsHeroImagePickerOpen] = useState(false);
@@ -15,6 +16,7 @@ export default function ContactPageEditor() {
     error,
     galleries,
     hasPendingMap,
+    hasUnsavedChanges,
     isDefault,
     isLoading,
     isSaving,
@@ -27,6 +29,7 @@ export default function ContactPageEditor() {
     uploadHeroImage,
   } = useContactPageEditor();
   const isBusy = isLoading || isSaving || isUploadingImage;
+  useUnsavedChangesGuard(hasUnsavedChanges && !isSaving);
 
   return (
     <AppShell title="Contact">

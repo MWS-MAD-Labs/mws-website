@@ -1,8 +1,17 @@
 import { Eye, MoreHorizontal, Pencil } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 import AppShell from '@/admin/components/layout/AppShell';
 import ContentPageHeader from '@/admin/components/ui/ContentPageHeader';
 import { managedPages } from './config/pages';
+
+function editPathForPage(pageId: string) {
+  if (pageId === 'about-millennia' || pageId === 'our-school') {
+    return '/admin/content/about-mws';
+  }
+
+  return `/admin/pages/${pageId}/edit`;
+}
 
 export default function PagesManagementPage() {
   return (
@@ -61,21 +70,23 @@ export default function PagesManagementPage() {
 
                 {/* Hover Actions */}
                 <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/35 opacity-0 transition-opacity group-hover:opacity-100">
-                  <button
-                    type="button"
+                  <Link
+                    to={editPathForPage(page.id)}
                     className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-2 text-xs font-medium text-[#1C2434] shadow-sm transition-colors hover:bg-[#F1F5F9]"
                   >
                     <Pencil size={14} />
                     Edit
-                  </button>
+                  </Link>
 
-                  <button
-                    type="button"
+                  <Link
+                    to={page.path}
+                    target="_blank"
+                    rel="noreferrer"
                     className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-2 text-xs font-medium text-[#1C2434] shadow-sm transition-colors hover:bg-[#F1F5F9]"
                   >
                     <Eye size={14} />
                     Preview
-                  </button>
+                  </Link>
                 </div>
               </div>
 

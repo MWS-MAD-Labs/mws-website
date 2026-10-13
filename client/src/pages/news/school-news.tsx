@@ -125,7 +125,7 @@ export default function SchoolNews() {
       />
 
       <ContentBreadcrumb
-        items={[{ label: 'Home', path: '/' }, { label: 'About MWS' }, { label: 'Our School' }]}
+        items={[{ label: 'Home', path: '/' }, { label: 'School News' }]}
       />
 
       <section className="px-4 py-12 sm:px-6 lg:px-8 lg:py-16" aria-label="School news post feed">

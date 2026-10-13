@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 120" role="img" aria-labelledby="title">
+  <title id="title">Erase Meanness</title>
+  <rect width="320" height="120" rx="10" fill="#fff7fb"/>
+  <circle cx="72" cy="60" r="28" fill="#be185d"/>
+  <path d="M58 70 83 45l8 8-25 25H54v-8h4Z" fill="#ffffff"/>
+  <text x="122" y="69" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#241718">Erase Meanness</text>
+</svg>

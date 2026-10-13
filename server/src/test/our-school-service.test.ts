@@ -22,6 +22,7 @@ const galleryImage = {
 function ourSchool(overrides: Record<string, unknown> = {}) {
   return {
     id: ourSchoolId,
+    singletonKey: "main",
     title: "Our School",
     description: "About school",
     galleryId,
@@ -55,6 +56,7 @@ afterEach(() => {
 
 describe("OurSchoolService", () => {
   it("creates OurSchool with galleryId and featuredImageId", async () => {
+    spyOn(OurSchoolRepository, "findSingleton").mockResolvedValue(null);
     spyOn(OurSchoolRepository, "findImageById").mockResolvedValue(galleryImage);
     spyOn(OurSchoolRepository, "create").mockResolvedValue(ourSchool() as never);
 
@@ -93,6 +95,7 @@ describe("OurSchoolService", () => {
   });
 
   it("rejects featured image from a different gallery", async () => {
+    spyOn(OurSchoolRepository, "findSingleton").mockResolvedValue(null);
     spyOn(OurSchoolRepository, "findImageById").mockResolvedValue({
       ...galleryImage,
       galleryId: otherGalleryId,

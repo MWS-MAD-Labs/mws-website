@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 120" role="img" aria-labelledby="title">
+  <title id="title">Climate Change School</title>
+  <rect width="320" height="120" rx="10" fill="#f7fbf8"/>
+  <circle cx="72" cy="60" r="28" fill="#2f7d59"/>
+  <path d="M59 66c20-4 28-14 28-27 13 20 3 43-18 43-7 0-11-5-10-16Z" fill="#d6a13a"/>
+  <text x="122" y="54" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#241718">Climate Change</text>
+  <text x="122" y="79" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#241718">School</text>
+</svg>

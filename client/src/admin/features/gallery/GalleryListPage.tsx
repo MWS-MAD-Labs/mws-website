@@ -134,25 +134,27 @@ export default function GalleryListPage() {
   }
 
   return (
-    <AppShell title="Galeri">
+    <AppShell title="Gallery">
       <section className="space-y-5 p-6">
         <div className="overflow-hidden rounded-lg border border-[#E2E8F0] bg-white">
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#E2E8F0] px-5 py-4">
             <div>
-              <h1 className="text-lg font-semibold text-[#1C2434]">Galeri</h1>
-              <p className="mt-0.5 text-sm text-[#64748B]">{galleries.length} galeri</p>
+              <h1 className="text-lg font-semibold text-[#1C2434]">Gallery</h1>
+              <p className="mt-0.5 text-sm text-[#64748B]">
+                {galleries.length} {galleries.length === 1 ? 'gallery' : 'galleries'}
+              </p>
             </div>
 
             <div className="flex flex-1 flex-wrap items-center justify-end gap-3">
               <SearchInput
                 className="max-w-xs"
-                placeholder="Cari galeri..."
+                placeholder="Search galleries..."
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
               />
               <Button className="gap-2" size="sm" type="button" onClick={openCreateForm}>
                 <Plus size={15} />
-                Tambah
+                Add
               </Button>
             </div>
           </div>
@@ -176,11 +178,11 @@ export default function GalleryListPage() {
 
       <Modal
         open={formMode !== null}
-        title={editingGallery ? 'Ubah galeri' : 'Tambah galeri'}
+        title={editingGallery ? 'Edit gallery' : 'Add gallery'}
         onClose={closeForm}
       >
         <form className="space-y-4" onSubmit={submitForm}>
-          <Field label="Judul">
+          <Field label="Title" required>
             <input
               className={FIELD_CLASS}
               disabled={isSaving}
@@ -190,7 +192,7 @@ export default function GalleryListPage() {
             />
           </Field>
 
-          <Field label="Keterangan">
+          <Field label="Description">
             <textarea
               className={`${FIELD_CLASS} min-h-28 resize-y`}
               disabled={isSaving}
@@ -203,10 +205,10 @@ export default function GalleryListPage() {
 
           <div className="flex justify-end gap-2 border-t border-[#E2E8F0] pt-4">
             <Button disabled={isSaving} type="button" variant="outline" onClick={closeForm}>
-              Batal
+              Cancel
             </Button>
             <Button disabled={isSaving} type="submit">
-              {isSaving ? 'Menyimpan...' : 'Simpan'}
+              {isSaving ? 'Saving...' : 'Save'}
             </Button>
           </div>
         </form>

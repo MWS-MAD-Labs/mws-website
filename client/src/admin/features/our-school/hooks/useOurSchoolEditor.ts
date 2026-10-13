@@ -57,7 +57,7 @@ export function useOurSchoolEditor() {
       loadData()
         .catch((error) => {
           if (!cancelled) {
-            setMessage(error instanceof Error ? error.message : 'Failed to load Our School page.');
+            setMessage(error instanceof Error ? error.message : 'Failed to load About MWS page.');
           }
         })
         .finally(() => {
@@ -96,9 +96,9 @@ export function useOurSchoolEditor() {
       setContent(normalizeOurSchoolContent(saved));
       setGalleryId(saved.galleryId);
       setFeaturedImageId(saved.featuredImageId);
-      setMessage(nextStatus === 'PUBLISHED' ? 'Our School page published.' : 'Draft saved.');
+      setMessage(nextStatus === 'PUBLISHED' ? 'About MWS page published.' : 'Draft saved.');
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Failed to save Our School page.');
+      setMessage(error instanceof Error ? error.message : 'Failed to save About MWS page.');
     } finally {
       setIsSaving(false);
     }
@@ -213,7 +213,7 @@ export function useOurSchoolEditor() {
 
   function removeFaq(index: number) {
     if (content.faq.length <= 1) return;
-    const confirmed = window.confirm('Remove this FAQ from Our School page?');
+    const confirmed = window.confirm('Remove this FAQ from About MWS page?');
     if (!confirmed) return;
 
     updateContent((current) => ({
