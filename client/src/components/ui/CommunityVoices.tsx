@@ -401,7 +401,7 @@ export default function CommunityVoices({
               >
                 <p className="m-0 text-lg font-semibold">{selectedVoice.name}</p>
 
-                <p className="mt-0.5 text-xs text-white/70">{selectedVoice.grade ?? 'Unit'}</p>
+                <p className="mt-0.5 text-xs text-white/70">{selectedVoice.grade || selectedVoice.role}</p>
 
                 <p className="mt-3 text-sm leading-5 text-white/90">{selectedVoice.quote}</p>
               </div>

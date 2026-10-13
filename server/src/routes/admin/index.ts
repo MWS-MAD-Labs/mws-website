@@ -3,6 +3,7 @@ import { AdminContactPageController } from "../../controllers/admin/ContactPage"
 import { CmsUsersController } from "../../controllers/admin/CmsUsers";
 import { DashboardController } from "../../controllers/admin/Dashboard";
 import { adminAuthMiddleware } from "../../middleware/admin-auth-middleware";
+import { auditLogMiddleware } from "../../middleware/audit-log-middleware";
 import {
   requireCmsPermission,
   requireCmsRole,
@@ -30,7 +31,7 @@ import { popupPromotedRoute } from "./popup-promoted-route";
 
 export const adminRoute = new Hono<{ Variables: SessionVariables }>();
 
-adminRoute.use("*", sessionAuthMiddleware, adminAuthMiddleware);
+adminRoute.use("*", sessionAuthMiddleware, adminAuthMiddleware, auditLogMiddleware);
 adminRoute.get(
   "/",
   requireCmsPermission("dashboard:read"),

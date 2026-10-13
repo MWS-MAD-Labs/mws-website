@@ -1,8 +1,9 @@
 import type { Context } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { ResponseError } from "../../error/response-error";
+import { auditRequestMeta, writeAuditLog } from "../../lib/audit-log";
 import { GoogleAuth } from "../../lib/google-auth";
-import { revokeSession, sessionCookieName } from "../../lib/session";
+import { revokeSession, sessionCookieName, verifySession } from "../../lib/session";
 import { AuthService } from "../../services/auth-services";
 import type { SessionVariables } from "../../types/hono-context";
 
@@ -13,6 +14,17 @@ const RESPONSE_ERROR_CODES: Record<number, string> = {
   403: "unauthorized",
   404: "not_registered",
 };
+
+async function logLogin(c: Context, user: { id: string; name: string; email: string | null }) {
+  await writeAuditLog({
+    actorId: user.id,
+    action: "CMS_LOGIN",
+    entityType: "CmsUser",
+    entityId: user.id,
+    newValues: { name: user.name, email: user.email },
+    ...auditRequestMeta(c),
+  });
+}
 
 function frontendOrigin(): string {
   return process.env.FRONTEND_ORIGIN ?? "http://localhost:7001";
@@ -78,6 +90,7 @@ export class LoginController {
 
     const { token, user } = await AuthService.loginWithGoogle(code);
     console.info("[AUTH] Google token exchange success");
+    await logLogin(c, user);
 
     setCookie(c, sessionCookieName(), token, {
       ...cookieOptions(),
@@ -115,7 +128,8 @@ export class LoginController {
     console.info("[AUTH] OAuth state valid");
 
     try {
-      const { token } = await AuthService.loginWithGoogle(code);
+      const { token, user } = await AuthService.loginWithGoogle(code);
+      await logLogin(c, user);
 
       setCookie(c, sessionCookieName(), token, {
         ...cookieOptions(),
@@ -135,6 +149,12 @@ export class LoginController {
         error instanceof ResponseError
           ? RESPONSE_ERROR_CODES[error.status]
           : undefined;
+      await writeAuditLog({
+        action: "CMS_LOGIN_FAILED",
+        entityType: "CmsUser",
+        newValues: { reason: errorCode ?? "login_failed" },
+        ...auditRequestMeta(c),
+      });
 
       return c.redirect(
         `${frontendOrigin()}/admin/login?error=${errorCode ?? "login_failed"}`,
@@ -151,6 +171,16 @@ export class LoginController {
     console.info("[AUTH] Logout");
     const token = getCookie(c, sessionCookieName());
     if (token) {
+      const session = await verifySession(token).catch(() => null);
+      if (session) {
+        await writeAuditLog({
+          actorId: session.user.id,
+          action: "CMS_LOGOUT",
+          entityType: "CmsUser",
+          entityId: session.user.id,
+          ...auditRequestMeta(c),
+        });
+      }
       try {
         await revokeSession(token);
       } catch (error) {

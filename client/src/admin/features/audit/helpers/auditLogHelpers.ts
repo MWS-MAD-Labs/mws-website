@@ -74,6 +74,12 @@ export function formatAuditEntityType(value: string) {
   return value.replace(/([a-z0-9])([A-Z])/g, '$1 $2');
 }
 
+/** The title or name of the changed item, when the entry recorded one. */
+export function auditLogLabel(log: AuditLogItem) {
+  const label = asRecord(log.newValues)?.label ?? asRecord(log.oldValues)?.label;
+  return typeof label === 'string' && label ? label : null;
+}
+
 export function shortAuditId(value: string) {
   return value.length > 13 ? `${value.slice(0, 8)}…${value.slice(-4)}` : value;
 }

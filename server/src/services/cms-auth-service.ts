@@ -3,6 +3,7 @@ import type { Prisma } from "@prisma/client";
 import { listActiveEmployees } from "../lib/central-client";
 import { z } from "zod";
 import { getUserUnitId, isMadLabsUser } from "../lib/admin-access";
+import { writeAuditLog } from "../lib/audit-log";
 import { sendMail } from "../lib/mailer";
 import { getPrisma } from "../lib/prisma";
 import { cmsInvitationEmail, cmsLoginUrl } from "./cms-invitation-email";
@@ -226,7 +227,7 @@ function auditLogListItem(log: {
   id: string;
   action: string;
   entityType: string;
-  entityId: string;
+  entityId: string | null;
   oldValues: unknown;
   newValues: unknown;
   ipAddress: string | null;
@@ -252,30 +253,6 @@ function auditLogListItem(log: {
         }
       : null,
   };
-}
-
-async function writeAuditLog(input: {
-  actorId?: string | null;
-  action: string;
-  entityType: string;
-  entityId: string;
-  oldValues?: unknown;
-  newValues?: unknown;
-}) {
-  try {
-    await getPrisma().auditLog.create({
-      data: {
-        cmsUserId: input.actorId ?? null,
-        action: input.action,
-        entityType: input.entityType,
-        entityId: input.entityId,
-        oldValues: input.oldValues ?? undefined,
-        newValues: input.newValues ?? undefined,
-      },
-    });
-  } catch {
-    // Audit logging must not turn a successful CMS mutation into a failure.
-  }
 }
 
 /**

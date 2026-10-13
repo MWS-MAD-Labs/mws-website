@@ -151,9 +151,8 @@ export default function AdmissionGuidelinesPage() {
                 <Eye size={15} />
                 Preview
               </Button>
-              <Button disabled={isSaving || isLoading} type="button" variant="outline" onClick={() => void persist('DRAFT')}>
-                Save Draft
-              </Button>
+              {/* No Save Draft: this page has no separate published copy, so a
+                  draft would take the live content off the website. */}
               <Button disabled={isSaving || isLoading} type="button" onClick={() => void persist('PUBLISHED')}>
                 {isSaving ? 'Saving...' : status === 'PUBLISHED' ? 'Update' : 'Publish'}
               </Button>

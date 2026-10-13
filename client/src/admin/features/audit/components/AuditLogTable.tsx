@@ -6,6 +6,7 @@ import {
   formatAuditDate,
   formatAuditEntityType,
   formatAuditRelative,
+  auditLogLabel,
   shortAuditId,
   type AuditLogItem,
 } from '@/admin/features/audit/helpers/auditLogHelpers';
@@ -139,12 +140,19 @@ export default function AuditLogTable({
                 <p className="text-sm font-semibold text-[#1C2434]">
                   {formatAuditEntityType(log.entityType)}
                 </p>
-                <p className="mt-0.5 flex items-center gap-0.5 text-xs text-[#64748B]">
-                  <span className="font-mono" title={log.entityId}>
-                    {shortAuditId(log.entityId)}
-                  </span>
-                  <CopyId value={log.entityId} />
-                </p>
+                {auditLogLabel(log) ? (
+                  <p className="mt-0.5 max-w-[16rem] truncate text-xs text-[#1C2434]" title={auditLogLabel(log) ?? undefined}>
+                    {auditLogLabel(log)}
+                  </p>
+                ) : null}
+                {log.entityId ? (
+                  <p className="mt-0.5 flex items-center gap-0.5 text-xs text-[#64748B]">
+                    <span className="font-mono" title={log.entityId}>
+                      {shortAuditId(log.entityId)}
+                    </span>
+                    <CopyId value={log.entityId} />
+                  </p>
+                ) : null}
               </td>
 
               <td className="px-5 py-4">

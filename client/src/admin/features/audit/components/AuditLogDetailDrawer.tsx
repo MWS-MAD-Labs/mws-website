@@ -89,8 +89,14 @@ export default function AuditLogDetailDrawer({ log, onClose }: AuditLogDetailDra
 
             <dt className="text-[#64748B]">Entity ID</dt>
             <dd className="flex min-w-0 items-center gap-1">
-              <span className="break-all font-mono text-xs text-[#1C2434]">{log.entityId}</span>
-              <CopyId value={log.entityId} />
+              {log.entityId ? (
+                <>
+                  <span className="break-all font-mono text-xs text-[#1C2434]">{log.entityId}</span>
+                  <CopyId value={log.entityId} />
+                </>
+              ) : (
+                <span className="text-xs text-[#64748B]">-</span>
+              )}
             </dd>
 
             {extra.ipAddress ? (

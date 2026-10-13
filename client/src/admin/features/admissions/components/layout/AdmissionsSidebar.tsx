@@ -78,14 +78,8 @@ export default function AdmissionsSidebar({ editor }: AdmissionsSidebarProps) {
           <Button disabled={isBusy} type="button" onClick={() => void persist('PUBLISHED')}>
             {isSaving ? 'Saving...' : isPublished ? 'Update' : 'Publish'}
           </Button>
-          <Button
-            disabled={isBusy}
-            type="button"
-            variant="outline"
-            onClick={() => void persist('DRAFT')}
-          >
-            Save Draft
-          </Button>
+          {/* No Save Draft: this page has no separate published copy, so a draft
+              would take the live content off the website. */}
           <Button
             disabled={isBusy}
             type="button"

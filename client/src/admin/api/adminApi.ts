@@ -116,7 +116,7 @@ export type AuditLogItem = {
   id: string;
   action: string;
   entityType: string;
-  entityId: string;
+  entityId: string | null;
   oldValues: unknown;
   newValues: unknown;
   ipAddress: string | null;
