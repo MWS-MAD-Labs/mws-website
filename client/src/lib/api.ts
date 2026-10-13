@@ -87,6 +87,16 @@ export async function apiRequest<T>(
     });
 
     if (response.status === 204) return null;
+
+    // An HTML page here means the request reached the SPA (or a cached copy
+    // of it) instead of the API; fail with a clear error, not a crash later.
+    const contentType = String(response.headers["content-type"] ?? "");
+    if (typeof response.data === "string" && contentType.includes("text/html")) {
+      throw new ApiError("The server returned a page instead of data. Reload and try again.", {
+        status: response.status,
+      });
+    }
+
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
