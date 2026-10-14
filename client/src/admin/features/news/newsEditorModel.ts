@@ -153,6 +153,18 @@ function optionalText(value: string) {
   return trimmed || null;
 }
 
+/** When a published post has a future date it stays off the website until then. */
+export function scheduledPublishAt(form: NewsForm) {
+  if (form.status !== 'PUBLISHED' || !form.publishedAt) return null;
+  const publishAt = new Date(form.publishedAt);
+  return publishAt.getTime() > Date.now() ? publishAt.toISOString() : null;
+}
+
+/** The current time in the format a datetime-local input expects. */
+export function nowAsLocalInput() {
+  return dateToLocalInput(new Date().toISOString());
+}
+
 function dateToLocalInput(value: string | null) {
   if (!value) return '';
 

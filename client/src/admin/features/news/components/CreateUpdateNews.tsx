@@ -30,11 +30,13 @@ import {
   isCategorySelectable,
   newsFormFromPost,
   newsPayloadFromForm,
+  nowAsLocalInput,
+  scheduledPublishAt,
   slugify,
   toggleTagId,
   type NewsForm,
 } from '../newsEditorModel';
-import { NEWS_STATUS_OPTIONS, notifyNewsListReturn } from '../newsUtils';
+import { NEWS_STATUS_OPTIONS, formatNewsDateTime, notifyNewsListReturn } from '../newsUtils';
 import { useToastState } from '@/admin/components/ui/toastContext';
 import { useUnsavedChangesGuard } from '@/admin/hooks/useUnsavedChangesGuard';
 
@@ -168,6 +170,8 @@ export default function CreateUpdateNews() {
     }));
   }
 
+  const scheduledAt = scheduledPublishAt(form);
+
   function handleTitleChange(value: string) {
     setForm((current) => ({
       ...current,
@@ -277,6 +281,15 @@ export default function CreateUpdateNews() {
 
   async function saveNews(event?: FormEvent<HTMLFormElement>) {
     event?.preventDefault();
+
+    if (
+      scheduledAt &&
+      !window.confirm(
+        `This post will not be on the website until ${formatNewsDateTime(scheduledAt)}. Save it as scheduled?`,
+      )
+    ) {
+      return;
+    }
 
     setSaving(true);
     setMessage(null);
@@ -484,13 +497,35 @@ export default function CreateUpdateNews() {
                       </Select>
                     </Field>
 
-                    <Field label="Publish date">
-                      <input
-                        className={NEWS_INPUT_CLASS}
-                        type="datetime-local"
-                        value={form.publishedAt}
-                        onChange={(event) => updateForm('publishedAt', event.target.value)}
-                      />
+                    <Field
+                      label="Publish date"
+                      hint={
+                        scheduledAt
+                          ? undefined
+                          : 'Leave empty to publish immediately. A future date schedules the post.'
+                      }
+                    >
+                      <div className="flex gap-2">
+                        <input
+                          className={NEWS_INPUT_CLASS}
+                          type="datetime-local"
+                          value={form.publishedAt}
+                          onChange={(event) => updateForm('publishedAt', event.target.value)}
+                        />
+                        <Button
+                          size="sm"
+                          type="button"
+                          variant="outline"
+                          onClick={() => updateForm('publishedAt', nowAsLocalInput())}
+                        >
+                          Now
+                        </Button>
+                      </div>
+                      {scheduledAt ? (
+                        <span className="text-xs font-medium text-[#3C50E0]">
+                          Scheduled: appears on the website on {formatNewsDateTime(scheduledAt)}.
+                        </span>
+                      ) : null}
                     </Field>
                   </div>
 

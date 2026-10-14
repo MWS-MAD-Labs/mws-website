@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, mock, spyOn } from "bun:test";
+import { Prisma } from "@prisma/client";
 import * as prismaLib from "../lib/prisma";
 import { AcademicPageService } from "../services/academic-page-service";
 import { GalleryService } from "../services/gallery-service";
@@ -163,5 +164,57 @@ describe("AcademicPageService", () => {
     expect(createArgs.data.academicLevelId).toBe("academic-level-1");
     expect(createArgs.data.status).toBe("DRAFT");
     expect(createArgs.data.publishedAt).toBeUndefined();
+  });
+  it("drops the published copy when a published page is unpublished", async () => {
+    const existing = academicRecord({
+      id: "level-page-1",
+      publishedTitle: "High School",
+      publishedHero: { title: "High School" },
+      publishedOverview: {},
+      publishedSections: [],
+    });
+    const juniorHigh = {
+      findFirst: mock(async () => existing),
+      update: mock(async () => ({ ...existing, status: "DRAFT" })),
+    };
+    const academicLevel = {
+      update: mock(async () => ({ id: "academic-level-1" })),
+      findFirst: mock(async () => ({ id: "academic-level-1" })),
+    };
+    const juniorHighFaq = { deleteMany: mock(async () => ({ count: 0 })) };
+
+    spyOn(prismaLib, "getPrisma").mockReturnValue({
+      academicLevel,
+      juniorHigh,
+      juniorHighFaq,
+    } as never);
+    spyOn(GalleryService, "listGalleries").mockResolvedValue([]);
+
+    await AcademicPageService.saveLevel("high-school", payload());
+
+    const updateArgs = (juniorHigh.update.mock.calls as unknown as unknown[][])[0]?.[0] as {
+      data: Record<string, unknown>;
+    };
+    expect(updateArgs.data.status).toBe("DRAFT");
+    expect(updateArgs.data.publishedTitle).toBeNull();
+    expect(updateArgs.data.publishedHero).toBe(Prisma.DbNull);
+    expect(updateArgs.data.publishedSections).toBe(Prisma.DbNull);
+  });
+
+  it("shows default content, not the draft, for an unpublished page", async () => {
+    const unpublished = academicRecord({
+      status: "DRAFT",
+      hero: { title: "Unreleased draft", description: "Draft", image: "", imageAlt: "" },
+      publishedHero: null,
+      publishedOverview: null,
+      publishedSections: null,
+    });
+    spyOn(prismaLib, "getPrisma").mockReturnValue({
+      juniorHigh: { findFirst: mock(async () => unpublished) },
+    } as never);
+
+    const result = await AcademicPageService.getPublicLevel("high-school");
+
+    expect(result.page.hero.title).not.toBe("Unreleased draft");
   });
 });

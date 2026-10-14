@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { ResponseError } from "../error/response-error";
 import {
   getMinioObjectBuffer,
@@ -484,6 +484,7 @@ function levelData(
   academicLevelId: string,
   data: AcademicPayload,
   status: AcademicStatus,
+  previousStatus: string | null,
 ) {
   const dataToSave: Record<string, unknown> = {
     levelKey,
@@ -509,6 +510,17 @@ function levelData(
     dataToSave.publishedHero = data.page.hero as Prisma.InputJsonValue;
     dataToSave.publishedOverview = data.page.overview as Prisma.InputJsonValue;
     dataToSave.publishedSections = data.page.sections as Prisma.InputJsonValue;
+  } else if (previousStatus === "PUBLISHED") {
+    // Unpublishing takes the page off the website: drop the published copy so
+    // the public page falls back to default content, as the CMS promises.
+    dataToSave.publishedAt = null;
+    dataToSave.publishedTitle = null;
+    dataToSave.publishedDescription = null;
+    dataToSave.publishedCoverImage = null;
+    dataToSave.publishedGalleryId = null;
+    dataToSave.publishedHero = Prisma.DbNull;
+    dataToSave.publishedOverview = Prisma.DbNull;
+    dataToSave.publishedSections = Prisma.DbNull;
   }
 
   return dataToSave;
@@ -602,7 +614,7 @@ async function saveLevelRecord(
 ) {
   const prisma = getPrisma();
   const academicLevel = await ensureAcademicLevel(levelKey, existing, data.program);
-  const nextData = levelData(levelKey, academicLevel.id, data, status);
+  const nextData = levelData(levelKey, academicLevel.id, data, status, existing?.status ?? null);
 
   if (levelKey === "kindergarten") {
     const saved = existing

@@ -27,8 +27,50 @@ const dateFormatter = new Intl.DateTimeFormat('id-ID', {
   year: 'numeric',
 });
 
+const dateTimeFormatter = new Intl.DateTimeFormat('id-ID', {
+  day: '2-digit',
+  month: 'short',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+});
+
 export function formatNewsDate(value: string | null) {
   return value ? dateFormatter.format(new Date(value)) : 'Not published';
+}
+
+export function formatNewsDateTime(value: string) {
+  return dateTimeFormatter.format(new Date(value));
+}
+
+export function getNewsEditPath(newsId: string) {
+  return `${NEWS_LIST_PATH}/${newsId}/edit`;
+}
+
+type NewsPublication = { status: NewsStatus; publishedAt: string | null };
+
+/** A published post with a future publish date stays off the website until then. */
+export function isNewsScheduled(post: NewsPublication, now = Date.now()) {
+  return (
+    post.status === 'PUBLISHED' &&
+    post.publishedAt !== null &&
+    new Date(post.publishedAt).getTime() > now
+  );
+}
+
+export function newsPublicationLabel(post: NewsPublication) {
+  if (isNewsScheduled(post)) return `Scheduled · ${formatNewsDateTime(post.publishedAt as string)}`;
+  return post.publishedAt ? formatNewsDate(post.publishedAt) : 'Not published';
+}
+
+export function getNewsPublicationClasses(post: NewsPublication) {
+  return isNewsScheduled(post)
+    ? 'bg-[#3C50E0]/10 text-[#3C50E0] ring-[#3C50E0]/20'
+    : getNewsStatusClasses(post.status);
+}
+
+export function newsStatusOptionLabel(post: NewsPublication, option: { label: string; value: NewsStatus }) {
+  return option.value === 'PUBLISHED' && isNewsScheduled(post) ? 'Scheduled' : option.label;
 }
 
 export function getNewsStatusClasses(status: NewsStatus) {
