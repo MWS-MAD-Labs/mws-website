@@ -71,7 +71,7 @@ const heroCtaLinkOptions = [
   { label: 'Community Stories', value: '/community-stories' },
   { label: 'Contact', value: '/contact' },
   { label: 'Admission FAQ', value: '/admission/faq' },
-  // { label: 'Admission Guidelines', value: '/admission/guidelines' },
+  { label: 'Admission Guidelines', value: '/admission/guidelines' },
 ];
 
 type HomeSettingsForm = {

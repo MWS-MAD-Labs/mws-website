@@ -5,7 +5,7 @@ import Contact from '@/pages/contact';
 // import OurSchool from '@/pages/our-school';
 import Admission from '@/pages/admission';
 import AdmissionFaqPage from '@/pages/admission-faq';
-import AdmissionGuidelinesPage from '@/pages/admission-guidelines';
+// import AdmissionGuidelinesPage from '@/pages/admission-guidelines';
 import Academic from '@/pages/Academic';
 import Kindergarten from '@/pages/level/kindergarten';
 import Elementary from '@/pages/level/elementary';
@@ -28,7 +28,7 @@ export default function App() {
         <Route path="about-millennia" element={<AboutUs />} />
         <Route path="admission" element={<Admission />} />
         <Route path="admission/faq" element={<AdmissionFaqPage />} />
-        <Route path="admission/guidelines" element={<AdmissionGuidelinesPage />} />
+        {/* <Route path="admission/guidelines" element={<AdmissionGuidelinesPage />} /> */}
         <Route path="book-a-tour" element={<BookATour />} />
         <Route path="academic" element={<Academic />} />
         <Route path="academic/kindergarten" element={<Kindergarten />} />

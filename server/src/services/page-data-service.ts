@@ -116,7 +116,7 @@ const defaultAdmissionsContent = {
       title: "Admission guidelines",
       description: "Requirements, document checklist, and how placement works.",
       linkLabel: "Read the guidelines",
-      linkUrl: "/admission/faq",
+      linkUrl: "/admission/guidelines",
       image: asset("JH.jpg"),
     },
   ],
