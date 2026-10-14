@@ -18,6 +18,7 @@ import CommunityStories from '@/pages/community-stories';
 import BookATour from '@/features/book-a-tour/BookATourPage';
 import AboutUs from '@/pages/aboutUS';
 import NotFound from '@/pages/not-found';
+import TourTest from '@/pages/TourTest';
 
 export default function App() {
   return (
@@ -47,6 +48,7 @@ export default function App() {
         <Route path="news-detail" element={<Navigate to="/news" replace />} />
         <Route path="community-stories" element={<CommunityStories />} />
         <Route path="contact" element={<Contact />} />
+        <Route path='360-Virtual-Tour' element={<TourTest/>} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
