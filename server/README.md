@@ -55,6 +55,7 @@ Public:
 - `POST /api/contact/inquiries`
 - `GET /api/news`
 - `GET /api/news/:slug`
+- `GET /api/calendar/events`
 - `GET /api/gallery-images/:id/file`
 
 CMS:
