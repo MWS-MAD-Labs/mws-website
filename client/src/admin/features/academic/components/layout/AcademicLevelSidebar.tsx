@@ -3,6 +3,7 @@ import { Eye, Trash2 } from 'lucide-react';
 import Button from '@/admin/components/ui/Button';
 import Field from '@/admin/components/ui/Field';
 import { inputClass } from '@/admin/features/news/components/layouts/formStyles';
+import { formatAdminDateTime } from '@/admin/utils/dateFormat';
 import type { AcademicLevelEditorState } from '../../hooks/useAcademicLevelEditor';
 import AcademicLevelImageField from './AcademicLevelImageField';
 
@@ -50,7 +51,7 @@ export default function AcademicLevelSidebar({ editor }: AcademicLevelSidebarPro
 
         {updatedAt ? (
           <p className="text-xs text-[#64748B]">
-            Last saved {new Date(updatedAt).toLocaleString()}
+            Last saved {formatAdminDateTime(updatedAt)}
           </p>
         ) : null}
 

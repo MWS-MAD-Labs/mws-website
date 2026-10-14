@@ -20,6 +20,7 @@ import {
   type NewsPostWithRelations,
 } from "../repositories/news-repository";
 import { sanitizeNewsContent } from "../lib/sanitize-html";
+import { AnalyticsService } from "./analytics-service";
 
 type NewsStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
 
@@ -258,6 +259,17 @@ function postResponse(post: NewsPostWithRelations) {
   };
 }
 
+async function postListResponses(posts: NewsPostWithRelations[]) {
+  const analyticsViews = await AnalyticsService.newsViewCounts(
+    posts.map((post) => post.slug),
+  );
+
+  return posts.map((post) => ({
+    ...postResponse(post),
+    viewCount: analyticsViews.get(post.slug) ?? 0,
+  }));
+}
+
 export class NewsService {
   // ---------- Categories ----------
 
@@ -376,7 +388,7 @@ export class NewsService {
     const { items, total } = await NewsRepository.listPosts(filters);
 
     return {
-      items: items.map(postResponse),
+      items: await postListResponses(items),
       pagination: {
         page: filters.page,
         pageSize: filters.pageSize,

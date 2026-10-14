@@ -17,6 +17,7 @@ import {
   videoPreviewName,
   youtubeEmbedUrl,
 } from "../utils/galleryAssets";
+import { formatAdminDate } from "@/admin/utils/dateFormat";
 
 type GalleryAssetPreviewModalProps = {
   asset: GalleryImageItem | GalleryVideoItem | null;
@@ -209,7 +210,7 @@ export default function GalleryAssetPreviewModal({
 
             <p className="mt-1 text-xs text-white/60">
               Uploaded:{" "}
-              {new Date(asset.createdAt).toLocaleDateString()}
+              {formatAdminDate(asset.createdAt)}
             </p>
           </div>
 

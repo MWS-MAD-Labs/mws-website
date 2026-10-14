@@ -1,4 +1,5 @@
 import type { NewsPostList, NewsStatus } from '@/admin/api/adminApi';
+import { formatAdminDate } from '@/admin/utils/dateFormat';
 
 export const NEWS_LIST_PATH = '/admin/news';
 export const NEWS_LIST_RETURN_MESSAGE_KEY = 'mws:admin-news:return-message';
@@ -21,26 +22,26 @@ export const NEWS_STATUS_OPTIONS: Array<{ label: string; value: NewsStatus }> = 
   { label: 'Archived', value: 'ARCHIVED' },
 ];
 
-const dateFormatter = new Intl.DateTimeFormat('id-ID', {
+const newsDateFormatOptions: Intl.DateTimeFormatOptions = {
   day: '2-digit',
   month: 'short',
   year: 'numeric',
-});
+};
 
-const dateTimeFormatter = new Intl.DateTimeFormat('id-ID', {
+const newsDateTimeFormatOptions: Intl.DateTimeFormatOptions = {
   day: '2-digit',
   month: 'short',
   year: 'numeric',
   hour: '2-digit',
   minute: '2-digit',
-});
+};
 
 export function formatNewsDate(value: string | null) {
-  return value ? dateFormatter.format(new Date(value)) : 'Not published';
+  return formatAdminDate(value, newsDateFormatOptions, 'Not published');
 }
 
 export function formatNewsDateTime(value: string) {
-  return dateTimeFormatter.format(new Date(value));
+  return formatAdminDate(value, newsDateTimeFormatOptions);
 }
 
 export function getNewsEditPath(newsId: string) {

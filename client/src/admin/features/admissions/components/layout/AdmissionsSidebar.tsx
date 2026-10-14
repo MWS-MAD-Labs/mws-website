@@ -3,6 +3,7 @@ import { Eye } from 'lucide-react';
 import { adminApi } from '@/admin/api/adminApi';
 import Button from '@/admin/components/ui/Button';
 import GalleryThumb from '@/admin/features/gallery/components/GalleryThumb';
+import { formatAdminDate } from '@/admin/utils/dateFormat';
 
 import type { AdmissionsEditorState } from '../../hooks/useAdmissionsEditor';
 
@@ -69,7 +70,7 @@ export default function AdmissionsSidebar({ editor }: AdmissionsSidebarProps) {
           <div className="flex items-center justify-between gap-3">
             <dt className="text-[#64748B]">Updated</dt>
             <dd className="font-medium text-[#1C2434]">
-              {updatedAt ? new Date(updatedAt).toLocaleDateString() : '-'}
+              {formatAdminDate(updatedAt)}
             </dd>
           </div>
         </dl>

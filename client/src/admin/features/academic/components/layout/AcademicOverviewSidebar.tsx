@@ -2,6 +2,7 @@ import { Eye, Trash2 } from 'lucide-react';
 
 import Button from '@/admin/components/ui/Button';
 import GalleryThumb from '@/admin/features/gallery/components/GalleryThumb';
+import { formatAdminDateTime } from '@/admin/utils/dateFormat';
 import type { AcademicOverviewEditorState } from '../../hooks/useAcademicOverviewEditor';
 
 const cardClass = 'min-w-0 overflow-hidden rounded-lg border border-[#E2E8F0] bg-white';
@@ -42,7 +43,7 @@ export default function AcademicOverviewSidebar({ editor }: AcademicOverviewSide
 
         {updatedAt ? (
           <p className="text-xs text-[#64748B]">
-            Last saved {new Date(updatedAt).toLocaleString()}
+            Last saved {formatAdminDateTime(updatedAt)}
           </p>
         ) : null}
 

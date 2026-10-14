@@ -56,6 +56,11 @@ export type GalleryVideoUpdateData = {
   sortOrder?: number;
 };
 
+export type GalleryReferenceSummary = {
+  count: number;
+  label: string;
+};
+
 function galleryImagePublicPath(id: string) {
   return `/api/gallery-images/${id}/file`;
 }
@@ -70,6 +75,10 @@ function like(value: string) {
 
 function countTotal(values: Array<number | bigint>) {
   return values.reduce<number>((total, value) => total + Number(value), 0);
+}
+
+function referencedLabels(references: GalleryReferenceSummary[]) {
+  return references.filter((reference) => reference.count > 0);
 }
 
 export class GalleryRepository {
@@ -117,7 +126,7 @@ export class GalleryRepository {
     });
   }
 
-  static async countReferences(id: string): Promise<number> {
+  static async listGalleryReferences(id: string): Promise<GalleryReferenceSummary[]> {
     const prisma = getPrisma();
     const [
       programs,
@@ -147,20 +156,26 @@ export class GalleryRepository {
       prisma.communityStoriesPage.count({ where: { galleryId: id } }),
     ]);
 
-    return [
-      programs,
-      admissions,
-      campusTours,
-      curriculums,
-      affiliations,
-      academics,
-      kindergartens,
-      elementaries,
-      juniorHighs,
-      ourSchools,
-      contacts,
-      communityStoriesPages,
-    ].reduce((total, count) => total + count, 0);
+    return referencedLabels([
+      { label: "Program page gallery", count: programs },
+      { label: "Admission page gallery", count: admissions },
+      { label: "Campus tour gallery", count: campusTours },
+      { label: "Curriculum gallery", count: curriculums },
+      { label: "Affiliation gallery", count: affiliations },
+      { label: "Academic page gallery", count: academics },
+      { label: "Kindergarten page gallery", count: kindergartens },
+      { label: "Elementary page gallery", count: elementaries },
+      { label: "Junior High page gallery", count: juniorHighs },
+      { label: "Our School page gallery", count: ourSchools },
+      { label: "Contact page gallery", count: contacts },
+      { label: "Community Stories page gallery", count: communityStoriesPages },
+    ]);
+  }
+
+  static async countReferences(id: string): Promise<number> {
+    return countTotal(
+      (await this.listGalleryReferences(id)).map((reference) => reference.count),
+    );
   }
 
   static async createImage(
@@ -184,7 +199,7 @@ export class GalleryRepository {
     return getPrisma().galleryImage.delete({ where: { id } });
   }
 
-  static async countImageReferences(image: GalleryImage): Promise<number> {
+  static async listImageReferences(image: GalleryImage): Promise<GalleryReferenceSummary[]> {
     const prisma = getPrisma();
     const publicPath = galleryImagePublicPath(image.id);
     const pathMatches = [{ equals: publicPath }, { equals: image.path }];
@@ -275,21 +290,27 @@ export class GalleryRepository {
       `,
     ]);
 
-    return countTotal([
-      ourSchools,
-      heroSlides,
-      popups,
-      newsPosts,
-      programs,
-      academics,
-      kindergartens,
-      elementaries,
-      juniorHighs,
-      communityStoriesPages,
-      communityVoices,
-      campusSpotlights,
-      jsonRows[0]?.count ?? 0,
+    return referencedLabels([
+      { label: "Our School featured image", count: ourSchools },
+      { label: "Home hero slide media", count: heroSlides },
+      { label: "Popup promoted poster", count: popups },
+      { label: "News cover image", count: newsPosts },
+      { label: "Program image", count: programs },
+      { label: "Academic cover image", count: academics },
+      { label: "Kindergarten page image", count: kindergartens },
+      { label: "Elementary page image", count: elementaries },
+      { label: "Junior High page image", count: juniorHighs },
+      { label: "Community Stories hero image", count: communityStoriesPages },
+      { label: "Community Voice image", count: communityVoices },
+      { label: "Campus Spotlight image", count: campusSpotlights },
+      { label: "Rich text content", count: Number(jsonRows[0]?.count ?? 0) },
     ]);
+  }
+
+  static async countImageReferences(image: GalleryImage): Promise<number> {
+    return countTotal(
+      (await this.listImageReferences(image)).map((reference) => reference.count),
+    );
   }
 
   static async createVideo(
@@ -313,7 +334,7 @@ export class GalleryRepository {
     return getPrisma().galleryVideo.delete({ where: { id } });
   }
 
-  static async countVideoReferences(video: GalleryVideo): Promise<number> {
+  static async listVideoReferences(video: GalleryVideo): Promise<GalleryReferenceSummary[]> {
     const prisma = getPrisma();
     const publicPath = galleryVideoPublicPath(video.id);
     const pathMatches = [{ equals: publicPath }, { equals: video.source }];
@@ -335,6 +356,15 @@ export class GalleryRepository {
       `,
     ]);
 
-    return countTotal([heroSlides, jsonRows[0]?.count ?? 0]);
+    return referencedLabels([
+      { label: "Home hero slide media", count: heroSlides },
+      { label: "Rich text content", count: Number(jsonRows[0]?.count ?? 0) },
+    ]);
+  }
+
+  static async countVideoReferences(video: GalleryVideo): Promise<number> {
+    return countTotal(
+      (await this.listVideoReferences(video)).map((reference) => reference.count),
+    );
   }
 }

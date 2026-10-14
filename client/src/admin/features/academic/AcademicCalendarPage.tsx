@@ -17,6 +17,7 @@ import SearchInput from '@/admin/components/ui/SearchInput';
 import Select from '@/admin/components/ui/Select';
 import StatusMessage from '@/admin/components/ui/StatusMessage';
 import { useToastState } from '@/admin/components/ui/toastContext';
+import { formatAdminDateOnly } from '@/admin/utils/dateFormat';
 
 const PAGE_SIZE = 20;
 const EMPTY_RESULT: AcademicCalendarEventList = {
@@ -65,11 +66,7 @@ function formFromItem(item: AcademicCalendarEvent): EventForm {
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  }).format(new Date(`${value}T00:00:00`));
+  return formatAdminDateOnly(value);
 }
 
 export default function AcademicCalendarPage() {

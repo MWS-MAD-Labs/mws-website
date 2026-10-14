@@ -12,6 +12,7 @@ import Field from '@/admin/components/ui/Field';
 import StatusMessage from '@/admin/components/ui/StatusMessage';
 import { uploadImageForPicker } from '@/admin/features/gallery/utils/uploadImageForPicker';
 import CoverImagePickerModal from '@/admin/features/news/components/layouts/CoverImagePickerModal';
+import { getHeroSlideStatus, getHeroSlideStatusClasses } from './heroSlideStatus';
 import type {
   HeroSlideMediaType,
   HeroSlideSourceType,
@@ -142,13 +143,6 @@ function previewFromSlide(slide: ResolvedHeroSlide): PreviewSlide {
   };
 }
 
-function slideStatus(slide: ResolvedHeroSlide) {
-  if (!slide.isActive) return 'Hidden';
-  if (!slide.mediaPath) return 'Needs media';
-  if (!slide.title && !slide.caption) return 'Needs copy';
-  return 'Ready';
-}
-
 function HomeHeroPreview({
   activeSlideCount,
   slide,
@@ -259,7 +253,9 @@ export default function HeroSlidesPage() {
 
   const previewSlide = previewFromForm(form);
   const activeSlideCount = slides.filter((slide) => slide.isActive).length;
-  const readySlideCount = slides.filter((slide) => slideStatus(slide) === 'Ready').length;
+  const readySlideCount = slides.filter(
+    (slide) => getHeroSlideStatus(slide).label === 'Ready',
+  ).length;
   const isBusy = isLoading || isSaving || isUploadingImage;
 
   async function loadSlides() {
@@ -498,7 +494,7 @@ export default function HeroSlidesPage() {
                   <div className="grid gap-3">
                     {slides.map((slide) => {
                       const isSelected = slide.id === editingId;
-                      const status = slideStatus(slide);
+                      const status = getHeroSlideStatus(slide);
                       const preview = previewFromSlide(slide);
 
                       return (
@@ -544,14 +540,10 @@ export default function HeroSlidesPage() {
                               <span
                                 className={[
                                   'rounded-md px-2 py-1 text-[11px] font-semibold',
-                                  status === 'Ready'
-                                    ? 'bg-[#10B981]/10 text-[#047857]'
-                                    : status === 'Hidden'
-                                      ? 'bg-[#F1F5F9] text-[#64748B]'
-                                      : 'bg-[#F59E0B]/10 text-[#D97706]',
+                                  getHeroSlideStatusClasses(status),
                                 ].join(' ')}
                               >
-                                {status}
+                                {status.label}
                               </span>
                             </div>
 
@@ -560,7 +552,7 @@ export default function HeroSlidesPage() {
                             </p>
 
                             <p className="mt-1 text-xs text-[#64748B]">
-                              {slide.isActive ? 'Visible on website' : 'Hidden from website'}
+                              {status.helperText}
                             </p>
                           </div>
 

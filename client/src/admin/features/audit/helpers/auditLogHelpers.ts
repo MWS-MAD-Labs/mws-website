@@ -1,4 +1,5 @@
 import type { AuditLogList } from '@/admin/api/adminApi';
+import { formatAdminDateTime, formatAdminRelativeTime } from '@/admin/utils/dateFormat';
 
 export const AUDIT_LOG_PAGE_SIZE = 50;
 export const AUDIT_LOG_SKELETON_ROWS = 8;
@@ -46,20 +47,12 @@ export const auditLogToneClasses: Record<Tone, { badge: string; dot: string }> =
 };
 
 export function formatAuditDate(value: string) {
-  return new Intl.DateTimeFormat('en-US', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(value));
+  return formatAdminDateTime(value);
 }
 
 export function formatAuditRelative(value: string) {
   const seconds = (Date.now() - new Date(value).getTime()) / 1000;
-  if (seconds < 45) return 'Just now';
-
-  const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
-  if (seconds < 3600) return rtf.format(-Math.round(seconds / 60), 'minute');
-  if (seconds < 86400) return rtf.format(-Math.round(seconds / 3600), 'hour');
-  if (seconds < 604800) return rtf.format(-Math.round(seconds / 86400), 'day');
+  if (seconds < 604800) return formatAdminRelativeTime(value);
   return formatAuditDate(value);
 }
 

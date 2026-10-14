@@ -7,24 +7,18 @@ import SearchInput from '@/admin/components/ui/SearchInput';
 import StatusMessage from '@/admin/components/ui/StatusMessage';
 import { useToastState } from '@/admin/components/ui/toastContext';
 import { getErrorMessage } from '@/admin/features/news/newsUtils';
+import { formatAdminDateTime } from '@/admin/utils/dateFormat';
 import ModalCreateUpdate, {
   type PopupPromotedFormData,
 } from './components/ModalCreateUpdate';
-
-function statusClassName(isActive: boolean) {
-  return isActive ? 'bg-[#DCFCE7] text-[#166534]' : 'bg-[#F1F5F9] text-[#64748B]';
-}
+import { findShowingPopupId, getPopupDisplayStatus } from './popupPromotedStatus';
 
 function formatTarget(popup: PopupPromoted) {
   return [popup.targetType, popup.targetId].filter(Boolean).join(': ') || 'Custom';
 }
 
 function formatDate(value: string | null) {
-  if (!value) return '-';
-  return new Intl.DateTimeFormat('en-US', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(value));
+  return formatAdminDateTime(value);
 }
 
 function toDateTimeLocal(value: string | null) {
@@ -64,6 +58,7 @@ export default function PopupPromotedPage() {
   const [modalMode, setModalMode] = useState<'create' | 'update'>('create');
   const [selectedPopup, setSelectedPopup] = useState<PopupPromoted | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const showingPopupId = useMemo(() => findShowingPopupId(popups), [popups]);
 
   const filteredPopups = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -78,12 +73,13 @@ export default function PopupPromotedPage() {
         popup.targetType ?? '',
         popup.targetId ?? '',
         popup.isActive ? 'active' : 'inactive',
+        getPopupDisplayStatus(popup, { isShowing: popup.id === showingPopupId }).searchText,
       ]
         .join(' ')
         .toLowerCase()
         .includes(query),
     );
-  }, [popups, search]);
+  }, [popups, search, showingPopupId]);
 
   async function loadPopups() {
     setPopups(await adminApi.popupPromoted());
@@ -243,84 +239,14 @@ export default function PopupPromotedPage() {
 
               <tbody className="divide-y divide-[#E2E8F0]">
                 {filteredPopups.map((popup) => (
-                  <tr key={popup.id} className="transition-colors hover:bg-[#F1F5F9]/50">
-                    <td className="px-5 py-4">
-                      <div className="flex min-w-0 items-center gap-3">
-                        <PosterPreview popup={popup} />
-                        <div className="min-w-0">
-                          <h3 className="truncate text-sm font-semibold text-[#1C2434]">
-                            {popup.title}
-                          </h3>
-                          <p className="mt-1 max-w-[360px] truncate text-xs text-[#64748B]">
-                            {popup.description || '-'}
-                          </p>
-                          <p className="mt-1 text-xs text-[#94A3B8]">
-                            Sort {popup.sortOrder} · {formatTarget(popup)}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="px-5 py-4">
-                      <p className="text-sm font-medium text-[#1C2434]">
-                        {popup.buttonText || 'No button text'}
-                      </p>
-                      {popup.buttonUrl ? (
-                        <a
-                          className="mt-1 inline-flex max-w-[260px] items-center gap-1 truncate text-xs font-medium text-[#3C50E0] hover:underline"
-                          href={popup.buttonUrl}
-                          rel="noreferrer"
-                          target="_blank"
-                        >
-                          <span className="truncate">{popup.buttonUrl}</span>
-                          <ExternalLink size={12} />
-                        </a>
-                      ) : (
-                        <p className="mt-1 text-xs text-[#94A3B8]">No URL</p>
-                      )}
-                    </td>
-
-                    <td className="px-5 py-4 text-xs text-[#64748B]">
-                      <p>From: {formatDate(popup.activeFrom)}</p>
-                      <p className="mt-1">Until: {formatDate(popup.activeUntil)}</p>
-                    </td>
-
-                    <td className="px-5 py-4">
-                      <span
-                        className={
-                          'inline-flex rounded-full px-2 py-1 text-[11px] font-semibold ' +
-                          statusClassName(popup.isActive)
-                        }
-                      >
-                        {popup.isActive ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-
-                    <td className="px-5 py-4">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <Button
-                          aria-label={'Delete ' + popup.title}
-                          className="rounded-md"
-                          disabled={deletingId === popup.id}
-                          iconOnly
-                          size="sm"
-                          type="button"
-                          variant="danger"
-                          onClick={() => void deletePopup(popup)}
-                        >
-                          <Trash2 size={14} />
-                        </Button>
-                        <button
-                          type="button"
-                          aria-label={'Edit ' + popup.title}
-                          className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md border border-[#E2E8F0] px-3 text-xs font-semibold text-[#475569] transition hover:bg-[#F8FAFC] hover:text-[#1C2434]"
-                          onClick={() => handleEdit(popup)}
-                        >
-                          <Pencil size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                  <PopupRow
+                    deletingId={deletingId}
+                    isShowing={popup.id === showingPopupId}
+                    key={popup.id}
+                    popup={popup}
+                    onDelete={() => void deletePopup(popup)}
+                    onEdit={() => handleEdit(popup)}
+                  />
                 ))}
               </tbody>
             </table>
@@ -354,6 +280,103 @@ export default function PopupPromotedPage() {
         />
       ) : null}
     </AppShell>
+  );
+}
+
+function PopupRow({
+  deletingId,
+  isShowing,
+  popup,
+  onDelete,
+  onEdit,
+}: {
+  deletingId: string | null;
+  isShowing: boolean;
+  popup: PopupPromoted;
+  onDelete: () => void;
+  onEdit: () => void;
+}) {
+  const status = getPopupDisplayStatus(popup, { isShowing });
+
+  return (
+    <tr className="transition-colors hover:bg-[#F1F5F9]/50">
+      <td className="px-5 py-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <PosterPreview popup={popup} />
+          <div className="min-w-0">
+            <h3 className="truncate text-sm font-semibold text-[#1C2434]">{popup.title}</h3>
+            <p className="mt-1 max-w-[360px] truncate text-xs text-[#64748B]">
+              {popup.description || '-'}
+            </p>
+            <p className="mt-1 text-xs text-[#94A3B8]">
+              Sort {popup.sortOrder} · {formatTarget(popup)}
+            </p>
+          </div>
+        </div>
+      </td>
+
+      <td className="px-5 py-4">
+        <p className="text-sm font-medium text-[#1C2434]">
+          {popup.buttonText || 'No button text'}
+        </p>
+        {popup.buttonUrl ? (
+          <a
+            className="mt-1 inline-flex max-w-[260px] items-center gap-1 truncate text-xs font-medium text-[#3C50E0] hover:underline"
+            href={popup.buttonUrl}
+            rel="noreferrer"
+            target="_blank"
+          >
+            <span className="truncate">{popup.buttonUrl}</span>
+            <ExternalLink size={12} />
+          </a>
+        ) : (
+          <p className="mt-1 text-xs text-[#94A3B8]">No URL</p>
+        )}
+      </td>
+
+      <td className="px-5 py-4 text-xs text-[#64748B]">
+        <p>From: {formatDate(popup.activeFrom)}</p>
+        <p className="mt-1">Until: {formatDate(popup.activeUntil)}</p>
+      </td>
+
+      <td className="px-5 py-4">
+        <span
+          className={
+            'inline-flex rounded-full px-2 py-1 text-[11px] font-semibold ' + status.className
+          }
+        >
+          {status.label}
+        </span>
+        <p className="mt-1 max-w-[180px] text-[11px] leading-4 text-[#64748B]">
+          {status.description}
+        </p>
+      </td>
+
+      <td className="px-5 py-4">
+        <div className="flex items-center justify-end gap-1.5">
+          <Button
+            aria-label={'Delete ' + popup.title}
+            className="rounded-md"
+            disabled={deletingId === popup.id}
+            iconOnly
+            size="sm"
+            type="button"
+            variant="danger"
+            onClick={onDelete}
+          >
+            <Trash2 size={14} />
+          </Button>
+          <button
+            type="button"
+            aria-label={'Edit ' + popup.title}
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md border border-[#E2E8F0] px-3 text-xs font-semibold text-[#475569] transition hover:bg-[#F8FAFC] hover:text-[#1C2434]"
+            onClick={onEdit}
+          >
+            <Pencil size={14} />
+          </button>
+        </div>
+      </td>
+    </tr>
   );
 }
 

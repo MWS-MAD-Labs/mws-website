@@ -18,6 +18,7 @@ import GalleryThumb from '@/admin/features/gallery/components/GalleryThumb';
 import { uploadImageForPicker } from '@/admin/features/gallery/utils/uploadImageForPicker';
 import CoverImagePickerModal from '@/admin/features/news/components/layouts/CoverImagePickerModal';
 import { getErrorMessage } from '@/admin/features/news/newsUtils';
+import { formatAdminDate } from '@/admin/utils/dateFormat';
 
 type PageForm = {
   activityDescription: string;
@@ -97,11 +98,11 @@ function statusClassName(isPublished: boolean) {
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat('en', {
+  return formatAdminDate(value, {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
-  }).format(new Date(value));
+  });
 }
 
 export default function CommunityStoriesPage() {

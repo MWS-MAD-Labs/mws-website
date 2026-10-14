@@ -231,4 +231,19 @@ export class AnalyticsService {
       })),
     };
   }
+
+  static async newsViewCounts(slugs: string[]) {
+    const paths = [...new Set(slugs.map((slug) => `/news/${slug}`))];
+    if (!paths.length) return new Map<string, number>();
+
+    const rows = await getPrisma().pageView.groupBy({
+      by: ["path"],
+      where: { path: { in: paths } },
+      _count: { _all: true },
+    });
+
+    return new Map(
+      rows.map((row) => [row.path.replace(/^\/news\//, ""), row._count._all]),
+    );
+  }
 }

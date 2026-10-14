@@ -54,6 +54,7 @@ import LoginPage from '@/admin/pages/LoginPage';
 
 import NewsPage from '../features/news/NewsPage';
 import CreateUpdateNews from '../features/news/components/CreateUpdateNews';
+import NewsPreviewPage from '../features/news/components/NewsPreviewPage';
 import NewsCategories from '../features/news/NewsCategories';
 import NewsTags from '../features/news/NewsTags';
 import { getErrorMessage } from '../features/news/newsUtils';
@@ -711,6 +712,17 @@ export default function AdminApp() {
             <RequireAuth>
               <RequireContentPermission>
                 <CreateUpdateNews />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="news/:newsId/preview"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <NewsPreviewPage />
               </RequireContentPermission>
             </RequireAuth>
           }

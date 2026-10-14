@@ -36,6 +36,11 @@ import {
   toggleTagId,
   type NewsForm,
 } from '../newsEditorModel';
+import {
+  clearNewsEditorDraft,
+  loadNewsEditorDraft,
+  saveNewsEditorDraft,
+} from '../newsEditorDraftStorage';
 import { NEWS_STATUS_OPTIONS, formatNewsDateTime, notifyNewsListReturn } from '../newsUtils';
 import { useToastState } from '@/admin/components/ui/toastContext';
 import { useUnsavedChangesGuard } from '@/admin/hooks/useUnsavedChangesGuard';
@@ -90,17 +95,31 @@ export default function CreateUpdateNews() {
         setGalleries(galleryData);
         setRemovedMediaIds([]);
 
-        if (post) {
-          const nextForm = newsFormFromPost(post);
-          setForm(nextForm);
-          setSavedSnapshot(serializeNewsDraft(nextForm, []));
-          setSlugWasEdited(true);
+        const nextForm = post ? newsFormFromPost(post) : createEmptyNewsForm();
+        const nextSnapshot = serializeNewsDraft(nextForm, []);
+        const storedDraft = loadNewsEditorDraft(newsId);
+        const shouldRestoreDraft =
+          storedDraft &&
+          serializeNewsDraft(storedDraft.form, storedDraft.removedMediaIds) !== nextSnapshot &&
+          window.confirm(
+            'A local news draft was found from this browser. Restore it before continuing?',
+          );
+
+        if (shouldRestoreDraft) {
+          setForm(storedDraft.form);
+          setRemovedMediaIds(storedDraft.removedMediaIds);
+          setMessage(
+            storedDraft.hasLocalCoverFile || storedDraft.lostLocalArticlePhotoCount
+              ? 'Local draft restored. Re-select any local image files before saving.'
+              : 'Local draft restored.',
+          );
         } else {
-          const nextForm = createEmptyNewsForm();
           setForm(nextForm);
-          setSavedSnapshot(serializeNewsDraft(nextForm, []));
-          setSlugWasEdited(false);
+          if (storedDraft) clearNewsEditorDraft(newsId);
         }
+
+        setSavedSnapshot(nextSnapshot);
+        setSlugWasEdited(Boolean(post));
       } catch (error) {
         if (!cancelled) {
           setMessage(error instanceof Error ? error.message : 'Failed to load news editor.');
@@ -162,6 +181,26 @@ export default function CreateUpdateNews() {
   );
 
   useUnsavedChangesGuard(hasUnsavedChanges);
+
+  useEffect(() => {
+    if (loading || saving) return;
+
+    if (!hasUnsavedChanges) {
+      clearNewsEditorDraft(newsId);
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      saveNewsEditorDraft({
+        form,
+        hasLocalCoverFile: Boolean(localCoverFile),
+        newsId,
+        removedMediaIds,
+      });
+    }, 500);
+
+    return () => window.clearTimeout(timer);
+  }, [form, hasUnsavedChanges, loading, localCoverFile, newsId, removedMediaIds, saving]);
 
   function updateForm<Key extends keyof NewsForm>(key: Key, value: NewsForm[Key]) {
     setForm((current) => ({
@@ -266,9 +305,19 @@ export default function CreateUpdateNews() {
   }
 
   function handlePreview() {
-    if (!form.slug.trim()) return;
+    if (!isEditing || !newsId) {
+      setMessage('Save this news post before previewing it.');
+      return;
+    }
 
-    window.open(`/news/${form.slug}`, '_blank', 'noopener,noreferrer');
+    if (
+      hasUnsavedChanges &&
+      !window.confirm('Preview shows the last saved version. Continue without saving changes?')
+    ) {
+      return;
+    }
+
+    window.open(`/admin/news/${newsId}/preview`, '_blank', 'noopener,noreferrer');
   }
 
   function handleClose() {
@@ -334,6 +383,8 @@ export default function CreateUpdateNews() {
         });
       }
 
+      clearNewsEditorDraft(newsId);
+      if (!isEditing) clearNewsEditorDraft(undefined);
       notifyNewsListReturn(isEditing ? 'News post updated.' : 'News post created.');
       navigate('/admin/news');
     } catch (error) {
@@ -651,7 +702,7 @@ export default function CreateUpdateNews() {
                   type="button"
                   variant="outline"
                   onClick={handlePreview}
-                  disabled={saving || !form.slug.trim()}
+                  disabled={saving || !isEditing}
                 >
                   Preview
                 </Button>

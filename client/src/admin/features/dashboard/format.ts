@@ -1,3 +1,5 @@
+import { formatAdminDateOnly, formatAdminRelativeTime } from '@/admin/utils/dateFormat';
+
 const compactNumber = new Intl.NumberFormat('en-US', {
   notation: 'compact',
   maximumFractionDigits: 1,
@@ -15,31 +17,15 @@ export function formatFullCount(value: number) {
 
 /** "2026-09-30" -> "30 Sep" (dates are already calendar days in Jakarta time). */
 export function formatDay(date: string, withWeekday = false) {
-  return new Intl.DateTimeFormat('en-GB', {
+  return formatAdminDateOnly(date, {
     day: 'numeric',
     month: 'short',
     ...(withWeekday ? { weekday: 'short' } : {}),
-    timeZone: 'UTC',
-  }).format(new Date(`${date}T00:00:00Z`));
+  });
 }
 
 export function formatRelativeTime(value: string, now = Date.now()) {
-  const seconds = Math.round((new Date(value).getTime() - now) / 1000);
-  const units: Array<[Intl.RelativeTimeFormatUnit, number]> = [
-    ['year', 31_536_000],
-    ['month', 2_592_000],
-    ['week', 604_800],
-    ['day', 86_400],
-    ['hour', 3_600],
-    ['minute', 60],
-  ];
-  const formatter = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
-
-  for (const [unit, size] of units) {
-    if (Math.abs(seconds) >= size) return formatter.format(Math.round(seconds / size), unit);
-  }
-
-  return 'just now';
+  return formatAdminRelativeTime(value, now);
 }
 
 const PAGE_LABELS: Record<string, string> = {

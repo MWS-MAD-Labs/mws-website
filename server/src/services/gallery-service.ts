@@ -10,6 +10,7 @@ import {
 import {
   GalleryRepository,
   type GalleryImageUpdateData,
+  type GalleryReferenceSummary,
   type GalleryUpdateData,
   type GalleryVideoUpdateData,
   type GalleryWithMedia,
@@ -150,6 +151,16 @@ function galleryResponse(gallery: GalleryWithMedia) {
   };
 }
 
+function referenceMessage(
+  target: "gallery" | "image" | "video",
+  references: GalleryReferenceSummary[],
+) {
+  const details = references
+    .map((reference) => `${reference.label} (${reference.count})`)
+    .join(", ");
+  return `Cannot delete this ${target} because it is still used by: ${details}. Remove those references first.`;
+}
+
 function validateImageFile(file: File) {
   if (!ACCEPTED_IMAGE_TYPES.has(file.type)) {
     throw new ResponseError(400, "Only AVIF, WebP, JPEG, or PNG images are allowed. Use WebP/AVIF for photos.");
@@ -228,27 +239,21 @@ export class GalleryService {
     const gallery = await GalleryRepository.findGalleryById(id);
     if (!gallery) return;
 
-    const referenceCount = await GalleryRepository.countReferences(id);
-    if (referenceCount > 0) {
-      throw new ResponseError(409, "Cannot delete a gallery that is referenced by content.");
+    const galleryReferences = await GalleryRepository.listGalleryReferences(id);
+    if (galleryReferences.length > 0) {
+      throw new ResponseError(409, referenceMessage("gallery", galleryReferences));
     }
 
     for (const image of gallery.images) {
-      const imageReferenceCount = await GalleryRepository.countImageReferences(image);
-      if (imageReferenceCount > 0) {
-        throw new ResponseError(
-          409,
-          "Cannot delete this gallery because one or more images are still used by website content.",
-        );
+      const imageReferences = await GalleryRepository.listImageReferences(image);
+      if (imageReferences.length > 0) {
+        throw new ResponseError(409, referenceMessage("gallery", imageReferences));
       }
     }
     for (const video of gallery.videos) {
-      const videoReferenceCount = await GalleryRepository.countVideoReferences(video);
-      if (videoReferenceCount > 0) {
-        throw new ResponseError(
-          409,
-          "Cannot delete this gallery because one or more videos are still used by website content.",
-        );
+      const videoReferences = await GalleryRepository.listVideoReferences(video);
+      if (videoReferences.length > 0) {
+        throw new ResponseError(409, referenceMessage("gallery", videoReferences));
       }
     }
 
@@ -331,9 +336,9 @@ export class GalleryService {
     const image = await GalleryRepository.findImageById(id);
     if (!image) return;
 
-    const referenceCount = await GalleryRepository.countImageReferences(image);
-    if (referenceCount > 0) {
-      throw new ResponseError(409, "Cannot delete this image because it is still used by website content.");
+    const references = await GalleryRepository.listImageReferences(image);
+    if (references.length > 0) {
+      throw new ResponseError(409, referenceMessage("image", references));
     }
 
     await deleteImageObject(image.path);
@@ -431,9 +436,9 @@ export class GalleryService {
     const video = await GalleryRepository.findVideoById(id);
     if (!video) return;
 
-    const referenceCount = await GalleryRepository.countVideoReferences(video);
-    if (referenceCount > 0) {
-      throw new ResponseError(409, "Cannot delete this video because it is still used by website content.");
+    const references = await GalleryRepository.listVideoReferences(video);
+    if (references.length > 0) {
+      throw new ResponseError(409, referenceMessage("video", references));
     }
 
     if (video.sourceType === "UPLOAD") {

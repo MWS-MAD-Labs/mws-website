@@ -110,3 +110,30 @@ describe("AnalyticsService.recordPageView", () => {
     ).rejects.toThrow("Invalid page view.");
   });
 });
+
+describe("AnalyticsService.newsViewCounts", () => {
+  it("counts analytics views by news slug", async () => {
+    const groupBy = mock(async () => [
+      { path: "/news/steam-exhibition", _count: { _all: 7 } },
+      { path: "/news/open-house", _count: { _all: 2 } },
+    ]);
+
+    spyOn(prismaModule, "getPrisma").mockReturnValue({
+      pageView: { groupBy },
+    } as unknown as ReturnType<typeof prismaModule.getPrisma>);
+
+    const counts = await AnalyticsService.newsViewCounts([
+      "steam-exhibition",
+      "open-house",
+      "steam-exhibition",
+    ]);
+
+    expect(groupBy).toHaveBeenCalledWith({
+      by: ["path"],
+      where: { path: { in: ["/news/steam-exhibition", "/news/open-house"] } },
+      _count: { _all: true },
+    });
+    expect(counts.get("steam-exhibition")).toBe(7);
+    expect(counts.get("open-house")).toBe(2);
+  });
+});

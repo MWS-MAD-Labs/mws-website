@@ -13,6 +13,7 @@ import Modal from '@/admin/components/ui/Modal';
 import SearchInput from '@/admin/components/ui/SearchInput';
 import StatusMessage from '@/admin/components/ui/StatusMessage';
 import { useToastState } from '@/admin/components/ui/toastContext';
+import { formatAdminDate } from '@/admin/utils/dateFormat';
 
 type MediaKind = 'images' | 'videos';
 type VideoType = GalleryVideoItem['sourceType'];
@@ -54,7 +55,7 @@ function optionalText(value: string) {
 }
 
 function formatDate(value: string) {
-  return new Date(value).toLocaleDateString();
+  return formatAdminDate(value);
 }
 
 function toSortOrder(value: string) {

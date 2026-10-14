@@ -18,6 +18,7 @@ import Panel from '@/admin/components/ui/Panel';
 import Select from '@/admin/components/ui/Select';
 import StatusMessage from '@/admin/components/ui/StatusMessage';
 import { useToastState } from '@/admin/components/ui/toastContext';
+import { formatAdminDateTime } from '@/admin/utils/dateFormat';
 
 import type { CmsRoleName } from '@/admin/types/auth';
 
@@ -31,12 +32,7 @@ const inputClass =
   'rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm outline-none focus:border-[#3C50E0]';
 
 function formatDate(value: string | null) {
-  if (!value) return '-';
-
-  return new Intl.DateTimeFormat('en-US', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(value));
+  return formatAdminDateTime(value);
 }
 
 function invitationEmailMessage(

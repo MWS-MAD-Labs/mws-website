@@ -1,4 +1,5 @@
 import type { ContactInquiryList, ContactInquiryStatus } from '@/admin/api/adminApi';
+import { formatAdminDateTime } from '@/admin/utils/dateFormat';
 
 export const INQUIRY_STATUS_OPTIONS: Array<{ value: ContactInquiryStatus; label: string }> = [
   { value: 'NEW', label: 'New' },
@@ -33,11 +34,6 @@ export function getInquiryStatusClasses(status: string) {
   );
 }
 
-const dateFormatter = new Intl.DateTimeFormat('en-GB', {
-  dateStyle: 'medium',
-  timeStyle: 'short',
-});
-
 export function formatInquiryDate(value: string) {
-  return dateFormatter.format(new Date(value));
+  return formatAdminDateTime(value);
 }
