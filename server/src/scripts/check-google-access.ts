@@ -68,7 +68,21 @@ if (calendarId && calendarApiKey) {
   try {
     const response = await fetch(url);
     console.log(`${response.ok ? "OK" : "FAIL"}   Calendar: public events via API key`);
-    if (!response.ok) console.log(`      Google: HTTP ${response.status}`);
+    if (!response.ok) {
+      let detail = `HTTP ${response.status}`;
+      try {
+        const payload = (await response.json()) as {
+          error?: { message?: string; errors?: Array<{ reason?: string }> };
+        };
+        const reasons = payload.error?.errors?.map((item) => item.reason).filter(Boolean);
+        detail = [detail, payload.error?.message, reasons?.join(", ")]
+          .filter(Boolean)
+          .join(" | ");
+      } catch {
+        // Status code is still useful if Google sends a non-JSON error.
+      }
+      console.log(`      Google: ${detail}`);
+    }
   } catch (error) {
     console.log("FAIL  Calendar: public events via API key");
     console.log(`      Google: ${error instanceof Error ? error.message : String(error)}`);

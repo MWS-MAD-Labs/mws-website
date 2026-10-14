@@ -67,6 +67,12 @@ type GoogleCalendarApiEvent = {
 };
 
 type GoogleCalendarApiResponse = {
+  error?: {
+    code?: number;
+    errors?: Array<{ domain?: string; message?: string; reason?: string }>;
+    message?: string;
+    status?: string;
+  };
   items?: GoogleCalendarApiEvent[];
   nextPageToken?: string | null;
 };
@@ -266,7 +272,22 @@ export async function listGoogleCalendarEvents(
   }
 
   if (!response.ok) {
+    let errorPayload: GoogleCalendarApiResponse["error"] | undefined;
+    try {
+      errorPayload = ((await response.json()) as GoogleCalendarApiResponse).error;
+    } catch {
+      // Google usually sends JSON here, but status is still enough if not.
+    }
+
     console.warn("[CALENDAR] Google Calendar API returned an error", {
+      googleError: errorPayload
+        ? {
+            code: errorPayload.code,
+            message: errorPayload.message,
+            reasons: errorPayload.errors?.map((item) => item.reason).filter(Boolean),
+            status: errorPayload.status,
+          }
+        : undefined,
       status: response.status,
       statusText: response.statusText,
     });
