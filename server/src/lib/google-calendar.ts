@@ -101,9 +101,20 @@ function emptyResult(pageSize: number): GoogleCalendarEventsResult {
 
 function readConfig() {
   return {
-    apiKey: process.env["GOOGLE_CALENDAR_API_KEY"]?.trim() || "",
-    calendarId: process.env["GOOGLE_CALENDAR_ID"]?.trim() || "",
+    apiKey: cleanEnvValue(process.env["GOOGLE_CALENDAR_API_KEY"]),
+    calendarId: cleanEnvValue(process.env["GOOGLE_CALENDAR_ID"]),
   };
+}
+
+function cleanEnvValue(value: string | undefined) {
+  const trimmed = value?.trim() || "";
+  if (trimmed.length >= 2 && trimmed.startsWith('"') && trimmed.endsWith('"')) {
+    return trimmed.slice(1, -1).trim();
+  }
+  if (trimmed.length >= 2 && trimmed.startsWith("'") && trimmed.endsWith("'")) {
+    return trimmed.slice(1, -1).trim();
+  }
+  return trimmed;
 }
 
 function parseQuery(rawQuery: GoogleCalendarEventsQuery = {}) {
@@ -247,12 +258,19 @@ export async function listGoogleCalendarEvents(
   let response: Response;
   try {
     response = await fetch(buildGoogleCalendarUrl(config, query));
-  } catch {
-    throw new ResponseError(502, "Calendar events could not be loaded.");
+  } catch (error) {
+    console.warn("[CALENDAR] Google Calendar API request failed", {
+      message: error instanceof Error ? error.message : String(error),
+    });
+    throw new ResponseError(503, "Calendar events could not be loaded.");
   }
 
   if (!response.ok) {
-    throw new ResponseError(502, "Calendar events could not be loaded.");
+    console.warn("[CALENDAR] Google Calendar API returned an error", {
+      status: response.status,
+      statusText: response.statusText,
+    });
+    throw new ResponseError(503, "Calendar events could not be loaded.");
   }
 
   const payload = (await response.json()) as GoogleCalendarApiResponse;

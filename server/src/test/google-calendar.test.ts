@@ -133,13 +133,27 @@ describe("listGoogleCalendarEvents", () => {
     });
   });
 
-  it("reports upstream Google Calendar failures as a gateway error", async () => {
+  it("reports upstream Google Calendar failures as a service error", async () => {
     configureCalendar();
     spyOn(globalThis, "fetch").mockResolvedValue(new Response("Forbidden", { status: 403 }));
 
     await expect(listGoogleCalendarEvents()).rejects.toMatchObject({
-      status: 502,
+      status: 503,
       message: "Calendar events could not be loaded.",
     } satisfies Partial<ResponseError>);
+  });
+
+  it("accepts quoted calendar env values", async () => {
+    process.env.GOOGLE_CALENDAR_ID = '"school@example.com"';
+    process.env.GOOGLE_CALENDAR_API_KEY = '"api-key"';
+    const fetch = spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ items: [] })),
+    );
+
+    await listGoogleCalendarEvents({ from: "2026-01-01", pageSize: 1 });
+
+    const requestedUrl = new URL(String(fetch.mock.calls[0]?.[0]));
+    expect(requestedUrl.pathname).toContain(encodeURIComponent("school@example.com"));
+    expect(requestedUrl.searchParams.get("key")).toBe("api-key");
   });
 });
