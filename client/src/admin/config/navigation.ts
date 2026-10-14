@@ -58,13 +58,13 @@ const contentPages: MenuItem[] = [
     enabled: true,
     requiredPermission: contentPermission,
   },
-  {
-    label: 'Admission Guidelines',
-    href: '/admin/content/admission-guidelines',
-    Icon: Files,
-    enabled: true,
-    requiredPermission: contentPermission,
-  },
+  // {
+  //   label: 'Admission Guidelines',
+  //   href: '/admin/content/admission-guidelines',
+  //   Icon: Files,
+  //   enabled: true,
+  //   requiredPermission: contentPermission,
+  // },
   {
     label: 'About MWS',
     href: '/admin/content/about-mws',

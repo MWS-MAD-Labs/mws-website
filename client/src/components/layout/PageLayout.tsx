@@ -112,7 +112,7 @@ const routeTitles: Record<string, string> = {
   '/our-school': 'Our School',
   '/admission': 'Admission',
   '/admission/faq': 'Admission FAQ',
-  '/admission/guidelines': 'Admission Guidelines',
+  // '/admission/guidelines': 'Admission Guidelines',
   '/book-a-tour': 'Book a Tour',
   '/academic': 'Academic',
   '/academic/kindergarten': 'Kindergarten',
