@@ -28,6 +28,7 @@ import { partnersRoute } from "./partners-route";
 import { adminContactInquiryRoute } from "./contact-inquiry-route";
 import { adminAcademicCalendarRoute } from "./academic-calendar-route";
 import { popupPromotedRoute } from "./popup-promoted-route";
+import { adminVirtualTourRoute } from "./virtual-tour-route";
 
 export const adminRoute = new Hono<{ Variables: SessionVariables }>();
 
@@ -120,3 +121,4 @@ adminRoute.route("/partners", partnersRoute);
 adminRoute.route("/popup-promoted", popupPromotedRoute);
 adminRoute.route("/contact-inquiries", adminContactInquiryRoute);
 adminRoute.route("/calendar", adminAcademicCalendarRoute);
+adminRoute.route("/virtual-tours", adminVirtualTourRoute);

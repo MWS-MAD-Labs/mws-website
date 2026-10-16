@@ -18,7 +18,7 @@ import CommunityStories from '@/pages/community-stories';
 import BookATour from '@/features/book-a-tour/BookATourPage';
 import AboutUs from '@/pages/aboutUS';
 import NotFound from '@/pages/not-found';
-import TourTest from '@/pages/TourTest';
+import VirtualTourPage from '@/pages/virtual-tour';
 
 export default function App() {
   return (
@@ -35,7 +35,10 @@ export default function App() {
         <Route path="academic/kindergarten" element={<Kindergarten />} />
         <Route path="academic/elementary" element={<Elementary />} />
         <Route path="academic/high-school" element={<HighSchool />} />
-        <Route path="academic/junior-high" element={<Navigate to="/academic/high-school" replace />} />
+        <Route
+          path="academic/junior-high"
+          element={<Navigate to="/academic/high-school" replace />}
+        />
         <Route path="kindergarten" element={<Navigate to="/academic/kindergarten" replace />} />
         <Route path="elementary" element={<Navigate to="/academic/elementary" replace />} />
         <Route path="high-school" element={<Navigate to="/academic/high-school" replace />} />
@@ -48,7 +51,7 @@ export default function App() {
         <Route path="news-detail" element={<Navigate to="/news" replace />} />
         <Route path="community-stories" element={<CommunityStories />} />
         <Route path="contact" element={<Contact />} />
-        <Route path='360-Virtual-Tour' element={<TourTest/>} />
+        <Route path="virtual-tour" element={<VirtualTourPage />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

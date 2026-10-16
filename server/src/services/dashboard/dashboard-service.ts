@@ -1,4 +1,4 @@
-import { getPrisma } from "../lib/prisma";
+import { getPrisma } from "../../lib/prisma";
 
 const ACADEMIC_LABELS: Record<string, string> = {
   kindergarten: "Kindergarten",
@@ -6,7 +6,11 @@ const ACADEMIC_LABELS: Record<string, string> = {
   "high-school": "High School",
 };
 
-const ACADEMIC_LEVEL_KEYS = ["kindergarten", "elementary", "high-school"] as const;
+const ACADEMIC_LEVEL_KEYS = [
+  "kindergarten",
+  "elementary",
+  "high-school",
+] as const;
 
 export type RecentUpdate = {
   type: "news" | "page" | "academic" | "hero";
@@ -23,7 +27,10 @@ export type RecentUpdate = {
  * without media) and what changed most recently.
  */
 export class DashboardService {
-  static async contentSummary(options: { includeUsers: boolean }, now = new Date()) {
+  static async contentSummary(
+    options: { includeUsers: boolean },
+    now = new Date(),
+  ) {
     const prisma = getPrisma();
 
     const [
@@ -42,14 +49,28 @@ export class DashboardService {
       activeUsers,
     ] = await Promise.all([
       prisma.newsPost.groupBy({ by: ["status"], _count: { _all: true } }),
-      prisma.newsPost.count({ where: { status: "PUBLISHED", publishedAt: { gt: now } } }),
+      prisma.newsPost.count({
+        where: { status: "PUBLISHED", publishedAt: { gt: now } },
+      }),
       prisma.newsPost.findMany({
-        select: { id: true, title: true, status: true, publishedAt: true, updatedAt: true },
+        select: {
+          id: true,
+          title: true,
+          status: true,
+          publishedAt: true,
+          updatedAt: true,
+        },
         orderBy: { updatedAt: "desc" },
         take: 5,
       }),
       prisma.heroSlide.findMany({
-        select: { id: true, title: true, isActive: true, mediaPath: true, updatedAt: true },
+        select: {
+          id: true,
+          title: true,
+          isActive: true,
+          mediaPath: true,
+          updatedAt: true,
+        },
         orderBy: { updatedAt: "desc" },
       }),
       prisma.gallery.count(),
@@ -69,7 +90,10 @@ export class DashboardService {
           orderBy: { updatedAt: "desc" },
         }),
       ]),
-      prisma.ourSchool.findFirst({ select: { updatedAt: true }, orderBy: { updatedAt: "desc" } }),
+      prisma.ourSchool.findFirst({
+        select: { updatedAt: true },
+        orderBy: { updatedAt: "desc" },
+      }),
       prisma.communityStoriesPage.findFirst({
         select: { updatedAt: true, isPublished: true },
         orderBy: { updatedAt: "desc" },
@@ -114,7 +138,9 @@ export class DashboardService {
         type: "news" as const,
         title: post.title,
         status:
-          post.status === "PUBLISHED" && post.publishedAt && post.publishedAt > now
+          post.status === "PUBLISHED" &&
+          post.publishedAt &&
+          post.publishedAt > now
             ? "SCHEDULED"
             : post.status,
         updatedAt: post.updatedAt,
@@ -139,7 +165,15 @@ export class DashboardService {
           ]
         : []),
       ...(ourSchool
-        ? [{ type: "page" as const, title: "Our School", status: "PUBLISHED", updatedAt: ourSchool.updatedAt, editPath: "/admin/content/our-school" }]
+        ? [
+            {
+              type: "page" as const,
+              title: "Our School",
+              status: "PUBLISHED",
+              updatedAt: ourSchool.updatedAt,
+              editPath: "/admin/content/our-school",
+            },
+          ]
         : []),
       ...(communityStories
         ? [
@@ -153,7 +187,15 @@ export class DashboardService {
           ]
         : []),
       ...(contactPage
-        ? [{ type: "page" as const, title: "Contact", status: "PUBLISHED", updatedAt: contactPage.updatedAt, editPath: "/admin/content/contact" }]
+        ? [
+            {
+              type: "page" as const,
+              title: "Contact",
+              status: "PUBLISHED",
+              updatedAt: contactPage.updatedAt,
+              editPath: "/admin/content/contact",
+            },
+          ]
         : []),
     ]
       .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
@@ -173,7 +215,11 @@ export class DashboardService {
         active: activeSlides.length,
         missingMedia: activeSlides.filter((slide) => !slide.mediaPath).length,
       },
-      gallery: { galleries: galleryCount, images: imageCount, videos: videoCount },
+      gallery: {
+        galleries: galleryCount,
+        images: imageCount,
+        videos: videoCount,
+      },
       academic,
       users:
         options.includeUsers && activeUsers !== null

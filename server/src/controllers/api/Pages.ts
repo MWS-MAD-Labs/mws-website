@@ -3,8 +3,8 @@ import { getCookie } from "hono/cookie";
 import { ResponseError } from "../../error/response-error";
 import { toJsonSafe } from "../../lib/json-response";
 import { sessionCookieName, verifySession } from "../../lib/session";
-import { ContactPageService } from "../../services/contact-page-service";
-import { AcademicPageService } from "../../services/academic-page-service";
+import { ContactPageService } from "../../services/contact/contact-page-service";
+import { AcademicPageService } from "../../services/academic/academic-page-service";
 import { PageDataService } from "../../services/page-data-service";
 
 export class PublicPagesController {
@@ -29,7 +29,9 @@ export class PublicPagesController {
   }
 
   static async getAcademicAsset(c: Context) {
-    const file = await AcademicPageService.getAssetFile(c.req.param("objectName"));
+    const file = await AcademicPageService.getAssetFile(
+      c.req.param("objectName"),
+    );
     c.header("Content-Type", file.contentType);
     c.header("Content-Length", String(file.size));
     c.header("Cache-Control", "public, max-age=31536000");
@@ -44,7 +46,9 @@ export class PublicPagesController {
     }
 
     if (slug === "admissions" || slug === "admission") {
-      return c.json({ data: toJsonSafe(await PageDataService.getAdmissions()) });
+      return c.json({
+        data: toJsonSafe(await PageDataService.getAdmissions()),
+      });
     }
 
     if (slug === "admission-faq") {
@@ -59,7 +63,11 @@ export class PublicPagesController {
       });
     }
 
-    if (slug === "about-millennia" || slug === "about-us" || slug === "our-school") {
+    if (
+      slug === "about-millennia" ||
+      slug === "about-us" ||
+      slug === "our-school"
+    ) {
       return c.json({ data: toJsonSafe(await PageDataService.getOurSchool()) });
     }
 
@@ -81,7 +89,9 @@ export class PublicPagesController {
     }
 
     if (slug === "academic") {
-      return c.json({ data: toJsonSafe(await AcademicPageService.listLevels()) });
+      return c.json({
+        data: toJsonSafe(await AcademicPageService.listLevels()),
+      });
     }
 
     throw new ResponseError(404, "Page not found.");

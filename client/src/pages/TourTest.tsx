@@ -25,12 +25,36 @@ export default function TourTest() {
                 id: 'lobby',
                 name: 'Lobby',
                 panorama: '/tours/PANO_20201015_153714.jpg',
-                links: [{ nodeId: 'corridor', position: { yaw: '90deg', pitch: '0deg' } }],
+                links: [
+                  {
+                    nodeId: 'corridor',
+                    position: { yaw: '90deg', pitch: '0deg' },
+                  },
+                  {
+                    nodeId: 'Lab IT',
+                    position: { yaw: '180deg', pitch: '0deg' },
+                  },
+                ],
               },
               {
                 id: 'corridor',
                 name: 'Koridor',
                 panorama: '/tours/PANO_20201020_074204.jpg',
+                links: [
+                  {
+                    nodeId: 'lobby',
+                    position: { yaw: '90deg', pitch: '0deg' },
+                  },
+                  {
+                    nodeId: 'Lab IT',
+                    position: { yaw: '180deg', pitch: '0deg' },
+                  },
+                ],
+              },
+              {
+                id: 'Lab IT',
+                name: 'IT',
+                panorama: '/tours/PANO_20201015_091445.jpg',
                 links: [{ nodeId: 'lobby', position: { yaw: '-90deg', pitch: '0deg' } }],
               },
             ],

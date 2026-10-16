@@ -4,7 +4,7 @@ import { getPrisma } from "../lib/prisma";
 import {
   planMadLabsSuperAdmins,
   type MadLabsSeedAction,
-} from "../services/madlabs-super-admin-seed";
+} from "../services/auth/madlabs-super-admin-seed";
 
 /**
  * Makes every active MAD Labs employee in Central a CMS SUPER_ADMIN.

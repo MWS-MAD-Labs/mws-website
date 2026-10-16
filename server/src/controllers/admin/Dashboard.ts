@@ -1,8 +1,11 @@
 import type { Context } from "hono";
 import { toJsonSafe } from "../../lib/json-response";
 import { hasCmsPermission } from "../../middleware/require-cms-permission";
-import { AnalyticsService, parseRange } from "../../services/analytics-service";
-import { DashboardService } from "../../services/dashboard-service";
+import {
+  AnalyticsService,
+  parseRange,
+} from "../../services/dashboard/analytics-service";
+import { DashboardService } from "../../services/dashboard/dashboard-service";
 import type { SessionVariables } from "../../types/hono-context";
 
 function userName(user: SessionVariables["user"]): string {
@@ -26,7 +29,9 @@ export class DashboardController {
   }
 
   static async analytics(c: Context<{ Variables: SessionVariables }>) {
-    const overview = await AnalyticsService.overview(parseRange(c.req.query("days")));
+    const overview = await AnalyticsService.overview(
+      parseRange(c.req.query("days")),
+    );
     return c.json({ data: toJsonSafe(overview) });
   }
 }

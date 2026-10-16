@@ -129,6 +129,7 @@ const routeTitles: Record<string, string> = {
   '/school-news': 'School News',
   '/community-stories': 'Community Stories',
   '/contact': 'Contact',
+  '/virtual-tour': 'Virtual Tour',
 };
 
 function titleFromPath(pathname: string) {

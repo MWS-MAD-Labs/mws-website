@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -28,6 +28,12 @@ const TRANSITION_DURATION = 900;
 
 const DEFAULT_CTA_LABEL = 'Learn More';
 const DEFAULT_CTA_HREF = '/admission';
+
+const ARROW_BUTTON_CLASS =
+  'group flex h-14 w-14 items-center justify-center text-white transition-transform duration-300 hover:scale-110 active:scale-95 disabled:pointer-events-none disabled:opacity-40 sm:h-16 sm:w-16 hover:text-black';
+
+const ARROW_DIAMOND_CLASS =
+  'absolute left-1/2 top-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2 rotate-45 border border-white/50 bg-black/25 backdrop-blur-md transition-colors duration-300 group-hover:border-white group-hover:bg-white sm:h-11 sm:w-11';
 
 export default function Hero({
   slides,
@@ -264,67 +270,38 @@ export default function Hero({
       </div>
 
       {/* =========================================================
-          HERO NAVIGATION
+          SIDE ARROWS (tengah kiri & kanan)
       ========================================================= */}
-      <div className="absolute bottom-6 right-5 z-30 flex items-center gap-4 text-white sm:bottom-8 sm:right-10 sm:gap-5">
-        {/* Slide indicators */}
-        <div className="flex items-center gap-2.5 sm:gap-3">
-          {slides.map((slide, index) => {
-            const isActive = index === activeIndex;
+      <button
+        type="button"
+        onClick={handlePrevious}
+        disabled={isTransitioning}
+        aria-label="Previous slide"
+        className={`${ARROW_BUTTON_CLASS} absolute left-3 top-1/2 z-30 -translate-y-1/2 sm:left-6 md:left-8`}
+      >
+        <span aria-hidden="true" className={ARROW_DIAMOND_CLASS} />
+        <ArrowLeft
+          size={20}
+          strokeWidth={1.75}
+          className="relative z-10 transition-transform duration-300 group-hover:-translate-x-0.5"
+        />
+      </button>
 
-            return (
-              <button
-                key={slide.id ?? slide.image}
-                type="button"
-                onClick={() => handleSelectSlide(index)}
-                disabled={isTransitioning}
-                aria-label={`Go to slide ${index + 1}`}
-                aria-current={isActive ? 'true' : undefined}
-                className="group flex items-center gap-2 disabled:pointer-events-none"
-              >
-                <span
-                  className={`text-[10px] font-semibold tracking-[0.16em] transition-opacity duration-300 sm:text-[11px] ${
-                    isActive ? 'opacity-100' : 'opacity-50 group-hover:opacity-100'
-                  }`}
-                >
-                  {String(index + 1).padStart(2, '0')}
-                </span>
+      <button
+        type="button"
+        onClick={handleNext}
+        disabled={isTransitioning}
+        aria-label="Next slide"
+        className={`${ARROW_BUTTON_CLASS} absolute right-3 top-1/2 z-30 -translate-y-1/2 sm:right-6 md:right-8`}
+      >
+        <span aria-hidden="true" className={ARROW_DIAMOND_CLASS} />
+        <ArrowRight
+          size={20}
+          strokeWidth={1.75}
+          className="relative z-10 transition-transform duration-300 group-hover:translate-x-0.5"
+        />
+      </button>
 
-                <span
-                  className={`h-px transition-all duration-300 ${
-                    isActive
-                      ? 'w-8 bg-white sm:w-10'
-                      : 'w-2 bg-white/50 group-hover:w-4 group-hover:bg-white'
-                  }`}
-                />
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Previous / Next */}
-        <div className="flex items-center border-l border-white/30 pl-2 sm:pl-3">
-          <button
-            type="button"
-            onClick={handlePrevious}
-            disabled={isTransitioning}
-            aria-label="Previous slide"
-            className="flex h-9 w-9 items-center justify-center text-white transition-opacity hover:opacity-60 disabled:pointer-events-none disabled:opacity-40 sm:h-10 sm:w-10"
-          >
-            <ChevronLeft size={20} strokeWidth={1.5} className="sm:h-[22px] sm:w-[22px]" />
-          </button>
-
-          <button
-            type="button"
-            onClick={handleNext}
-            disabled={isTransitioning}
-            aria-label="Next slide"
-            className="flex h-9 w-9 items-center justify-center text-white transition-opacity hover:opacity-60 disabled:pointer-events-none disabled:opacity-40 sm:h-10 sm:w-10"
-          >
-            <ChevronRight size={20} strokeWidth={1.5} className="sm:h-[22px] sm:w-[22px]" />
-          </button>
-        </div>
-      </div>
     </section>
   );
 }

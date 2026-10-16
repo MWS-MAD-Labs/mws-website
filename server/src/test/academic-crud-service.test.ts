@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, mock, spyOn } from "bun:test";
 import { ResponseError } from "../error/response-error";
 import * as prismaLib from "../lib/prisma";
-import { AcademicCrudService } from "../services/academic-crud-service";
+import { AcademicCrudService } from "../services/academic/academic-crud-service";
 
 const id = "11111111-1111-4111-8111-111111111111";
 const academicLevelId = "22222222-2222-4222-8222-222222222222";
@@ -73,7 +73,8 @@ describe("AcademicCrudService", () => {
       publishedAt: "2026-01-01T00:00:00.000Z",
     });
 
-    const updateCalls = (kindergarten.update.mock.calls as unknown[]) as unknown[][];
+    const updateCalls = kindergarten.update.mock
+      .calls as unknown[] as unknown[][];
     const updateArgs = updateCalls[0]?.[0] as {
       where: { id: string };
       data: { academicLevelId: string; title: string; publishedAt: Date };

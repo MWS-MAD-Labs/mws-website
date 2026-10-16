@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { ResponseError } from "../error/response-error";
-import { getPrisma } from "../lib/prisma";
+import { ResponseError } from "../../error/response-error";
+import { getPrisma } from "../../lib/prisma";
 import type { ContactInquiry } from "@prisma/client";
-import { sendMail, type MailResult } from "../lib/mailer";
-import { ContactInquiryRepository } from "../repositories/contact-inquiry-repository";
+import { sendMail, type MailResult } from "../../lib/mailer";
+import { ContactInquiryRepository } from "../../repositories/contact-inquiry-repository";
 import {
   contactInquiryNotificationEmail,
   inquiryNotifyRecipients,

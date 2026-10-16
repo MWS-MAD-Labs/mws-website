@@ -1,6 +1,6 @@
 import type { Context } from "hono";
 import { ResponseError } from "../../error/response-error";
-import { ContactInquiryService } from "../../services/contact-inquiry-service";
+import { ContactInquiryService } from "../../services/contact/contact-inquiry-service";
 
 async function readJson(c: Context) {
   try {

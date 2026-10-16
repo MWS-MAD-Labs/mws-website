@@ -12,6 +12,7 @@ import {
   Megaphone,
   MessageSquare,
   Newspaper,
+  RectangleGoggles,
   School,
   Tags,
   Users,
@@ -253,6 +254,13 @@ export const menuSections: MenuSection[] = [
             requiredPermission: contentPermission,
           },
         ],
+      },
+      {
+        label: 'Virtual Tour',
+        href: '/admin/virtual-tour',
+        Icon: RectangleGoggles,
+        enabled: true,
+        requiredPermission: contentPermission,
       },
       {
         label: 'Calendar',

@@ -4,7 +4,7 @@ import { ResponseError } from "../../error/response-error";
 import { auditRequestMeta, writeAuditLog } from "../../lib/audit-log";
 import { GoogleAuth } from "../../lib/google-auth";
 import { revokeSession, sessionCookieName, verifySession } from "../../lib/session";
-import { AuthService } from "../../services/auth-services";
+import { AuthService } from "../../services/auth/auth-services";
 import type { SessionVariables } from "../../types/hono-context";
 
 const OAUTH_STATE_COOKIE = "mws_cms_google_oauth_state";

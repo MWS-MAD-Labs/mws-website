@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { planMadLabsSuperAdmins } from "../services/madlabs-super-admin-seed";
+import { planMadLabsSuperAdmins } from "../services/auth/madlabs-super-admin-seed";
 import type { CentralUser } from "../types/central-types";
 import { testUser } from "./test-helpers";
 

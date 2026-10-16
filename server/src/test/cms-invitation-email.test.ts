@@ -5,8 +5,8 @@ import {
   CmsUserRepository,
   type CmsInvitationWithRelations,
 } from "../repositories/cms-user-repository";
-import { cmsInvitationEmail } from "../services/cms-invitation-email";
-import { CmsAuthService } from "../services/cms-auth-service";
+import { cmsInvitationEmail } from "../services/auth/cms-invitation-email";
+import { CmsAuthService } from "../services/auth/cms-auth-service";
 
 const originalFrontendOrigin = process.env.FRONTEND_ORIGIN;
 const MAIL_ENV_KEYS = [

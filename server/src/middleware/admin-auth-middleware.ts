@@ -65,7 +65,7 @@ export async function adminAuthMiddleware(
       throw new ResponseError(403, "Central identity is no longer registered.");
     }
 
-    const { CmsAuthService } = await import("../services/cms-auth-service");
+    const { CmsAuthService } = await import("../services/auth/cms-auth-service");
     const freshCmsUser = await CmsAuthService.requireFreshSessionUser(
       sessionUser,
       currentUser,

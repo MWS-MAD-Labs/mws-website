@@ -1,5 +1,5 @@
-import { escapeHtml } from "../lib/email-html";
-import type { MailMessage } from "../lib/mailer";
+import { escapeHtml } from "../../lib/email-html";
+import type { MailMessage } from "../../lib/mailer";
 
 function formatDate(value: Date) {
   return new Intl.DateTimeFormat("id-ID", {

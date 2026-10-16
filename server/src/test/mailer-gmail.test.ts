@@ -6,8 +6,8 @@ import * as mailer from "../lib/mailer";
 import {
   ContactInquiryService,
   resetContactInquiryRateLimitForTest,
-} from "../services/contact-inquiry-service";
-import { ContactPageService, defaultContactPageContent } from "../services/contact-page-service";
+} from "../services/contact/contact-inquiry-service";
+import { ContactPageService, defaultContactPageContent } from "../services/contact/contact-page-service";
 
 const ENV_KEYS = [
   "GOOGLE_SA_CLIENT_EMAIL",

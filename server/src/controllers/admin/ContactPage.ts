@@ -1,6 +1,6 @@
 import type { Context } from "hono";
 import { ResponseError } from "../../error/response-error";
-import { ContactPageService } from "../../services/contact-page-service";
+import { ContactPageService } from "../../services/contact/contact-page-service";
 import type { SessionVariables } from "../../types/hono-context";
 
 async function readJson(c: Context) {

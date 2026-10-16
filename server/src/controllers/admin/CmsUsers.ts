@@ -1,6 +1,6 @@
 import type { Context } from "hono";
 import { ResponseError } from "../../error/response-error";
-import { CmsAuthService } from "../../services/cms-auth-service";
+import { CmsAuthService } from "../../services/auth/cms-auth-service";
 import type { SessionVariables } from "../../types/hono-context";
 
 async function readJson<T = unknown>(c: Context): Promise<T> {

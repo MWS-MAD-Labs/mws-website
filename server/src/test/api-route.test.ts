@@ -13,7 +13,7 @@ import * as googleCalendar from "../lib/google-calendar";
 import { signSession } from "../lib/session";
 import * as centralClient from "../lib/central-client";
 import { apiRoute } from "../routes/api-router";
-import { CmsAuthService } from "../services/cms-auth-service";
+import { CmsAuthService } from "../services/auth/cms-auth-service";
 import { PartnerService } from "../services/partner-service";
 import { cmsSessionUser, testUser } from "./test-helpers";
 import type { SessionVariables } from "../types/hono-context";

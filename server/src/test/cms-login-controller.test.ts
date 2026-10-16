@@ -2,8 +2,8 @@ import { afterEach, beforeAll, describe, expect, it, mock, spyOn } from "bun:tes
 import { Hono } from "hono";
 import { authRoute } from "../routes/auth";
 import { ResponseError } from "../error/response-error";
-import { AuthService } from "../services/auth-services";
-import { CmsAuthService } from "../services/cms-auth-service";
+import { AuthService } from "../services/auth/auth-services";
+import { CmsAuthService } from "../services/auth/cms-auth-service";
 import * as centralClient from "../lib/central-client";
 import { cmsSessionUser, testUser } from "./test-helpers";
 import type { SessionVariables } from "../types/hono-context";

@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { ResponseError } from "../error/response-error";
-import { getPrisma } from "../lib/prisma";
+import { ResponseError } from "../../error/response-error";
+import { getPrisma } from "../../lib/prisma";
 
 const EVENT_TYPES = ["EVENT", "HOLIDAY"] as const;
 const uuidSchema = z.string().uuid();
@@ -28,22 +28,27 @@ const eventSchema = eventFieldsSchema.superRefine((value, context) => {
   }
 });
 
-const updateSchema = eventFieldsSchema.partial().superRefine((value, context) => {
-  if (value.startDate && value.endDate && value.endDate < value.startDate) {
-    context.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ["endDate"],
-      message: "End date cannot be before start date.",
-    });
-  }
-});
+const updateSchema = eventFieldsSchema
+  .partial()
+  .superRefine((value, context) => {
+    if (value.startDate && value.endDate && value.endDate < value.startDate) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["endDate"],
+        message: "End date cannot be before start date.",
+      });
+    }
+  });
 
 const listSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
   search: z.string().trim().optional(),
   type: z.enum(EVENT_TYPES).optional(),
-  isActive: z.enum(["true", "false"]).transform((value) => value === "true").optional(),
+  isActive: z
+    .enum(["true", "false"])
+    .transform((value) => value === "true")
+    .optional(),
 });
 
 const publicSchema = z.object({
@@ -74,8 +79,13 @@ function requireId(id: string | undefined) {
 
 function handleDatabaseError(error: unknown): never {
   const code = (error as { code?: string }).code;
-  if (code === "P2025") throw new ResponseError(404, "Calendar event not found.");
-  if (code === "P2002") throw new ResponseError(409, "A calendar event with the same value already exists.");
+  if (code === "P2025")
+    throw new ResponseError(404, "Calendar event not found.");
+  if (code === "P2002")
+    throw new ResponseError(
+      409,
+      "A calendar event with the same value already exists.",
+    );
   throw error;
 }
 
@@ -103,7 +113,8 @@ function eventResponse(event: {
 export class AcademicCalendarService {
   static async list(rawQuery: Record<string, string | undefined> = {}) {
     const parsed = listSchema.safeParse(rawQuery);
-    if (!parsed.success) throw new ResponseError(400, "Invalid calendar list query.");
+    if (!parsed.success)
+      throw new ResponseError(400, "Invalid calendar list query.");
 
     const { page, pageSize, search, type, isActive } = parsed.data;
     const where = {
@@ -111,7 +122,9 @@ export class AcademicCalendarService {
         ? {
             OR: [
               { title: { contains: search, mode: "insensitive" as const } },
-              { description: { contains: search, mode: "insensitive" as const } },
+              {
+                description: { contains: search, mode: "insensitive" as const },
+              },
               { location: { contains: search, mode: "insensitive" as const } },
             ],
           }
@@ -125,7 +138,11 @@ export class AcademicCalendarService {
       const [items, total] = await Promise.all([
         prisma.academicCalendarEvent.findMany({
           where,
-          orderBy: [{ startDate: "asc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
+          orderBy: [
+            { startDate: "asc" },
+            { sortOrder: "asc" },
+            { createdAt: "asc" },
+          ],
           skip: (page - 1) * pageSize,
           take: pageSize,
         }),
@@ -134,7 +151,12 @@ export class AcademicCalendarService {
 
       return {
         items: items.map(eventResponse),
-        pagination: { page, pageSize, total, totalPages: Math.ceil(total / pageSize) },
+        pagination: {
+          page,
+          pageSize,
+          total,
+          totalPages: Math.ceil(total / pageSize),
+        },
       };
     } catch (error) {
       handleDatabaseError(error);
@@ -143,17 +165,26 @@ export class AcademicCalendarService {
 
   static async listPublic(rawQuery: Record<string, string | undefined> = {}) {
     const parsed = publicSchema.safeParse(rawQuery);
-    if (!parsed.success) throw new ResponseError(400, "Invalid calendar date range.");
+    if (!parsed.success)
+      throw new ResponseError(400, "Invalid calendar date range.");
 
     const prisma = getPrisma();
     try {
       const items = await prisma.academicCalendarEvent.findMany({
         where: {
           isActive: true,
-          ...(parsed.data.from ? { endDate: { gte: dateValue(parsed.data.from) } } : {}),
-          ...(parsed.data.to ? { startDate: { lte: dateValue(parsed.data.to) } } : {}),
+          ...(parsed.data.from
+            ? { endDate: { gte: dateValue(parsed.data.from) } }
+            : {}),
+          ...(parsed.data.to
+            ? { startDate: { lte: dateValue(parsed.data.to) } }
+            : {}),
         },
-        orderBy: [{ startDate: "asc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
+        orderBy: [
+          { startDate: "asc" },
+          { sortOrder: "asc" },
+          { createdAt: "asc" },
+        ],
         take: 500,
       });
 
@@ -174,7 +205,8 @@ export class AcademicCalendarService {
 
   static async create(payload: unknown) {
     const parsed = eventSchema.safeParse(payload);
-    if (!parsed.success) throw new ResponseError(400, "Invalid calendar event payload.");
+    if (!parsed.success)
+      throw new ResponseError(400, "Invalid calendar event payload.");
 
     try {
       const event = await getPrisma().academicCalendarEvent.create({
@@ -200,28 +232,58 @@ export class AcademicCalendarService {
     const eventId = requireId(id);
     const parsed = updateSchema.safeParse(payload);
     if (!parsed.success || !Object.keys(parsed.data).length) {
-      throw new ResponseError(400, "At least one valid calendar event field is required.");
+      throw new ResponseError(
+        400,
+        "At least one valid calendar event field is required.",
+      );
     }
 
     try {
-      const existing = await getPrisma().academicCalendarEvent.findUnique({ where: { id: eventId } });
+      const existing = await getPrisma().academicCalendarEvent.findUnique({
+        where: { id: eventId },
+      });
       if (!existing) throw new ResponseError(404, "Calendar event not found.");
-      const startDate = parsed.data.startDate ?? dateString(existing.startDate)!;
-      const endDate = parsed.data.endDate === undefined ? dateString(existing.endDate) : parsed.data.endDate;
-      if (endDate && endDate < startDate) throw new ResponseError(400, "End date cannot be before start date.");
+      const startDate =
+        parsed.data.startDate ?? dateString(existing.startDate)!;
+      const endDate =
+        parsed.data.endDate === undefined
+          ? dateString(existing.endDate)
+          : parsed.data.endDate;
+      if (endDate && endDate < startDate)
+        throw new ResponseError(400, "End date cannot be before start date.");
 
       const event = await getPrisma().academicCalendarEvent.update({
         where: { id: eventId },
         data: {
-          ...(parsed.data.title !== undefined ? { title: parsed.data.title } : {}),
-          ...(parsed.data.description !== undefined ? { description: nullable(parsed.data.description) } : {}),
+          ...(parsed.data.title !== undefined
+            ? { title: parsed.data.title }
+            : {}),
+          ...(parsed.data.description !== undefined
+            ? { description: nullable(parsed.data.description) }
+            : {}),
           ...(parsed.data.type !== undefined ? { type: parsed.data.type } : {}),
-          ...(parsed.data.startDate !== undefined ? { startDate: dateValue(parsed.data.startDate) } : {}),
-          ...(parsed.data.endDate !== undefined ? { endDate: parsed.data.endDate ? dateValue(parsed.data.endDate) : null } : {}),
-          ...(parsed.data.eventTime !== undefined ? { eventTime: nullable(parsed.data.eventTime) } : {}),
-          ...(parsed.data.location !== undefined ? { location: nullable(parsed.data.location) } : {}),
-          ...(parsed.data.isActive !== undefined ? { isActive: parsed.data.isActive } : {}),
-          ...(parsed.data.sortOrder !== undefined ? { sortOrder: parsed.data.sortOrder } : {}),
+          ...(parsed.data.startDate !== undefined
+            ? { startDate: dateValue(parsed.data.startDate) }
+            : {}),
+          ...(parsed.data.endDate !== undefined
+            ? {
+                endDate: parsed.data.endDate
+                  ? dateValue(parsed.data.endDate)
+                  : null,
+              }
+            : {}),
+          ...(parsed.data.eventTime !== undefined
+            ? { eventTime: nullable(parsed.data.eventTime) }
+            : {}),
+          ...(parsed.data.location !== undefined
+            ? { location: nullable(parsed.data.location) }
+            : {}),
+          ...(parsed.data.isActive !== undefined
+            ? { isActive: parsed.data.isActive }
+            : {}),
+          ...(parsed.data.sortOrder !== undefined
+            ? { sortOrder: parsed.data.sortOrder }
+            : {}),
         },
       });
       return eventResponse(event);
@@ -232,7 +294,9 @@ export class AcademicCalendarService {
 
   static async delete(id: string | undefined) {
     try {
-      await getPrisma().academicCalendarEvent.delete({ where: { id: requireId(id) } });
+      await getPrisma().academicCalendarEvent.delete({
+        where: { id: requireId(id) },
+      });
     } catch (error) {
       handleDatabaseError(error);
     }

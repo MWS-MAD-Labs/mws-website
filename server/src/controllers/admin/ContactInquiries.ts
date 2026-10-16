@@ -1,7 +1,7 @@
 import type { Context } from "hono";
 import { ResponseError } from "../../error/response-error";
 import { toJsonSafe } from "../../lib/json-response";
-import { ContactInquiryService } from "../../services/contact-inquiry-service";
+import { ContactInquiryService } from "../../services/contact/contact-inquiry-service";
 import type { SessionVariables } from "../../types/hono-context";
 
 type AdminContext = Context<{

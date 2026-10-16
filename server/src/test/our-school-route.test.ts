@@ -4,7 +4,7 @@ import { ResponseError } from "../error/response-error";
 import { signSession } from "../lib/session";
 import * as centralClient from "../lib/central-client";
 import { adminRoute } from "../routes/admin";
-import { CmsAuthService } from "../services/cms-auth-service";
+import { CmsAuthService } from "../services/auth/cms-auth-service";
 import { OurSchoolService } from "../services/our-school-service";
 import { cmsSessionUser, testUser } from "./test-helpers";
 import type { SessionVariables } from "../types/hono-context";

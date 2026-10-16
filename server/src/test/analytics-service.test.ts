@@ -10,9 +10,10 @@ import {
   rangeDays,
   referrerHostOf,
   resetAnalyticsDedupeForTest,
-} from "../services/analytics-service";
+} from "../services/dashboard/analytics-service";
 
-const CHROME = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/140 Safari/537.36";
+const CHROME =
+  "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/140 Safari/537.36";
 const IPHONE =
   "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1";
 
@@ -34,17 +35,33 @@ describe("analytics helpers", () => {
   it("classifies devices and bots", () => {
     expect(deviceTypeOf(CHROME)).toBe("desktop");
     expect(deviceTypeOf(IPHONE)).toBe("mobile");
-    expect(deviceTypeOf("Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X)")).toBe("tablet");
+    expect(deviceTypeOf("Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X)")).toBe(
+      "tablet",
+    );
     expect(isBotUserAgent("Googlebot/2.1")).toBe(true);
     expect(isBotUserAgent(undefined)).toBe(true);
     expect(isBotUserAgent(CHROME)).toBe(false);
   });
 
   it("keeps only external referrer hosts", () => {
-    expect(referrerHostOf("https://www.google.com/search?q=x", "beta.millenniaws.sch.id")).toBe("google.com");
-    expect(referrerHostOf("https://l.instagram.com/?u=x", null)).toBe("instagram.com");
-    expect(referrerHostOf("https://lm.facebook.com/l.php", null)).toBe("facebook.com");
-    expect(referrerHostOf("https://beta.millenniaws.sch.id/news", "beta.millenniaws.sch.id")).toBeNull();
+    expect(
+      referrerHostOf(
+        "https://www.google.com/search?q=x",
+        "beta.millenniaws.sch.id",
+      ),
+    ).toBe("google.com");
+    expect(referrerHostOf("https://l.instagram.com/?u=x", null)).toBe(
+      "instagram.com",
+    );
+    expect(referrerHostOf("https://lm.facebook.com/l.php", null)).toBe(
+      "facebook.com",
+    );
+    expect(
+      referrerHostOf(
+        "https://beta.millenniaws.sch.id/news",
+        "beta.millenniaws.sch.id",
+      ),
+    ).toBeNull();
     expect(referrerHostOf("not a url", null)).toBeNull();
     expect(referrerHostOf(null, null)).toBeNull();
   });
@@ -54,7 +71,9 @@ describe("analytics helpers", () => {
     const days = rangeDays(3, new Date("2026-09-30T20:00:00Z"));
     expect(days).toEqual(["2026-09-29", "2026-09-30", "2026-10-01"]);
 
-    expect(fillDailySeries(days, [{ day: "2026-09-30", views: 5n, visits: 2n }])).toEqual([
+    expect(
+      fillDailySeries(days, [{ day: "2026-09-30", views: 5n, visits: 2n }]),
+    ).toEqual([
       { date: "2026-09-29", views: 0, visits: 0 },
       { date: "2026-09-30", views: 5, visits: 2 },
       { date: "2026-10-01", views: 0, visits: 0 },
@@ -80,7 +99,11 @@ describe("AnalyticsService.recordPageView", () => {
 
   it("stores a view once per session and path within the reload window", async () => {
     const create = mockPrisma();
-    const view = { path: "/admission", sessionId: "session-0001", referrer: null };
+    const view = {
+      path: "/admission",
+      sessionId: "session-0001",
+      referrer: null,
+    };
 
     expect(await AnalyticsService.recordPageView(view, CHROME)).toBe(true);
     expect(await AnalyticsService.recordPageView(view, CHROME)).toBe(false);
@@ -98,8 +121,18 @@ describe("AnalyticsService.recordPageView", () => {
   it("skips bots and CMS paths without writing", async () => {
     const create = mockPrisma();
 
-    expect(await AnalyticsService.recordPageView({ path: "/", sessionId: "session-0002" }, "Googlebot")).toBe(false);
-    expect(await AnalyticsService.recordPageView({ path: "/admin", sessionId: "session-0002" }, CHROME)).toBe(false);
+    expect(
+      await AnalyticsService.recordPageView(
+        { path: "/", sessionId: "session-0002" },
+        "Googlebot",
+      ),
+    ).toBe(false);
+    expect(
+      await AnalyticsService.recordPageView(
+        { path: "/admin", sessionId: "session-0002" },
+        CHROME,
+      ),
+    ).toBe(false);
     expect(create).not.toHaveBeenCalled();
   });
 

@@ -23,7 +23,7 @@ export default function StatusMessage({ children, tone }: StatusMessageProps) {
       : nextTone === 'error'
         ? 'text-[#B91C1C]'
         : nextTone === 'warning'
-          ? 'text-[#D97706]'
+          ? 'text-[#92400E]'
           : 'text-[#64748B]';
 
   return (

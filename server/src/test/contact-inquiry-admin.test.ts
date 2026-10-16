@@ -3,7 +3,7 @@ import { Hono } from "hono";
 import { ResponseError } from "../error/response-error";
 import { ContactInquiryRepository } from "../repositories/contact-inquiry-repository";
 import { adminContactInquiryRoute } from "../routes/admin/contact-inquiry-route";
-import { ContactInquiryService } from "../services/contact-inquiry-service";
+import { ContactInquiryService } from "../services/contact/contact-inquiry-service";
 import type { CmsSessionUser } from "../types/cms-auth-types";
 import type { SessionVariables } from "../types/hono-context";
 import { cmsSessionUser } from "./test-helpers";

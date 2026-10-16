@@ -48,6 +48,12 @@ enum AcademicCalendarEventType {
   HOLIDAY
 }
 
+enum VirtualTourStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
 // Clear DB
 
 model CmsRole {
@@ -62,17 +68,17 @@ model CmsRole {
 }
 
 model CmsUser {
-  id            String   @id @default(uuid()) @db.Uuid
-  centralUserId String   @unique
-  email         String?  @unique @db.VarChar(255)
-  name          String   @db.VarChar(255)
-  unitId        String
-  cmsRoleId     String   @db.Uuid
-  isActive      Boolean  @default(true)
+  id                  String    @id @default(uuid()) @db.Uuid
+  centralUserId       String    @unique
+  email               String?   @unique @db.VarChar(255)
+  name                String    @db.VarChar(255)
+  unitId              String
+  cmsRoleId           String    @db.Uuid
+  isActive            Boolean   @default(true)
   lastCentralSyncedAt DateTime?
-  deactivatedAt DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  deactivatedAt       DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
   role                CmsRole             @relation(fields: [cmsRoleId], references: [id])
   auditLogs           AuditLog[]
@@ -115,8 +121,8 @@ model NewsCategory {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  posts NewsPost[]
-  homePageSettings HomePageSettings[]
+  posts                     NewsPost[]
+  homePageSettings          HomePageSettings[]
   homeInfoSectionCategories HomeInfoSectionCategory[]
 }
 
@@ -130,31 +136,31 @@ model NewsTag {
 }
 
 model NewsPost {
-  id               String      @id @default(uuid()) @db.Uuid
-  categoryId       String?     @db.Uuid
-  title            String      @db.VarChar(255)
-  slug             String      @unique @db.VarChar(255)
-  excerpt          String?
-  coverImage       String?     @db.VarChar(1000)
-  coverImageAlt    String?     @db.VarChar(255)
-  content          Json
-  authorName       String?     @db.VarChar(150)
-  authorId         String?     @db.Uuid
-  status           NewsStatus  @default(DRAFT)
-  isFeatured       Boolean     @default(false)
-  isPublished      Boolean     @default(false)
-  publishedAt      DateTime?
-  seoTitle         String?     @db.VarChar(255)
-  seoDescription   String?
-  readTime         Int         @default(0)
-  viewCount        Int         @default(0)
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
+  id             String     @id @default(uuid()) @db.Uuid
+  categoryId     String?    @db.Uuid
+  title          String     @db.VarChar(255)
+  slug           String     @unique @db.VarChar(255)
+  excerpt        String?
+  coverImage     String?    @db.VarChar(1000)
+  coverImageAlt  String?    @db.VarChar(255)
+  content        Json
+  authorName     String?    @db.VarChar(150)
+  authorId       String?    @db.Uuid
+  status         NewsStatus @default(DRAFT)
+  isFeatured     Boolean    @default(false)
+  isPublished    Boolean    @default(false)
+  publishedAt    DateTime?
+  seoTitle       String?    @db.VarChar(255)
+  seoDescription String?
+  readTime       Int        @default(0)
+  viewCount      Int        @default(0)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 
-  category   NewsCategory? @relation(fields: [categoryId], references: [id])
-  author     CmsUser?      @relation(fields: [authorId], references: [id])
-  media      NewsPostMedia[]
-  postTags   NewsPostTag[]
+  category NewsCategory?   @relation(fields: [categoryId], references: [id])
+  author   CmsUser?        @relation(fields: [authorId], references: [id])
+  media    NewsPostMedia[]
+  postTags NewsPostTag[]
 }
 
 model NewsPostTag {
@@ -168,15 +174,15 @@ model NewsPostTag {
 }
 
 model NewsPostMedia {
-  id          String        @id @default(uuid()) @db.Uuid
-  newsPostId  String        @db.Uuid
-  mediaType   NewsMediaType @default(IMAGE)
-  url         String        @db.VarChar(1000)
-  alt         String?       @db.VarChar(255)
-  caption     String?
-  sortOrder   Int           @default(0)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id         String        @id @default(uuid()) @db.Uuid
+  newsPostId String        @db.Uuid
+  mediaType  NewsMediaType @default(IMAGE)
+  url        String        @db.VarChar(1000)
+  alt        String?       @db.VarChar(255)
+  caption    String?
+  sortOrder  Int           @default(0)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
 
   newsPost NewsPost @relation(fields: [newsPostId], references: [id])
 }
@@ -185,7 +191,7 @@ model Academic {
   id          String   @id @default(uuid()) @db.Uuid
   title       String   @db.VarChar(255)
   description String?
-  coverImage     String?  @db.VarChar(1000)
+  coverImage  String?  @db.VarChar(1000)
   content     Json?
   galleryId   String?  @db.Uuid
   createdAt   DateTime @default(now())
@@ -195,8 +201,8 @@ model Academic {
 }
 
 model AcademicLevel {
-  id          String   @id @default(uuid()) @db.Uuid
-  title       String   @db.VarChar(255)
+  id          String  @id @default(uuid()) @db.Uuid
+  title       String  @db.VarChar(255)
   description String?
 
   kindergartens Kindergarten[]
@@ -208,32 +214,32 @@ model AcademicLevel {
 }
 
 model Kindergarten {
-  id             String   @id @default(uuid()) @db.Uuid
-  levelKey       String?  @unique @default("kindergarten") @db.VarChar(40)
-  academicLevelId String   @db.Uuid
+  id              String  @id @default(uuid()) @db.Uuid
+  levelKey        String? @unique @default("kindergarten") @db.VarChar(40)
+  academicLevelId String  @db.Uuid
 
-  title          String   @db.VarChar(255)
-  description    String?
+  title       String  @db.VarChar(255)
+  description String?
 
-  coverImage     String?  @db.VarChar(1000)
-  galleryId      String?  @db.Uuid
+  coverImage String? @db.VarChar(1000)
+  galleryId  String? @db.Uuid
 
-  hero           Json
-  overview       Json
-  sections       Json
-  publishedTitle       String?  @db.VarChar(255)
+  hero                 Json
+  overview             Json
+  sections             Json
+  publishedTitle       String? @db.VarChar(255)
   publishedDescription String?
-  publishedCoverImage  String?  @db.VarChar(1000)
-  publishedGalleryId   String?  @db.Uuid
+  publishedCoverImage  String? @db.VarChar(1000)
+  publishedGalleryId   String? @db.Uuid
   publishedHero        Json?
   publishedOverview    Json?
   publishedSections    Json?
 
-  status         String   @default("PUBLISHED") @db.VarChar(30)
-  publishedAt    DateTime?
+  status      String    @default("PUBLISHED") @db.VarChar(30)
+  publishedAt DateTime?
 
-  academicLevel AcademicLevel @relation(fields: [academicLevelId], references: [id])
-  gallery       Gallery?       @relation(fields: [galleryId], references: [id])
+  academicLevel AcademicLevel     @relation(fields: [academicLevelId], references: [id])
+  gallery       Gallery?          @relation(fields: [galleryId], references: [id])
   faqs          KindergartenFaq[]
 
   createdAt DateTime @default(now())
@@ -241,32 +247,32 @@ model Kindergarten {
 }
 
 model Elementary {
-  id             String   @id @default(uuid()) @db.Uuid
-  levelKey       String?  @unique @default("elementary") @db.VarChar(40)
-  academicLevelId String   @db.Uuid
+  id              String  @id @default(uuid()) @db.Uuid
+  levelKey        String? @unique @default("elementary") @db.VarChar(40)
+  academicLevelId String  @db.Uuid
 
-  title          String   @db.VarChar(255)
-  description    String?
+  title       String  @db.VarChar(255)
+  description String?
 
-  coverImage     String?  @db.VarChar(1000)
-  galleryId      String?  @db.Uuid
+  coverImage String? @db.VarChar(1000)
+  galleryId  String? @db.Uuid
 
-  hero           Json
-  overview       Json
-  sections       Json
-  publishedTitle       String?  @db.VarChar(255)
+  hero                 Json
+  overview             Json
+  sections             Json
+  publishedTitle       String? @db.VarChar(255)
   publishedDescription String?
-  publishedCoverImage  String?  @db.VarChar(1000)
-  publishedGalleryId   String?  @db.Uuid
+  publishedCoverImage  String? @db.VarChar(1000)
+  publishedGalleryId   String? @db.Uuid
   publishedHero        Json?
   publishedOverview    Json?
   publishedSections    Json?
 
-  status         String   @default("PUBLISHED") @db.VarChar(30)
-  publishedAt    DateTime?
+  status      String    @default("PUBLISHED") @db.VarChar(30)
+  publishedAt DateTime?
 
-  academicLevel AcademicLevel @relation(fields: [academicLevelId], references: [id])
-  gallery       Gallery?       @relation(fields: [galleryId], references: [id])
+  academicLevel AcademicLevel   @relation(fields: [academicLevelId], references: [id])
+  gallery       Gallery?        @relation(fields: [galleryId], references: [id])
   faqs          ElementaryFaq[]
 
   createdAt DateTime @default(now())
@@ -274,32 +280,32 @@ model Elementary {
 }
 
 model JuniorHigh {
-  id             String   @id @default(uuid()) @db.Uuid
-  levelKey       String?  @unique @default("high-school") @db.VarChar(40)
-  academicLevelId String   @db.Uuid
+  id              String  @id @default(uuid()) @db.Uuid
+  levelKey        String? @unique @default("high-school") @db.VarChar(40)
+  academicLevelId String  @db.Uuid
 
-  title          String   @db.VarChar(255)
-  description    String?
+  title       String  @db.VarChar(255)
+  description String?
 
-  coverImage     String?  @db.VarChar(1000)
-  galleryId      String?  @db.Uuid
+  coverImage String? @db.VarChar(1000)
+  galleryId  String? @db.Uuid
 
-  hero           Json
-  overview       Json
-  sections       Json
-  publishedTitle       String?  @db.VarChar(255)
+  hero                 Json
+  overview             Json
+  sections             Json
+  publishedTitle       String? @db.VarChar(255)
   publishedDescription String?
-  publishedCoverImage  String?  @db.VarChar(1000)
-  publishedGalleryId   String?  @db.Uuid
+  publishedCoverImage  String? @db.VarChar(1000)
+  publishedGalleryId   String? @db.Uuid
   publishedHero        Json?
   publishedOverview    Json?
   publishedSections    Json?
 
-  status         String   @default("PUBLISHED") @db.VarChar(30)
-  publishedAt    DateTime?
+  status      String    @default("PUBLISHED") @db.VarChar(30)
+  publishedAt DateTime?
 
-  academicLevel AcademicLevel @relation(fields: [academicLevelId], references: [id])
-  gallery       Gallery?       @relation(fields: [galleryId], references: [id])
+  academicLevel AcademicLevel   @relation(fields: [academicLevelId], references: [id])
+  gallery       Gallery?        @relation(fields: [galleryId], references: [id])
   faqs          JuniorHighFaq[]
 
   createdAt DateTime @default(now())
@@ -307,14 +313,14 @@ model JuniorHigh {
 }
 
 model Faq {
-  id        String   @id @default(uuid()) @db.Uuid
-  question  String   @db.VarChar(500)
-  answer    String
-  isActive  Boolean  @default(true)
-  isAdmissionFaq Boolean @default(false)
-  admissionSortOrder Int @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 String   @id @default(uuid()) @db.Uuid
+  question           String   @db.VarChar(500)
+  answer             String
+  isActive           Boolean  @default(true)
+  isAdmissionFaq     Boolean  @default(false)
+  admissionSortOrder Int      @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   kindergartens KindergartenFaq[]
   elementaries  ElementaryFaq[]
@@ -397,13 +403,13 @@ model Gallery {
   curriculums  Curriculum[]
   affiliations Affiliation[]
 
-  academics     Academic[]
-  admissionPages AdmissionPage[]
-  ourSchools    OurSchool[]
-  contacts      Contact[]
-  kindergartens Kindergarten[]
-  elementaries  Elementary[]
-  juniorHighs   JuniorHigh[]
+  academics             Academic[]
+  admissionPages        AdmissionPage[]
+  ourSchools            OurSchool[]
+  contacts              Contact[]
+  kindergartens         Kindergarten[]
+  elementaries          Elementary[]
+  juniorHighs           JuniorHigh[]
   communityStoriesPages CommunityStoriesPage[]
 }
 
@@ -419,7 +425,8 @@ model GalleryImage {
 
   gallery Gallery @relation(fields: [galleryId], references: [id])
 
-  featuredInOurSchools OurSchool[] @relation("OurSchoolFeaturedImage")
+  featuredInOurSchools OurSchool[]        @relation("OurSchoolFeaturedImage")
+  virtualTourScenes    VirtualTourScene[]
 }
 
 model GalleryVideo {
@@ -479,8 +486,67 @@ model CmsRevokedSession {
   @@index([expiresAt])
 }
 
-// Not Clear DB
+model VirtualTour {
+  id           String            @id @default(uuid()) @db.Uuid
+  title        String            @db.VarChar(255)
+  slug         String            @unique @db.VarChar(255)
+  description  String?
+  status       VirtualTourStatus @default(DRAFT)
+  startSceneId String?           @unique @db.Uuid
+  publishedAt  DateTime?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
 
+  scenes     VirtualTourScene[] @relation("TourScenes")
+  startScene VirtualTourScene?  @relation("TourStartScene", fields: [startSceneId], references: [id], onDelete: SetNull)
+}
+
+model VirtualTourScene {
+  id              String   @id @default(uuid()) @db.Uuid
+  tourId          String   @db.Uuid
+  panoramaImageId String   @db.Uuid
+  name            String   @db.VarChar(255)
+  slug            String   @db.VarChar(255)
+  description     String?
+  initialYaw      Float    @default(0)
+  initialPitch    Float    @default(0)
+  sortOrder       Int      @default(0)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  tour          VirtualTour  @relation("TourScenes", fields: [tourId], references: [id], onDelete: Cascade)
+  panoramaImage GalleryImage @relation(fields: [panoramaImageId], references: [id], onDelete: Restrict)
+
+  outgoingLinks VirtualTourLink[] @relation("TourLinkSource")
+  incomingLinks VirtualTourLink[] @relation("TourLinkTarget")
+  startForTour  VirtualTour?      @relation("TourStartScene")
+
+  @@unique([tourId, slug])
+  @@index([tourId, sortOrder])
+  @@index([panoramaImageId])
+}
+
+model VirtualTourLink {
+  id          String   @id @default(uuid()) @db.Uuid
+  fromSceneId String   @db.Uuid
+  toSceneId   String   @db.Uuid
+  label       String?  @db.VarChar(255)
+  yaw         Float
+  pitch       Float
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  fromScene VirtualTourScene @relation("TourLinkSource", fields: [fromSceneId], references: [id], onDelete: Cascade)
+  toScene   VirtualTourScene @relation("TourLinkTarget", fields: [toSceneId], references: [id], onDelete: Cascade)
+
+  @@unique([fromSceneId, toSceneId])
+  @@index([fromSceneId, sortOrder])
+  @@index([toSceneId])
+}
+
+// Not Clear DB
 
 model Program {
   id          String   @id @default(uuid()) @db.Uuid
@@ -505,18 +571,18 @@ model Program {
 }
 
 model Admission {
-  id          String   @id @default(uuid()) @db.Uuid
-  programId   String   @db.Uuid
-  title       String   @db.VarChar(255)
-  description String?
-  adminWhatsapp String? @db.VarChar(100)
-  contactLabel String? @db.VarChar(100)
-  exploreLabel String? @db.VarChar(100)
-  galleryId   String?  @db.Uuid
-  sortOrder   Int      @default(0)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(uuid()) @db.Uuid
+  programId     String   @db.Uuid
+  title         String   @db.VarChar(255)
+  description   String?
+  adminWhatsapp String?  @db.VarChar(100)
+  contactLabel  String?  @db.VarChar(100)
+  exploreLabel  String?  @db.VarChar(100)
+  galleryId     String?  @db.Uuid
+  sortOrder     Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   program Program  @relation(fields: [programId], references: [id])
   gallery Gallery? @relation(fields: [galleryId], references: [id])
@@ -574,7 +640,6 @@ model Affiliation {
   gallery Gallery? @relation(fields: [galleryId], references: [id])
 }
 
-
 model OurSchool {
   id              String   @id @default(uuid()) @db.Uuid
   singletonKey    String?  @unique @default("main") @db.VarChar(40)
@@ -620,51 +685,51 @@ model ContactInquiry {
 }
 
 model CmsPage {
-  id          String   @id @default(uuid()) @db.Uuid
-  slug        String   @unique @db.VarChar(255)
-  title       String   @db.VarChar(500)
+  id          String    @id @default(uuid()) @db.Uuid
+  slug        String    @unique @db.VarChar(255)
+  title       String    @db.VarChar(500)
   body        Json
-  template    String?  @db.VarChar(100)
-  status      String?  @db.VarChar(50)
+  template    String?   @db.VarChar(100)
+  status      String?   @db.VarChar(50)
   publishedAt DateTime?
-  createdBy   String?  @db.Uuid
+  createdBy   String?   @db.Uuid
   deletedAt   DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   creator CmsUser? @relation(fields: [createdBy], references: [id])
 }
 
 model CommunityStoriesPage {
-  id          String   @id @default(uuid()) @db.Uuid
-  title       String   @db.VarChar(255)
-  heroImagePath String? @db.VarChar(1000)
-  heroImageAlt  String? @db.VarChar(255)
-  introTitle    String? @db.VarChar(500)
-  introBody     Json?
-  activityTitle String? @db.VarChar(255)
+  id                  String   @id @default(uuid()) @db.Uuid
+  title               String   @db.VarChar(255)
+  heroImagePath       String?  @db.VarChar(1000)
+  heroImageAlt        String?  @db.VarChar(255)
+  introTitle          String?  @db.VarChar(500)
+  introBody           Json?
+  activityTitle       String?  @db.VarChar(255)
   activityDescription String?
-  galleryId     String? @db.Uuid
-  isPublished   Boolean @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  galleryId           String?  @db.Uuid
+  isPublished         Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
   gallery Gallery? @relation(fields: [galleryId], references: [id])
 }
 
 model CommunityVoice {
-  id        String   @id @default(uuid()) @db.Uuid
-  role      String   @db.VarChar(100)
-  name      String   @db.VarChar(255)
-  grade     String?  @db.VarChar(255)
-  quote     String
-  imagePath String   @db.VarChar(1000)
-  sortOrder Int      @default(0)
-  isActive  Boolean  @default(true)
-  showOnHome Boolean @default(false)
-  homeSortOrder Int  @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String   @id @default(uuid()) @db.Uuid
+  role          String   @db.VarChar(100)
+  name          String   @db.VarChar(255)
+  grade         String?  @db.VarChar(255)
+  quote         String
+  imagePath     String   @db.VarChar(1000)
+  sortOrder     Int      @default(0)
+  isActive      Boolean  @default(true)
+  showOnHome    Boolean  @default(false)
+  homeSortOrder Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model HomePageSettings {
@@ -674,7 +739,7 @@ model HomePageSettings {
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 
-  infoSectionCategory NewsCategory? @relation(fields: [infoSectionCategoryId], references: [id])
+  infoSectionCategory   NewsCategory?             @relation(fields: [infoSectionCategoryId], references: [id])
   infoSectionCategories HomeInfoSectionCategory[]
 
   @@index([infoSectionCategoryId])
@@ -694,17 +759,17 @@ model HomeInfoSectionCategory {
 }
 
 model CampusSpotlight {
-  id        String    @id @default(uuid()) @db.Uuid
-  text      String
-  cite      String    @db.VarChar(255)
-  imagePath String?   @db.VarChar(1000)
-  imageAlt  String?   @db.VarChar(255)
-  sortOrder Int       @default(0)
-  isActive  Boolean   @default(true)
-  activeFrom DateTime?
+  id          String    @id @default(uuid()) @db.Uuid
+  text        String
+  cite        String    @db.VarChar(255)
+  imagePath   String?   @db.VarChar(1000)
+  imageAlt    String?   @db.VarChar(255)
+  sortOrder   Int       @default(0)
+  isActive    Boolean   @default(true)
+  activeFrom  DateTime?
   activeUntil DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@index([isActive, sortOrder])
 }
@@ -724,7 +789,6 @@ model AuditLog {
   cmsUser CmsUser? @relation(fields: [cmsUserId], references: [id])
 }
 
-
 // First-party page view log for the CMS traffic dashboard. No IP address or
 // cookie is stored: `sessionId` is a random id the public site keeps in
 // sessionStorage, so it groups views of one browsing session only.
@@ -741,28 +805,28 @@ model PageView {
 }
 
 model HeroSlide {
-  id          String   @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  sourceType  HeroSlideSourceType @default(MANUAL)
-  sourceId    String?             @db.Uuid
+  sourceType HeroSlideSourceType @default(MANUAL)
+  sourceId   String?             @db.Uuid
 
-  title       String?  @db.VarChar(255)
+  title       String? @db.VarChar(255)
   description String?
   caption     String?
 
-  mediaType   HeroSlideMediaType?
-  mediaPath   String?  @db.VarChar(1000)
-  mediaAlt    String?  @db.VarChar(255)
-  posterPath  String?  @db.VarChar(1000)
+  mediaType  HeroSlideMediaType?
+  mediaPath  String?             @db.VarChar(1000)
+  mediaAlt   String?             @db.VarChar(255)
+  posterPath String?             @db.VarChar(1000)
 
-  isLooping   Boolean  @default(true)
+  isLooping Boolean @default(true)
 
-  ctaLabel    String?  @db.VarChar(100)
-  ctaUrl      String?  @db.VarChar(1000)
+  ctaLabel String? @db.VarChar(100)
+  ctaUrl   String? @db.VarChar(1000)
 
-  sortOrder   Int      @default(0)
-  isActive    Boolean  @default(true)
+  sortOrder Int     @default(0)
+  isActive  Boolean @default(true)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

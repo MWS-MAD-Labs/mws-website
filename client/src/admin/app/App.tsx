@@ -47,6 +47,7 @@ import GalleryListPage from '@/admin/features/gallery/GalleryListPage';
 import GalleryVidioPage from '@/admin/features/gallery/GalleryVidioPage';
 
 import OurSchoolPage from '@/admin/features/our-school/OurSchoolPage';
+import VirtualPage from '@/admin/features/virtual-tour/VirtualPage';
 
 import CmsUsersPage from '@/admin/pages/CmsUsersPage';
 import Dashboard from '@/admin/pages/Dashboard';
@@ -781,6 +782,17 @@ export default function AdminApp() {
             <RequireAuth>
               <RequireContentPermission>
                 <GalleryDetailPage />
+              </RequireContentPermission>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="virtual-tour"
+          element={
+            <RequireAuth>
+              <RequireContentPermission>
+                <VirtualPage />
               </RequireContentPermission>
             </RequireAuth>
           }

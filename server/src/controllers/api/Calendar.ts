@@ -1,5 +1,5 @@
 import type { Context } from "hono";
-import { AcademicCalendarService } from "../../services/academic-calendar-service";
+import { AcademicCalendarService } from "../../services/academic/academic-calendar-service";
 import { listGoogleCalendarEvents } from "../../lib/google-calendar";
 
 export class PublicCalendarController {
