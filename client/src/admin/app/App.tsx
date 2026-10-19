@@ -61,6 +61,8 @@ import NewsTags from '../features/news/NewsTags';
 import { getErrorMessage } from '../features/news/newsUtils';
 import PartnersPage from '../features/partners/pages/PartnersPage';
 import InquiriesPage from '../features/inquiries/InquiriesPage';
+import VirtualSceneCreateUpdate from '../features/virtual-tour/virtual-scene/VirtualSceneCreateUpdate';
+import VirtualScenePage from '../features/virtual-tour/virtual-scene/VirtualScenePage';
 
 type RouteMessage = {
   text: string;
@@ -447,465 +449,495 @@ export default function AdminApp() {
   return (
     <AuthProvider>
       <ToastProvider>
-      <Routes>
-        {/* Authentication */}
-        <Route path="login" element={<LoginPage />} />
+        <Routes>
+          {/* Authentication */}
+          <Route path="login" element={<LoginPage />} />
 
-        {/* Dashboard */}
-        <Route
-          index
-          element={
-            <RequireAuth>
-              <Dashboard />
-            </RequireAuth>
-          }
-        />
+          {/* Dashboard */}
+          <Route
+            index
+            element={
+              <RequireAuth>
+                <Dashboard />
+              </RequireAuth>
+            }
+          />
 
-        {/* Content */}
-        <Route
-          path="content"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <PagesManagementPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          {/* Content */}
+          <Route
+            path="content"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <PagesManagementPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="content/home"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <HeroSlidesPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="content/home"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <HeroSlidesPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="content/admissions"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <AdmissionsPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="content/admissions"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <AdmissionsPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="content/admission-guidelines"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <AdmissionGuidelinesPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="content/admission-guidelines"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <AdmissionGuidelinesPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="content/about-mws"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <OurSchoolPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="content/about-mws"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <OurSchoolPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="content/our-school"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <OurSchoolPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="content/our-school"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <OurSchoolPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="content/community-stories"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <CommunityStoriesPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="content/community-stories"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <CommunityStoriesPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="content/community-voices"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <CommunityVoicesPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="content/community-voices"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <CommunityVoicesPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="content/contact"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <ContactPageEditor />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="content/contact"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <ContactPageEditor />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="content/Quotes"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <QuotesPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="content/Quotes"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <QuotesPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="content/popup-promoted"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <PopupPromotedPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="content/popup-promoted"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <PopupPromotedPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        {/* Legacy Pages */}
-        <Route
-          path="pages"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <PagesManagementPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          {/* Legacy Pages */}
+          <Route
+            path="pages"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <PagesManagementPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="pages/:pageId/edit"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <PageEditorPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="pages/:pageId/edit"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <PageEditorPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        {/* Academic */}
-        <Route
-          path="academic"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <AcademicOverviewPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          {/* Academic */}
+          <Route
+            path="academic"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <AcademicOverviewPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="academic/faqs"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <AcademicFaqsPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="academic/faqs"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <AcademicFaqsPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="academic/kindergarten"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <AcademicLevelEditorPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="academic/kindergarten"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <AcademicLevelEditorPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="academic/elementary"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <AcademicLevelEditorPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="academic/elementary"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <AcademicLevelEditorPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="academic/high-school"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <AcademicLevelEditorPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="academic/high-school"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <AcademicLevelEditorPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="academic/partners"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <PartnersPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="academic/partners"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <PartnersPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        {/* News */}
-        <Route
-          path="news"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <NewsPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          {/* News */}
+          <Route
+            path="news"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <NewsPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="news/categories"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <NewsCategoriesRoute />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="news/categories"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <NewsCategoriesRoute />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="news/tags"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <NewsTagsRoute />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="news/tags"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <NewsTagsRoute />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="news/new"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <CreateUpdateNews />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="news/new"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <CreateUpdateNews />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="news/:newsId/preview"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <NewsPreviewPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="news/:newsId/preview"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <NewsPreviewPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="news/:newsId/edit"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <CreateUpdateNews />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="news/:newsId/edit"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <CreateUpdateNews />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        {/* Gallery */}
-        <Route
-          path="gallery"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <GalleryListPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          {/* Gallery */}
+          <Route
+            path="gallery"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <GalleryListPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="gallery/images"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <GalleryImagesPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="gallery/images"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <GalleryImagesPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route path="gallery/Gambar" element={<Navigate to="/admin/gallery/images" replace />} />
+          <Route path="gallery/Gambar" element={<Navigate to="/admin/gallery/images" replace />} />
 
-        <Route
-          path="gallery/videos"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <GalleryVidioPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="gallery/videos"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <GalleryVidioPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="gallery/:galleryId"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <GalleryDetailPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="gallery/:galleryId"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <GalleryDetailPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="virtual-tour"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <VirtualPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="virtual-tour"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <VirtualPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="virtual/scene"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <VirtualScenePage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="virtual/scene/new"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <VirtualSceneCreateUpdate />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="virtual/scene/:sceneId/edit"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <VirtualSceneCreateUpdate />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="VoiceComunity"
-          element={<Navigate to="/admin/content/community-voices" replace />}
-        />
+          <Route
+            path="VoiceComunity"
+            element={<Navigate to="/admin/content/community-voices" replace />}
+          />
 
-        <Route
-          path="calendar"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <AcademicCalendarPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="calendar"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <AcademicCalendarPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        {/* Users */}
-        <Route
-          path="users"
-          element={
-            <RequireAuth>
-              <RequireUsersPermission>
-                <CmsUsersPage />
-              </RequireUsersPermission>
-            </RequireAuth>
-          }
-        />
+          {/* Users */}
+          <Route
+            path="users"
+            element={
+              <RequireAuth>
+                <RequireUsersPermission>
+                  <CmsUsersPage />
+                </RequireUsersPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="permissions"
-          element={
-            <RequireAuth>
-              <RequireUsersPermission>
-                <PermissionsPage />
-              </RequireUsersPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="permissions"
+            element={
+              <RequireAuth>
+                <RequireUsersPermission>
+                  <PermissionsPage />
+                </RequireUsersPermission>
+              </RequireAuth>
+            }
+          />
 
-        {/* System */}
-        <Route
-          path="audit-logs"
-          element={
-            <RequireAuth>
-              <RequireUsersPermission>
-                <AuditLogsPage />
-              </RequireUsersPermission>
-            </RequireAuth>
-          }
-        />
+          {/* System */}
+          <Route
+            path="audit-logs"
+            element={
+              <RequireAuth>
+                <RequireUsersPermission>
+                  <AuditLogsPage />
+                </RequireUsersPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="help"
-          element={
-            <RequireAuth>
-              <HelpPage />
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="help"
+            element={
+              <RequireAuth>
+                <HelpPage />
+              </RequireAuth>
+            }
+          />
 
-        {/* Existing program routes */}
-        <Route
-          path="programs/campus-tour"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <CampusTourPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          {/* Existing program routes */}
+          <Route
+            path="programs/campus-tour"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <CampusTourPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="programs/curriculum"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <CurriculumPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="programs/curriculum"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <CurriculumPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="programs/affiliations"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <AffiliationsPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="programs/affiliations"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <AffiliationsPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        <Route
-          path="inquiries"
-          element={
-            <RequireAuth>
-              <RequireContentPermission>
-                <InquiriesPage />
-              </RequireContentPermission>
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="inquiries"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <InquiriesPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
 
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/admin" replace />} />
-      </Routes>
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/admin" replace />} />
+        </Routes>
       </ToastProvider>
     </AuthProvider>
   );

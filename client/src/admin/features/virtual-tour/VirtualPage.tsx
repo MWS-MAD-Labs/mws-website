@@ -1,5 +1,6 @@
 import { Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type {
   VirtualTourListItem,
   VirtualTourPayload,
@@ -15,18 +16,17 @@ import StatusMessage from '@/admin/components/ui/StatusMessage';
 import { useToast } from '@/admin/components/ui/toastContext';
 import type { StatusTone } from '@/admin/components/ui/statusTone';
 import VirtualTourFormModal from './components/VirtualTourFormModal';
-import VirtualTourManagerModal from './components/VirtualTourManagerModal';
 import VirtualTourTable from './components/VirtualTourTable';
 import { useVirtualTours } from './hooks/useVirtualTours';
 
 export default function VirtualPage() {
+  const navigate = useNavigate();
   const data = useVirtualTours();
   const showToast = useToast();
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<VirtualTourStatus | ''>('');
   const [editingTour, setEditingTour] = useState<VirtualTourListItem | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [managerTourId, setManagerTourId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<VirtualTourListItem | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -172,7 +172,9 @@ export default function VirtualPage() {
               tours={visibleTours}
               onDelete={setDeleteTarget}
               onEdit={openEdit}
-              onManage={(tour) => setManagerTourId(tour.id)}
+              onManage={(tour) =>
+                navigate(`/admin/virtual/scene?tourId=${encodeURIComponent(tour.id)}`)
+              }
             />
           )}
         </section>
@@ -188,18 +190,6 @@ export default function VirtualPage() {
         onSubmit={(payload) => void saveTour(payload)}
       />
 
-      <VirtualTourManagerModal
-        key={managerTourId ?? 'closed-manager'}
-        galleries={data.galleries}
-        galleryError={data.galleryError}
-        isGalleryLoading={data.isGalleryLoading}
-        open={Boolean(managerTourId)}
-        tourId={managerTourId}
-        onClose={() => setManagerTourId(null)}
-        onRetryGalleries={data.retryGalleries}
-        onTourChanged={data.reload}
-      />
-
       <Modal
         closeDisabled={Boolean(deletingId)}
         open={Boolean(deleteTarget)}
@@ -208,14 +198,22 @@ export default function VirtualPage() {
       >
         <div className="grid gap-4">
           <p className="text-sm leading-6 text-[#64748B]">
-            Delete <strong className="text-[#1C2434]">{deleteTarget?.title}</strong> and all of
-            its scenes and links? This action cannot be undone.
+            Delete <strong className="text-[#1C2434]">{deleteTarget?.title}</strong> and all of its
+            scenes and links? This action cannot be undone.
           </p>
           <div className="flex justify-end gap-2">
-            <Button disabled={Boolean(deletingId)} variant="outline" onClick={() => setDeleteTarget(null)}>
+            <Button
+              disabled={Boolean(deletingId)}
+              variant="outline"
+              onClick={() => setDeleteTarget(null)}
+            >
               Cancel
             </Button>
-            <Button disabled={Boolean(deletingId)} variant="danger" onClick={() => void deleteTour()}>
+            <Button
+              disabled={Boolean(deletingId)}
+              variant="danger"
+              onClick={() => void deleteTour()}
+            >
               {deletingId ? 'Deleting...' : 'Delete tour'}
             </Button>
           </div>

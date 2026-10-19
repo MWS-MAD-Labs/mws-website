@@ -262,6 +262,7 @@ export const menuSections: MenuSection[] = [
         enabled: true,
         requiredPermission: contentPermission,
       },
+
       {
         label: 'Calendar',
         href: '/admin/calendar',
