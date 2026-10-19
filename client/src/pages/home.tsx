@@ -170,7 +170,6 @@ export default function Home() {
       <Hero
         slides={slides}
         activeIndex={activeHeroIndex}
-        onSelectSlide={changeHeroSlide}
         onPrevious={() =>
           changeHeroSlide(activeHeroIndex === 0 ? slides.length - 1 : activeHeroIndex - 1)
         }

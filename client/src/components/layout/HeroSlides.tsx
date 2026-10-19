@@ -19,7 +19,6 @@ type HeroSlide = {
 type HeroProps = {
   slides: HeroSlide[];
   activeIndex: number;
-  onSelectSlide: (index: number) => void;
   onPrevious: () => void;
   onNext: () => void;
 };
@@ -38,7 +37,6 @@ const ARROW_DIAMOND_CLASS =
 export default function Hero({
   slides,
   activeIndex,
-  onSelectSlide,
   onPrevious,
   onNext,
 }: HeroProps) {
@@ -139,11 +137,6 @@ export default function Hero({
   const handleNext = () => {
     isManualNavigation.current = true;
     onNext();
-  };
-
-  const handleSelectSlide = (index: number) => {
-    isManualNavigation.current = true;
-    onSelectSlide(index);
   };
 
   const currentSlide = slides[currentIndex];
