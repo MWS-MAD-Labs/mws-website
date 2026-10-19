@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { ResponseError } from "../error/response-error";
-import { getPrisma } from "../lib/prisma";
+import { ResponseError } from "../../error/response-error";
+import { getPrisma } from "../../lib/prisma";
 
 /**
  * First-party traffic analytics for the CMS dashboard.
@@ -31,7 +31,8 @@ export function isBotUserAgent(userAgent: string | null | undefined) {
 
 export function deviceTypeOf(userAgent: string | null | undefined) {
   const ua = userAgent ?? "";
-  if (/iPad|Tablet|PlayBook|Silk|(Android(?!.*Mobile))/i.test(ua)) return "tablet";
+  if (/iPad|Tablet|PlayBook|Silk|(Android(?!.*Mobile))/i.test(ua))
+    return "tablet";
   if (/Mobi|iPhone|iPod|Android|Windows Phone/i.test(ua)) return "mobile";
   return "desktop";
 }
@@ -45,14 +46,22 @@ export function normalizePath(rawPath: string) {
 }
 
 /** Referring site, or null for direct visits and navigation within this site. */
-export function referrerHostOf(referrer: string | null | undefined, ownHost: string | null) {
+export function referrerHostOf(
+  referrer: string | null | undefined,
+  ownHost: string | null,
+) {
   if (!referrer) return null;
 
   try {
     // l.instagram.com, lm.facebook.com, m.facebook.com are link redirectors of
     // the same site, so they are grouped under the plain domain.
-    const host = new URL(referrer).hostname.replace(/^(www|m|l|lm)\./, "").toLowerCase();
-    if (!host || (ownHost && host === ownHost.replace(/^www\./, "").toLowerCase())) {
+    const host = new URL(referrer).hostname
+      .replace(/^(www|m|l|lm)\./, "")
+      .toLowerCase();
+    if (
+      !host ||
+      (ownHost && host === ownHost.replace(/^www\./, "").toLowerCase())
+    ) {
       return null;
     }
     return host.slice(0, 255);
@@ -137,7 +146,10 @@ function percentChange(current: number, previous: number) {
 
 export class AnalyticsService {
   /** Returns true when the view was stored. */
-  static async recordPageView(payload: unknown, userAgent: string | null | undefined) {
+  static async recordPageView(
+    payload: unknown,
+    userAgent: string | null | undefined,
+  ) {
     const parsed = pageViewSchema.safeParse(payload);
     if (!parsed.success) throw new ResponseError(400, "Invalid page view.");
     if (isBotUserAgent(userAgent)) return false;
@@ -167,36 +179,37 @@ export class AnalyticsService {
     const previousSince = new Date(since.getTime() - days * 86_400_000);
     const activeSince = new Date(now.getTime() - 30 * 60_000);
 
-    const [daily, totals, previous, topPages, referrers, devices, active] = await Promise.all([
-      prisma.$queryRaw<DailyRow[]>`
+    const [daily, totals, previous, topPages, referrers, devices, active] =
+      await Promise.all([
+        prisma.$queryRaw<DailyRow[]>`
         SELECT to_char(("createdAt" AT TIME ZONE 'UTC') AT TIME ZONE ${TIME_ZONE}, 'YYYY-MM-DD') AS day,
                COUNT(*) AS views,
                COUNT(DISTINCT "sessionId") AS visits
         FROM "PageView"
         WHERE "createdAt" >= ${since}
         GROUP BY day`,
-      prisma.$queryRaw<{ views: bigint; visits: bigint }[]>`
+        prisma.$queryRaw<{ views: bigint; visits: bigint }[]>`
         SELECT COUNT(*) AS views, COUNT(DISTINCT "sessionId") AS visits
         FROM "PageView" WHERE "createdAt" >= ${since}`,
-      prisma.$queryRaw<{ views: bigint; visits: bigint }[]>`
+        prisma.$queryRaw<{ views: bigint; visits: bigint }[]>`
         SELECT COUNT(*) AS views, COUNT(DISTINCT "sessionId") AS visits
         FROM "PageView" WHERE "createdAt" >= ${previousSince} AND "createdAt" < ${since}`,
-      prisma.$queryRaw<{ path: string; views: bigint; visits: bigint }[]>`
+        prisma.$queryRaw<{ path: string; views: bigint; visits: bigint }[]>`
         SELECT path, COUNT(*) AS views, COUNT(DISTINCT "sessionId") AS visits
         FROM "PageView" WHERE "createdAt" >= ${since}
         GROUP BY path ORDER BY views DESC LIMIT 8`,
-      prisma.$queryRaw<{ host: string | null; visits: bigint }[]>`
+        prisma.$queryRaw<{ host: string | null; visits: bigint }[]>`
         SELECT "referrerHost" AS host, COUNT(DISTINCT "sessionId") AS visits
         FROM "PageView" WHERE "createdAt" >= ${since}
         GROUP BY "referrerHost" ORDER BY visits DESC LIMIT 6`,
-      prisma.$queryRaw<{ device: string; visits: bigint }[]>`
+        prisma.$queryRaw<{ device: string; visits: bigint }[]>`
         SELECT "deviceType" AS device, COUNT(DISTINCT "sessionId") AS visits
         FROM "PageView" WHERE "createdAt" >= ${since}
         GROUP BY "deviceType" ORDER BY visits DESC`,
-      prisma.$queryRaw<{ visits: bigint }[]>`
+        prisma.$queryRaw<{ visits: bigint }[]>`
         SELECT COUNT(DISTINCT "sessionId") AS visits
         FROM "PageView" WHERE "createdAt" >= ${activeSince}`,
-    ]);
+      ]);
 
     const views = Number(totals[0]?.views ?? 0);
     const visits = Number(totals[0]?.visits ?? 0);

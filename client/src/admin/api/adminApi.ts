@@ -249,6 +249,87 @@ export type GalleryPayload = {
   description?: string | null;
 };
 
+export type VirtualTourStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
+
+export type VirtualTourSceneRef = {
+  id: string;
+  tourId: string;
+  name: string;
+  slug: string;
+  isActive: boolean;
+};
+
+export type VirtualTourLink = {
+  id: string;
+  fromSceneId: string;
+  toSceneId: string;
+  label: string | null;
+  yaw: number;
+  pitch: number;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+  fromScene: VirtualTourSceneRef;
+  toScene: VirtualTourSceneRef;
+};
+
+export type VirtualTourScene = VirtualTourSceneRef & {
+  panoramaImageId: string;
+  description: string | null;
+  initialYaw: number;
+  initialPitch: number;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+  panoramaImage: Pick<GalleryImageItem, "id" | "path" | "title" | "caption">;
+  outgoingLinks: VirtualTourLink[];
+};
+
+export type VirtualTourListItem = {
+  id: string;
+  title: string;
+  slug: string;
+  description: string | null;
+  status: VirtualTourStatus;
+  startSceneId: string | null;
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  startScene: VirtualTourSceneRef | null;
+  _count: { scenes: number };
+};
+
+export type VirtualTourDetail = Omit<VirtualTourListItem, "_count"> & {
+  scenes: VirtualTourScene[];
+};
+
+export type VirtualTourPayload = {
+  title: string;
+  slug: string;
+  description?: string | null;
+  status?: VirtualTourStatus;
+  startSceneId?: string | null;
+};
+
+export type VirtualTourScenePayload = {
+  panoramaImageId: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  initialYaw?: number;
+  initialPitch?: number;
+  sortOrder?: number;
+  isActive?: boolean;
+};
+
+export type VirtualTourLinkPayload = {
+  toSceneId: string;
+  label?: string | null;
+  yaw: number;
+  pitch: number;
+  sortOrder?: number;
+};
+
 export type OurSchoolItem = {
   id: string;
   title: string;
@@ -1039,6 +1120,108 @@ export const adminApi = {
 
   async deleteGallery(id: string): Promise<void> {
     await apiRequest(`/admin/galleries/${id}`, { method: "DELETE" });
+  },
+
+  async virtualTours(): Promise<VirtualTourListItem[]> {
+    const response = await apiRequest<{ data: VirtualTourListItem[] }>(
+      "/admin/virtual-tours",
+    );
+    return response?.data ?? [];
+  },
+
+  async virtualTour(id: string): Promise<VirtualTourDetail> {
+    const response = await apiRequest<{ data: VirtualTourDetail }>(
+      `/admin/virtual-tours/${id}`,
+    );
+    return response!.data;
+  },
+
+  async createVirtualTour(data: VirtualTourPayload): Promise<VirtualTourDetail> {
+    const response = await apiRequest<{ data: VirtualTourDetail }>(
+      "/admin/virtual-tours",
+      { method: "POST", body: data },
+    );
+    return response!.data;
+  },
+
+  async updateVirtualTour(
+    id: string,
+    data: Partial<VirtualTourPayload>,
+  ): Promise<VirtualTourDetail> {
+    const response = await apiRequest<{ data: VirtualTourDetail }>(
+      `/admin/virtual-tours/${id}`,
+      { method: "PATCH", body: data },
+    );
+    return response!.data;
+  },
+
+  async deleteVirtualTour(id: string): Promise<void> {
+    await apiRequest(`/admin/virtual-tours/${id}`, { method: "DELETE" });
+  },
+
+  async createVirtualTourScene(
+    tourId: string,
+    data: VirtualTourScenePayload,
+  ): Promise<VirtualTourScene> {
+    const response = await apiRequest<{ data: VirtualTourScene }>(
+      `/admin/virtual-tours/${tourId}/scenes`,
+      { method: "POST", body: data },
+    );
+    return response!.data;
+  },
+
+  async updateVirtualTourScene(
+    tourId: string,
+    sceneId: string,
+    data: Partial<VirtualTourScenePayload>,
+  ): Promise<VirtualTourScene> {
+    const response = await apiRequest<{ data: VirtualTourScene }>(
+      `/admin/virtual-tours/${tourId}/scenes/${sceneId}`,
+      { method: "PATCH", body: data },
+    );
+    return response!.data;
+  },
+
+  async deleteVirtualTourScene(tourId: string, sceneId: string): Promise<void> {
+    await apiRequest(`/admin/virtual-tours/${tourId}/scenes/${sceneId}`, {
+      method: "DELETE",
+    });
+  },
+
+  async createVirtualTourLink(
+    tourId: string,
+    sceneId: string,
+    data: VirtualTourLinkPayload,
+  ): Promise<VirtualTourLink> {
+    const response = await apiRequest<{ data: VirtualTourLink }>(
+      `/admin/virtual-tours/${tourId}/scenes/${sceneId}/links`,
+      { method: "POST", body: data },
+    );
+    return response!.data;
+  },
+
+  async updateVirtualTourLink(
+    tourId: string,
+    sceneId: string,
+    linkId: string,
+    data: Partial<VirtualTourLinkPayload>,
+  ): Promise<VirtualTourLink> {
+    const response = await apiRequest<{ data: VirtualTourLink }>(
+      `/admin/virtual-tours/${tourId}/scenes/${sceneId}/links/${linkId}`,
+      { method: "PATCH", body: data },
+    );
+    return response!.data;
+  },
+
+  async deleteVirtualTourLink(
+    tourId: string,
+    sceneId: string,
+    linkId: string,
+  ): Promise<void> {
+    await apiRequest(
+      `/admin/virtual-tours/${tourId}/scenes/${sceneId}/links/${linkId}`,
+      { method: "DELETE" },
+    );
   },
 
   async ourSchools(): Promise<OurSchoolItem[]> {

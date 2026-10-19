@@ -1,6 +1,6 @@
 import type { ContactInquiry } from "@prisma/client";
-import { escapeHtml } from "../lib/email-html";
-import type { MailMessage } from "../lib/mailer";
+import { escapeHtml } from "../../lib/email-html";
+import type { MailMessage } from "../../lib/mailer";
 
 export function inquiryNotifyRecipients() {
   return (process.env.INQUIRY_NOTIFY_EMAILS ?? "")

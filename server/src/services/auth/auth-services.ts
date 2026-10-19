@@ -1,8 +1,8 @@
-import { ResponseError } from "../error/response-error";
-import { GoogleAuth } from "../lib/google-auth";
-import { resolveCentralIdentity } from "../lib/central-client";
-import { signSession } from "../lib/session";
-import type { CmsSessionUser } from "../types/cms-auth-types";
+import { ResponseError } from "../../error/response-error";
+import { GoogleAuth } from "../../lib/google-auth";
+import { resolveCentralIdentity } from "../../lib/central-client";
+import { signSession } from "../../lib/session";
+import type { CmsSessionUser } from "../../types/cms-auth-types";
 import { CmsAuthService } from "./cms-auth-service";
 
 export class AuthService {

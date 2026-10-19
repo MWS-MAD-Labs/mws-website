@@ -1,0 +1,224 @@
+{
+  "info": {
+    "name": "MWS Virtual Tour API",
+    "description": "CRUD backend Virtual Tour. Run Create Tour, Create Scene, and Create Target Scene before creating a link.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4004" },
+    { "key": "cmsSession", "value": "" },
+    { "key": "tourId", "value": "" },
+    { "key": "tourSlug", "value": "tour-kampus-postman" },
+    { "key": "sceneId", "value": "" },
+    { "key": "targetSceneId", "value": "" },
+    { "key": "linkId", "value": "" },
+    { "key": "panoramaImageId", "value": "" },
+    { "key": "targetPanoramaImageId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Public",
+      "item": [
+        {
+          "name": "List Published Tours",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/virtual-tours" }
+        },
+        {
+          "name": "Get Published Tour",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/virtual-tours/{{tourSlug}}" }
+        }
+      ]
+    },
+    {
+      "name": "Admin Tours",
+      "item": [
+        {
+          "name": "List Tours",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "mws_cms_session={{cmsSession}}" }],
+            "url": "{{baseUrl}}/admin/virtual-tours"
+          }
+        },
+        {
+          "name": "Create Tour",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["if (pm.response.code === 201) pm.collectionVariables.set('tourId', pm.response.json().data.id);"] }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Cookie", "value": "mws_cms_session={{cmsSession}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Tour Kampus Postman\",\n  \"slug\": \"{{tourSlug}}\",\n  \"description\": \"Tour untuk pengujian API\",\n  \"status\": \"DRAFT\"\n}"
+            },
+            "url": "{{baseUrl}}/admin/virtual-tours"
+          }
+        },
+        {
+          "name": "Get Tour",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "mws_cms_session={{cmsSession}}" }],
+            "url": "{{baseUrl}}/admin/virtual-tours/{{tourId}}"
+          }
+        },
+        {
+          "name": "Publish Tour",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Cookie", "value": "mws_cms_session={{cmsSession}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"PUBLISHED\"\n}" },
+            "url": "{{baseUrl}}/admin/virtual-tours/{{tourId}}"
+          }
+        },
+        {
+          "name": "Delete Tour",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Cookie", "value": "mws_cms_session={{cmsSession}}" }],
+            "url": "{{baseUrl}}/admin/virtual-tours/{{tourId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin Scenes",
+      "item": [
+        {
+          "name": "List Scenes",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "mws_cms_session={{cmsSession}}" }],
+            "url": "{{baseUrl}}/admin/virtual-tours/{{tourId}}/scenes"
+          }
+        },
+        {
+          "name": "Create Scene",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["if (pm.response.code === 201) pm.collectionVariables.set('sceneId', pm.response.json().data.id);"] }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Cookie", "value": "mws_cms_session={{cmsSession}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"panoramaImageId\": \"{{panoramaImageId}}\",\n  \"name\": \"Lobby\",\n  \"slug\": \"lobby-postman\",\n  \"description\": \"Pintu masuk sekolah\",\n  \"initialYaw\": 0,\n  \"initialPitch\": 0,\n  \"sortOrder\": 0,\n  \"isActive\": true\n}"
+            },
+            "url": "{{baseUrl}}/admin/virtual-tours/{{tourId}}/scenes"
+          }
+        },
+        {
+          "name": "Create Target Scene",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["if (pm.response.code === 201) pm.collectionVariables.set('targetSceneId', pm.response.json().data.id);"] }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Cookie", "value": "mws_cms_session={{cmsSession}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"panoramaImageId\": \"{{targetPanoramaImageId}}\",\n  \"name\": \"Koridor\",\n  \"slug\": \"koridor-postman\",\n  \"initialYaw\": 0,\n  \"initialPitch\": 0,\n  \"sortOrder\": 1,\n  \"isActive\": true\n}"
+            },
+            "url": "{{baseUrl}}/admin/virtual-tours/{{tourId}}/scenes"
+          }
+        },
+        {
+          "name": "Get Scene",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "mws_cms_session={{cmsSession}}" }],
+            "url": "{{baseUrl}}/admin/virtual-tours/{{tourId}}/scenes/{{sceneId}}"
+          }
+        },
+        {
+          "name": "Update Scene",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Cookie", "value": "mws_cms_session={{cmsSession}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"initialYaw\": 25,\n  \"initialPitch\": -5\n}" },
+            "url": "{{baseUrl}}/admin/virtual-tours/{{tourId}}/scenes/{{sceneId}}"
+          }
+        },
+        {
+          "name": "Delete Scene",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Cookie", "value": "mws_cms_session={{cmsSession}}" }],
+            "url": "{{baseUrl}}/admin/virtual-tours/{{tourId}}/scenes/{{sceneId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin Links",
+      "item": [
+        {
+          "name": "List Links",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "mws_cms_session={{cmsSession}}" }],
+            "url": "{{baseUrl}}/admin/virtual-tours/{{tourId}}/scenes/{{sceneId}}/links"
+          }
+        },
+        {
+          "name": "Create Link",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["if (pm.response.code === 201) pm.collectionVariables.set('linkId', pm.response.json().data.id);"] }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Cookie", "value": "mws_cms_session={{cmsSession}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"toSceneId\": \"{{targetSceneId}}\",\n  \"label\": \"Ke koridor\",\n  \"yaw\": 90,\n  \"pitch\": 0,\n  \"sortOrder\": 0\n}"
+            },
+            "url": "{{baseUrl}}/admin/virtual-tours/{{tourId}}/scenes/{{sceneId}}/links"
+          }
+        },
+        {
+          "name": "Update Link",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Cookie", "value": "mws_cms_session={{cmsSession}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"label\": \"Masuk koridor\",\n  \"yaw\": 95\n}" },
+            "url": "{{baseUrl}}/admin/virtual-tours/{{tourId}}/scenes/{{sceneId}}/links/{{linkId}}"
+          }
+        },
+        {
+          "name": "Delete Link",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Cookie", "value": "mws_cms_session={{cmsSession}}" }],
+            "url": "{{baseUrl}}/admin/virtual-tours/{{tourId}}/scenes/{{sceneId}}/links/{{linkId}}"
+          }
+        }
+      ]
+    }
+  ]
+}

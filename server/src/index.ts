@@ -13,8 +13,6 @@ const frontendOrigin =
 const port = Number(process.env["PORT"] ?? 4004);
 
 declare global {
-  // `bun run --hot` re-evaluates this module on changes. Keep one server
-  // instance alive and reload its fetch handler instead of binding twice.
   var __mwsWebsiteServer: ReturnType<typeof Bun.serve> | undefined;
 }
 

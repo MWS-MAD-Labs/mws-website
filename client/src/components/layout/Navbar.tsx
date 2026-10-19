@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, Menu, X } from 'lucide-react';
+import { ChevronDown, Menu, Orbit, X } from 'lucide-react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 
 import { academicLinks, logoUrl, pageLinks } from '../../data/site';
@@ -315,6 +315,26 @@ const topNavClassName = ({ isActive }: { isActive: boolean }) =>
     'max-[980px]:hover:text-[var(--white)]',
   );
 
+  const explore360ClassName = cx(
+    'inline-flex items-center justify-center gap-2 border',
+    'px-[18px] py-2.5',
+    'text-sm font-[var(--f-head)] font-bold',
+    'transition-[background,color,border-color] duration-300',
+    useTransparentHomeHeader
+      ? 'border-[var(--gold)] bg-[var(--gold)] text-[var(--charcoal)] hover:border-[var(--gold-light)] hover:bg-[var(--gold-light)]'
+      : 'border-[var(--burgundy)] bg-[var(--burgundy)] text-[var(--white)] hover:border-[var(--burgundy-dark)] hover:bg-[var(--burgundy-dark)]',
+
+    // Mobile CTA appears inside the solid mobile menu panel.
+    'max-[980px]:order-[-1]',
+    'max-[980px]:flex',
+    'max-[980px]:min-h-11',
+    'max-[980px]:w-full',
+    'max-[980px]:shrink-0',
+    'max-[980px]:px-4',
+    'max-[980px]:py-3',
+    'max-[980px]:text-center',
+  );
+
   return (
     <div className="h-0">
       <header className={headerClassName} data-header>
@@ -574,6 +594,15 @@ const topNavClassName = ({ isActive }: { isActive: boolean }) =>
                 </li>
               </ul>
             </nav>
+
+            <Link
+              aria-label="Explore the Virtual Tour in 360 degrees"
+              className={explore360ClassName}
+              to="/virtual-tour"
+            >
+              <Orbit size={17} aria-hidden="true" />
+              Explore 360°
+            </Link>
 
             {/* Book a Tour */}
             <Link className={bookTourClassName} to="/book-a-tour">

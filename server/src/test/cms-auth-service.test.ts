@@ -6,7 +6,7 @@ import {
   type CmsInvitationWithRelations,
   type CmsUserWithRole,
 } from "../repositories/cms-user-repository";
-import { CmsAuthService } from "../services/cms-auth-service";
+import { CmsAuthService } from "../services/auth/cms-auth-service";
 import type { CentralUser } from "../types/central-types";
 import { jsonResponse, testUser } from "./test-helpers";
 

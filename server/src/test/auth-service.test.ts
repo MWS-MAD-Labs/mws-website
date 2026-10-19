@@ -1,9 +1,9 @@
 import { afterEach, beforeAll, describe, expect, it, mock, spyOn } from "bun:test";
-import { AuthService } from "../services/auth-services";
+import { AuthService } from "../services/auth/auth-services";
 import { GoogleAuth } from "../lib/google-auth";
 import * as centralClient from "../lib/central-client";
 import { verifySession } from "../lib/session";
-import { CmsAuthService } from "../services/cms-auth-service";
+import { CmsAuthService } from "../services/auth/cms-auth-service";
 import { cmsSessionUser, testUser } from "./test-helpers";
 import type { GooglePayload } from "../types/google-types";
 

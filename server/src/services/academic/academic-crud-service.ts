@@ -1,7 +1,7 @@
 import type { PrismaClient } from "@prisma/client";
 import { z, ZodError } from "zod";
-import { ResponseError } from "../error/response-error";
-import { getPrisma } from "../lib/prisma";
+import { ResponseError } from "../../error/response-error";
+import { getPrisma } from "../../lib/prisma";
 
 const uuid = z.string().trim().uuid();
 const optionalUuid = uuid.nullable().optional();
@@ -82,9 +82,7 @@ export type AcademicCrudResource =
   | "junior-highs";
 
 export type FixedAcademicCrudResource =
-  | "kindergartens"
-  | "elementaries"
-  | "junior-highs";
+  "kindergartens" | "elementaries" | "junior-highs";
 
 type AcademicCrudModel = {
   resource: AcademicCrudResource;
@@ -217,7 +215,10 @@ function modelFor(resource: AcademicCrudResource) {
   return academicCrudModels[resource];
 }
 
-function delegateFor(prisma: PrismaClient, model: AcademicCrudModel): PrismaDelegate {
+function delegateFor(
+  prisma: PrismaClient,
+  model: AcademicCrudModel,
+): PrismaDelegate {
   const delegate = (prisma as unknown as Record<string, PrismaDelegate>)[
     model.delegate
   ];
@@ -230,7 +231,9 @@ function delegateFor(prisma: PrismaClient, model: AcademicCrudModel): PrismaDele
 }
 
 function rawDelegate(prisma: PrismaClient, delegate: string): PrismaDelegate {
-  const resolved = (prisma as unknown as Record<string, PrismaDelegate>)[delegate];
+  const resolved = (prisma as unknown as Record<string, PrismaDelegate>)[
+    delegate
+  ];
   if (!resolved) {
     throw new ResponseError(500, `${delegate} repository is not available.`);
   }
@@ -286,7 +289,10 @@ function handleDatabaseError(error: unknown, model: AcademicCrudModel): never {
   console.error(`[CMS] ${model.label} database error`, {
     code: prismaError.code ?? "unknown",
   });
-  throw new ResponseError(500, `Database error while processing ${model.label}.`);
+  throw new ResponseError(
+    500,
+    `Database error while processing ${model.label}.`,
+  );
 }
 
 export class AcademicCrudService {
@@ -398,7 +404,10 @@ export class AcademicCrudService {
     const relation = faqRelationModels[resource];
 
     if (!parsed.success) {
-      throw new ResponseError(400, validationMessage(parsed.error, academicCrudModels.faqs));
+      throw new ResponseError(
+        400,
+        validationMessage(parsed.error, academicCrudModels.faqs),
+      );
     }
 
     const prisma = getPrisma();
@@ -414,11 +423,17 @@ export class AcademicCrudService {
       if (!level) throw new ResponseError(404, `${relation.label} not found.`);
       if (!faq) throw new ResponseError(404, "FAQ not found.");
       if (!faq.isActive) {
-        throw new ResponseError(400, "Only active FAQ records can be attached.");
+        throw new ResponseError(
+          400,
+          "Only active FAQ records can be attached.",
+        );
       }
 
       if (!junction.upsert) {
-        throw new ResponseError(500, `${relation.label} FAQ repository is not available.`);
+        throw new ResponseError(
+          500,
+          `${relation.label} FAQ repository is not available.`,
+        );
       }
 
       return await junction.upsert({
@@ -473,7 +488,10 @@ export class AcademicCrudService {
   ) {
     const parsed = faqReorderSchema.safeParse(payload);
     if (!parsed.success) {
-      throw new ResponseError(400, validationMessage(parsed.error, academicCrudModels.faqs));
+      throw new ResponseError(
+        400,
+        validationMessage(parsed.error, academicCrudModels.faqs),
+      );
     }
 
     const relation = faqRelationModels[resource];

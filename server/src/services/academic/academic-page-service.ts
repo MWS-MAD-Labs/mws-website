@@ -1,13 +1,13 @@
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
-import { ResponseError } from "../error/response-error";
+import { ResponseError } from "../../error/response-error";
 import {
   getMinioObjectBuffer,
   putMinioObject,
   statMinioObject,
-} from "../lib/minio";
-import { getPrisma } from "../lib/prisma";
-import { GalleryService } from "./gallery-service";
+} from "../../lib/minio";
+import { getPrisma } from "../../lib/prisma";
+import { GalleryService } from "../gallery-service";
 
 const asset = (fileName: string) => `/assets-mws/${fileName}`;
 
@@ -142,7 +142,8 @@ const defaultLevels = {
           "Learning happens through play, conversation, movement, creative expression, and hands-on experiences. These experiences help children develop confidence while building the foundations they need for their next stage of learning.",
         ],
         introImage: asset("Kindergarten.jpg"),
-        introImageAlt: "Kindergarten students exploring their learning environment",
+        introImageAlt:
+          "Kindergarten students exploring their learning environment",
         curriculumTitle: "Our Curriculum",
         curriculumDescription: [
           "Our Kindergarten curriculum provides a balance of guided learning and open-ended exploration. Children develop early literacy and numeracy skills while learning to communicate, collaborate, solve problems, and make sense of the world around them.",
@@ -166,7 +167,8 @@ const defaultLevels = {
           title: "Growing Independence",
           text: "Daily routines give children opportunities to take responsibility for themselves and their learning. From caring for personal belongings to working with friends and expressing their ideas, children gradually develop confidence, independence, and a sense of responsibility.",
           image: asset("_DSC7101.jpg"),
-          imageAlt: "Kindergarten students participating in a classroom activity",
+          imageAlt:
+            "Kindergarten students participating in a classroom activity",
           imagePosition: "left" as const,
         },
       ],
@@ -288,7 +290,8 @@ const defaultLevels = {
           title: "Leadership and Responsibility",
           text: "High School students are given opportunities to develop leadership through collaboration, presentations, service, and student-led initiatives. These experiences help them understand how their choices can contribute positively to the school community.",
           image: asset("JH.jpg"),
-          imageAlt: "High School students participating in a collaborative activity",
+          imageAlt:
+            "High School students participating in a collaborative activity",
           imagePosition: "left" as const,
         },
       ],
@@ -316,7 +319,8 @@ const ACCEPTED_DOCUMENT_TYPES = new Set([
 
 function parseLevelKey(value: string | undefined): AcademicLevelKey {
   const parsed = levelKeySchema.safeParse(value);
-  if (!parsed.success) throw new ResponseError(404, "Academic level not found.");
+  if (!parsed.success)
+    throw new ResponseError(404, "Academic level not found.");
   return parsed.data;
 }
 
@@ -336,7 +340,10 @@ function programFromRecord(
   return {
     title: record.title,
     age: fallback.age,
-    description: record.description || record.academicLevel.description || fallback.description,
+    description:
+      record.description ||
+      record.academicLevel.description ||
+      fallback.description,
     image: record.coverImage || fallback.image,
     imageAlt: fallback.imageAlt,
     path: fallback.path,
@@ -355,9 +362,11 @@ function pageFromRecord(
     galleryId: record.galleryId,
     hero: json<AcademicPagePayload["hero"]>(record.hero) ?? fallback.hero,
     overview:
-      json<AcademicPagePayload["overview"]>(record.overview) ?? fallback.overview,
+      json<AcademicPagePayload["overview"]>(record.overview) ??
+      fallback.overview,
     sections:
-      json<AcademicPagePayload["sections"]>(record.sections) ?? fallback.sections,
+      json<AcademicPagePayload["sections"]>(record.sections) ??
+      fallback.sections,
     faq: (record.faqs ?? [])
       .filter((item) => item.faq.isActive)
       .map((item) => ({
@@ -391,9 +400,15 @@ function pageResponse(
   };
 }
 
-function publishedRecord(record: AcademicLevelRecord): AcademicLevelRecord | null {
+function publishedRecord(
+  record: AcademicLevelRecord,
+): AcademicLevelRecord | null {
   if (record.status === "PUBLISHED") return record;
-  if (!record.publishedHero || !record.publishedOverview || !record.publishedSections) {
+  if (
+    !record.publishedHero ||
+    !record.publishedOverview ||
+    !record.publishedSections
+  ) {
     return null;
   }
 
@@ -415,7 +430,10 @@ function publishedRecord(record: AcademicLevelRecord): AcademicLevelRecord | nul
   };
 }
 
-function publicPageResponse(levelKey: AcademicLevelKey, record: AcademicLevelRecord | null) {
+function publicPageResponse(
+  levelKey: AcademicLevelKey,
+  record: AcademicLevelRecord | null,
+) {
   if (!record) return pageResponse(levelKey, null);
   return pageResponse(levelKey, publishedRecord(record));
 }
@@ -490,7 +508,9 @@ function levelData(
     levelKey,
     academicLevelId,
     title: data.program.title,
-    description: nullable(data.program.description ?? data.page.hero.description),
+    description: nullable(
+      data.program.description ?? data.page.hero.description,
+    ),
     coverImage: nullable(data.program.image ?? data.page.hero.image),
     galleryId: data.page.galleryId ?? null,
     hero: data.page.hero as Prisma.InputJsonValue,
@@ -505,7 +525,9 @@ function levelData(
     dataToSave.publishedDescription = nullable(
       data.program.description ?? data.page.hero.description,
     );
-    dataToSave.publishedCoverImage = nullable(data.program.image ?? data.page.hero.image);
+    dataToSave.publishedCoverImage = nullable(
+      data.program.image ?? data.page.hero.image,
+    );
     dataToSave.publishedGalleryId = data.page.galleryId ?? null;
     dataToSave.publishedHero = data.page.hero as Prisma.InputJsonValue;
     dataToSave.publishedOverview = data.page.overview as Prisma.InputJsonValue;
@@ -579,7 +601,8 @@ async function deleteMissingLegacyFaqLinks(
     },
   };
 
-  if (levelKey === "kindergarten") return prisma.kindergartenFaq.deleteMany(args);
+  if (levelKey === "kindergarten")
+    return prisma.kindergartenFaq.deleteMany(args);
   if (levelKey === "elementary") return prisma.elementaryFaq.deleteMany(args);
   return prisma.juniorHighFaq.deleteMany(args);
 }
@@ -613,8 +636,18 @@ async function saveLevelRecord(
   status: AcademicStatus,
 ) {
   const prisma = getPrisma();
-  const academicLevel = await ensureAcademicLevel(levelKey, existing, data.program);
-  const nextData = levelData(levelKey, academicLevel.id, data, status, existing?.status ?? null);
+  const academicLevel = await ensureAcademicLevel(
+    levelKey,
+    existing,
+    data.program,
+  );
+  const nextData = levelData(
+    levelKey,
+    academicLevel.id,
+    data,
+    status,
+    existing?.status ?? null,
+  );
 
   if (levelKey === "kindergarten") {
     const saved = existing
@@ -682,7 +715,8 @@ function academicAssetUrl(objectName: string) {
 }
 
 function validateAssetFile(file: File, type: "image" | "document") {
-  const accepted = type === "image" ? ACCEPTED_IMAGE_TYPES : ACCEPTED_DOCUMENT_TYPES;
+  const accepted =
+    type === "image" ? ACCEPTED_IMAGE_TYPES : ACCEPTED_DOCUMENT_TYPES;
   const maxSize = type === "image" ? MAX_IMAGE_SIZE : MAX_DOCUMENT_SIZE;
   if (!accepted.has(file.type)) {
     throw new ResponseError(
@@ -745,7 +779,9 @@ export class AcademicPageService {
     }
 
     const response = pageResponse(levelKey, record);
-    return response.page.isPublished ? response : publicPageResponse(levelKey, record);
+    return response.page.isPublished
+      ? response
+      : publicPageResponse(levelKey, record);
   }
 
   static async saveLevel(rawLevelKey: string | undefined, payload: unknown) {
@@ -793,8 +829,11 @@ export class AcademicPageService {
     return {
       buffer,
       contentType:
-        String(stat.metaData?.["content-type"] ?? stat.metaData?.["Content-Type"] ?? "") ||
-        "application/octet-stream",
+        String(
+          stat.metaData?.["content-type"] ??
+            stat.metaData?.["Content-Type"] ??
+            "",
+        ) || "application/octet-stream",
       size: stat.size,
     };
   }

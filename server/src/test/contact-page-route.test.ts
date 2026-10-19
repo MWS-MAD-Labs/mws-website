@@ -8,8 +8,8 @@ import { apiRoute } from "../routes/api-router";
 import {
   ContactPageService,
   defaultContactPageContent,
-} from "../services/contact-page-service";
-import { CmsAuthService } from "../services/cms-auth-service";
+} from "../services/contact/contact-page-service";
+import { CmsAuthService } from "../services/auth/cms-auth-service";
 import { cmsSessionUser, testUser } from "./test-helpers";
 import type { SessionVariables } from "../types/hono-context";
 

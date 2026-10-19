@@ -6,9 +6,9 @@ import { signSession } from "../lib/session";
 import { adminRoute } from "../routes/admin";
 import { apiRoute } from "../routes/api-router";
 import { authRoute } from "../routes/auth";
-import { CmsAuthService } from "../services/cms-auth-service";
-import { ContactInquiryService } from "../services/contact-inquiry-service";
-import { ContactPageService } from "../services/contact-page-service";
+import { CmsAuthService } from "../services/auth/cms-auth-service";
+import { ContactInquiryService } from "../services/contact/contact-inquiry-service";
+import { ContactPageService } from "../services/contact/contact-page-service";
 import type { SessionVariables } from "../types/hono-context";
 import { cmsSessionUser, testUser } from "./test-helpers";
 

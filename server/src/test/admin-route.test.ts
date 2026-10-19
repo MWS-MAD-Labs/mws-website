@@ -1,12 +1,20 @@
-import { afterEach, beforeAll, describe, expect, it, mock, spyOn } from "bun:test";
+import {
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  it,
+  mock,
+  spyOn,
+} from "bun:test";
 import { Hono } from "hono";
 import { adminRoute } from "../routes/admin";
 import { ResponseError } from "../error/response-error";
 import { signSession } from "../lib/session";
 import { clearCentralIdentityCacheForTest } from "../middleware/admin-auth-middleware";
 import * as centralClient from "../lib/central-client";
-import { CmsAuthService } from "../services/cms-auth-service";
-import { DashboardService } from "../services/dashboard-service";
+import { CmsAuthService } from "../services/auth/cms-auth-service";
+import { DashboardService } from "../services/dashboard/dashboard-service";
 import { cmsSessionUser, testUser } from "./test-helpers";
 import type { SessionVariables } from "../types/hono-context";
 
@@ -41,7 +49,9 @@ const dashboardSummary = {
 } satisfies Awaited<ReturnType<typeof DashboardService.contentSummary>>;
 
 function mockDashboardSummary() {
-  return spyOn(DashboardService, "contentSummary").mockResolvedValue(dashboardSummary);
+  return spyOn(DashboardService, "contentSummary").mockResolvedValue(
+    dashboardSummary,
+  );
 }
 
 describe("adminRoute", () => {
@@ -49,7 +59,9 @@ describe("adminRoute", () => {
     const res = await buildApp().request("/admin/dashboard-data");
 
     expect(res.status).toBe(401);
-    expect(((await res.json()) as { errors: string }).errors).toBe("Not signed in.");
+    expect(((await res.json()) as { errors: string }).errors).toBe(
+      "Not signed in.",
+    );
   });
 
   it("allows an authenticated Central user to access dashboard data", async () => {
@@ -64,7 +76,9 @@ describe("adminRoute", () => {
     });
 
     expect(res.status).toBe(200);
-    const body = (await res.json()) as { data: { message: string; user: unknown } };
+    const body = (await res.json()) as {
+      data: { message: string; user: unknown };
+    };
     expect(body.data.message).toBe("Halo, Test Employee");
     expect(body.data.user).toEqual(cmsUser);
     expect(contentSummary).toHaveBeenCalledWith({ includeUsers: false });

@@ -1,6 +1,6 @@
 import type { Context } from "hono";
 import { RateLimiterMemory } from "rate-limiter-flexible";
-import { AnalyticsService } from "../../services/analytics-service";
+import { AnalyticsService } from "../../services/dashboard/analytics-service";
 
 // Generous per-client ceiling so one script cannot flood the table. The address
 // is only used as the limiter key and is never stored.

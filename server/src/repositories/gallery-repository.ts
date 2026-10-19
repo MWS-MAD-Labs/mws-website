@@ -219,6 +219,7 @@ export class GalleryRepository {
       communityStoriesPages,
       communityVoices,
       campusSpotlights,
+      virtualTourScenes,
       jsonRows,
     ] = await Promise.all([
       prisma.ourSchool.count({ where: { featuredImageId: image.id } }),
@@ -275,6 +276,9 @@ export class GalleryRepository {
       prisma.campusSpotlight.count({
         where: { OR: pathMatches.map((match) => ({ imagePath: match })) },
       }),
+      prisma.virtualTourScene.count({
+        where: { panoramaImageId: image.id },
+      }),
       prisma.$queryRaw<{ count: bigint }[]>`
         SELECT
           (
@@ -303,6 +307,7 @@ export class GalleryRepository {
       { label: "Community Stories hero image", count: communityStoriesPages },
       { label: "Community Voice image", count: communityVoices },
       { label: "Campus Spotlight image", count: campusSpotlights },
+      { label: "Virtual Tour panorama", count: virtualTourScenes },
       { label: "Rich text content", count: Number(jsonRows[0]?.count ?? 0) },
     ]);
   }

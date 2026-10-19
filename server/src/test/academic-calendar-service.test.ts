@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "bun:test";
-import { AcademicCalendarService } from "../services/academic-calendar-service";
+import { AcademicCalendarService } from "../services/academic/academic-calendar-service";
 
 const event = {
   id: "11111111-1111-4111-8111-111111111111",

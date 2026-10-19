@@ -1,7 +1,7 @@
 import type { Context } from "hono";
 import { ResponseError } from "../../error/response-error";
 import { toJsonSafe } from "../../lib/json-response";
-import { AcademicPageService } from "../../services/academic-page-service";
+import { AcademicPageService } from "../../services/academic/academic-page-service";
 
 async function readJson(c: Context) {
   try {
@@ -28,14 +28,19 @@ function fileField(body: MultipartBody, key: string) {
   return value instanceof File ? value : null;
 }
 
-async function readMultipartAsset(c: Context): Promise<{ file: File; type: "image" | "document" }> {
+async function readMultipartAsset(
+  c: Context,
+): Promise<{ file: File; type: "image" | "document" }> {
   const body = (await c.req.parseBody()) as MultipartBody;
   const file = fileField(body, "file");
   const type = textField(body, "type");
 
   if (!file) throw new ResponseError(400, "File is required.");
   if (type !== "image" && type !== "document") {
-    throw new ResponseError(400, "Academic asset type must be image or document.");
+    throw new ResponseError(
+      400,
+      "Academic asset type must be image or document.",
+    );
   }
 
   return { file, type };
@@ -48,7 +53,9 @@ export class AdminAcademicLevelsController {
 
   static async get(c: Context) {
     return c.json({
-      data: toJsonSafe(await AcademicPageService.getLevel(c.req.param("levelKey"))),
+      data: toJsonSafe(
+        await AcademicPageService.getLevel(c.req.param("levelKey")),
+      ),
     });
   }
 
@@ -66,7 +73,11 @@ export class AdminAcademicLevelsController {
     return c.json(
       {
         data: toJsonSafe(
-          await AcademicPageService.uploadAsset(c.req.param("levelKey"), file, type),
+          await AcademicPageService.uploadAsset(
+            c.req.param("levelKey"),
+            file,
+            type,
+          ),
         ),
       },
       201,

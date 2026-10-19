@@ -4,7 +4,7 @@ import { requireCmsPermission } from "../../middleware/require-cms-permission";
 import type {
   AcademicCrudResource,
   FixedAcademicCrudResource,
-} from "../../services/academic-crud-service";
+} from "../../services/academic/academic-crud-service";
 import type { SessionVariables } from "../../types/hono-context";
 
 export const adminAcademicCrudRoute = new Hono<{

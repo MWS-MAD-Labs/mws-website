@@ -4,7 +4,7 @@ import {
   ContactPageService,
   defaultContactPageContent,
   normalizeMapEmbedSrc,
-} from "../services/contact-page-service";
+} from "../services/contact/contact-page-service";
 
 const embedUrl = defaultContactPageContent.map.src;
 

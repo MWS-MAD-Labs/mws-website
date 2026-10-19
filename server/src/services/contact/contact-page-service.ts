@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { ResponseError } from "../error/response-error";
-import { getPrisma } from "../lib/prisma";
+import { ResponseError } from "../../error/response-error";
+import { getPrisma } from "../../lib/prisma";
 
 const CONTACT_PAGE_SLUG = "contact";
 

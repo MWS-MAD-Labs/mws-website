@@ -1,5 +1,5 @@
-import type { CentralUser } from "../types/central-types";
-import { getUserUnitId } from "../lib/admin-access";
+import type { CentralUser } from "../../types/central-types";
+import { getUserUnitId } from "../../lib/admin-access";
 
 type ActiveEmployee = Extract<CentralUser, { source: "employee" }>;
 

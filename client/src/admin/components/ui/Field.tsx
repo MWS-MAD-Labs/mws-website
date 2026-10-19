@@ -28,7 +28,7 @@ export default function Field({
         {label}
         {required ? <span className="ml-1 text-red-600">*</span> : null}
         {!required && optional ? (
-          <span className="ml-1 text-xs font-normal text-[#94A3B8]">(opsional)</span>
+          <span className="ml-1 text-xs font-normal text-[#64748B]">(opsional)</span>
         ) : null}
       </span>
       {children}

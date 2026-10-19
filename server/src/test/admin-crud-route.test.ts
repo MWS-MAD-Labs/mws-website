@@ -5,7 +5,7 @@ import { signSession } from "../lib/session";
 import { clearCentralIdentityCacheForTest } from "../middleware/admin-auth-middleware";
 import * as centralClient from "../lib/central-client";
 import { adminRoute } from "../routes/admin";
-import { CmsAuthService } from "../services/cms-auth-service";
+import { CmsAuthService } from "../services/auth/cms-auth-service";
 import { cmsSessionUser, testUser } from "./test-helpers";
 import type { SessionVariables } from "../types/hono-context";
 

@@ -20,7 +20,7 @@ import {
   type NewsPostWithRelations,
 } from "../repositories/news-repository";
 import { sanitizeNewsContent } from "../lib/sanitize-html";
-import { AnalyticsService } from "./analytics-service";
+import { AnalyticsService } from "./dashboard/analytics-service";
 
 type NewsStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
 
@@ -30,7 +30,9 @@ const categoryUpdateSchema = newsCategorySchema.partial();
 const tagUpdateSchema = newsTagSchema.partial();
 const postUpdateSchema = newsPostSchema.partial();
 const mediaCreateSchema = newsPostMediaSchema;
-const mediaUpdateSchema = newsPostMediaSchema.omit({ newsPostId: true }).partial();
+const mediaUpdateSchema = newsPostMediaSchema
+  .omit({ newsPostId: true })
+  .partial();
 const imageUploadMetadataSchema = z.object({
   alt: z.string().trim().max(255).optional(),
   caption: z.string().trim().max(2000).optional(),
@@ -76,7 +78,10 @@ function parse<T extends z.ZodTypeAny>(
 ): z.infer<T> {
   const result = schema.safeParse(payload);
   if (!result.success) {
-    throw new ResponseError(400, `${label} validation failed. ${flatten(result.error)}`);
+    throw new ResponseError(
+      400,
+      `${label} validation failed. ${flatten(result.error)}`,
+    );
   }
   return result.data;
 }
@@ -103,7 +108,10 @@ function parseUpdate<T extends z.ZodTypeAny>(
   );
 
   if (!Object.keys(data).length) {
-    throw new ResponseError(400, `${label} update requires at least one field.`);
+    throw new ResponseError(
+      400,
+      `${label} update requires at least one field.`,
+    );
   }
 
   return data as Partial<z.infer<T>>;
@@ -165,7 +173,10 @@ function imageObjectKey(fileName: string) {
 
 function validateImageFile(file: File) {
   if (!ACCEPTED_IMAGE_TYPES.has(file.type)) {
-    throw new ResponseError(400, "Only AVIF, WebP, JPEG, or PNG images are allowed. Use WebP/AVIF for photos.");
+    throw new ResponseError(
+      400,
+      "Only AVIF, WebP, JPEG, or PNG images are allowed. Use WebP/AVIF for photos.",
+    );
   }
 
   if (file.size <= 0) {
@@ -173,7 +184,10 @@ function validateImageFile(file: File) {
   }
 
   if (file.size > MAX_IMAGE_SIZE) {
-    throw new ResponseError(400, "Image file must be 5MB or smaller. Use WebP/AVIF for photos.");
+    throw new ResponseError(
+      400,
+      "Image file must be 5MB or smaller. Use WebP/AVIF for photos.",
+    );
   }
 }
 
@@ -190,7 +204,9 @@ function findCoverMedia<Media extends { id: string; url: string }>(post: {
   media: Media[];
 }): Media | undefined {
   if (!post.coverImage) return undefined;
-  return post.media.find((media) => newsMediaFileUrl(media.id) === post.coverImage);
+  return post.media.find(
+    (media) => newsMediaFileUrl(media.id) === post.coverImage,
+  );
 }
 
 /**
@@ -229,8 +245,7 @@ function derivePublication(
   return {
     status,
     isPublished: true,
-    publishedAt:
-      data.publishedAt ?? existing?.publishedAt ?? new Date(),
+    publishedAt: data.publishedAt ?? existing?.publishedAt ?? new Date(),
   };
 }
 
@@ -422,7 +437,9 @@ export class NewsService {
         {
           ...data,
           authorId,
-          content: sanitizeNewsContent(data.content ?? {}) as Prisma.InputJsonValue,
+          content: sanitizeNewsContent(
+            data.content ?? {},
+          ) as Prisma.InputJsonValue,
           ...derivePublication(data),
         },
         tagIds,
@@ -435,7 +452,11 @@ export class NewsService {
 
   static async updatePost(rawId: string | undefined, payload: unknown) {
     const id = requireUuid(rawId, "post id");
-    const { tagIds, ...data } = parseUpdate(postUpdateSchema, payload, "News post");
+    const { tagIds, ...data } = parseUpdate(
+      postUpdateSchema,
+      payload,
+      "News post",
+    );
 
     const existing = await NewsRepository.findPostById(id);
     if (!existing) throw new ResponseError(404, "News post not found.");
@@ -466,7 +487,9 @@ export class NewsService {
         const previousCover = findCoverMedia(existing);
 
         if (previousCover) {
-          await NewsRepository.deleteMedia(previousCover.id).catch(() => undefined);
+          await NewsRepository.deleteMedia(previousCover.id).catch(
+            () => undefined,
+          );
           await discardCoverObject(previousCover);
         }
       }
@@ -533,7 +556,10 @@ export class NewsService {
     const postId = requireUuid(rawPostId, "post id");
     await this.getPost(postId);
 
-    const body = { ...(payload as Record<string, unknown>), newsPostId: postId };
+    const body = {
+      ...(payload as Record<string, unknown>),
+      newsPostId: postId,
+    };
     const data = parse(mediaCreateSchema, body, "News post media");
 
     try {
@@ -597,7 +623,8 @@ export class NewsService {
       return await NewsRepository.createMedia({
         ...data,
         sortOrder:
-          metadata.sortOrder ?? (await NewsRepository.nextMediaSortOrder(postId)),
+          metadata.sortOrder ??
+          (await NewsRepository.nextMediaSortOrder(postId)),
       });
     } catch (error) {
       await deleteMinioObject(objectName).catch(() => undefined);
@@ -609,7 +636,11 @@ export class NewsService {
     const mediaId = requireUuid(rawMediaId, "media id");
     const media = await NewsRepository.findMediaById(mediaId);
 
-    if (!media || media.mediaType !== "IMAGE" || !isUploadedNewsImage(media.url)) {
+    if (
+      !media ||
+      media.mediaType !== "IMAGE" ||
+      !isUploadedNewsImage(media.url)
+    ) {
       throw new ResponseError(404, "News image not found.");
     }
 
@@ -621,8 +652,11 @@ export class NewsService {
     return {
       buffer,
       contentType:
-        String(stat.metaData?.["content-type"] ?? stat.metaData?.["Content-Type"] ?? "") ||
-        "application/octet-stream",
+        String(
+          stat.metaData?.["content-type"] ??
+            stat.metaData?.["Content-Type"] ??
+            "",
+        ) || "application/octet-stream",
       size: stat.size,
     };
   }

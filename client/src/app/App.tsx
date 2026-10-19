@@ -18,10 +18,12 @@ import CommunityStories from '@/pages/community-stories';
 import BookATour from '@/features/book-a-tour/BookATourPage';
 import AboutUs from '@/pages/aboutUS';
 import NotFound from '@/pages/not-found';
+import VirtualTourPage from '@/pages/virtual-tour';
 
 export default function App() {
   return (
     <Routes>
+      <Route path="virtual-tour" element={<VirtualTourPage />} />
       <Route element={<PageLayout />}>
         <Route index element={<Home />} />
         {/* <Route path="our-school" element={<OurSchool />} /> */}
@@ -34,7 +36,10 @@ export default function App() {
         <Route path="academic/kindergarten" element={<Kindergarten />} />
         <Route path="academic/elementary" element={<Elementary />} />
         <Route path="academic/high-school" element={<HighSchool />} />
-        <Route path="academic/junior-high" element={<Navigate to="/academic/high-school" replace />} />
+        <Route
+          path="academic/junior-high"
+          element={<Navigate to="/academic/high-school" replace />}
+        />
         <Route path="kindergarten" element={<Navigate to="/academic/kindergarten" replace />} />
         <Route path="elementary" element={<Navigate to="/academic/elementary" replace />} />
         <Route path="high-school" element={<Navigate to="/academic/high-school" replace />} />
