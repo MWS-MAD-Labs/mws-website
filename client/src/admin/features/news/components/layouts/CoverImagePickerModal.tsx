@@ -291,6 +291,7 @@ function imageSelection(gallery: GalleryItem, image: GalleryImageItem): GalleryA
   return {
     alt: image.title || image.caption || gallery.title,
     galleryId: gallery.id,
+    id: image.id,
     kind: 'IMAGE',
     label: image.title || image.caption || 'Gallery image',
     path: adminApi.galleryImagePublicPath(image),
@@ -301,6 +302,7 @@ function videoSelection(gallery: GalleryItem, video: GalleryVideoItem): GalleryA
   return {
     alt: video.title || video.caption || gallery.title,
     galleryId: gallery.id,
+    id: video.id,
     kind: 'VIDEO',
     label: video.title || video.caption || 'Gallery video',
     path: adminApi.galleryVideoPublicPath(video),

@@ -58,7 +58,7 @@ const sceneFields = {
     .max(255, "Scene name must be 255 characters or less"),
   slug,
   description: optionalText(5000),
-  initialYaw: z.number().finite().min(-180).max(180),
+  initialYaw: z.number().finite(),
   initialPitch: z.number().finite().min(-90).max(90),
   sortOrder: z.number().int(),
   isActive: z.boolean(),
@@ -82,7 +82,7 @@ export const updateVirtualTourSceneSchema = z
 const linkFields = {
   toSceneId: z.string().uuid("Target scene id must be a valid UUID"),
   label: optionalText(255),
-  yaw: z.number().finite().min(-180).max(180),
+  yaw: z.number().finite(),
   pitch: z.number().finite().min(-90).max(90),
   sortOrder: z.number().int(),
 } satisfies z.ZodRawShape;

@@ -23,6 +23,7 @@ import VirtualTourPage from '@/pages/virtual-tour';
 export default function App() {
   return (
     <Routes>
+      <Route path="virtual-tour" element={<VirtualTourPage />} />
       <Route element={<PageLayout />}>
         <Route index element={<Home />} />
         {/* <Route path="our-school" element={<OurSchool />} /> */}
@@ -51,7 +52,6 @@ export default function App() {
         <Route path="news-detail" element={<Navigate to="/news" replace />} />
         <Route path="community-stories" element={<CommunityStories />} />
         <Route path="contact" element={<Contact />} />
-        <Route path="virtual-tour" element={<VirtualTourPage />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
