@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { pageApi, type AcademicLevelData } from '@/api/pageApi';
 import { programCards } from '../../data/site';
 import DecorativeDoodles from './DecorativeDoodles';
 
@@ -19,8 +20,49 @@ type ProgramAcademicProps = {
 
 const defaultPrograms: ProgramAcademicItem[] = programCards;
 
+type AcademicLevelKey = AcademicLevelData['levelKey'];
+
+function getAcademicLevelKey(programId: string): AcademicLevelKey | null {
+  if (programId === 'kindergarten' || programId === 'elementary') return programId;
+  if (programId === 'high-school' || programId === 'junior-high') return 'high-school';
+
+  return null;
+}
+
+async function getAcademicHeroImages(programs: ProgramAcademicItem[]) {
+  const programLevels = programs.flatMap((program) => {
+    const levelKey = getAcademicLevelKey(program.id);
+
+    return levelKey ? [{ programId: program.id, levelKey }] : [];
+  });
+  const levelKeys = [...new Set(programLevels.map(({ levelKey }) => levelKey))];
+  const imagesByLevel = new Map<AcademicLevelKey, string>();
+  const images: Record<string, string> = {};
+
+  await Promise.all(
+    levelKeys.map(async (levelKey) => {
+      try {
+        const data = await pageApi.academicLevel(levelKey);
+        const image = data.page.hero.image.trim();
+
+        if (image) imagesByLevel.set(levelKey, image);
+      } catch {
+        // Keep the image supplied by the program data as the fallback.
+      }
+    }),
+  );
+
+  for (const { programId, levelKey } of programLevels) {
+    const image = imagesByLevel.get(levelKey);
+
+    if (image) images[programId] = image;
+  }
+
+  return images;
+}
+
 function getSelectorLabel(program: ProgramAcademicItem) {
-  if (program.id === 'high-school' && program.title === 'High School') {
+  if (getAcademicLevelKey(program.id) === 'high-school' && program.title === 'High School') {
     return 'Junior High';
   }
 
@@ -29,9 +71,22 @@ function getSelectorLabel(program: ProgramAcademicItem) {
 
 export default function ProgramAcademic({ programs = defaultPrograms }: ProgramAcademicProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [heroImages, setHeroImages] = useState<Record<string, string>>({});
 
   const items = programs.length ? programs : defaultPrograms;
   const selectedIndex = activeIndex < items.length ? activeIndex : 0;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    void getAcademicHeroImages(items).then((images) => {
+      if (!cancelled) setHeroImages(images);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [items]);
 
   return (
     <section
@@ -69,7 +124,7 @@ export default function ProgramAcademic({ programs = defaultPrograms }: ProgramA
               >
                 {/* Image */}
                 <img
-                  src={program.image}
+                  src={heroImages[program.id] || program.image}
                   alt={program.title}
                   className={`pointer-events-none absolute inset-0 h-full w-full object-cover transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
                     isActive
@@ -148,7 +203,7 @@ export default function ProgramAcademic({ programs = defaultPrograms }: ProgramA
                 {/* Image */}
                 <div className="relative aspect-[16/10] overflow-hidden bg-[var(--charcoal)]">
                   <img
-                    src={program.image}
+                    src={heroImages[program.id] || program.image}
                     alt={program.title}
                     className="h-full w-full object-cover"
                   />
