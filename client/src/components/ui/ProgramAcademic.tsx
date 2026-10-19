@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { pageApi, type AcademicLevelData } from '@/api/pageApi';
-import { programCards } from '../../data/site';
 import DecorativeDoodles from './DecorativeDoodles';
 
 type ProgramAcademicItem = {
@@ -18,20 +17,29 @@ type ProgramAcademicProps = {
   programs?: ProgramAcademicItem[];
 };
 
-const defaultPrograms: ProgramAcademicItem[] = programCards;
+const emptyPrograms: ProgramAcademicItem[] = [];
 
 type AcademicLevelKey = AcademicLevelData['levelKey'];
 
-function getAcademicLevelKey(programId: string): AcademicLevelKey | null {
-  if (programId === 'kindergarten' || programId === 'elementary') return programId;
-  if (programId === 'high-school' || programId === 'junior-high') return 'high-school';
+function isStaticAcademicImage(image: string) {
+  return /^(?:https?:\/\/[^/]+)?\/assets-mws\//i.test(image);
+}
+
+function getAcademicLevelKey(program: ProgramAcademicItem): AcademicLevelKey | null {
+  const pathKey = program.path.split('/').filter(Boolean).at(-1);
+  const key = [program.id, pathKey].find((value) =>
+    ['kindergarten', 'elementary', 'high-school', 'junior-high'].includes(value ?? ''),
+  );
+
+  if (key === 'kindergarten' || key === 'elementary') return key;
+  if (key === 'high-school' || key === 'junior-high') return 'high-school';
 
   return null;
 }
 
 async function getAcademicHeroImages(programs: ProgramAcademicItem[]) {
   const programLevels = programs.flatMap((program) => {
-    const levelKey = getAcademicLevelKey(program.id);
+    const levelKey = getAcademicLevelKey(program);
 
     return levelKey ? [{ programId: program.id, levelKey }] : [];
   });
@@ -45,9 +53,11 @@ async function getAcademicHeroImages(programs: ProgramAcademicItem[]) {
         const data = await pageApi.academicLevel(levelKey);
         const image = data.page.hero.image.trim();
 
-        if (image) imagesByLevel.set(levelKey, image);
+        if (image && !isStaticAcademicImage(image)) {
+          imagesByLevel.set(levelKey, image);
+        }
       } catch {
-        // Keep the image supplied by the program data as the fallback.
+        // Leave the image empty when CMS data is unavailable.
       }
     }),
   );
@@ -62,18 +72,18 @@ async function getAcademicHeroImages(programs: ProgramAcademicItem[]) {
 }
 
 function getSelectorLabel(program: ProgramAcademicItem) {
-  if (getAcademicLevelKey(program.id) === 'high-school' && program.title === 'High School') {
+  if (getAcademicLevelKey(program) === 'high-school' && program.title === 'High School') {
     return 'Junior High';
   }
 
   return program.title;
 }
 
-export default function ProgramAcademic({ programs = defaultPrograms }: ProgramAcademicProps) {
+export default function ProgramAcademic({ programs = emptyPrograms }: ProgramAcademicProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [heroImages, setHeroImages] = useState<Record<string, string>>({});
 
-  const items = programs.length ? programs : defaultPrograms;
+  const items = programs;
   const selectedIndex = activeIndex < items.length ? activeIndex : 0;
 
   useEffect(() => {
@@ -87,6 +97,8 @@ export default function ProgramAcademic({ programs = defaultPrograms }: ProgramA
       cancelled = true;
     };
   }, [items]);
+
+  if (!items.length) return null;
 
   return (
     <section
@@ -123,15 +135,17 @@ export default function ProgramAcademic({ programs = defaultPrograms }: ProgramA
                 className="group relative basis-0 overflow-hidden transition-[flex-grow] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
               >
                 {/* Image */}
-                <img
-                  src={heroImages[program.id] || program.image}
-                  alt={program.title}
-                  className={`pointer-events-none absolute inset-0 h-full w-full object-cover transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
-                    isActive
-                      ? 'scale-100 brightness-[0.8]'
-                      : 'scale-[1.02] brightness-[0.55] grayscale-[0.1]'
-                  } group-hover:scale-[1.03]`}
-                />
+                {heroImages[program.id] && (
+                  <img
+                    src={heroImages[program.id]}
+                    alt={program.title}
+                    className={`pointer-events-none absolute inset-0 h-full w-full object-cover transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+                      isActive
+                        ? 'scale-100 brightness-[0.8]'
+                        : 'scale-[1.02] brightness-[0.55] grayscale-[0.1]'
+                    } group-hover:scale-[1.03]`}
+                  />
+                )}
 
                 {/* Overlay */}
                 <div
@@ -202,11 +216,13 @@ export default function ProgramAcademic({ programs = defaultPrograms }: ProgramA
               >
                 {/* Image */}
                 <div className="relative aspect-[16/10] overflow-hidden bg-[var(--charcoal)]">
-                  <img
-                    src={heroImages[program.id] || program.image}
-                    alt={program.title}
-                    className="h-full w-full object-cover"
-                  />
+                  {heroImages[program.id] && (
+                    <img
+                      src={heroImages[program.id]}
+                      alt={program.title}
+                      className="h-full w-full object-cover"
+                    />
+                  )}
 
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
 
