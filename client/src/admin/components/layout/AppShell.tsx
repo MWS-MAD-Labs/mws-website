@@ -79,6 +79,7 @@ export default function AppShell({ children, title }: AppShellProps) {
                     className="h-9 w-9 rounded-full object-cover"
                     src={photoUrl}
                     alt={user?.name ?? 'CMS user'}
+                    loading='lazy'
                   />
                 ) : (
                   <div className="grid h-9 w-9 place-items-center rounded-full bg-[#3C50E0] text-sm font-semibold text-white">
@@ -115,6 +116,7 @@ export default function AppShell({ children, title }: AppShellProps) {
                         className="h-16 w-16 shrink-0 object-cover"
                         src={photoUrl}
                         alt={user?.name ?? 'CMS user'}
+                        loading='lazy'
                       />
                     ) : (
                       <div className="grid h-16 w-16 shrink-0 place-items-center bg-[#F1F5F9] text-[#64748B]">

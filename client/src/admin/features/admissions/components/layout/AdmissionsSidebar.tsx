@@ -134,6 +134,7 @@ export default function AdmissionsSidebar({ editor }: AdmissionsSidebarProps) {
             className="aspect-video rounded-lg object-cover"
             src={adminApi.galleryImageUrl(selectedGallery.images[0]!)}
             alt={selectedGallery.images[0]!.title || selectedGallery.title}
+            loading='lazy'
           />
         ) : null}
 
