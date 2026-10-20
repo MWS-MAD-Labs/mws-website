@@ -6,7 +6,7 @@ export class PublicGalleryMediaController {
   static async image(c: Context) {
     const file = await GalleryService.getImageFile(c.req.param("id"));
     return sendStoredFile(c, file, {
-      cacheControl: "public, max-age=300",
+      cacheControl: "public, max-age=31536000, immutable",
     });
   }
 

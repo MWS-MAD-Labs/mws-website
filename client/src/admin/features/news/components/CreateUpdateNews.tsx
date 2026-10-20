@@ -717,6 +717,7 @@ export default function CreateUpdateNews() {
 
         <CoverImagePickerModal
           open={imagePickerTarget !== null}
+          allowMultipleUploads={imagePickerTarget === 'article-photo'}
           galleries={galleries}
           title={imagePickerTarget === 'article-photo' ? 'Choose article photo' : 'Choose cover image'}
           onClose={() => setImagePickerTarget(null)}

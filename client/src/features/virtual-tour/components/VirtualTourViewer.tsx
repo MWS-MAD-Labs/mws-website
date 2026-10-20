@@ -7,12 +7,16 @@ import '@photo-sphere-viewer/core/index.css';
 import '@photo-sphere-viewer/markers-plugin/index.css';
 import '@photo-sphere-viewer/virtual-tour-plugin/index.css';
 
-import type { PublicVirtualTour } from '@/api/virtualTourApi';
+import type { PublicVirtualTour, PublicVirtualTourSummary } from '@/api/virtualTourApi';
+import VirtualTourNavigation from './VirtualTourNavigation';
 
 type VirtualTourViewerProps = {
   activeSceneId: string;
+  activeTourSlug: string;
   onSceneChange: (sceneId: string) => void;
+  onTourChange: (slug: string) => void;
   tour: PublicVirtualTour;
+  tours: PublicVirtualTourSummary[];
 };
 
 function angleToRadians(value: string) {
@@ -33,8 +37,11 @@ function initialPosition(node: VirtualTourNode) {
 
 export default function VirtualTourViewer({
   activeSceneId,
+  activeTourSlug,
   onSceneChange,
+  onTourChange,
   tour,
+  tours,
 }: VirtualTourViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const pluginRef = useRef<VirtualTourPlugin | null>(null);
@@ -70,7 +77,7 @@ export default function VirtualTourViewer({
             {
               nodes,
               positionMode: 'manual',
-              preload: true,
+              preload: false,
               renderMode: '3d',
               startNodeId: tour.startNodeId,
               transitionOptions: (node: VirtualTourNode) => ({
@@ -125,6 +132,15 @@ export default function VirtualTourViewer({
         role="region"
         className="h-full w-full"
         aria-label={`${tour.title} interactive virtual tour`}
+      />
+
+      <VirtualTourNavigation
+        tour={tour}
+        activeSceneId={activeSceneId}
+        onSceneSelect={onSceneChange}
+        activeTourSlug={activeTourSlug}
+        onTourSelect={onTourChange}
+        tours={tours}
       />
 
       {panoramaError ? (

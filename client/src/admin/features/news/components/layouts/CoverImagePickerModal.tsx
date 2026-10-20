@@ -17,6 +17,7 @@ import type {
 } from '@/admin/features/gallery/components/GalleryAssetPickerModal';
 
 type CoverImagePickerModalProps = {
+  allowMultipleUploads?: boolean;
   allowUpload?: boolean;
   allowedKinds?: GalleryAssetKind[];
   galleries: GalleryItem[];
@@ -30,6 +31,7 @@ type CoverImagePickerModalProps = {
 type PickerMode = 'GALLERY' | 'UPLOAD';
 
 export default function CoverImagePickerModal({
+  allowMultipleUploads = false,
   allowUpload = true,
   allowedKinds = ['IMAGE'],
   galleries,
@@ -89,14 +91,18 @@ export default function CoverImagePickerModal({
   }
 
   function selectLocalFile(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
+    const files = Array.from(event.target.files ?? []);
+    event.target.value = '';
 
-    if (file && onSelectLocalFile) {
+    if (!files.length || !onSelectLocalFile) return;
+
+    const selectedFiles = allowMultipleUploads ? files : files.slice(0, 1);
+
+    for (const file of selectedFiles) {
       onSelectLocalFile(file);
-      close();
     }
 
-    event.target.value = '';
+    close();
   }
 
   function selectGalleryAsset(asset: GalleryAssetSelection) {
@@ -133,6 +139,7 @@ export default function CoverImagePickerModal({
                 ref={fileInputRef}
                 type="file"
                 accept="image/avif,image/webp,image/jpeg,image/png"
+                multiple={allowMultipleUploads}
                 className="sr-only"
                 onChange={selectLocalFile}
               />
@@ -161,7 +168,7 @@ export default function CoverImagePickerModal({
 
                 <span>
                   <span className="block text-sm font-semibold text-[#1C2434]">
-                    Upload an image
+                    {allowMultipleUploads ? 'Upload images' : 'Upload an image'}
                   </span>
                   <span className="mt-1 block text-xs text-[#64748B]">
                     AVIF/WebP preferred, JPEG/PNG allowed · Max 5 MB

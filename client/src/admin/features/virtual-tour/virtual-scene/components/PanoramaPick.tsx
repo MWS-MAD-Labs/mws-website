@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Check, ImagePlus, MapPin, RotateCcw, X } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { Viewer, type ClickData } from '@photo-sphere-viewer/core';
@@ -13,6 +13,7 @@ import Button from '@/admin/components/ui/Button';
 import Field from '@/admin/components/ui/Field';
 import Select from '@/admin/components/ui/Select';
 import StatusMessage from '@/admin/components/ui/StatusMessage';
+import { apiClient } from '@/lib/api';
 import { FIELD_CLASS } from '../../virtualTourUtils';
 import type { HotspotForm } from '../sceneEditorModel';
 
@@ -125,6 +126,8 @@ export default function PanoramaPick({
   const viewerRef = useRef<Viewer | null>(null);
   const markersRef = useRef<MarkersPlugin | null>(null);
   const hasDraftMarkerRef = useRef(false);
+  const [panoramaError, setPanoramaError] = useState<string | null>(null);
+  const [isPanoramaLoading, setIsPanoramaLoading] = useState(false);
 
   const isSavingRef = useRef(isSaving);
   const onChooseCoordinateRef = useRef(onChooseCoordinate);
@@ -151,52 +154,98 @@ export default function PanoramaPick({
 
     if (!container || !previewUrl) return;
 
-    let viewer: Viewer;
+    const requestController = new AbortController();
+    let viewer: Viewer | null = null;
+    let panoramaObjectUrl: string | null = null;
+    let handleClick: ((event: unknown) => void) | null = null;
+    let cancelled = false;
 
-    try {
-      viewer = new Viewer({
-        container,
-        panorama: previewUrl,
-        navbar: ['zoom', 'fullscreen'],
-        defaultZoomLvl: 0,
-        mousewheel: true,
-        plugins: [[MarkersPlugin, {}]],
-      });
-    } catch (error) {
-      console.error('Failed to initialize panorama viewer:', error);
-      return;
-    }
+    setPanoramaError(null);
+    setIsPanoramaLoading(true);
 
-    viewerRef.current = viewer;
+    // React development StrictMode immediately runs an effect setup/cleanup cycle.
+    // Deferring the request prevents the discarded mount from starting a panorama load.
+    const initializationFrame = window.requestAnimationFrame(() => {
+      void apiClient
+        .get<Blob>(previewUrl, {
+          headers: { Accept: 'image/avif,image/webp,image/png,image/jpeg' },
+          responseType: 'blob',
+          signal: requestController.signal,
+        })
+        .then((response) => {
+          if (cancelled || viewerContainerRef.current !== container) return;
 
-    const markers = viewer.getPlugin<MarkersPlugin>(MarkersPlugin);
-    markersRef.current = markers;
+          const panoramaBlob = response.data;
+          if (!panoramaBlob.type.startsWith('image/')) {
+            throw new Error('The panorama endpoint did not return an image.');
+          }
 
-    const handleClick = (event: unknown) => {
-      const { data } = event as { data: ClickData };
-      if (data.rightclick || isSavingRef.current) return;
+          panoramaObjectUrl = URL.createObjectURL(panoramaBlob);
 
-      const yaw = radiansToDegrees(data.yaw);
-      const pitch = radiansToDegrees(data.pitch);
+          viewer = new Viewer({
+            container,
+            panorama: panoramaObjectUrl,
+            navbar: ['zoom', 'fullscreen'],
+            defaultZoomLvl: 0,
+            mousewheel: true,
+            plugins: [[MarkersPlugin, {}]],
+          });
+          viewerRef.current = viewer;
 
-      try {
-        hasDraftMarkerRef.current = renderDraftMarker(
-          markers,
-          { label: '', yaw, pitch },
-          hasDraftMarkerRef.current,
-        );
-      } catch (error) {
-        hasDraftMarkerRef.current = false;
-        console.error('Failed to place draft hotspot marker:', error);
-      }
+          const markers = viewer.getPlugin<MarkersPlugin>(MarkersPlugin);
+          markersRef.current = markers;
 
-      onChooseCoordinateRef.current(yaw, pitch);
-    };
+          handleClick = (event: unknown) => {
+            const { data } = event as { data: ClickData };
+            if (data.rightclick || isSavingRef.current) return;
 
-    viewer.addEventListener('click', handleClick);
+            const yaw = radiansToDegrees(data.yaw);
+            const pitch = radiansToDegrees(data.pitch);
+
+            try {
+              hasDraftMarkerRef.current = renderDraftMarker(
+                markers,
+                { label: '', yaw, pitch },
+                hasDraftMarkerRef.current,
+              );
+            } catch (error) {
+              hasDraftMarkerRef.current = false;
+              console.error('Failed to place draft hotspot marker:', error);
+            }
+
+            onChooseCoordinateRef.current(yaw, pitch);
+          };
+
+          viewer.addEventListener('click', handleClick);
+          viewer.addEventListener('panorama-loaded', () => {
+            if (!cancelled) setIsPanoramaLoading(false);
+          });
+          viewer.addEventListener('panorama-error', () => {
+            if (cancelled) return;
+            setIsPanoramaLoading(false);
+            setPanoramaError('Panorama gagal ditampilkan. Coba muat ulang atau pilih gambar lain.');
+          });
+        })
+        .catch((error: unknown) => {
+          if (cancelled || requestController.signal.aborted) return;
+          setIsPanoramaLoading(false);
+          setPanoramaError(
+            error instanceof Error
+              ? error.message
+              : 'Panorama gagal dimuat. Coba muat ulang atau pilih gambar lain.',
+          );
+          console.error('Failed to load panorama:', error);
+        });
+    });
 
     return () => {
-      viewer.removeEventListener('click', handleClick);
+      cancelled = true;
+      window.cancelAnimationFrame(initializationFrame);
+      requestController.abort();
+
+      if (viewer && handleClick) {
+        viewer.removeEventListener('click', handleClick);
+      }
 
       if (viewerRef.current === viewer) {
         viewerRef.current = null;
@@ -204,7 +253,8 @@ export default function PanoramaPick({
         hasDraftMarkerRef.current = false;
       }
 
-      viewer.destroy();
+      viewer?.destroy();
+      if (panoramaObjectUrl) URL.revokeObjectURL(panoramaObjectUrl);
     };
   }, [previewUrl]);
 
@@ -275,6 +325,18 @@ export default function PanoramaPick({
               Drag untuk melihat sekitar · Scroll untuk zoom
             </div>
           </div>
+
+          {isPanoramaLoading && !panoramaError ? (
+            <div className="border-t border-gray-200 px-4 py-3">
+              <StatusMessage tone="info">Memuat panorama...</StatusMessage>
+            </div>
+          ) : null}
+
+          {panoramaError ? (
+            <div className="border-t border-gray-200 px-4 py-3">
+              <StatusMessage tone="error">{panoramaError}</StatusMessage>
+            </div>
+          ) : null}
 
           <div className="grid grid-cols-2 gap-px border-t border-gray-200 bg-gray-200">
             <div className="bg-white px-4 py-3">
