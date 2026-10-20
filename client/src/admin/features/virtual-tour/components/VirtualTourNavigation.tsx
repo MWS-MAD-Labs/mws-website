@@ -16,7 +16,6 @@ export default function VirtualTourNavigation({
   activeSceneId,
   onSceneSelect,
 }: VirtualTourNavigationProps) {
-  const [areaMenuOpen, setAreaMenuOpen] = useState(false);
   const [scenePanelOpen, setScenePanelOpen] = useState(true);
   const navigate = useNavigate();
   const tourList = useVirtualTourList();
@@ -27,17 +26,8 @@ export default function VirtualTourNavigation({
     [tour.nodes, activeSceneId],
   );
 
-  const connectedScenes = useMemo(() => {
-    if (!activeScene) return [];
-
-    const linkedIds = new Set(activeScene.links.map((link) => link.nodeId));
-
-    return tour.nodes.filter((node) => node.id === activeScene.id || linkedIds.has(node.id));
-  }, [activeScene, tour.nodes]);
-
   function selectScene(scene: PublicVirtualTourNode) {
     onSceneSelect(scene.id);
-    setAreaMenuOpen(false);
   }
 
   if (!activeScene) return null;
