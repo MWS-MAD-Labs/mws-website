@@ -25,6 +25,7 @@ import type { CmsPermission } from '@/admin/types/auth';
 export type MenuItem = {
   label: string;
   href?: string;
+  activePaths?: string[];
   Icon: LucideIcon;
   enabled: boolean;
   requiredPermission?: CmsPermission;
@@ -258,6 +259,7 @@ export const menuSections: MenuSection[] = [
       {
         label: 'Virtual Tour',
         href: '/admin/virtual-tour',
+        activePaths: ['/admin/virtual/scene'],
         Icon: RectangleGoggles,
         enabled: true,
         requiredPermission: contentPermission,

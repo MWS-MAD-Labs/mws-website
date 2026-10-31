@@ -28,24 +28,36 @@ function isMenuItemVisible(item: MenuItem, user: AuthUser): boolean {
   return item.children.some((child) => isMenuItemVisible(child, user));
 }
 
-function menuHrefs(items: MenuItem[]): string[] {
-  return items.flatMap((item) => [
-    ...(item.href ? [item.href] : []),
-    ...menuHrefs(item.children ?? []),
-  ]);
+function menuPaths(items: MenuItem[]): { href: string; path: string }[] {
+  return items.flatMap((item) => {
+    const href = item.href;
+
+    return [
+      ...(href
+        ? [
+            { href, path: href },
+            ...(item.activePaths ?? []).map((path) => ({ href, path })),
+          ]
+        : []),
+      ...menuPaths(item.children ?? []),
+    ];
+  });
 }
 
-const allMenuHrefs = menuHrefs(menuSections.flatMap((section) => section.items));
+const allMenuPaths = menuPaths(menuSections.flatMap((section) => section.items));
 
 /**
- * The menu entry a page belongs to: the longest href that is the path itself or
+ * The menu entry a page belongs to: the longest configured path that is itself or
  * a parent of it. `/admin/news/123/edit` highlights Posts, and `/admin` (the
  * dashboard) only matches itself instead of every CMS page.
  */
 function activeMenuHref(pathname: string): string | undefined {
-  return allMenuHrefs
-    .filter((href) => pathname === href || (href !== '/admin' && pathname.startsWith(`${href}/`)))
-    .sort((a, b) => b.length - a.length)[0];
+  return allMenuPaths
+    .filter(
+      ({ path }) =>
+        pathname === path || (path !== '/admin' && pathname.startsWith(`${path}/`)),
+    )
+    .sort((a, b) => b.path.length - a.path.length)[0]?.href;
 }
 
 function hasActiveChild(item: MenuItem, pathname: string): boolean {

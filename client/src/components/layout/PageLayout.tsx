@@ -4,6 +4,7 @@ import Chatbot from './Chatbot';
 import Footer from './Footer';
 import Navbar from './Navbar';
 import { refreshPublicAos, syncPublicAos, watchPublicAos } from './publicAos';
+import { jumpTo, startSmoothScroll } from './smoothScroll';
 import { trackPageView } from '@/lib/analytics';
 import PopupInfo from '../ui/PopupInfo';
 import { pageApi, type PublicPopupPromoted } from '@/api/pageApi';
@@ -192,6 +193,8 @@ export default function PageLayout() {
     };
   }, []);
 
+  useEffect(() => startSmoothScroll(), []);
+
   useEffect(() => {
     if (hash) {
       window.requestAnimationFrame(() => {
@@ -199,20 +202,13 @@ export default function PageLayout() {
         if (!target) {
           return;
         }
-        const navbarHeight = Number.parseFloat(
-          getComputedStyle(document.documentElement).getPropertyValue('--navbar-height'),
-        );
-        const targetTop = target.getBoundingClientRect().top + window.scrollY;
-        window.scrollTo({
-          top: Math.max(0, targetTop - (Number.isFinite(navbarHeight) ? navbarHeight : 0)),
-          behavior: 'instant',
-        });
+        jumpTo(target);
         refreshPublicAos();
       });
 
       return;
     }
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    jumpTo(null);
     refreshPublicAos();
   }, [hash, pathname]);
 
