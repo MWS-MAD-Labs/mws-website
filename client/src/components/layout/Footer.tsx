@@ -33,7 +33,7 @@ export default function Footer() {
           </div>
 
           <div className="flex flex-col items-start">
-            <h2 className="mb-[18px] text-[13px] font-semibold uppercase tracking-[0.08em] text-[rgba(248,247,243,0.42)]">
+            <h2 className="mb-[18px] text-[13px] font-semibold uppercase tracking-[0.08em] text-[rgba(248,247,243,0.52)]">
               Explore
             </h2>
             <Link className={footerLinkClassName} to="/about-millennia">
@@ -51,7 +51,7 @@ export default function Footer() {
           </div>
 
           <div className="flex flex-col items-start">
-            <h2 className="mb-[18px] text-[13px] font-semibold uppercase tracking-[0.08em] text-[rgba(248,247,243,0.42)]">
+            <h2 className="mb-[18px] text-[13px] font-semibold uppercase tracking-[0.08em] text-[rgba(248,247,243,0.52)]">
               Programs
             </h2>
             <Link className={footerLinkClassName} to="/academic/kindergarten">
@@ -69,7 +69,7 @@ export default function Footer() {
           </div>
 
           <div className="flex flex-col items-start">
-            <h2 className="mb-[18px] text-[13px] font-semibold uppercase tracking-[0.08em] text-[rgba(248,247,243,0.42)]">
+            <h2 className="mb-[18px] text-[13px] font-semibold uppercase tracking-[0.08em] text-[rgba(248,247,243,0.52)]">
               Contact
             </h2>
             <p className="mb-3.5 max-w-[280px] text-[14.5px] leading-[1.8] text-[rgba(248,247,243,0.55)]">
@@ -89,7 +89,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-6 pt-8 text-[13px] text-[rgba(248,247,243,0.4)] max-[680px]:flex-col max-[680px]:items-start">
+        <div className="flex items-center justify-between gap-6 pt-8 text-[13px] text-[rgba(248,247,243,0.52)] max-[680px]:flex-col max-[680px]:items-start">
           <p className="m-0">&copy; Millennia World School. All rights reserved.</p>
           <div>
             <Link

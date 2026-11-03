@@ -248,7 +248,11 @@ export default function PageLayout() {
     <>
       <Navbar />
       <div className="navbar-spacer" aria-hidden="true" />
-      <div className="site-content" ref={siteContentRef}>
+      {/* At least one screen tall so the footer doesn't jump down when API content arrives. */}
+      <div
+        className="site-content min-h-[calc(100svh-var(--navbar-height,0px))]"
+        ref={siteContentRef}
+      >
         <Outlet />
       </div>
       <Footer />

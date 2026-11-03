@@ -60,7 +60,7 @@ export default function NotFound() {
               </Link>
             </div>
 
-            <p className="mt-8 text-sm text-[#897A75]">
+            <p className="mt-8 text-sm text-[#74655F]">
               Every great journey starts somewhere. Let's find yours.
             </p>
           </div>
@@ -177,7 +177,7 @@ export default function NotFound() {
                   <p className="font-serif text-sm font-bold text-[#7E1518]">
                     Keep exploring!
                   </p>
-                  <p className="mt-1 text-[10px] text-[#897A75]">
+                  <p className="mt-1 text-[10px] text-[#74655F]">
                     Your next chapter awaits.
                   </p>
                 </div>

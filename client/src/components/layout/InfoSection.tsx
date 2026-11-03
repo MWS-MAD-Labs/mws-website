@@ -111,9 +111,9 @@ export default function InfoSection({ title, filters, cards }: InfoSectionProps)
             ))}
           </div>
 
-          <div className="flex gap-2 pb-3 max-[980px]:self-end">
+          <div className="-mr-2.5 flex pb-1 max-[980px]:self-end">
             <button
-              className="cursor-pointer border-0 bg-transparent px-2 text-xl leading-none text-[var(--charcoal)]"
+              className="flex h-10 w-10 cursor-pointer items-center justify-center border-0 bg-transparent text-xl leading-none text-[var(--charcoal)]"
               type="button"
               aria-label="Previous Slide"
               onClick={() =>
@@ -126,7 +126,7 @@ export default function InfoSection({ title, filters, cards }: InfoSectionProps)
               &#8249;
             </button>
             <button
-              className="cursor-pointer border-0 bg-transparent px-2 text-xl leading-none text-[var(--charcoal)]"
+              className="flex h-10 w-10 cursor-pointer items-center justify-center border-0 bg-transparent text-xl leading-none text-[var(--charcoal)]"
               type="button"
               aria-label="Next Slide"
               onClick={() =>

@@ -8,6 +8,7 @@ import { publicPartnersRoute } from "./partners-route";
 import { publicCalendarRoute } from "./calendar-route";
 import { publicPopupPromotedRoute } from "./popup-promoted-route";
 import { publicVirtualTourRoute } from "./virtual-tour-route";
+import { publicChatbotRoute } from "./chatbot-route";
 import type { SessionVariables } from "../../types/hono-context";
 
 export const apiRoute = new Hono<{ Variables: SessionVariables }>();
@@ -21,3 +22,4 @@ apiRoute.route("/popup-promoted", publicPopupPromotedRoute);
 apiRoute.route("/contact", publicContactInquiryRoute);
 apiRoute.route("/analytics", publicAnalyticsRoute);
 apiRoute.route("/virtual-tours", publicVirtualTourRoute);
+apiRoute.route("/chatbot", publicChatbotRoute);

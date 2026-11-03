@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import PageLayout from '@/components/layout/PageLayout';
 import Home from '../pages/home';
@@ -18,12 +19,20 @@ import CommunityStories from '@/pages/community-stories';
 import BookATour from '@/features/book-a-tour/BookATourPage';
 import AboutUs from '@/pages/aboutUS';
 import NotFound from '@/pages/not-found';
-import VirtualTourPage from '@/pages/virtual-tour';
+// The 360 viewer pulls in three.js; load it only when the tour is opened.
+const VirtualTourPage = lazy(() => import('@/pages/virtual-tour'));
 
 export default function App() {
   return (
     <Routes>
-      <Route path="virtual-tour" element={<VirtualTourPage />} />
+      <Route
+        path="virtual-tour"
+        element={
+          <Suspense fallback={null}>
+            <VirtualTourPage />
+          </Suspense>
+        }
+      />
       <Route element={<PageLayout />}>
         <Route index element={<Home />} />
         {/* <Route path="our-school" element={<OurSchool />} /> */}

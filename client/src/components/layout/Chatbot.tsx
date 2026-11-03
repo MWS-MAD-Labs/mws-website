@@ -1,48 +1,39 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { MessageCircle, Send, X } from 'lucide-react';
+import { chatbotApi, type ChatAction } from '@/api/chatbotApi';
 
 type Message = {
   from: 'bot' | 'user';
   text: string;
+  actions?: ChatAction[];
+  suggestions?: string[];
 };
 
 const initialMessages: Message[] = [
   {
     from: 'bot',
-    text: "Hi! I'm MWS AI. How can I help you today?",
+    text: "Hi! I'm MWS AI. Ask me about admissions, tours, programs or the school calendar. You can also ask in Bahasa Indonesia.",
   },
 ];
 
-function getBotReply(text: string) {
-  const lowText = text.toLowerCase();
+const errorMessage: Message = {
+  from: 'bot',
+  text: "Sorry, I can't answer right now. Please reach our admissions team directly. / Maaf, saya belum bisa menjawab sekarang. Silakan hubungi tim admisi kami.",
+  actions: [{ label: 'Contact page', href: '/contact' }],
+};
 
-  if (lowText.includes('admission') || lowText.includes('daftar') || lowText.includes('apply')) {
-    return 'You can view detailed steps, timelines, and tuition fees on our Admissions page. Booking a school tour is also available there!';
-  }
-
-  if (lowText.includes('kindergarten') || lowText.includes('tk')) {
-    return 'Our Kindergarten program accepts children ages 2 to 6. We focus on play-based learning and inquiry!';
-  }
-
-  if (lowText.includes('fee') || lowText.includes('biaya') || lowText.includes('tuition')) {
-    return 'Tuition and enrollment fees vary by level (Kindergarten, Elementary, High School). Full details are listed on the Admissions page table.';
-  }
-
-  if (lowText.includes('contact') || lowText.includes('lokasi') || lowText.includes('map')) {
-    return 'We are located at Jl. Merpati Raya No. 103, Sawah Lama, Ciputat. Visit our Contact page to find our interactive map and phone details!';
-  }
-
-  if (lowText.includes('curriculum') || lowText.includes('kurikulum')) {
-    return 'We combine the Cambridge International Curriculum with the Indonesian National Curriculum, taught using an inquiry-based model.';
-  }
-
-  return 'Thank you for asking. Our admissions team is happy to guide you! Please check our Admissions page or email info@millennia21.id for direct support.';
-}
+const chipClass =
+  'border border-[var(--border)] bg-white px-2.5 py-1.5 text-left text-[12px] leading-4 text-[var(--charcoal)] transition-colors hover:border-[var(--burgundy)] hover:text-[var(--burgundy)] disabled:opacity-50';
+const actionClass =
+  'inline-flex items-center bg-[var(--burgundy)] px-2.5 py-1.5 text-[12px] font-semibold leading-4 text-white transition-colors hover:bg-[var(--charcoal)]';
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState(initialMessages);
+  const [isSending, setIsSending] = useState(false);
+  const startersRequested = useRef(false);
 
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -51,32 +42,49 @@ export default function Chatbot() {
       top: panelRef.current.scrollHeight,
       behavior: 'smooth',
     });
-  }, [messages]);
+  }, [messages, isSending]);
 
-  const sendMessage = () => {
-    const text = input.trim();
+  // Load starter questions from the CMS FAQs the first time the chat opens.
+  useEffect(() => {
+    if (!isOpen || startersRequested.current) return;
+    startersRequested.current = true;
 
-    if (!text) return;
+    chatbotApi
+      .starters()
+      .then((starters) => {
+        if (!starters.length) return;
+        setMessages((items) =>
+          items.map((item, index) => (index === 0 ? { ...item, suggestions: starters } : item)),
+        );
+      })
+      .catch(() => {});
+  }, [isOpen]);
 
-    setMessages((items) => [
-      ...items,
-      {
-        from: 'user',
-        text,
-      },
-    ]);
+  const sendMessage = async (value = input) => {
+    const text = value.trim();
 
+    if (!text || isSending) return;
+
+    setMessages((items) => [...items, { from: 'user', text }]);
     setInput('');
+    setIsSending(true);
 
-    window.setTimeout(() => {
+    try {
+      const reply = await chatbotApi.send(text);
       setMessages((items) => [
         ...items,
         {
           from: 'bot',
-          text: getBotReply(text),
+          text: reply.reply,
+          actions: reply.actions,
+          suggestions: reply.suggestions,
         },
       ]);
-    }, 500);
+    } catch {
+      setMessages((items) => [...items, errorMessage]);
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (
@@ -117,19 +125,84 @@ export default function Chatbot() {
         <div
           ref={panelRef}
           className="flex max-h-[300px] min-h-[180px] flex-col gap-3 overflow-y-auto bg-[var(--warm-white)] p-4"
+          role="log"
+          aria-live="polite"
         >
           {messages.map((message, index) => (
             <div
               key={`${message.from}-${index}`}
-              className={`max-w-[82%] px-3.5 py-2.5 text-[13px] leading-5 ${
-                message.from === 'user'
-                  ? 'self-end bg-[var(--burgundy)] text-white'
-                  : 'self-start border border-[var(--border)] bg-white text-[var(--charcoal)]'
+              className={`flex max-w-[82%] flex-col gap-2 ${
+                message.from === 'user' ? 'items-end self-end' : 'items-start self-start'
               }`}
             >
-              {message.text}
+              <div
+                className={`whitespace-pre-line px-3.5 py-2.5 text-[13px] leading-5 ${
+                  message.from === 'user'
+                    ? 'bg-[var(--burgundy)] text-white'
+                    : 'border border-[var(--border)] bg-white text-[var(--charcoal)]'
+                }`}
+              >
+                {message.text}
+              </div>
+
+              {message.actions?.length ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {message.actions.map((action) =>
+                    action.href.startsWith('/') ? (
+                      <Link
+                        key={action.href}
+                        to={action.href}
+                        className={actionClass}
+                        onClick={() => setIsOpen(false)}
+                      >
+                        {action.label}
+                      </Link>
+                    ) : (
+                      <a
+                        key={action.href}
+                        href={action.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={actionClass}
+                      >
+                        {action.label}
+                      </a>
+                    ),
+                  )}
+                </div>
+              ) : null}
+
+              {/* Only the latest message offers follow-up questions. */}
+              {message.suggestions?.length && index === messages.length - 1 ? (
+                <div className="flex flex-col items-start gap-1.5">
+                  {message.suggestions.map((suggestion) => (
+                    <button
+                      key={suggestion}
+                      type="button"
+                      disabled={isSending}
+                      onClick={() => sendMessage(suggestion)}
+                      className={chipClass}
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
             </div>
           ))}
+
+          {isSending ? (
+            <div
+              className="text-[var(--charcoal)]/60 self-start border border-[var(--border)] bg-white px-3.5 py-2.5 text-[13px] leading-5"
+              aria-label="MWS AI is typing"
+            >
+              <span className="inline-flex gap-1">
+                <span className="animate-pulse">•</span>
+                <span className="animate-pulse [animation-delay:150ms]">•</span>
+                <span className="animate-pulse [animation-delay:300ms]">•</span>
+              </span>
+            </div>
+          ) : null}
         </div>
 
         {/* Input */}
@@ -138,11 +211,13 @@ export default function Chatbot() {
             <input
               type="text"
               placeholder="Ask something..."
+              aria-label="Your question"
+              maxLength={500}
               value={input}
               onChange={(event) => setInput(event.target.value)}
               onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  sendMessage();
+                if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
+                  void sendMessage();
                 }
               }}
               className="placeholder:text-[var(--charcoal)]/40 min-w-0 flex-1 border border-[var(--border)] bg-white px-3 py-2.5 text-[13px] font-[var(--f-body)] text-[var(--charcoal)] outline-none transition-colors focus:border-[var(--burgundy)]"
@@ -151,8 +226,9 @@ export default function Chatbot() {
             <button
               type="button"
               aria-label="Send message"
-              onClick={sendMessage}
-              className="flex h-[42px] w-[42px] shrink-0 items-center justify-center bg-[var(--burgundy)] text-white transition-all duration-200 hover:bg-[var(--charcoal)]"
+              disabled={isSending || !input.trim()}
+              onClick={() => void sendMessage()}
+              className="flex h-[42px] w-[42px] shrink-0 items-center justify-center bg-[var(--burgundy)] text-white transition-all duration-200 hover:bg-[var(--charcoal)] disabled:opacity-60"
             >
               <Send size={16} />
             </button>

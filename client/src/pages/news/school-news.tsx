@@ -132,7 +132,11 @@ export default function SchoolNews() {
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_292px]">
             {/* News Feed */}
-            <section className="min-w-0 space-y-5" aria-live="polite">
+            <section
+              // While loading, keep the sidebar below the fold on narrow screens so it doesn't jump.
+              className={`min-w-0 space-y-5 ${isLoading ? 'max-lg:min-h-[100svh]' : ''}`}
+              aria-live="polite"
+            >
               {isLoading ? <NewsState message="Loading school news..." /> : null}
 
               {!isLoading && error ? <NewsState message={error} isError /> : null}
@@ -282,7 +286,7 @@ export default function SchoolNews() {
                       onClick={() => selectCategory('')}
                     >
                       <span>All News</span>
-                      <span className="text-xs text-gray-400">{totalPublished}</span>
+                      <span className="text-xs text-gray-500">{totalPublished}</span>
                     </button>
                   </li>
 
@@ -298,7 +302,7 @@ export default function SchoolNews() {
                         onClick={() => selectCategory(item.slug)}
                       >
                         <span>{item.name}</span>
-                        <span className="text-xs text-gray-400">{item.count || 0}</span>
+                        <span className="text-xs text-gray-500">{item.count || 0}</span>
                       </button>
                     </li>
                   ))}
@@ -349,7 +353,7 @@ export default function SchoolNews() {
                         {post.title}
                       </Link>
 
-                      <span className="mt-1.5 block text-xs text-gray-400">
+                      <span className="mt-1.5 block text-xs text-gray-500">
                         {formatNewsDate(post.publishedAt)}
                       </span>
                     </li>
