@@ -38,10 +38,6 @@
   box-sizing: border-box;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
 body {
   background: var(--white);
   color: var(--charcoal);
@@ -323,9 +319,6 @@ h3 {
     transform: none;
     transition: none;
   }
-  html {
-    scroll-behavior: auto;
-  }
 }
 
 /*
@@ -345,11 +338,80 @@ html.aos-preparing [data-aos] {
   transition: none !important;
 }
 
+/*
+ * Reveal tuning shared by every AOS element (see publicAos.ts): a short 28px
+ * rise, a soft ease-out curve and a per-element stagger via --reveal-delay.
+ */
+html.aos-ready [data-aos^='fade'][data-aos^='fade'] {
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+[data-aos][data-aos][data-aos-easing='smooth-out'] {
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-aos='fade-up'][data-aos='fade-up'] {
+  transform: translate3d(0, 28px, 0);
+}
+
+/*
+ * Cards rise with a slight 3D tilt. This is a keyframe animation rather than
+ * a transition so the card keeps its own hover transitions (e.g. the program
+ * panels' flex-grow) once it has appeared.
+ */
+html.aos-ready [data-aos='card-rise']:not(.aos-animate) {
+  opacity: 0;
+  transform: perspective(900px) translate3d(0, 28px, 0) rotateX(-14deg);
+}
+
+html.aos-ready [data-aos='card-rise'].aos-animate {
+  animation: card-rise 700ms cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms) backwards;
+}
+
+@keyframes card-rise {
+  from {
+    opacity: 0;
+    transform: perspective(900px) translate3d(0, 28px, 0) rotateX(-14deg);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(900px) translate3d(0, 0, 0) rotateX(0);
+  }
+}
+
+/*
+ * Cover photos inside a card zoom out as the card appears. This uses the
+ * standalone `scale` property and an animation, so it never fights the
+ * images' own hover transforms or transitions.
+ */
+html.aos-ready [data-aos='card-rise']:not(.aos-animate) img.object-cover {
+  scale: 1.18;
+}
+
+html.aos-ready [data-aos='card-rise'].aos-animate img.object-cover {
+  animation: reveal-zoom 1.4s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms) both;
+}
+
+@keyframes reveal-zoom {
+  from {
+    scale: 1.18;
+  }
+  to {
+    scale: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   [data-aos] {
     opacity: 1 !important;
     transform: none !important;
     transition: none !important;
+  }
+
+  [data-aos],
+  [data-aos] img.object-cover {
+    scale: none !important;
+    animation: none !important;
   }
 }
 

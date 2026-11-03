@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { apiRequest, publicAssetUrl } from '@/lib/api';
+import SplitHeading from '@/components/motion/SplitHeading';
 
 type AffiliationsProps = {
   title: string;
@@ -59,9 +60,10 @@ export default function Affiliations({ title, text, logos, logosLabel }: Affilia
       <div className="relative z-10 mx-auto flex w-full max-w-[1240px] flex-col items-center">
         {/* Heading */}
         <div className="mb-[60px] max-w-[800px] text-center max-[680px]:mb-8">
-          <h2 className="mb-4 text-[clamp(32px,3.5vw,44px)] font-semibold leading-[1.25] tracking-normal text-[var(--charcoal)] max-[680px]:text-[clamp(28px,9vw,34px)]">
-            {title}
-          </h2>
+          <SplitHeading
+            text={title}
+            className="mb-4 text-[clamp(32px,3.5vw,44px)] font-semibold leading-[1.25] tracking-normal text-[var(--charcoal)] max-[680px]:text-[clamp(28px,9vw,34px)]"
+          />
           <p className="m-0 text-base leading-[1.6] text-[var(--charcoal-muted)]"> {text} </p>
         </div>
 

@@ -20,14 +20,18 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
-import type { CmsPermission } from '@/admin/types/auth';
+import type { CmsPermission, CmsRoleName } from '@/admin/types/auth';
 
 export type MenuItem = {
   label: string;
   href?: string;
+  activePaths?: string[];
   Icon: LucideIcon;
   enabled: boolean;
   requiredPermission?: CmsPermission;
+  /** Keeps the item visible but disabled when the current user lacks this role. */
+  requiredRole?: CmsRoleName;
+  restrictedLabel?: string;
   children?: MenuItem[];
 };
 
@@ -258,9 +262,12 @@ export const menuSections: MenuSection[] = [
       {
         label: 'Virtual Tour',
         href: '/admin/virtual-tour',
+        activePaths: ['/admin/virtual/scene'],
         Icon: RectangleGoggles,
         enabled: true,
         requiredPermission: contentPermission,
+        requiredRole: 'SUPER_ADMIN',
+        restrictedLabel: 'Under Deployment',
       },
 
       {

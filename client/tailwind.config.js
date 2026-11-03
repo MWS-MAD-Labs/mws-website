@@ -15,10 +15,15 @@ export default {
           "0%": { transform: "translateX(0)" },
           "100%": { transform: "translateX(-50%)" },
         },
+        riseIn: {
+          "0%": { opacity: "0", transform: "translateY(48px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         scrollcue: "scrollcue 2.2s ease-in-out infinite",
         marqueeScroll: "marqueeScroll 25s linear infinite",
+        riseIn: "riseIn 700ms cubic-bezier(0.22, 1, 0.36, 1) both",
       },
     },
   },

@@ -1,5 +1,6 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, type CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
+import SplitHeading from '@/components/motion/SplitHeading';
 
 type InfoFilter = {
   label: string;
@@ -22,7 +23,6 @@ type InfoSectionProps = {
   filters: InfoFilter[];
   cards: InfoCard[];
 };
-
 
 const ALL_FILTER_VALUE = 'all';
 
@@ -80,9 +80,10 @@ export default function InfoSection({ title, filters, cards }: InfoSectionProps)
 
       <div className="relative z-[1] mx-auto max-w-[1240px] px-12 max-[980px]:w-[min(100%_-_40px,1240px)] max-[980px]:px-0 max-[680px]:w-[min(100%_-_32px,1240px)] max-[430px]:w-[min(100%_-_28px,1240px)]">
         <div className="mx-auto mb-10 max-w-[700px] text-center max-[680px]:mb-7 max-[680px]:text-left">
-          <h2 className="text-[clamp(28px,3vw,40px)] tracking-normal text-[var(--charcoal)] max-[680px]:text-[clamp(28px,9vw,34px)]">
-            {title}
-          </h2>
+          <SplitHeading
+            text={title}
+            className="text-[clamp(28px,3vw,40px)] tracking-normal text-[var(--charcoal)] max-[680px]:text-[clamp(28px,9vw,34px)]"
+          />
         </div>
 
         <div className="mb-8 flex w-full items-center justify-between border-b border-[var(--border)] max-[980px]:flex-col max-[980px]:items-start max-[980px]:gap-4">
@@ -143,14 +144,20 @@ export default function InfoSection({ title, filters, cards }: InfoSectionProps)
 
       <div className="relative left-1/2 right-1/2 z-[1] -ml-[50vw] -mr-[50vw] w-screen">
         <div
-          className="w-full overflow-x-auto scroll-smooth pb-[52px] pl-[max(24px,calc((100vw-1200px)/2))] pr-6 [-ms-overflow-style:none] [scrollbar-width:none] max-[980px]:px-5 [&::-webkit-scrollbar]:hidden"
+          className="w-full overflow-x-auto overflow-y-hidden scroll-smooth pb-[52px] pl-[max(24px,calc((100vw-1200px)/2))] pr-6 [-ms-overflow-style:none] [scrollbar-width:none] max-[980px]:px-5 [&::-webkit-scrollbar]:hidden"
           ref={slickListRef}
         >
           <div className="relative flex w-max flex-nowrap gap-3 before:pointer-events-none before:absolute before:-bottom-[52px] before:-left-[100vw] before:-right-[50px] before:h-[220px] before:bg-[var(--burgundy,#6b1f2a)] before:content-['']">
-            {visibleCards.map((card) => (
+            {visibleCards.map((card, index) => (
               <div
                 className="group relative w-[300px] flex-[0_0_300px] cursor-pointer overflow-hidden max-[980px]:w-[clamp(230px,42vw,300px)] max-[980px]:flex-[0_0_clamp(230px,42vw,300px)] max-[680px]:w-[min(78vw,280px)] max-[680px]:flex-[0_0_min(78vw,280px)] max-[430px]:w-[min(84vw,260px)] max-[430px]:flex-[0_0_min(84vw,260px)]"
                 data-category={card.category}
+                data-aos="card-rise"
+                data-aos-duration="700"
+                data-aos-easing="smooth-out"
+                data-aos-once="true"
+                data-aos-offset="100"
+                style={{ '--reveal-delay': `${Math.min(index, 5) * 70}ms` } as CSSProperties}
                 key={card.title}
               >
                 <div className="relative aspect-[9/16] w-full overflow-hidden bg-[var(--charcoal)]">
