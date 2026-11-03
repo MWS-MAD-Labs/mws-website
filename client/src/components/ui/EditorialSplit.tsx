@@ -1,3 +1,6 @@
+import Parallax from '@/components/motion/Parallax';
+import SplitHeading from '@/components/motion/SplitHeading';
+
 type EditorialSplitProps = {
   title: string;
   children: React.ReactNode;
@@ -16,20 +19,17 @@ export default function EditorialSplit({
   const imageFirst = imagePosition === 'left';
 
   const imageBlock = (
-    <div className="h-full min-h-[520px] overflow-hidden max-[1024px]:min-h-[420px] max-[680px]:min-h-0">
-      <img
-        src={image}
-        alt={imageAlt}
-        className="block h-full min-h-[520px] w-full object-cover max-[1024px]:min-h-[420px] max-[680px]:min-h-[300px]"
-      />
-    </div>
+    <Parallax className="relative h-full min-h-[520px] max-[1024px]:min-h-[420px] max-[680px]:min-h-[300px]">
+      <img src={image} alt={imageAlt} className="block h-full w-full object-cover" />
+    </Parallax>
   );
 
   const textBlock = (
     <div className="max-w-[600px]">
-      <h2 className="mb-5 text-[clamp(30px,8vw,48px)] font-semibold leading-[1.1] tracking-[-0.025em] text-[var(--charcoal)] md:mb-7">
-        {title}
-      </h2>
+      <SplitHeading
+        text={title}
+        className="mb-5 text-[clamp(30px,8vw,48px)] font-semibold leading-[1.1] tracking-[-0.025em] text-[var(--charcoal)] md:mb-7"
+      />
 
       <div className="space-y-5 text-[15px] leading-7 text-[var(--charcoal-muted)]">{children}</div>
     </div>

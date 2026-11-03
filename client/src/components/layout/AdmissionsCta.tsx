@@ -1,5 +1,6 @@
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import SplitHeading from '@/components/motion/SplitHeading';
 
 type CtaAction = {
   label: string;
@@ -22,12 +23,11 @@ export default function AdmissionsCta({ headline, primary, secondary }: Admissio
       <div className="mx-auto flex w-full max-w-[1240px] items-center justify-between gap-12 max-[900px]:flex-col max-[900px]:items-start max-[900px]:gap-8">
         {/* Content */}
         <div className="max-w-[620px]">
-          <h2
+          <SplitHeading
             id="admissions-cta-title"
+            text={headline}
             className="text-balance text-[clamp(34px,4.2vw,56px)] font-semibold leading-[1.08] tracking-[-0.025em] text-[var(--warm-white)]"
-          >
-            {headline}
-          </h2>
+          />
         </div>
 
         {/* Actions */}

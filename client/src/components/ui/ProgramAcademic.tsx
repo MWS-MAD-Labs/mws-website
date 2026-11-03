@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { programCards } from '../../data/site';
 import DecorativeDoodles from './DecorativeDoodles';
+import SplitHeading from '@/components/motion/SplitHeading';
 
 type ProgramAcademicItem = {
   id: string;
@@ -44,12 +45,11 @@ export default function ProgramAcademic({ programs = defaultPrograms }: ProgramA
 
         {/* Heading */}
         <div className="relative z-10 mb-8 text-center sm:mb-10 md:mb-12">
-          <h2
+          <SplitHeading
             id="classes-title"
+            text="Programs for every learning stage"
             className="mx-auto max-w-[820px] text-[44px] font-semibold leading-[1.2] text-[var(--charcoal)] max-[680px]:text-[clamp(28px,9vw,34px)]"
-          >
-            Programs for every learning stage
-          </h2>
+          />
         </div>
 
         {/* Desktop and tablet accordion */}

@@ -1,5 +1,6 @@
 import { useId, useState } from 'react';
 import DOMPurify from 'dompurify';
+import SplitHeading from '@/components/motion/SplitHeading';
 
 type FaqItem = {
   question: string;
@@ -31,9 +32,10 @@ export default function FaqSection({
         {/* Intro */}
         <div className="min-[981px]:sticky min-[981px]:top-28">
           <span className="mb-4 block h-[3px] w-12 bg-[var(--gold)]" />
-          <h2 className="m-0 text-[clamp(30px,3.5vw,44px)] font-bold leading-[1.15] text-[var(--charcoal)]">
-            {title}
-          </h2>
+          <SplitHeading
+            text={title}
+            className="m-0 text-[clamp(30px,3.5vw,44px)] font-bold leading-[1.15] text-[var(--charcoal)]"
+          />
           {description ? (
             <p className="mb-0 mt-4 text-base leading-[1.8] text-[var(--charcoal-muted)]">
               {description}

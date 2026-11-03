@@ -1,6 +1,7 @@
 import { Pause, Play, X } from 'lucide-react';
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import { Link } from 'react-router-dom';
+import SplitHeading from '@/components/motion/SplitHeading';
 
 export type Voice = {
   id?: string;
@@ -266,9 +267,10 @@ export default function CommunityVoices({
           <rect width="100%" height="100%" fill="url(#cv-dots)" mask="url(#cv-mask)" />
         </svg>
         <div className="mx-auto mb-10 max-w-[600px] text-center max-[680px]:mb-8">
-          <h2 className="mb-3 text-[clamp(32px,3.5vw,44px)] font-bold leading-[1.25] text-black max-[680px]:text-[clamp(28px,9vw,34px)]">
-            Community Voices
-          </h2>
+          <SplitHeading
+            text="Community Voices"
+            className="mb-3 text-[clamp(32px,3.5vw,44px)] font-bold leading-[1.25] text-black max-[680px]:text-[clamp(28px,9vw,34px)]"
+          />
 
           <p className="m-0 text-base text-black">
             Hear from the students, parents, staff, and alumni who make MWS what it is.

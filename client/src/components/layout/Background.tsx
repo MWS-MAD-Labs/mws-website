@@ -1,3 +1,5 @@
+import ScrollHighlightText from '@/components/motion/ScrollHighlightText';
+
 type BackgroundProps = {
   body: string;
   logoSrc: string;
@@ -22,9 +24,10 @@ export default function Background({
 
 
         {/* Penjelasan pendukung */}
-        <p className="mt-7 max-w-[62ch] text-center text-base leading-[1.75] text-[var(--charcoal-muted)]">
-          {body}
-        </p>
+        <ScrollHighlightText
+          text={body}
+          className="mt-7 max-w-[62ch] text-center text-base leading-[1.75] text-[var(--charcoal-muted)]"
+        />
       </div>
     </section>
   );
