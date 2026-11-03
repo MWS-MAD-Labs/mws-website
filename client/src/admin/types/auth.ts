@@ -55,3 +55,11 @@ export function hasCmsPermission(
         user.role.permissions.includes(permission)),
   );
 }
+
+export function hasCmsRole(user: AuthUser | null, roleName: CmsRoleName): boolean {
+  return Boolean(
+    user &&
+      (user.role.name === roleName ||
+        (roleName === "ADMIN" && user.role.name === "SUPER_ADMIN")),
+  );
+}

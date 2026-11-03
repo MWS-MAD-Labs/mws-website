@@ -17,7 +17,7 @@ import ContentPageHeader from '@/admin/components/ui/ContentPageHeader';
 import StatusMessage from '@/admin/components/ui/StatusMessage';
 import ToastProvider from '@/admin/components/ui/ToastProvider';
 import { useToastMessage } from '@/admin/components/ui/toastContext';
-import { hasCmsPermission } from '@/admin/types/auth';
+import { hasCmsPermission, hasCmsRole } from '@/admin/types/auth';
 
 import AdmissionsPage from '@/admin/features/admissions/AdmissionsPage';
 import AdmissionGuidelinesPage from '@/admin/features/admissions/AdmissionGuidelinesPage';
@@ -83,6 +83,16 @@ function RequireContentPermission({ children }: { children: ReactNode }) {
   const { user } = useAuth();
 
   if (!hasCmsPermission(user, 'content:manage')) {
+    return <Navigate to="/admin" replace />;
+  }
+
+  return children;
+}
+
+function RequireSuperAdmin({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
+
+  if (!hasCmsRole(user, 'SUPER_ADMIN')) {
     return <Navigate to="/admin" replace />;
   }
 
@@ -793,9 +803,9 @@ export default function AdminApp() {
             path="virtual-tour"
             element={
               <RequireAuth>
-                <RequireContentPermission>
+                <RequireSuperAdmin>
                   <VirtualPage />
-                </RequireContentPermission>
+                </RequireSuperAdmin>
               </RequireAuth>
             }
           />
@@ -803,9 +813,9 @@ export default function AdminApp() {
             path="virtual/scene"
             element={
               <RequireAuth>
-                <RequireContentPermission>
+                <RequireSuperAdmin>
                   <VirtualScenePage />
-                </RequireContentPermission>
+                </RequireSuperAdmin>
               </RequireAuth>
             }
           />
@@ -813,9 +823,9 @@ export default function AdminApp() {
             path="virtual/scene/new"
             element={
               <RequireAuth>
-                <RequireContentPermission>
+                <RequireSuperAdmin>
                   <VirtualSceneCreateUpdate />
-                </RequireContentPermission>
+                </RequireSuperAdmin>
               </RequireAuth>
             }
           />
@@ -823,9 +833,9 @@ export default function AdminApp() {
             path="virtual/scene/:sceneId/edit"
             element={
               <RequireAuth>
-                <RequireContentPermission>
+                <RequireSuperAdmin>
                   <VirtualSceneCreateUpdate />
-                </RequireContentPermission>
+                </RequireSuperAdmin>
               </RequireAuth>
             }
           />

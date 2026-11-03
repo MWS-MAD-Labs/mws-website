@@ -6,6 +6,7 @@ import { publicVirtualTourRoute } from "../routes/api/virtual-tour-route";
 import { VirtualTourLinkService } from "../services/virtual-tour/virtual-tour-link";
 import { VirtualTourSceneService } from "../services/virtual-tour/virtual-tour-scene";
 import { VirtualTourService } from "../services/virtual-tour/virtual-tour";
+import type { CmsRoleName } from "../types/cms-auth-types";
 import type { SessionVariables } from "../types/hono-context";
 import { cmsSessionUser } from "./test-helpers";
 
@@ -13,10 +14,10 @@ const TOUR_ID = "11111111-1111-4111-8111-111111111111";
 const SCENE_ID = "22222222-2222-4222-8222-222222222222";
 const TARGET_ID = "33333333-3333-4333-8333-333333333333";
 
-function adminApp() {
+function adminApp(roleName: CmsRoleName = "SUPER_ADMIN") {
   const app = new Hono<{ Variables: SessionVariables }>();
   app.use("*", async (c, next) => {
-    c.set("user", cmsSessionUser("ADMIN"));
+    c.set("user", cmsSessionUser(roleName));
     await next();
   });
   app.route("/virtual-tours", adminVirtualTourRoute);
@@ -46,6 +47,17 @@ afterEach(() => {
 });
 
 describe("adminVirtualTourRoute", () => {
+  it("rejects ADMIN users before calling the service", async () => {
+    const list = spyOn(VirtualTourService, "listAdmin");
+    const response = await adminApp("ADMIN").request("/virtual-tours");
+
+    expect(response.status).toBe(403);
+    expect(await response.json()).toEqual({
+      errors: "You are not allowed to perform this action.",
+    });
+    expect(list).not.toHaveBeenCalled();
+  });
+
   it("rejects malformed scene JSON before calling the service", async () => {
     const create = spyOn(VirtualTourSceneService, "create");
     const response = await adminApp().request(

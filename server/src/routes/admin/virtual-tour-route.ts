@@ -4,14 +4,14 @@ import {
   VirtualTourLinkController,
   VirtualTourSceneController,
 } from "../../controllers/admin/virtual-tour-controller";
-import { requireCmsPermission } from "../../middleware/require-cms-permission";
+import { requireCmsRole } from "../../middleware/require-cms-permission";
 import type { SessionVariables } from "../../types/hono-context";
 
 export const adminVirtualTourRoute = new Hono<{
   Variables: SessionVariables;
 }>();
 
-adminVirtualTourRoute.use("*", requireCmsPermission("content:manage"));
+adminVirtualTourRoute.use("*", requireCmsRole("SUPER_ADMIN"));
 
 adminVirtualTourRoute.get("/", VirtualTourController.list);
 adminVirtualTourRoute.post("/", VirtualTourController.create);

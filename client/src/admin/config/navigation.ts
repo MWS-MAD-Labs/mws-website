@@ -20,7 +20,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
-import type { CmsPermission } from '@/admin/types/auth';
+import type { CmsPermission, CmsRoleName } from '@/admin/types/auth';
 
 export type MenuItem = {
   label: string;
@@ -29,6 +29,9 @@ export type MenuItem = {
   Icon: LucideIcon;
   enabled: boolean;
   requiredPermission?: CmsPermission;
+  /** Keeps the item visible but disabled when the current user lacks this role. */
+  requiredRole?: CmsRoleName;
+  restrictedLabel?: string;
   children?: MenuItem[];
 };
 
@@ -263,6 +266,8 @@ export const menuSections: MenuSection[] = [
         Icon: RectangleGoggles,
         enabled: true,
         requiredPermission: contentPermission,
+        requiredRole: 'SUPER_ADMIN',
+        restrictedLabel: 'Under Deployment',
       },
 
       {

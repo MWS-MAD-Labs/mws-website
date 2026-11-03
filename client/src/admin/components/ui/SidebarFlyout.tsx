@@ -2,7 +2,7 @@ import { ChevronRight } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
 import type { MenuItem } from '@/admin/config/navigation';
-import { hasCmsPermission } from '@/admin/types/auth';
+import { hasCmsPermission, hasCmsRole } from '@/admin/types/auth';
 import { useAuth } from '@/admin/auth/useAuth';
 
 type AuthUser = ReturnType<typeof useAuth>['user'];
@@ -28,6 +28,10 @@ function isMenuItemVisible(item: MenuItem, user: AuthUser): boolean {
   if (!item.children?.length) return true;
 
   return item.children.some((child) => isMenuItemVisible(child, user));
+}
+
+function isMenuItemRestricted(item: MenuItem, user: AuthUser): boolean {
+  return Boolean(item.requiredRole && !hasCmsRole(user, item.requiredRole));
 }
 
 export default function SidebarFlyout({ item, position, onClose }: SidebarFlyoutProps) {
@@ -107,6 +111,26 @@ function SidebarFlyoutItem({
 
   if (!item.href) {
     return null;
+  }
+
+  if (isMenuItemRestricted(item, user)) {
+    return (
+      <div
+        role="link"
+        aria-disabled="true"
+        aria-label={`${item.label}. ${item.restrictedLabel ?? 'Unavailable'}`}
+        className="flex min-h-11 cursor-not-allowed items-center gap-2 rounded-md px-3 text-[#7D8796]"
+      >
+        <Icon size={16} strokeWidth={1.8} aria-hidden="true" />
+
+        <span className="min-w-0 leading-tight">
+          <span className="block truncate text-sm">{item.label}</span>
+          <span className="mt-0.5 block truncate text-[9px] font-semibold uppercase tracking-[0.08em] text-[#FBBF24]">
+            {item.restrictedLabel ?? 'Unavailable'}
+          </span>
+        </span>
+      </div>
+    );
   }
 
   return (

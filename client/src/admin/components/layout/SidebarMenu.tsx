@@ -4,7 +4,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 
 import { useAuth } from '@/admin/auth/useAuth';
 import menuSections, { type MenuItem, type MenuSection } from '@/admin/config/navigation';
-import { hasCmsPermission } from '@/admin/types/auth';
+import { hasCmsPermission, hasCmsRole } from '@/admin/types/auth';
 import SidebarFlyout, { type SidebarFlyoutPosition } from '@/admin/components/ui/SidebarFlyout';
 
 type AuthUser = ReturnType<typeof useAuth>['user'];
@@ -26,6 +26,10 @@ function isMenuItemVisible(item: MenuItem, user: AuthUser): boolean {
   }
 
   return item.children.some((child) => isMenuItemVisible(child, user));
+}
+
+function isMenuItemRestricted(item: MenuItem, user: AuthUser): boolean {
+  return Boolean(item.requiredRole && !hasCmsRole(user, item.requiredRole));
 }
 
 function menuPaths(items: MenuItem[]): { href: string; path: string }[] {
@@ -324,6 +328,43 @@ function SidebarMenuItem({
    */
   if (!item.href) {
     return null;
+  }
+
+  if (isMenuItemRestricted(item, user)) {
+    const statusLabel = item.restrictedLabel ?? 'Unavailable';
+
+    return (
+      <div
+        role="link"
+        aria-disabled="true"
+        aria-label={`${item.label}. ${statusLabel}`}
+        title={collapsed ? `${item.label} — ${statusLabel}` : undefined}
+        className={[
+          'relative flex min-h-11 cursor-not-allowed items-center gap-2 rounded-md text-[#7D8796]',
+          level === 0 ? 'font-medium' : '',
+          leftPadding,
+        ].join(' ')}
+      >
+        <Icon size={level === 0 ? 17 : 16} strokeWidth={1.8} aria-hidden="true" />
+
+        {!collapsed ? (
+          <span className="min-w-0 leading-tight">
+            <span className="block truncate text-sm">{item.label}</span>
+            <span className="mt-0.5 block truncate text-[9px] font-semibold uppercase tracking-[0.08em] text-[#FBBF24]">
+              {statusLabel}
+            </span>
+          </span>
+        ) : (
+          <>
+            <span
+              className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-[#FBBF24]"
+              aria-hidden="true"
+            />
+            <span className="sr-only">{statusLabel}</span>
+          </>
+        )}
+      </div>
+    );
   }
 
   return (
