@@ -443,7 +443,7 @@ export default function CommunityStoriesPage() {
                       <div className="flex min-w-0 items-center gap-3">
                         <img
                           className="h-14 w-14 shrink-0 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] object-cover"
-                          src={adminApi.galleryImageUrl(image)}
+                          src={adminApi.galleryImageUrl(image, 320)}
                           alt={image.title || image.caption || 'Activity photo'}
                         />
 

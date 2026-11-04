@@ -5,6 +5,7 @@ import ContentBreadcrumb from '@/components/ui/ContentBreadcrumb';
 import SubpageHero from '@/components/ui/SubpageHero';
 import AdmissionsCta from '@/components/layout/AdmissionsCta';
 import { asset, logoUrl } from '@/data/site';
+import { responsiveImage } from '@/lib/api';
 
 const defaultAboutContent: OurSchoolPageData = {
   hero: {
@@ -241,7 +242,9 @@ export default function AboutUs() {
         <div className="grid items-center gap-10 md:grid-cols-2 md:gap-16">
           <div className="flex justify-center md:justify-start">
             <img
-              src={content.visionMission.image}
+              loading="lazy"
+              decoding="async"
+              {...responsiveImage(content.visionMission.image, '(min-width: 768px) 512px, 100vw')}
               alt={content.visionMission.imageAlt}
               className="h-auto w-full max-w-lg object-cover"
             />
@@ -301,6 +304,8 @@ export default function AboutUs() {
           <div className="relative hidden md:block">
             <div className="sticky top-0 flex h-screen items-center justify-center">
               <img
+                loading="lazy"
+                decoding="async"
                 src={logoUrl}
                 alt="Millennia World School logo"
                 className="h-auto w-full max-w-[220px] object-contain lg:max-w-[260px]"
@@ -371,7 +376,8 @@ export default function AboutUs() {
                 aria-label={`View ${image.alt}`}
               >
                 <img
-                  src={image.src}
+                  decoding="async"
+                  {...responsiveImage(image.src, '(min-width: 768px) 25vw, 50vw')}
                   alt={image.alt}
                   loading="lazy"
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -392,7 +398,8 @@ export default function AboutUs() {
         >
           <figure className="max-w-[92vw]" onClick={(event) => event.stopPropagation()}>
             <img
-              src={selectedImage.src}
+              decoding="async"
+              {...responsiveImage(selectedImage.src, '92vw')}
               alt={selectedImage.alt}
               className="max-h-[82vh] max-w-[92vw] object-contain"
             />

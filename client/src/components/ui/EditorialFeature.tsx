@@ -1,5 +1,6 @@
 import Parallax from '@/components/motion/Parallax';
 import SplitHeading from '@/components/motion/SplitHeading';
+import { responsiveImage } from '@/lib/api';
 
 type EditorialFeatureProps = {
   title: string;
@@ -18,7 +19,7 @@ export default function EditorialFeature({
     <section className="w-full bg-[var(--warm-white)] py-[64px] md:py-[120px]">
       <div className="mx-auto grid w-full max-w-[1240px] items-center gap-9 px-5 sm:px-6 md:gap-20 md:px-10 lg:grid-cols-[0.9fr_1.1fr]">
         <Parallax className="relative aspect-[4/3] md:aspect-[5/4]">
-          <img src={image} alt={imageAlt} className="block h-full w-full object-cover" />
+          <img loading="lazy" decoding="async" {...responsiveImage(image, '(min-width: 768px) 50vw, 100vw')} alt={imageAlt} className="block h-full w-full object-cover" />
         </Parallax>
 
         <div className="max-w-[560px]">

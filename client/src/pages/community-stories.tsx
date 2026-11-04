@@ -6,6 +6,7 @@ import SubpageHero from '../components/ui/SubpageHero';
 import { asset } from '../data/site';
 import CommunityVoices from '../components/ui/CommunityVoices';
 import AdmissionsCta from '@/components/layout/AdmissionsCta';
+import { responsiveImage } from '@/lib/api';
 
 const defaultCommunityStories: CommunityStoriesPageData = {
   hero: {
@@ -158,7 +159,9 @@ export default function CommunityStories() {
                     aria-label={`View ${image.alt}`}
                   >
                     <img
-                      src={image.src}
+                      loading="lazy"
+                      decoding="async"
+                      {...responsiveImage(image.src, '(min-width: 768px) 33vw, 100vw')}
                       alt={image.alt}
                       className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                     />
@@ -189,7 +192,8 @@ export default function CommunityStories() {
         >
           <figure className="max-w-[92vw]" onClick={(event) => event.stopPropagation()}>
             <img
-              src={selectedImage.src}
+              decoding="async"
+              {...responsiveImage(selectedImage.src, '92vw')}
               alt={selectedImage.alt}
               className="max-h-[82vh] max-w-[92vw] object-contain"
             />
@@ -238,7 +242,9 @@ export default function CommunityStories() {
                   >
                     <div className="aspect-[16/10] overflow-hidden bg-[var(--warm-white)]">
                       <img
-                        src={news.image}
+                        loading="lazy"
+                        decoding="async"
+                        {...responsiveImage(news.image, '380px')}
                         alt={news.title}
                         className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                       />

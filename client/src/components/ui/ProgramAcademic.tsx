@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { pageApi, type AcademicLevelData } from '@/api/pageApi';
 import DecorativeDoodles from './DecorativeDoodles';
 import SplitHeading from '@/components/motion/SplitHeading';
+import { responsiveImage } from '@/lib/api';
 
 type ProgramAcademicItem = {
   id: string;
@@ -137,7 +138,9 @@ export default function ProgramAcademic({ programs = emptyPrograms }: ProgramAca
                 {/* Image */}
                 {heroImages[program.id] && (
                   <img
-                    src={heroImages[program.id]}
+                    loading="lazy"
+                    decoding="async"
+                    {...responsiveImage(heroImages[program.id], '100vw')}
                     alt={program.title}
                     className={`pointer-events-none absolute inset-0 h-full w-full object-cover transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
                       isActive
@@ -218,7 +221,9 @@ export default function ProgramAcademic({ programs = emptyPrograms }: ProgramAca
                 <div className="relative aspect-[16/10] overflow-hidden bg-[var(--charcoal)]">
                   {heroImages[program.id] && (
                     <img
-                      src={heroImages[program.id]}
+                      loading="lazy"
+                      decoding="async"
+                      {...responsiveImage(heroImages[program.id], '(min-width: 768px) 50vw, 100vw')}
                       alt={program.title}
                       className="h-full w-full object-cover"
                     />

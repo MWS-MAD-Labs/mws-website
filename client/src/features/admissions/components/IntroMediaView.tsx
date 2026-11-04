@@ -1,4 +1,5 @@
 import type { AdmissionIntroMedia } from '@/features/admissions/admissionPageData';
+import { responsiveImage } from '@/lib/api';
 
 type IntroMediaViewProps = {
   media: AdmissionIntroMedia;
@@ -18,7 +19,7 @@ export default function IntroMediaView({ media }: IntroMediaViewProps) {
           className="block aspect-video w-full object-cover"
         />
       ) : (
-        <img src={media.src} alt={media.alt} className="block aspect-video w-full object-cover" />
+        <img loading="lazy" decoding="async" {...responsiveImage(media.src, '(min-width: 1024px) 50vw, 100vw')} alt={media.alt} className="block aspect-video w-full object-cover" />
       )}
     </div>
   );

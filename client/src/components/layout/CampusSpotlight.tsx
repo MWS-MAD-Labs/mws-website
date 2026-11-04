@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { responsiveImage } from '@/lib/api';
 
 type SpotlightSlide = {
   image: string;
@@ -46,10 +47,12 @@ useEffect(() => {
               }`}
             >
               <img
+                loading="lazy"
+                decoding="async"
                 className={`block h-full w-full object-cover transition-transform duration-[6000ms] ease-in-out ${
                   index === activeIndex ? 'scale-[1.04]' : 'scale-100'
                 }`}
-                src={slide.image}
+                {...responsiveImage(slide.image, '100vw')}
                 alt={slide.alt}
               />
 

@@ -1,6 +1,7 @@
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { responsiveImage } from '@/lib/api';
 
 type HeroSlide = {
   id?: string;
@@ -171,7 +172,9 @@ export default function Hero({
           />
         ) : (
           <img
-            src={currentSlide.image}
+            fetchPriority="high"
+            decoding="async"
+            {...responsiveImage(currentSlide.image, '100vw')}
             alt={currentSlide.alt}
             className={`absolute inset-0 h-full w-full object-cover will-change-transform ${
               isTransitioning ? 'animate-hero-out' : ''
@@ -182,8 +185,9 @@ export default function Hero({
         {/* Incoming slide hanya digunakan untuk IMAGE transition */}
         {incomingSlide && incomingSlide.mediaType !== 'VIDEO' && (
           <img
+            decoding="async"
             key={incomingIndex}
-            src={incomingSlide.image}
+            {...responsiveImage(incomingSlide.image, '100vw')}
             alt={incomingSlide.alt}
             className="animate-hero-in absolute inset-0 h-full w-full object-cover will-change-transform"
           />

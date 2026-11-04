@@ -17,7 +17,7 @@ export default function GalleryThumb({ gallery }: GalleryThumbProps) {
 
   return (
     <img
-      src={adminApi.galleryImageUrl(firstImage)}
+      src={adminApi.galleryImageUrl(firstImage, 320)}
       alt={firstImage.title ?? gallery.title}
       className="h-14 w-20 shrink-0 rounded-md object-cover"
     />

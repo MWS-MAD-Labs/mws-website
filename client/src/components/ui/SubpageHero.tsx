@@ -1,5 +1,6 @@
 import Parallax from '@/components/motion/Parallax';
 import SplitHeading from '@/components/motion/SplitHeading';
+import { responsiveImage } from '@/lib/api';
 
 type SubpageHeroProps = {
   title: string;
@@ -12,7 +13,7 @@ export default function SubpageHero({ title, image, imageAlt }: SubpageHeroProps
   return (
     <section className="relative h-[320px] overflow-hidden md:h-[380px]">
       <Parallax className="absolute inset-0" distance={40}>
-        <img src={image} alt={imageAlt} className="h-full w-full object-cover" />
+        <img fetchPriority="high" decoding="async" {...responsiveImage(image, '100vw')} alt={imageAlt} className="h-full w-full object-cover" />
       </Parallax>
 
       <div className="absolute inset-0 bg-black/45" />

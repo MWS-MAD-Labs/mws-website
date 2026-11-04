@@ -41,7 +41,7 @@ export default function ImageList({
             >
               <img
                 className="h-full w-full object-cover transition-transform group-hover:scale-[1.02]"
-                src={adminApi.galleryImageUrl(image)}
+                src={adminApi.galleryImageUrl(image, 640)}
                 alt={image.title ?? "Gallery image"}
               />
             </button>

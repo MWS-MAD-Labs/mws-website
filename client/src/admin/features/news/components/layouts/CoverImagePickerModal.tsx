@@ -256,7 +256,7 @@ export default function CoverImagePickerModal({
                         <div className="relative aspect-[4/3] overflow-hidden rounded-md border border-[#E2E8F0] bg-[#F1F5F9] group-hover:border-[#3C50E0] group-focus-visible:border-[#3C50E0]">
                           {asset.kind === 'IMAGE' ? (
                             <img
-                              src={adminApi.galleryImageUrl(asset.image)}
+                              src={adminApi.galleryImageUrl(asset.image, 320)}
                               alt={asset.selection.alt}
                               className="h-full w-full object-cover"
                             />

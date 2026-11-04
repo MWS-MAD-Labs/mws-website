@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 import type { AdmissionPageContent } from '@/features/admissions/admissionPageData';
 import { focusRing } from '@/features/admissions/admissionPublicConfig';
+import { responsiveImage } from '@/lib/api';
 
 type AdmissionHeroProps = {
   content: AdmissionPageContent;
@@ -13,7 +14,9 @@ export default function AdmissionHero({ content, generalHref }: AdmissionHeroPro
   return (
     <section className="relative isolate flex min-h-[520px] items-end overflow-hidden bg-[var(--charcoal)] md:min-h-[560px]">
       <img
-        src={content.heroImage}
+        fetchPriority="high"
+        decoding="async"
+        {...responsiveImage(content.heroImage, '100vw')}
         alt={content.heroImageAlt}
         className="absolute inset-0 -z-10 h-full w-full object-cover"
       />

@@ -1,5 +1,6 @@
 import axios, { AxiosError, type AxiosRequestConfig, type Method } from "axios";
 import { env } from "@/config/env";
+import { responsiveImageAttributes } from "./imageVariants";
 
 export class ApiError extends Error {
   status?: number;
@@ -118,6 +119,21 @@ export function publicAssetUrl(path: string | null | undefined, fallback = "") {
   if (!path) return fallback;
   return path.startsWith("/api/") ? `${env.apiBaseUrl}${path}` : path;
 }
+
+/**
+ * `src`, `srcSet` and `sizes` for an <img>. For an uploaded image the browser
+ * picks the smallest copy that fills the slot `sizes` describes, so a phone
+ * loads a 320px thumbnail instead of the full photo. Other images (bundled
+ * assets, external links) are returned unchanged.
+ *
+ *   <img {...responsiveImage(url, '(min-width: 768px) 33vw, 100vw')} />
+ */
+export function responsiveImage(src: string | null | undefined, sizes: string) {
+  return responsiveImageAttributes(publicAssetUrl(src), sizes);
+}
+
+/** Article HTML from the CMS: give its uploaded images a srcset too. */
+export const ARTICLE_IMAGE_SIZES = '(min-width: 1024px) 760px, 100vw';
 
 export function normalizePublicAssetUrls<T>(value: T): T {
   if (typeof value === "string") {

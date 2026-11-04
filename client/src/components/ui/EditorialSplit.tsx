@@ -1,5 +1,6 @@
 import Parallax from '@/components/motion/Parallax';
 import SplitHeading from '@/components/motion/SplitHeading';
+import { responsiveImage } from '@/lib/api';
 
 type EditorialSplitProps = {
   title: string;
@@ -20,7 +21,7 @@ export default function EditorialSplit({
 
   const imageBlock = (
     <Parallax className="relative h-full min-h-[520px] max-[1024px]:min-h-[420px] max-[680px]:min-h-[300px]">
-      <img src={image} alt={imageAlt} className="block h-full w-full object-cover" />
+      <img loading="lazy" decoding="async" {...responsiveImage(image, '(min-width: 768px) 50vw, 100vw')} alt={imageAlt} className="block h-full w-full object-cover" />
     </Parallax>
   );
 

@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react';
 
 import { Link, useParams } from 'react-router-dom';
-import DOMPurify from 'dompurify';
 
 import { asset } from '@/data/site';
 
 import {
+  newsContentHtml,
   formatNewsDate,
   newsApi,
   publicNewsImage,
   type PublicNewsDetail,
 } from '@/features/news/newsData';
+import { responsiveImage } from '@/lib/api';
 
 export default function NewsDetails() {
   const { slug = '' } = useParams<{ slug: string }>();
@@ -166,7 +167,9 @@ export default function NewsDetails() {
                   {/* Cover */}
                   <figure className="overflow-hidden bg-[#f5f2ec]">
                     <img
-                      src={publicNewsImage(post.coverImage || null, asset('_DSC4760.jpg'))}
+                      fetchPriority="high"
+                      decoding="async"
+                      {...responsiveImage(publicNewsImage(post.coverImage || null, asset('_DSC4760.jpg')), '(min-width: 1024px) 760px, 100vw')}
                       alt={post.coverImageAlt || post.title || 'MWS School News'}
                       className="block aspect-[16/9] h-auto w-full object-cover"
                     />
@@ -176,7 +179,7 @@ export default function NewsDetails() {
                   <div
                     className="public-rich-text mt-10 max-w-none break-words font-sans leading-[1.8] text-[#241718]"
                     dangerouslySetInnerHTML={{
-                      __html: DOMPurify.sanitize(post.content?.text || ''),
+                      __html: newsContentHtml(post.content?.text),
                     }}
                   />
 
@@ -187,7 +190,9 @@ export default function NewsDetails() {
                       <figure key={media.id} className="mt-10 overflow-hidden">
                         <div className="overflow-hidden bg-[#f5f2ec]">
                           <img
-                            src={publicNewsImage(media.url, asset('DSC04079.jpg'))}
+                            loading="lazy"
+                            decoding="async"
+                            {...responsiveImage(publicNewsImage(media.url, asset('DSC04079.jpg')), '(min-width: 1024px) 760px, 100vw')}
                             alt={media.alt || post.title}
                             className="block h-auto max-h-[700px] w-full object-cover"
                           />
@@ -253,10 +258,12 @@ export default function NewsDetails() {
                           >
                             <div className="h-20 w-20 shrink-0 overflow-hidden bg-[#f5f2ec]">
                               <img
-                                src={publicNewsImage(
+                                loading="lazy"
+                                decoding="async"
+                                {...responsiveImage(publicNewsImage(
                                   relatedPost.coverImage || null,
                                   asset('DSC04079.jpg'),
-                                )}
+                                ), '80px')}
                                 alt={relatedPost.title}
                                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                               />

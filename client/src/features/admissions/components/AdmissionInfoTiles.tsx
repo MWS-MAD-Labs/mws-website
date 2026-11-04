@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 
 import type { AdmissionInfoTile } from '@/features/admissions/admissionPageData';
 import { focusRing } from '@/features/admissions/admissionPublicConfig';
+import { responsiveImage } from '@/lib/api';
 
 const isExternal = (url: string) => /^(https?:|mailto:|tel:)/i.test(url);
 
@@ -48,7 +49,8 @@ export default function AdmissionInfoTiles({ tiles }: AdmissionInfoTilesProps) {
             >
               {tile.image ? (
                 <img
-                  src={tile.image}
+                  decoding="async"
+                  {...responsiveImage(tile.image, '(min-width: 768px) 33vw, 100vw')}
                   alt=""
                   loading="lazy"
                   className="absolute inset-0 -z-20 h-full w-full object-cover transition-transform duration-700 group-focus-visible:scale-105 group-hover:scale-105 motion-reduce:transition-none"

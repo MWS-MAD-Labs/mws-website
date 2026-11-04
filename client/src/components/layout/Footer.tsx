@@ -20,6 +20,8 @@ export default function Footer() {
               aria-label="Millennia World School home"
             >
               <img
+                loading="lazy"
+                decoding="async"
                 className="h-[54px] w-[54px] object-contain"
                 src={logoUrl}
                 alt="Millennia World School"

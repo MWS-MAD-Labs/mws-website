@@ -95,7 +95,7 @@ export default function GalleryAssetPickerModal({
         ...(allowedKinds.includes("IMAGE")
           ? activeGallery.images.map((image) => ({
               id: image.id,
-              preview: adminApi.galleryImageUrl(image),
+              preview: adminApi.galleryImageUrl(image, 320),
               selection: imageSelection(activeGallery, image),
             }))
           : []),

@@ -2,7 +2,7 @@ import DOMPurify from 'dompurify';
 
 import ContactInquiryForm from '@/features/contact/components/ContactInquiryForm';
 import type { ContactPageContent } from '@/features/contact/contactPageData';
-import { publicAssetUrl } from '@/lib/api';
+import { publicAssetUrl, responsiveImage } from '@/lib/api';
 
 type ContactPageViewProps = {
   content: ContactPageContent;
@@ -17,7 +17,9 @@ export default function ContactPageView({ content, preview = false }: ContactPag
           <div className="grid items-center gap-8 md:gap-12 lg:grid-cols-[0.9fr_1.1fr ] lg:gap-16">
             <div className="overflow-hidden">
               <img
-                src={publicAssetUrl(content.hero.image)}
+                fetchPriority="high"
+                decoding="async"
+                {...responsiveImage(publicAssetUrl(content.hero.image), '100vw')}
                 alt={content.hero.imageAlt}
                 className="block h-[280px] w-full object-cover sm:h-[360px] lg:h-[460px]"
               />

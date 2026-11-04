@@ -478,7 +478,7 @@ function ImageTable({
                 <img
                   alt={image.title || image.caption || 'Gallery image preview'}
                   className="h-12 w-16 rounded-md border border-[#E2E8F0] object-cover"
-                  src={adminApi.galleryImageUrl(image)}
+                  src={adminApi.galleryImageUrl(image, 320)}
                 />
               </td>
               <td className="px-5 py-4 font-semibold text-[#1C2434]">{image.title || '-'}</td>

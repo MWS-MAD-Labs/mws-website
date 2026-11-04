@@ -1,4 +1,6 @@
-import { apiRequest, publicAssetUrl } from '@/lib/api';
+import DOMPurify from 'dompurify';
+
+import { ARTICLE_IMAGE_SIZES, apiRequest, publicAssetUrl, responsiveImage } from '@/lib/api';
 
 export type PublicNewsCategory = {
   id: string;
@@ -122,6 +124,29 @@ export const newsApi = {
 
 export function publicNewsImage(path: string | null, fallback: string) {
   return publicAssetUrl(path, fallback);
+}
+
+/**
+ * Article images are stored with a relative `/api/...` src, which only works
+ * when the API shares the site's origin. Point them at the API like every
+ * other CMS image, and give them a srcset so phones load a smaller copy.
+ */
+export function newsContentHtml(text: string | null | undefined) {
+  const container = document.createElement('div');
+  container.innerHTML = DOMPurify.sanitize(text || '');
+
+  container.querySelectorAll('img').forEach((img) => {
+    const image = responsiveImage(img.getAttribute('src'), ARTICLE_IMAGE_SIZES);
+    img.setAttribute('src', image.src);
+    if (image.srcSet) {
+      img.setAttribute('srcset', image.srcSet);
+      img.setAttribute('sizes', image.sizes);
+    }
+    img.setAttribute('loading', 'lazy');
+    img.setAttribute('decoding', 'async');
+  });
+
+  return container.innerHTML;
 }
 
 export function formatNewsDate(value: string) {

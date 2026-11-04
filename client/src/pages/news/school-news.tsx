@@ -13,6 +13,7 @@ import {
 } from '@/features/news/newsData';
 import ContentBreadcrumb from '@/components/ui/ContentBreadcrumb';
 import { calendarApi, type GoogleCalendarEvent } from '@/api/calendarApi';
+import { responsiveImage } from '@/lib/api';
 
 const EMPTY_NEWS: PublicNewsList = {
   items: [],
@@ -163,8 +164,10 @@ export default function SchoolNews() {
                         to={`/news/${post.slug}`}
                       >
                         <img
+                          loading="lazy"
+                          decoding="async"
                           className="block h-full w-full object-cover transition-transform duration-500 ease-out hover:scale-[1.03]"
-                          src={publicNewsImage(post.coverImage, asset('DSC04079.jpg'))}
+                          {...responsiveImage(publicNewsImage(post.coverImage, asset('DSC04079.jpg')), '(min-width: 768px) 275px, 100vw')}
                           alt={post.coverImageAlt || post.title}
                         />
                       </Link>

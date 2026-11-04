@@ -1,5 +1,6 @@
 import { X } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { responsiveImage } from '@/lib/api';
 
 type PopupInfoProps = {
   title: string;
@@ -82,7 +83,9 @@ export default function PopupInfo({
 
           {imageSrc ? (
             <img
-              src={imageSrc}
+              loading="lazy"
+              decoding="async"
+              {...responsiveImage(imageSrc, '360px')}
               alt={imageAlt || title}
               className="mx-auto mt-5 max-h-[360px] w-full max-w-[360px] object-contain"
             />

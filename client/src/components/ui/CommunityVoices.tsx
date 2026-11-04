@@ -111,7 +111,7 @@ function VoiceMedia({
     );
   }
 
-  return <img className={className} src={src} alt={alt} />;
+  return <img loading="lazy" decoding="async" className={className} src={src} alt={alt} />;
 }
 
 export default function CommunityVoices({

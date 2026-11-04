@@ -2,6 +2,7 @@ import { ArrowUpRight } from 'lucide-react';
 
 import type { AdmissionStepItem } from '@/features/admissions/admissionPageData';
 import { focusRing, stepFallbackImages } from '@/features/admissions/admissionPublicConfig';
+import { responsiveImage } from '@/lib/api';
 
 type AdmissionProcessProps = {
   steps: AdmissionStepItem[];
@@ -23,7 +24,8 @@ function AdmissionStepCard({ index, step }: AdmissionStepCardProps) {
       >
         <picture className="absolute inset-0 -z-20 block h-full w-full">
           <img
-            src={image}
+            decoding="async"
+            {...responsiveImage(image, '(min-width: 768px) 50vw, 100vw')}
             alt={step.imageAlt || ''}
             loading="lazy"
             className="block h-full w-full scale-100 object-cover object-center blur-0 transition-all duration-1000 [transition-timing-function:cubic-bezier(.34,.615,.4,.985)] group-hover:scale-105 group-focus-visible:scale-105 motion-reduce:transition-none"

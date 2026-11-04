@@ -77,6 +77,8 @@ export default function Affiliations({ title, text, logos, logosLabel }: Affilia
             {[...displayLogos, ...displayLogos].map((src, index) => (
               <div key={`${src}-${index}`} className="shrink-0">
                 <img
+                  loading="lazy"
+                  decoding="async"
                   className="h-[75px] w-auto object-contain transition-transform duration-300 hover:scale-105 max-[980px]:h-[58px] max-[680px]:h-[46px]"
                   src={src}
                   alt="MWS learning partner"

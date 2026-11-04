@@ -1,6 +1,7 @@
 import { useRef, useState, type CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import SplitHeading from '@/components/motion/SplitHeading';
+import { responsiveImage } from '@/lib/api';
 
 type InfoFilter = {
   label: string;
@@ -163,8 +164,10 @@ export default function InfoSection({ title, filters, cards }: InfoSectionProps)
                 <div className="relative aspect-[9/16] w-full overflow-hidden bg-[var(--charcoal)]">
                   <picture>
                     <img
+                      loading="lazy"
+                      decoding="async"
                       className="block h-full w-full object-cover transition-[transform,filter] duration-500 ease-in-out group-hover:scale-105 group-hover:blur-[8px] group-hover:brightness-50"
-                      src={card.image}
+                      {...responsiveImage(card.image, '(min-width: 1024px) 25vw, (min-width: 680px) 50vw, 100vw')}
                       alt={card.alt}
                     />
                   </picture>

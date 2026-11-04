@@ -3,7 +3,7 @@ import { Download } from 'lucide-react';
 
 import AdmissionsCta from '@/components/layout/AdmissionsCta';
 import FaqAccordion from '@/components/ui/FaqAccordion';
-import { publicAssetUrl } from '@/lib/api';
+import { publicAssetUrl, responsiveImage } from '@/lib/api';
 
 type RichText = string | string[];
 
@@ -80,7 +80,8 @@ export default function LevelPage({
             {/* Image */}
             <div className="overflow-hidden">
               <img
-                src={introImage}
+                decoding="async"
+                {...responsiveImage(introImage, '(min-width: 1024px) 50vw, 100vw')}
                 alt={introImageAlt}
                 className="block h-full max-h-[420px] w-full object-cover"
               />
@@ -145,7 +146,9 @@ export default function LevelPage({
                     )}
                   >
                     <img
-                      src={section.image}
+                      loading="lazy"
+                      decoding="async"
+                      {...responsiveImage(section.image, '(min-width: 768px) 50vw, 100vw')}
                       alt={section.imageAlt}
                       className="block aspect-[4/3] w-full object-cover"
                     />

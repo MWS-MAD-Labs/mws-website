@@ -12,6 +12,7 @@ import SupPageHeroAcademic from '@/components/ui/SupPageHeroAcademic';
 import { asset } from '../data/site';
 import ContentBreadcrumb from '@/components/ui/ContentBreadcrumb';
 import AdmissionsCta from '@/components/layout/AdmissionsCta';
+import { responsiveImage } from '@/lib/api';
 
 const defaultOverview: AcademicOverviewPageData = {
   title: 'Academic',
@@ -158,7 +159,9 @@ export default function Academic() {
 
           <div className="mt-10 overflow-hidden md:mt-14">
             <img
-              src={overview.content.intro.image || defaultOverview.content.intro.image}
+              loading="lazy"
+              decoding="async"
+              {...responsiveImage(overview.content.intro.image || defaultOverview.content.intro.image, '(min-width: 1280px) 1200px, 100vw')}
               alt={overview.content.intro.imageAlt}
               className="block aspect-[4/3] w-full object-cover md:aspect-[21/9]"
             />
@@ -218,10 +221,9 @@ export default function Academic() {
               </div>
               <div className="mt-8 hidden overflow-hidden lg:block">
                 <img
-                  src={
-                    overview.content.experience.image ||
-                    defaultOverview.content.experience.image
-                  }
+                  decoding="async"
+                  {...responsiveImage(overview.content.experience.image ||
+                    defaultOverview.content.experience.image, '(min-width: 1024px) 40vw, 100vw')}
                   alt={overview.content.experience.imageAlt}
                   className="block aspect-[4/5] w-full object-cover"
                   loading="lazy"

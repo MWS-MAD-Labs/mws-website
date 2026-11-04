@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import { responsiveImage } from '@/lib/api';
 
 type SupPageHeroAcademicProps = {
   image: string;
@@ -34,7 +35,7 @@ export default function SupPageHeroAcademic({
     <section className="w-full">
       {/* Hero */}
       <div className="relative h-[520px] w-full overflow-hidden md:h-[550px]">
-        <img src={image} alt={imageAlt} className="absolute inset-0 h-full w-full object-cover" />
+        <img fetchPriority="high" decoding="async" {...responsiveImage(image, '100vw')} alt={imageAlt} className="absolute inset-0 h-full w-full object-cover" />
 
         <div className="absolute inset-0 bg-black/15" />
 
