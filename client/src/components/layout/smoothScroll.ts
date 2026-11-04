@@ -19,7 +19,7 @@ export function startSmoothScroll() {
 
   const instance = new Lenis({
     autoRaf: true,
-    duration: 2.05,
+    duration: 1.55,
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     allowNestedScroll: true,
     stopInertiaOnNavigate: true,
