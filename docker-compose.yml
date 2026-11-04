@@ -89,6 +89,11 @@ services:
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin123}
       MINIO_BUCKET: ${MINIO_BUCKET:-mws-gallery}
       MINIO_REGION: ${MINIO_REGION:-us-east-1}
+      # Uploaded files are sent by the client nginx, not by Bun: the backend
+      # answers with X-Accel-Redirect and nginx fetches from minio:9000 (see
+      # `location /_minio/` in client/nginx.conf). Needs MINIO_ENDPOINT=minio
+      # and MINIO_PORT=9000, the values the URL is signed for.
+      FILE_DELIVERY: ${FILE_DELIVERY:-nginx}
     command: >
       sh -c "export DATABASE_URL=\"postgresql://$${POSTGRES_USER:-mws_website}:$${POSTGRES_PASSWORD:-postgres}@db:5432/$${POSTGRES_DB:-mws_website}?schema=public\" &&
       export SHADOW_DATABASE_URL=\"postgresql://$${POSTGRES_USER:-mws_website}:$${POSTGRES_PASSWORD:-postgres}@db:5432/$${POSTGRES_DB:-mws_website}_shadow?schema=public\" &&

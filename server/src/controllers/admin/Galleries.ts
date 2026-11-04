@@ -1,6 +1,6 @@
 import type { Context } from "hono";
 import { ResponseError } from "../../error/response-error";
-import { sendStoredFile } from "../../lib/file-response";
+import { sendStoredFile, sendStoredImage } from "../../lib/file-response";
 import { toJsonSafe } from "../../lib/json-response";
 import { GalleryService } from "../../services/gallery-service";
 
@@ -134,7 +134,7 @@ export class AdminGalleryImagesController {
 
   static async file(c: Context) {
     const file = await GalleryService.getImageFile(c.req.param("id"));
-    return sendStoredFile(c, file, {
+    return sendStoredImage(c, file, {
       cacheControl: "private, max-age=300",
     });
   }

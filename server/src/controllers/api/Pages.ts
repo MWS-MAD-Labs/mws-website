@@ -1,4 +1,5 @@
 import type { Context } from "hono";
+import { sendStoredFile, sendStoredImage } from "../../lib/file-response";
 import { getCookie } from "hono/cookie";
 import { ResponseError } from "../../error/response-error";
 import { toJsonSafe } from "../../lib/json-response";
@@ -32,10 +33,14 @@ export class PublicPagesController {
     const file = await AcademicPageService.getAssetFile(
       c.req.param("objectName"),
     );
-    c.header("Content-Type", file.contentType);
-    c.header("Content-Length", String(file.size));
-    c.header("Cache-Control", "public, max-age=31536000");
-    return c.body(file.buffer);
+    // Only photos get thumbnails; documents (PDF, DOCX) are always sent whole.
+    const send = file.objectName.startsWith("academic/images/")
+      ? sendStoredImage
+      : sendStoredFile;
+    return send(c, file, {
+      acceptRanges: true,
+      cacheControl: "public, max-age=31536000",
+    });
   }
 
   static async get(c: Context) {

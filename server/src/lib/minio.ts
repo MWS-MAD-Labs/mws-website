@@ -1,6 +1,7 @@
 import { Client, type ClientOptions } from "minio";
 import type { Readable } from "node:stream";
 import { ResponseError } from "../error/response-error";
+import { variantObjectNames } from "./image-variant-names";
 
 export type MinioConfig = {
   endPoint: string;
@@ -13,6 +14,9 @@ export type MinioConfig = {
 };
 
 let minioClient: Client | null = null;
+// Buckets are never deleted at runtime, so one successful check is enough.
+// Without this every file request paid an extra round trip to MinIO.
+const knownBuckets = new Set<string>();
 
 function requiredEnv(name: string): string {
   const value = process.env[name]?.trim();
@@ -95,6 +99,8 @@ function toMissingObjectError(objectName: string) {
 }
 
 export async function ensureMinioBucket(bucket = getMinioConfig().bucket) {
+  if (knownBuckets.has(bucket)) return bucket;
+
   const client = getMinioClient();
   const exists = await client.bucketExists(bucket);
 
@@ -102,7 +108,13 @@ export async function ensureMinioBucket(bucket = getMinioConfig().bucket) {
     await client.makeBucket(bucket, getMinioConfig().region);
   }
 
+  knownBuckets.add(bucket);
   return bucket;
+}
+
+/** Test hook: forget which buckets were already checked. */
+export function resetMinioBucketCache() {
+  knownBuckets.clear();
 }
 
 export async function putMinioObject(
@@ -139,10 +151,19 @@ export async function deleteMinioObject(objectName: string) {
   const config = getMinioConfig();
   try {
     await ensureMinioBucket(config.bucket);
-    return await getMinioClient().removeObject(config.bucket, objectName);
+    await getMinioClient().removeObject(config.bucket, objectName);
   } catch (error) {
     if (isMinioNotFoundError(error)) return;
     throw error;
+  }
+
+  // Thumbnails made from this file. Most never existed, which MinIO ignores;
+  // a leftover is only wasted space, so a failure here never fails the delete.
+  const variants = variantObjectNames(objectName);
+  if (variants.length) {
+    await getMinioClient()
+      .removeObjects(config.bucket, variants)
+      .catch(() => undefined);
   }
 }
 
@@ -168,4 +189,51 @@ export async function getMinioObjectBuffer(objectName: string) {
   }
 
   return Buffer.concat(chunks);
+}
+
+export type ByteRange = { start: number; end: number };
+
+/**
+ * Streams an object instead of buffering it, so serving a 50MB video costs a
+ * few KB of memory per request. With a range only those bytes leave MinIO.
+ */
+export async function openMinioObjectStream(objectName: string, range?: ByteRange) {
+  const config = getMinioConfig();
+  try {
+    await ensureMinioBucket(config.bucket);
+    const client = getMinioClient();
+    return (
+      range
+        ? await client.getPartialObject(
+            config.bucket,
+            objectName,
+            range.start,
+            range.end - range.start + 1,
+          )
+        : await client.getObject(config.bucket, objectName)
+    ) as Readable;
+  } catch (error) {
+    if (isMinioNotFoundError(error)) {
+      throw toMissingObjectError(objectName);
+    }
+    throw error;
+  }
+}
+
+/**
+ * A short-lived signed URL for nginx to fetch the object itself. Signing is
+ * local (the region is configured), so this costs no request to MinIO.
+ */
+export async function presignMinioGet(
+  objectName: string,
+  responseHeaders: Record<string, string> = {},
+  expiresSeconds = 300,
+) {
+  const config = getMinioConfig();
+  return getMinioClient().presignedGetObject(
+    config.bucket,
+    objectName,
+    expiresSeconds,
+    responseHeaders,
+  );
 }

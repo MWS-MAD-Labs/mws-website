@@ -1,11 +1,11 @@
 import { z, ZodError } from "zod";
+import { MAX_UPLOAD_IMAGE_SIZE, optimizeImage, webpFileName } from "../lib/optimize-image";
+import { storedObject } from "../lib/file-response";
 import type { Prisma } from "@prisma/client";
 import { ResponseError } from "../error/response-error";
 import {
   deleteMinioObject,
-  getMinioObjectBuffer,
   putMinioObject,
-  statMinioObject,
 } from "../lib/minio";
 import {
   newsCategorySchema,
@@ -41,7 +41,6 @@ const imageUploadMetadataSchema = z.object({
   purpose: z.enum(["COVER", "ARTICLE"]).optional().default("ARTICLE"),
 });
 
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = new Set([
   "image/avif",
   "image/jpeg",
@@ -168,7 +167,7 @@ function sanitizeFileName(name: string) {
 }
 
 function imageObjectKey(fileName: string) {
-  return `news/images/${crypto.randomUUID()}-${sanitizeFileName(fileName)}`;
+  return `news/images/${crypto.randomUUID()}-${sanitizeFileName(webpFileName(fileName))}`;
 }
 
 function validateImageFile(file: File) {
@@ -183,11 +182,8 @@ function validateImageFile(file: File) {
     throw new ResponseError(400, "Image file is empty.");
   }
 
-  if (file.size > MAX_IMAGE_SIZE) {
-    throw new ResponseError(
-      400,
-      "Image file must be 5MB or smaller. Use WebP/AVIF for photos.",
-    );
+  if (file.size > MAX_UPLOAD_IMAGE_SIZE) {
+    throw new ResponseError(400, "Image file must be 15MB or smaller.");
   }
 }
 
@@ -591,10 +587,10 @@ export class NewsService {
       "News image metadata",
     );
     const objectName = imageObjectKey(file.name);
-    const buffer = Buffer.from(await file.arrayBuffer());
+    const optimized = await optimizeImage(new Uint8Array(await file.arrayBuffer()));
 
-    await putMinioObject(objectName, buffer, {
-      "Content-Type": file.type,
+    await putMinioObject(objectName, optimized.bytes, {
+      "Content-Type": "image/webp",
       "Cache-Control": "public, max-age=31536000",
     });
 
@@ -644,21 +640,7 @@ export class NewsService {
       throw new ResponseError(404, "News image not found.");
     }
 
-    const [stat, buffer] = await Promise.all([
-      statMinioObject(media.url),
-      getMinioObjectBuffer(media.url),
-    ]);
-
-    return {
-      buffer,
-      contentType:
-        String(
-          stat.metaData?.["content-type"] ??
-            stat.metaData?.["Content-Type"] ??
-            "",
-        ) || "application/octet-stream",
-      size: stat.size,
-    };
+    return storedObject(media.url);
   }
 
   static async updateMedia(

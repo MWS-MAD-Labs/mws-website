@@ -1,10 +1,10 @@
 import { z } from "zod";
+import { MAX_UPLOAD_IMAGE_SIZE, optimizeImage, webpFileName } from "../../lib/optimize-image";
+import { storedObject } from "../../lib/file-response";
 import { Prisma } from "@prisma/client";
 import { ResponseError } from "../../error/response-error";
 import {
-  getMinioObjectBuffer,
   putMinioObject,
-  statMinioObject,
 } from "../../lib/minio";
 import { getPrisma } from "../../lib/prisma";
 import { GalleryService } from "../gallery-service";
@@ -303,7 +303,7 @@ const defaultLevels = {
   AcademicPayload & { levelKey: AcademicLevelKey }
 >;
 
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const MAX_IMAGE_SIZE = MAX_UPLOAD_IMAGE_SIZE;
 const MAX_DOCUMENT_SIZE = 25 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = new Set([
   "image/avif",
@@ -731,7 +731,7 @@ function validateAssetFile(file: File, type: "image" | "document") {
     throw new ResponseError(
       400,
       type === "image"
-        ? "Image file must be 5MB or smaller. Use WebP/AVIF for photos."
+        ? "Image file must be 15MB or smaller."
         : "Document file must be 25MB or smaller.",
     );
   }
@@ -803,10 +803,20 @@ export class AcademicPageService {
     parseLevelKey(rawLevelKey);
     validateAssetFile(file, type);
 
-    const objectName = academicObjectKey(type, file.name);
-    const buffer = Buffer.from(await file.arrayBuffer());
-    await putMinioObject(objectName, buffer, {
-      "Content-Type": file.type,
+    // Photos are shrunk and stored as WebP; documents are kept byte for byte.
+    const optimized =
+      type === "image"
+        ? await optimizeImage(new Uint8Array(await file.arrayBuffer()))
+        : null;
+    const objectName = academicObjectKey(
+      type,
+      optimized ? webpFileName(file.name) : file.name,
+    );
+    const body = optimized ? optimized.bytes : Buffer.from(await file.arrayBuffer());
+    const contentType = optimized ? "image/webp" : file.type;
+
+    await putMinioObject(objectName, body, {
+      "Content-Type": contentType,
       "Cache-Control": "public, max-age=31536000",
     });
 
@@ -814,27 +824,13 @@ export class AcademicPageService {
       path: academicAssetUrl(objectName),
       objectName,
       filename: file.name,
-      contentType: file.type,
-      size: file.size,
+      contentType,
+      size: body.byteLength,
     };
   }
 
   static async getAssetFile(rawObjectName: string | undefined) {
     const objectName = decodeAcademicObjectName(rawObjectName);
-    const [stat, buffer] = await Promise.all([
-      statMinioObject(objectName),
-      getMinioObjectBuffer(objectName),
-    ]);
-
-    return {
-      buffer,
-      contentType:
-        String(
-          stat.metaData?.["content-type"] ??
-            stat.metaData?.["Content-Type"] ??
-            "",
-        ) || "application/octet-stream",
-      size: stat.size,
-    };
+    return storedObject(objectName);
   }
 }

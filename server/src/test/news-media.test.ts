@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
+import sharp from "sharp";
 import {
   NewsRepository,
   type NewsPostWithRelations,
@@ -19,8 +20,15 @@ const { NewsService } = await import("../services/news-service");
 const POST_ID = "11111111-1111-4111-8111-111111111111";
 const COVER_MEDIA_ID = "22222222-2222-4222-8222-222222222222";
 
+// A real (tiny) JPEG: uploads are decoded and re-encoded as WebP now.
+const TINY_JPEG = await sharp({
+  create: { width: 4, height: 3, channels: 3, background: "#7e1518" },
+})
+  .jpeg()
+  .toBuffer();
+
 function imageFile(name: string) {
-  return new File([new Uint8Array([1, 2, 3])], name, { type: "image/jpeg" });
+  return new File([TINY_JPEG], name, { type: "image/jpeg" });
 }
 
 function mediaRow(id: string, url: string, sortOrder = 0) {

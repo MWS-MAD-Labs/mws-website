@@ -1,11 +1,11 @@
 import { VideoSourceType, type GalleryImage, type GalleryVideo } from "@prisma/client";
+import { MAX_UPLOAD_IMAGE_SIZE, optimizeImage, webpFileName } from "../lib/optimize-image";
+import { storedObject } from "../lib/file-response";
 import { z } from "zod";
 import { ResponseError } from "../error/response-error";
 import {
   deleteMinioObject,
-  getMinioObjectBuffer,
   putMinioObject,
-  statMinioObject,
 } from "../lib/minio";
 import {
   GalleryRepository,
@@ -16,7 +16,6 @@ import {
   type GalleryWithMedia,
 } from "../repositories/gallery-repository";
 
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const MAX_VIDEO_SIZE = 50 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = new Set([
   "image/avif",
@@ -115,7 +114,7 @@ function sanitizeFileName(name: string) {
 }
 
 function imageObjectKey(fileName: string) {
-  return `gallery/images/${crypto.randomUUID()}-${sanitizeFileName(fileName)}`;
+  return `gallery/images/${crypto.randomUUID()}-${sanitizeFileName(webpFileName(fileName))}`;
 }
 
 function videoObjectKey(fileName: string) {
@@ -170,8 +169,8 @@ function validateImageFile(file: File) {
     throw new ResponseError(400, "Image file is empty.");
   }
 
-  if (file.size > MAX_IMAGE_SIZE) {
-    throw new ResponseError(400, "Image file must be 5MB or smaller. Use WebP/AVIF for photos.");
+  if (file.size > MAX_UPLOAD_IMAGE_SIZE) {
+    throw new ResponseError(400, "Image file must be 15MB or smaller.");
   }
 }
 
@@ -280,10 +279,10 @@ export class GalleryService {
 
     const metadata = parseImageMetadata(metadataPayload);
     const objectName = imageObjectKey(file.name);
-    const buffer = Buffer.from(await file.arrayBuffer());
+    const optimized = await optimizeImage(new Uint8Array(await file.arrayBuffer()));
 
-    await putMinioObject(objectName, buffer, {
-      "Content-Type": file.type,
+    await putMinioObject(objectName, optimized.bytes, {
+      "Content-Type": "image/webp",
       "Cache-Control": "public, max-age=31536000",
     });
 
@@ -317,18 +316,7 @@ export class GalleryService {
     const image = await GalleryRepository.findImageById(id);
     if (!image) throw new ResponseError(404, "Gallery image not found.");
 
-    const [stat, buffer] = await Promise.all([
-      statMinioObject(image.path),
-      getMinioObjectBuffer(image.path),
-    ]);
-
-    return {
-      buffer,
-      contentType:
-        String(stat.metaData?.["content-type"] ?? stat.metaData?.["Content-Type"] ?? "")
-          || "application/octet-stream",
-      size: stat.size,
-    };
+    return storedObject(image.path);
   }
 
   static async deleteImage(id: string | undefined) {
@@ -417,18 +405,7 @@ export class GalleryService {
       throw new ResponseError(400, "This gallery video is not an uploaded file.");
     }
 
-    const [stat, buffer] = await Promise.all([
-      statMinioObject(video.source),
-      getMinioObjectBuffer(video.source),
-    ]);
-
-    return {
-      buffer,
-      contentType:
-        String(stat.metaData?.["content-type"] ?? stat.metaData?.["Content-Type"] ?? "")
-          || "application/octet-stream",
-      size: stat.size,
-    };
+    return storedObject(video.source);
   }
 
   static async deleteVideo(id: string | undefined) {
