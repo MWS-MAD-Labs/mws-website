@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import {
   adminApi,
   type GalleryItem,
   type NewsCategory,
+  type NewsContentImage,
   type NewsStatus,
   type NewsTag,
 } from '@/admin/api/adminApi';
@@ -14,6 +15,7 @@ import type { GalleryAssetSelection } from '@/admin/features/gallery/components/
 
 import AppShell from '@/admin/components/layout/AppShell';
 import Tiptap from '@/admin/components/Tiptap';
+import type { TiptapImageOptions, TiptapInsertedImage } from '@/admin/components/tiptapImage';
 import Button from '@/admin/components/ui/Button';
 import Field from '@/admin/components/ui/Field';
 import Select from '@/admin/components/ui/Select';
@@ -45,6 +47,30 @@ import { NEWS_STATUS_OPTIONS, formatNewsDateTime, notifyNewsListReturn } from '.
 import { useToastState } from '@/admin/components/ui/toastContext';
 import { useUnsavedChangesGuard } from '@/admin/hooks/useUnsavedChangesGuard';
 
+const CONTENT_IMAGE_SRC = /^\/api\/news\/content-images\/[0-9a-f-]{36}\.(?:avif|jpg|png|webp)$/;
+
+async function galleryImageFile(selection: GalleryAssetSelection, fallbackName: string) {
+  const response = await apiClient.get<Blob>(adminApi.publicAssetUrl(selection.path), {
+    responseType: 'blob',
+  });
+  const blob = response.data;
+  const extension = blob.type.split('/')[1] || 'jpg';
+
+  return new File([blob], `${selection.label || fallbackName}.${extension}`, {
+    type: blob.type || 'image/jpeg',
+  });
+}
+
+function formatBytes(bytes: number) {
+  return bytes >= 1024 * 1024
+    ? `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+    : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+}
+
+function optimizedImageMessage(image: NewsContentImage) {
+  return `Image added (${image.width}×${image.height}, ${formatBytes(image.originalSize)} → ${formatBytes(image.size)}).`;
+}
+
 function serializeNewsDraft(form: NewsForm, removedMediaIds: string[]) {
   return JSON.stringify({ form, removedMediaIds });
 }
@@ -59,7 +85,10 @@ export default function CreateUpdateNews() {
   const [tags, setTags] = useState<NewsTag[]>([]);
   const [galleries, setGalleries] = useState<GalleryItem[]>([]);
 
-  const [imagePickerTarget, setImagePickerTarget] = useState<'cover' | 'article-photo' | null>(null);
+  const [imagePickerTarget, setImagePickerTarget] = useState<
+    'cover' | 'article-photo' | 'content-image' | null
+  >(null);
+  const insertContentImageRef = useRef<((image: TiptapInsertedImage) => void) | null>(null);
   const [localCoverFile, setLocalCoverFile] = useState<File | null>(null);
   const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
   const [removedMediaIds, setRemovedMediaIds] = useState<string[]>([]);
@@ -304,6 +333,54 @@ export default function CreateUpdateNews() {
     }));
   }
 
+  /**
+   * The picker closes (and clears the ref) right after it reports a choice, so
+   * the insert callback is taken synchronously before any await.
+   */
+  async function insertContentImage(loadFile: () => Promise<File>, alt?: string) {
+    const insert = insertContentImageRef.current;
+    insertContentImageRef.current = null;
+    if (!insert) return;
+
+    setMessage('Uploading image...');
+
+    try {
+      const stored = await adminApi.uploadNewsContentImage(await loadFile());
+      insert({ src: stored.url, alt: alt || form.title });
+      setMessage(optimizedImageMessage(stored));
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Failed to upload image.');
+    }
+  }
+
+  const title = form.title;
+  const contentImageOptions = useMemo<TiptapImageOptions>(
+    () => ({
+      onBrowse: (insert) => {
+        insertContentImageRef.current = insert;
+        setImagePickerTarget('content-image');
+      },
+      onImportUrl: async (url) => {
+        const stored = await adminApi.importNewsContentImage(url);
+        setMessage(optimizedImageMessage(stored));
+        return { src: stored.url, alt: title };
+      },
+      onUploadFile: async (file) => {
+        const stored = await adminApi.uploadNewsContentImage(file);
+        setMessage(optimizedImageMessage(stored));
+        return { src: stored.url, alt: title };
+      },
+      isAllowedSrc: (src) => CONTENT_IMAGE_SRC.test(src),
+      onError: (errorMessage) => setMessage(errorMessage),
+    }),
+    [setMessage, title],
+  );
+
+  const closeImagePicker = useCallback(() => {
+    insertContentImageRef.current = null;
+    setImagePickerTarget(null);
+  }, []);
+
   function handlePreview() {
     if (!isEditing || !newsId) {
       setMessage('Save this news post before previewing it.');
@@ -407,19 +484,7 @@ export default function CreateUpdateNews() {
     if (selection.kind !== 'IMAGE') return;
 
     try {
-      const imageUrl = adminApi.publicAssetUrl(selection.path);
-
-      const response = await apiClient.get<Blob>(imageUrl, {
-        responseType: 'blob',
-      });
-
-      const blob = response.data;
-
-      const extension = blob.type.split('/')[1] || 'jpg';
-
-      const file = new File([blob], `${selection.label || 'article-photo'}.${extension}`, {
-        type: blob.type || 'image/jpeg',
-      });
+      const file = await galleryImageFile(selection, 'article-photo');
 
       handleAddArticlePhoto(file, {
         alt: selection.alt,
@@ -481,19 +546,24 @@ export default function CreateUpdateNews() {
                       placeholder="Write the story..."
                       size="article"
                       value={form.content}
+                      images={contentImageOptions}
                       onChange={(value) => updateForm('content', value)}
                     />
                   </Field>
                 </div>
 
-                <div className="border-t border-[#E2E8F0] p-5">
-                  <ArticlePhotosSection
-                    photos={form.articlePhotos}
-                    onOpenAssetPicker={() => setImagePickerTarget('article-photo')}
-                    onRemovePhoto={handleRemoveArticlePhoto}
-                    onChangePhoto={handleChangeArticlePhoto}
-                  />
-                </div>
+                {/* Photos now go inside the text. The old end-of-article list is
+                    only shown while a post still has some, so they can be removed. */}
+                {form.articlePhotos.length ? (
+                  <div className="border-t border-[#E2E8F0] p-5">
+                    <ArticlePhotosSection
+                      photos={form.articlePhotos}
+                      onOpenAssetPicker={() => setImagePickerTarget('article-photo')}
+                      onRemovePhoto={handleRemoveArticlePhoto}
+                      onChangePhoto={handleChangeArticlePhoto}
+                    />
+                  </div>
+                ) : null}
               </div>
 
               <aside className="min-w-0 overflow-hidden rounded-lg border border-[#E2E8F0] bg-white">
@@ -719,9 +789,24 @@ export default function CreateUpdateNews() {
           open={imagePickerTarget !== null}
           allowMultipleUploads={imagePickerTarget === 'article-photo'}
           galleries={galleries}
-          title={imagePickerTarget === 'article-photo' ? 'Choose article photo' : 'Choose cover image'}
-          onClose={() => setImagePickerTarget(null)}
+          title={
+            imagePickerTarget === 'content-image'
+              ? 'Insert image into article'
+              : imagePickerTarget === 'article-photo'
+                ? 'Choose article photo'
+                : 'Choose cover image'
+          }
+          onClose={closeImagePicker}
           onSelect={(selection) => {
+            if (imagePickerTarget === 'content-image') {
+              if (selection.kind !== 'IMAGE') return;
+              void insertContentImage(
+                () => galleryImageFile(selection, 'article-image'),
+                selection.alt,
+              );
+              return;
+            }
+
             if (imagePickerTarget === 'article-photo') {
               void handleArticlePhotoSelection(selection);
               return;
@@ -738,6 +823,11 @@ export default function CreateUpdateNews() {
             updateForm('coverImageAlt', selection.alt || form.title);
           }}
           onSelectLocalFile={(file) => {
+            if (imagePickerTarget === 'content-image') {
+              void insertContentImage(async () => file);
+              return;
+            }
+
             if (imagePickerTarget === 'article-photo') {
               handleAddArticlePhoto(file, {
                 alt: form.title,

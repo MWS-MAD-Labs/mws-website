@@ -14,7 +14,8 @@
     "db:studio": "prisma studio",
     "db:validate": "prisma validate",
     "db:seed:cms-roles": "bun run src/scripts/seed-cms-roles.ts",
-    "db:seed:madlabs-super-admins": "bun run src/scripts/seed-madlabs-super-admins.ts"
+    "db:seed:madlabs-super-admins": "bun run src/scripts/seed-madlabs-super-admins.ts",
+    "images:optimize": "bun run src/scripts/optimize-existing-images.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -36,6 +37,7 @@
     "nodemailer": "^10.0.13",
     "pg": "8.18.0",
     "rate-limiter-flexible": "^11.2.0",
+    "sharp": "^0.35.5",
     "zod": "^4.5.4"
   }
 }

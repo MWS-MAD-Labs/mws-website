@@ -3,6 +3,7 @@ import {
   Bold,
   Heading2,
   Heading3,
+  ImagePlus,
   Italic,
   Link2,
   Link2Off,
@@ -19,8 +20,11 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
+import { insertTiptapImage, type TiptapImageOptions } from './tiptapImage';
+
 type TiptapToolbarProps = {
   editor: Editor;
+  images?: TiptapImageOptions;
 };
 
 function ToolbarButton({
@@ -66,7 +70,7 @@ function ToolbarDivider() {
 
 const MOD = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl';
 
-export default function TiptapToolbar({ editor }: TiptapToolbarProps) {
+export default function TiptapToolbar({ editor, images }: TiptapToolbarProps) {
   const state = useEditorState({
     editor,
     selector: ({ editor: current }) => ({
@@ -89,10 +93,45 @@ export default function TiptapToolbar({ editor }: TiptapToolbarProps) {
 
   const [isEditingLink, setIsEditingLink] = useState(false);
   const [linkValue, setLinkValue] = useState('');
+  const [isAddingImage, setIsAddingImage] = useState(false);
+  const [imageLink, setImageLink] = useState('');
+  const [imageError, setImageError] = useState<string | null>(null);
+  const [importingImage, setImportingImage] = useState(false);
 
   function openLinkEditor() {
+    setIsAddingImage(false);
     setLinkValue(state.linkHref);
     setIsEditingLink(true);
+  }
+
+  function openImagePanel() {
+    setIsEditingLink(false);
+    setImageError(null);
+    setIsAddingImage((current) => !current);
+  }
+
+  function browseImage() {
+    if (!images) return;
+    setIsAddingImage(false);
+    images.onBrowse((image) => insertTiptapImage(editor, image));
+  }
+
+  async function importImageLink() {
+    const url = imageLink.trim();
+    if (!images || !url || importingImage) return;
+
+    setImportingImage(true);
+    setImageError(null);
+
+    try {
+      insertTiptapImage(editor, await images.onImportUrl(url));
+      setImageLink('');
+      setIsAddingImage(false);
+    } catch (error) {
+      setImageError(error instanceof Error ? error.message : 'Failed to add image from link.');
+    } finally {
+      setImportingImage(false);
+    }
   }
 
   function applyLink() {
@@ -205,6 +244,18 @@ export default function TiptapToolbar({ editor }: TiptapToolbarProps) {
           onClick={() => editor.chain().focus().extendMarkRange('link').unsetLink().run()}
         />
 
+        {images ? (
+          <>
+            <ToolbarDivider />
+            <ToolbarButton
+              icon={ImagePlus}
+              label="Insert image"
+              active={isAddingImage}
+              onClick={openImagePanel}
+            />
+          </>
+        ) : null}
+
         <div className="ml-auto flex items-center gap-0.5">
           <ToolbarButton
             icon={Undo2}
@@ -268,6 +319,71 @@ export default function TiptapToolbar({ editor }: TiptapToolbarProps) {
           <p className="w-full text-[11px] text-[#64748B]">
             Select text first, then add a link. Leave empty to remove it.
           </p>
+        </div>
+      ) : null}
+
+      {images && isAddingImage ? (
+        <div
+          role="group"
+          aria-label="Insert image"
+          className="space-y-2 border-t border-[#E2E8F0] bg-white px-3 py-2"
+        >
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={browseImage}
+              className="rounded-md border border-[#E2E8F0] px-3 py-1.5 text-xs font-semibold text-[#1C2434] hover:bg-[#F1F5F9]"
+            >
+              Upload or choose from gallery
+            </button>
+            <span className="text-xs text-[#64748B]">or</span>
+            <input
+              id="tiptap-image-link-input"
+              aria-label="Public image link"
+              autoFocus
+              type="text"
+              inputMode="url"
+              placeholder="Paste a public image link (Google Drive, Google Photos, image URL…)"
+              value={imageLink}
+              disabled={importingImage}
+              onChange={(event) => setImageLink(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault();
+                  void importImageLink();
+                }
+                if (event.key === 'Escape') setIsAddingImage(false);
+              }}
+              className="min-w-[220px] flex-1 rounded-md border border-[#E2E8F0] px-2.5 py-1.5 text-sm outline-none focus:border-[#3C50E0] disabled:bg-[#F1F5F9]"
+            />
+            <button
+              type="button"
+              disabled={!imageLink.trim() || importingImage}
+              onClick={() => void importImageLink()}
+              className="rounded-md bg-[#3C50E0] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#2F3EC8] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {importingImage ? 'Adding…' : 'Insert from link'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsAddingImage(false)}
+              className="rounded-md px-3 py-1.5 text-xs font-semibold text-[#64748B] hover:bg-[#F1F5F9]"
+            >
+              Cancel
+            </button>
+          </div>
+          {imageError ? (
+            <p role="alert" className="text-[11px] font-medium text-[#DC2626]">
+              {imageError}
+            </p>
+          ) : (
+            <p className="text-[11px] text-[#64748B]">
+              The image goes where the cursor is. You can also paste or drag a picture straight into
+              the text. Works with Google Drive and Google Photos share links (shared as &quot;Anyone
+              with the link&quot;) and direct image links. Max 15MB; large photos are shrunk
+              automatically so the page stays light.
+            </p>
+          )}
         </div>
       ) : null}
     </div>

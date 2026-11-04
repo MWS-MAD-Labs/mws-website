@@ -33,6 +33,10 @@ adminNewsRoute.put("/posts/:id", NewsController.updatePost);
 adminNewsRoute.delete("/posts/:id", NewsController.deletePost);
 
 // ---------- Post media (always nested under its post) ----------
+// Article body images
+adminNewsRoute.post("/content-images", NewsController.uploadContentImage);
+adminNewsRoute.post("/content-images/import", NewsController.importContentImage);
+
 adminNewsRoute.get("/posts/:id/media", NewsController.listMedia);
 adminNewsRoute.post("/posts/:id/media", NewsController.createMedia);
 adminNewsRoute.post("/posts/:id/media/images", NewsController.uploadImageMedia);

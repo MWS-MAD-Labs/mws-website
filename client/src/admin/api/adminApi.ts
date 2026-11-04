@@ -16,6 +16,15 @@ import type {
 } from "@/features/hero/heroData";
 import type { AuthUser, CmsRoleName } from "@/admin/types/auth";
 
+/** An article body image after the server resized and re-encoded it. */
+export type NewsContentImage = {
+  url: string;
+  width: number;
+  height: number;
+  size: number;
+  originalSize: number;
+};
+
 export type DashboardRecentUpdate = {
   type: "news" | "page" | "academic" | "hero";
   title: string;
@@ -1803,6 +1812,27 @@ export const adminApi = {
     return response!.data;
   },
 
+  /** Stores an image for the article body and returns its relative URL. */
+  async uploadNewsContentImage(file: File): Promise<NewsContentImage> {
+    const body = new FormData();
+    body.append("file", file);
+
+    const response = await apiRequest<{ data: NewsContentImage }>(
+      "/admin/news/content-images",
+      { method: "POST", body },
+    );
+    return response!.data;
+  },
+
+  /** The server downloads a public link (Google Drive, Dropbox, any site). */
+  async importNewsContentImage(url: string): Promise<NewsContentImage> {
+    const response = await apiRequest<{ data: NewsContentImage }>(
+      "/admin/news/content-images/import",
+      { method: "POST", body: { url } },
+    );
+    return response!.data;
+  },
+
   /** Also removes the stored object; the cover is never reachable this way. */
   async deleteNewsImage(newsPostId: string, mediaId: string): Promise<void> {
     await apiRequest(`/admin/news/posts/${newsPostId}/media/${mediaId}`, {
@@ -1977,8 +2007,13 @@ export const adminApi = {
     await apiRequest(`/admin/gallery-videos/${id}`, { method: "DELETE" });
   },
 
-  galleryImageUrl(image: GalleryImageItem): string {
-    return `${env.apiBaseUrl}${image.previewPath}`;
+  /**
+   * Pass `width` (320, 640, 960 or 1280) for a thumbnail: the API answers with
+   * a small WebP copy instead of the full photo.
+   */
+  galleryImageUrl(image: GalleryImageItem, width?: 320 | 640 | 960 | 1280): string {
+    const url = `${env.apiBaseUrl}${image.previewPath}`;
+    return width ? `${url}?w=${width}` : url;
   },
 
   galleryVideoUrl(video: GalleryVideoItem): string {

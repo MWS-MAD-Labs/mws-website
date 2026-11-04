@@ -6,4 +6,5 @@ export const publicNewsRoute = new Hono();
 publicNewsRoute.get("/", PublicNewsController.list);
 publicNewsRoute.get("/categories", PublicNewsController.categories);
 publicNewsRoute.get("/media/:id/file", PublicNewsController.mediaFile);
+publicNewsRoute.get("/content-images/:name", PublicNewsController.contentImage);
 publicNewsRoute.get("/:slug", PublicNewsController.detail);

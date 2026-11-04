@@ -2,6 +2,7 @@ import type { Context } from "hono";
 import { ResponseError } from "../../error/response-error";
 import { toJsonSafe } from "../../lib/json-response";
 import { NewsService } from "../../services/news-service";
+import { NewsContentImageService } from "../../services/news-content-image-service";
 import type { SessionVariables } from "../../types/hono-context";
 
 async function readJson(c: Context) {
@@ -127,6 +128,27 @@ export class NewsController {
 
   static async deletePost(c: Context) {
     return ok(c, await NewsService.deletePost(c.req.param("id")));
+  }
+
+  // ---------- Article body images ----------
+
+  static async uploadContentImage(c: Context) {
+    const body = (await c.req.parseBody()) as MultipartBody;
+    const file = firstFormValue(body.file);
+
+    if (!(file instanceof File)) {
+      throw new ResponseError(400, "Image file is required.");
+    }
+
+    return ok(c, await NewsContentImageService.upload(file), 201);
+  }
+
+  static async importContentImage(c: Context) {
+    return ok(
+      c,
+      await NewsContentImageService.importFromUrl(await readJson(c)),
+      201,
+    );
   }
 
   // ---------- Post media ----------

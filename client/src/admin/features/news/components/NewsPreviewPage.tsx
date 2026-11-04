@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import DOMPurify from 'dompurify';
 import { ExternalLink } from 'lucide-react';
 
 import { adminApi, type NewsPost } from '@/admin/api/adminApi';
@@ -8,6 +7,7 @@ import Button from '@/admin/components/ui/Button';
 import { newsPreviewFromPost } from '@/admin/features/news/newsPreviewModel';
 import { asset } from '@/data/site';
 import {
+  newsContentHtml,
   formatNewsDate,
   publicNewsImage,
   type PublicNewsDetail,
@@ -194,7 +194,7 @@ function NewsPreviewArticle({ post }: { post: PublicNewsDetail }) {
             <div
               className="public-rich-text mt-10 max-w-none break-words font-sans leading-[1.8] text-[#241718]"
               dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(post.content?.text || ''),
+                __html: newsContentHtml(post.content?.text),
               }}
             />
 

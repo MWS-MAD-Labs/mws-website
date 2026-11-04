@@ -1,3 +1,5 @@
+import { isNewsContentImageUrl } from "./news-content-image";
+
 const ALLOWED_TAGS = new Set([
   "p",
   "br",
@@ -14,6 +16,7 @@ const ALLOWED_TAGS = new Set([
   "h4",
   "hr",
   "a",
+  "img",
 ]);
 
 const URI_ATTRIBUTES = new Set(["href"]);
@@ -42,11 +45,44 @@ function isSafeHref(value: string) {
   }
 }
 
+const ATTRIBUTE_PATTERN = /([a-zA-Z0-9:-]+)(?:\s*=\s*("[^"]*"|'[^']*'|[^\s"'=<>`]+))?/g;
+
+function readAttributes(rawAttributes: string) {
+  const values = new Map<string, string>();
+  for (const match of rawAttributes.matchAll(ATTRIBUTE_PATTERN)) {
+    const name = match[1]!.toLowerCase();
+    if (values.has(name)) continue;
+    values.set(name, (match[2] ?? "").replace(/^['"]|['"]$/g, ""));
+  }
+  return values;
+}
+
+/**
+ * An article image may only show a file stored by the news content image
+ * upload. Anything else (another site, a data: URI, a tracking pixel) is
+ * dropped together with the tag.
+ */
+function sanitizedImage(rawAttributes: string) {
+  const values = readAttributes(rawAttributes);
+  const src = values.get("src")?.trim() ?? "";
+  if (!isNewsContentImageUrl(src)) return "";
+
+  // The editor already writes `&amp;`/`&quot;`; keep those instead of turning
+  // them into a visible "&amp;amp;".
+  const alt = (values.get("alt") ?? "")
+    .slice(0, 255)
+    .replace(/&(?!(?:[a-zA-Z]+|#\d+|#x[0-9a-fA-F]+);)/g, "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+  return `<img src="${escapeAttribute(src)}" alt="${alt}">`;
+}
+
 function sanitizedAttributes(tagName: string, rawAttributes: string) {
   if (tagName !== "a") return "";
 
   const attributes: string[] = [];
-  const attributePattern = /([a-zA-Z0-9:-]+)(?:\s*=\s*("[^"]*"|'[^']*'|[^\s"'=<>`]+))?/g;
+  const attributePattern = new RegExp(ATTRIBUTE_PATTERN.source, "g");
   let match: RegExpExecArray | null;
 
   while ((match = attributePattern.exec(rawAttributes))) {
@@ -76,6 +112,9 @@ export function sanitizeHtml(input: string) {
     if (!ALLOWED_TAGS.has(tagName)) return "";
 
     const isClosing = /^<\//.test(rawTag);
+    if (tagName === "img") {
+      return isClosing ? "" : sanitizedImage(match[2] ?? "");
+    }
     if (isClosing) return `</${tagName}>`;
 
     const isVoid = tagName === "br" || tagName === "hr";
