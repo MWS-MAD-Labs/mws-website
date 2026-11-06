@@ -125,10 +125,6 @@ export default function Home() {
   const campusSlides = homeData?.spotlightSlides.length ? homeData.spotlightSlides : spotlightSlides;
   const activeHeroIndex = slides.length ? heroIndex % slides.length : 0;
 
-  const changeHeroSlide = (nextIndex: number) => {
-    setHeroIndex(nextIndex);
-  };
-
   useEffect(() => {
     let isMounted = true;
 
@@ -170,11 +166,10 @@ export default function Home() {
       <Hero
         slides={slides}
         activeIndex={activeHeroIndex}
-        onSelectSlide={changeHeroSlide}
         onPrevious={() =>
-          changeHeroSlide(activeHeroIndex === 0 ? slides.length - 1 : activeHeroIndex - 1)
+          setHeroIndex(activeHeroIndex === 0 ? slides.length - 1 : activeHeroIndex - 1)
         }
-        onNext={() => changeHeroSlide((activeHeroIndex + 1) % slides.length)}
+        onNext={() => setHeroIndex((activeHeroIndex + 1) % slides.length)}
       />
       <Background
         body={
