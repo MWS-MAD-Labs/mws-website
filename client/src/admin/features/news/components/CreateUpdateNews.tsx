@@ -44,6 +44,7 @@ import {
 import { NEWS_STATUS_OPTIONS, formatNewsDateTime, notifyNewsListReturn } from '../newsUtils';
 import { useToastState } from '@/admin/components/ui/toastContext';
 import { useUnsavedChangesGuard } from '@/admin/hooks/useUnsavedChangesGuard';
+import { useAuth } from '@/admin/auth/useAuth';
 
 function serializeNewsDraft(form: NewsForm, removedMediaIds: string[]) {
   return JSON.stringify({ form, removedMediaIds });
@@ -52,6 +53,7 @@ function serializeNewsDraft(form: NewsForm, removedMediaIds: string[]) {
 export default function CreateUpdateNews() {
   const navigate = useNavigate();
   const { newsId } = useParams<{ newsId: string }>();
+  const { user } = useAuth();
   const isEditing = Boolean(newsId);
 
   const [form, setForm] = useState<NewsForm>(createEmptyNewsForm());
@@ -72,6 +74,22 @@ export default function CreateUpdateNews() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useToastState<string | null>(null);
   const articlePhotoPreviewUrlsRef = useRef<Set<string>>(new Set());
+  const draftUserIdRef = useRef<string | null>(user?.id ?? null);
+  const draftStorageWarningShownRef = useRef(false);
+  const pendingDraftRef = useRef<{
+    form: NewsForm;
+    hasLocalCoverFile: boolean;
+    hasUnsavedChanges: boolean;
+    loading: boolean;
+    newsId: string | undefined;
+    removedMediaIds: string[];
+    saving: boolean;
+    userId: string | null;
+  } | null>(null);
+
+  useEffect(() => {
+    if (user?.id) draftUserIdRef.current = user.id;
+  }, [user?.id]);
 
   useEffect(() => {
     let cancelled = false;
@@ -97,7 +115,16 @@ export default function CreateUpdateNews() {
 
         const nextForm = post ? newsFormFromPost(post) : createEmptyNewsForm();
         const nextSnapshot = serializeNewsDraft(nextForm, []);
-        const storedDraft = loadNewsEditorDraft(newsId);
+        const draftUserId = draftUserIdRef.current;
+        const draftResult = draftUserId
+          ? loadNewsEditorDraft(newsId, draftUserId)
+          : { draft: null, storageAvailable: true };
+        const storedDraft = draftResult.draft;
+        if (!draftResult.storageAvailable) {
+          setMessage(
+            'Local draft recovery is unavailable in this browser. Changes can still be saved, but may not be recoverable after your session expires.',
+          );
+        }
         const shouldRestoreDraft =
           storedDraft &&
           serializeNewsDraft(storedDraft.form, storedDraft.removedMediaIds) !== nextSnapshot &&
@@ -115,7 +142,7 @@ export default function CreateUpdateNews() {
           );
         } else {
           setForm(nextForm);
-          if (storedDraft) clearNewsEditorDraft(newsId);
+          if (storedDraft && draftUserId) clearNewsEditorDraft(newsId, draftUserId);
         }
 
         setSavedSnapshot(nextSnapshot);
@@ -136,7 +163,7 @@ export default function CreateUpdateNews() {
     return () => {
       cancelled = true;
     };
-  }, [newsId, setMessage]);
+  }, [newsId, setMessage, user?.id]);
 
   useEffect(() => {
     return () => {
@@ -183,24 +210,70 @@ export default function CreateUpdateNews() {
   useUnsavedChangesGuard(hasUnsavedChanges);
 
   useEffect(() => {
+    pendingDraftRef.current = {
+      form,
+      hasLocalCoverFile: Boolean(localCoverFile),
+      hasUnsavedChanges,
+      loading,
+      newsId,
+      removedMediaIds,
+      saving,
+      userId: draftUserIdRef.current,
+    };
+  }, [form, hasUnsavedChanges, loading, localCoverFile, newsId, removedMediaIds, saving, user?.id]);
+
+  useEffect(
+    () => () => {
+      const pendingDraft = pendingDraftRef.current;
+      if (
+        !pendingDraft ||
+        !pendingDraft.hasUnsavedChanges ||
+        pendingDraft.loading ||
+        pendingDraft.saving ||
+        !pendingDraft.userId
+      ) {
+        return;
+      }
+
+      saveNewsEditorDraft({
+        form: pendingDraft.form,
+        hasLocalCoverFile: pendingDraft.hasLocalCoverFile,
+        newsId: pendingDraft.newsId,
+        removedMediaIds: pendingDraft.removedMediaIds,
+        userId: pendingDraft.userId,
+      });
+    },
+    [],
+  );
+
+  useEffect(() => {
     if (loading || saving) return;
+    const draftUserId = draftUserIdRef.current;
+    if (!draftUserId) return;
 
     if (!hasUnsavedChanges) {
-      clearNewsEditorDraft(newsId);
+      clearNewsEditorDraft(newsId, draftUserId);
       return;
     }
 
     const timer = window.setTimeout(() => {
-      saveNewsEditorDraft({
+      const saved = saveNewsEditorDraft({
         form,
         hasLocalCoverFile: Boolean(localCoverFile),
         newsId,
         removedMediaIds,
+        userId: draftUserId,
       });
+      if (!saved && !draftStorageWarningShownRef.current) {
+        draftStorageWarningShownRef.current = true;
+        setMessage(
+          'Local draft recovery is unavailable in this browser. Changes can still be saved, but may not be recoverable after your session expires.',
+        );
+      }
     }, 500);
 
     return () => window.clearTimeout(timer);
-  }, [form, hasUnsavedChanges, loading, localCoverFile, newsId, removedMediaIds, saving]);
+  }, [form, hasUnsavedChanges, loading, localCoverFile, newsId, removedMediaIds, saving, setMessage, user?.id]);
 
   function updateForm<Key extends keyof NewsForm>(key: Key, value: NewsForm[Key]) {
     setForm((current) => ({
@@ -383,8 +456,11 @@ export default function CreateUpdateNews() {
         });
       }
 
-      clearNewsEditorDraft(newsId);
-      if (!isEditing) clearNewsEditorDraft(undefined);
+      const draftUserId = draftUserIdRef.current;
+      if (draftUserId) {
+        clearNewsEditorDraft(newsId, draftUserId);
+        if (!isEditing) clearNewsEditorDraft(undefined, draftUserId);
+      }
       notifyNewsListReturn(isEditing ? 'News post updated.' : 'News post created.');
       navigate('/admin/news');
     } catch (error) {

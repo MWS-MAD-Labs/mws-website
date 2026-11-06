@@ -1,7 +1,7 @@
 import type { NewsForm } from './newsEditorModel';
 
 const STORAGE_PREFIX = 'mws:admin-news-editor-draft';
-const STORAGE_VERSION = 1;
+const STORAGE_VERSION = 2;
 
 export type StoredNewsEditorDraft = {
   form: NewsForm;
@@ -10,11 +10,17 @@ export type StoredNewsEditorDraft = {
   newsId: string | null;
   removedMediaIds: string[];
   savedAt: number;
+  userId: string;
   version: number;
 };
 
-function draftKey(newsId: string | undefined) {
-  return `${STORAGE_PREFIX}:${newsId ?? 'new'}`;
+export type NewsEditorDraftLoadResult = {
+  draft: StoredNewsEditorDraft | null;
+  storageAvailable: boolean;
+};
+
+function draftKey(newsId: string | undefined, userId: string) {
+  return `${STORAGE_PREFIX}:${userId}:${newsId ?? 'new'}`;
 }
 
 function storableForm(form: NewsForm): { form: NewsForm; lostLocalArticlePhotoCount: number } {
@@ -36,20 +42,37 @@ function isStoredDraft(value: unknown): value is StoredNewsEditorDraft {
   return (
     draft.version === STORAGE_VERSION &&
     typeof draft.savedAt === 'number' &&
+    typeof draft.userId === 'string' &&
     draft.form !== undefined &&
     Array.isArray(draft.removedMediaIds)
   );
 }
 
-export function loadNewsEditorDraft(newsId: string | undefined): StoredNewsEditorDraft | null {
-  try {
-    const raw = window.localStorage.getItem(draftKey(newsId));
-    if (!raw) return null;
+export function loadNewsEditorDraft(
+  newsId: string | undefined,
+  userId: string,
+): NewsEditorDraftLoadResult {
+  let raw: string | null;
 
-    const parsed = JSON.parse(raw) as unknown;
-    return isStoredDraft(parsed) ? parsed : null;
+  try {
+    raw = window.localStorage.getItem(draftKey(newsId, userId));
   } catch {
-    return null;
+    return { draft: null, storageAvailable: false };
+  }
+
+  if (!raw) return { draft: null, storageAvailable: true };
+
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    return {
+      draft:
+        isStoredDraft(parsed) && parsed.userId === userId && parsed.newsId === (newsId ?? null)
+          ? parsed
+          : null,
+      storageAvailable: true,
+    };
+  } catch {
+    return { draft: null, storageAvailable: true };
   }
 }
 
@@ -58,11 +81,13 @@ export function saveNewsEditorDraft({
   hasLocalCoverFile,
   newsId,
   removedMediaIds,
+  userId,
 }: {
   form: NewsForm;
   hasLocalCoverFile: boolean;
   newsId: string | undefined;
   removedMediaIds: string[];
+  userId: string;
 }) {
   try {
     const storable = storableForm(form);
@@ -73,18 +98,20 @@ export function saveNewsEditorDraft({
       newsId: newsId ?? null,
       removedMediaIds,
       savedAt: Date.now(),
+      userId,
       version: STORAGE_VERSION,
     };
 
-    window.localStorage.setItem(draftKey(newsId), JSON.stringify(draft));
+    window.localStorage.setItem(draftKey(newsId, userId), JSON.stringify(draft));
+    return true;
   } catch {
-    // Autosave is a safety net only; editing and saving through the API still work.
+    return false;
   }
 }
 
-export function clearNewsEditorDraft(newsId: string | undefined) {
+export function clearNewsEditorDraft(newsId: string | undefined, userId: string) {
   try {
-    window.localStorage.removeItem(draftKey(newsId));
+    window.localStorage.removeItem(draftKey(newsId, userId));
   } catch {
     // Nothing to clear when storage is unavailable.
   }

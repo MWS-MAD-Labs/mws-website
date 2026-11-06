@@ -6,9 +6,9 @@ import { ExternalLink } from 'lucide-react';
 import { adminApi, type NewsPost } from '@/admin/api/adminApi';
 import Button from '@/admin/components/ui/Button';
 import { newsPreviewFromPost } from '@/admin/features/news/newsPreviewModel';
+import { formatAdminDate } from '@/admin/utils/dateFormat';
 import { asset } from '@/data/site';
 import {
-  formatNewsDate,
   publicNewsImage,
   type PublicNewsDetail,
 } from '@/features/news/newsData';
@@ -165,7 +165,7 @@ function NewsPreviewArticle({ post }: { post: PublicNewsDetail }) {
             </h1>
 
             <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-[#625759]">
-              <span>{formatNewsDate(post.publishedAt)}</span>
+              <span>{formatAdminDate(post.publishedAt)}</span>
 
               {post.authorName ? (
                 <>
