@@ -22,11 +22,14 @@ import { hasCmsPermission, hasCmsRole } from '@/admin/types/auth';
 import AdmissionsPage from '@/admin/features/admissions/AdmissionsPage';
 import AdmissionGuidelinesPage from '@/admin/features/admissions/AdmissionGuidelinesPage';
 import AcademicFaqsPage from '@/admin/features/academic/AcademicFaqsPage';
-import AcademicCalendarPage from '@/admin/features/academic/AcademicCalendarPage';
 import AcademicLevelEditorPage from '@/admin/features/academic/AcademicLevelEditorPage';
 import AcademicOverviewPage from '@/admin/features/academic/AcademicOverviewPage';
 import AuditLogsPage from '@/admin/features/audit/pages/AuditLogsPage';
 import ContactPageEditor from '@/admin/features/contact/ContactPageEditor';
+import ContactSettingsPage from '@/admin/features/settings/pages/ContactSettingsPage';
+import LocationSettingsPage from '@/admin/features/settings/pages/LocationSettingsPage';
+import OfficeHoursSettingsPage from '@/admin/features/settings/pages/OfficeHoursSettingsPage';
+import SocialSettingsPage from '@/admin/features/settings/pages/SocialSettingsPage';
 import CommunityStoriesPage from '@/admin/features/community-stories/CommunityStoriesPage';
 import CommunityVoicesPage from '@/admin/features/community-voices/pages/CommunityVoicesPage';
 import HeroSlidesPage from '@/admin/features/home/HeroSlidesPage';
@@ -880,12 +883,49 @@ export default function AdminApp() {
             element={<Navigate to="/admin/content/community-voices" replace />}
           />
 
+
+          {/* Settings */}
+          <Route path="settings" element={<Navigate to="/admin/settings/contact" replace />} />
+
           <Route
-            path="calendar"
+            path="settings/contact"
             element={
               <RequireAuth>
                 <RequireContentPermission>
-                  <AcademicCalendarPage />
+                  <ContactSettingsPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
+
+          <Route
+            path="settings/location"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <LocationSettingsPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
+
+          <Route
+            path="settings/office-hours"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <OfficeHoursSettingsPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
+
+          <Route
+            path="settings/social"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <SocialSettingsPage />
                 </RequireContentPermission>
               </RequireAuth>
             }

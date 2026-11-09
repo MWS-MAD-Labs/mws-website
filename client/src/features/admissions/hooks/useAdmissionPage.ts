@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { contactPageApi } from '@/api/contactPageApi';
 import { pageApi, type AdmissionProgramData } from '@/api/pageApi';
 import {
   defaultAdmissionPageContent,
@@ -8,11 +7,7 @@ import {
   type AdmissionPageContent,
 } from '@/features/admissions/admissionPageData';
 import { fallbackPrograms, whatsappHref } from '@/features/admissions/admissionPublicConfig';
-import {
-  defaultContactPageContent,
-  type ContactPageContent,
-  withContactPageFallback,
-} from '@/features/contact/contactPageData';
+import { useSiteSettings } from '@/features/site-settings/useSiteSettings';
 
 const admissionMessage =
   'Hello MWS Admissions Team, I would like to ask about admissions. Could you please help me with the next steps?';
@@ -20,8 +15,7 @@ const admissionMessage =
 export function useAdmissionPage() {
   const [programs, setPrograms] = useState<AdmissionProgramData[]>(fallbackPrograms);
   const [content, setContent] = useState<AdmissionPageContent>(defaultAdmissionPageContent);
-  const [contactContent, setContactContent] =
-    useState<ContactPageContent>(defaultContactPageContent);
+  const { contact } = useSiteSettings();
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -40,21 +34,14 @@ export function useAdmissionPage() {
         setLoadError(error instanceof Error ? error.message : 'Unable to load admissions content.');
       });
 
-    contactPageApi
-      .publicContactPage()
-      .then((page) => {
-        if (isMounted) setContactContent(withContactPageFallback(page.content));
-      })
-      .catch(() => undefined);
-
     return () => {
       isMounted = false;
     };
   }, []);
 
   const generalHref = useMemo(
-    () => whatsappHref(contactContent.directContacts.whatsapp, admissionMessage),
-    [contactContent],
+    () => whatsappHref(contact.whatsapp, admissionMessage),
+    [contact.whatsapp],
   );
 
   return {

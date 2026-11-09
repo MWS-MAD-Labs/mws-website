@@ -1,11 +1,14 @@
 import { z } from "zod";
 import { ResponseError } from "../../error/response-error";
 import { getPrisma } from "../../lib/prisma";
+import { MAP_EMBED_ERROR, normalizeMapEmbedSrc } from "../../lib/google-maps";
+import {
+  SiteSettingsService,
+  defaultSiteSettings,
+  type SiteSettings,
+} from "../site-settings-service";
 
 const CONTACT_PAGE_SLUG = "contact";
-
-const mapSrc =
-  "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3965.7314275134707!2d106.7262070747513!3d-6.300282493688862!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69fa70d8a57eb7%3A0x6b10705a6ef6c3b6!2sMillennia%20World%20School!5e0!3m2!1sen!2sid!4v1715569420000!5m2!1sen!2sid";
 
 export const defaultContactPageContent = {
   hero: {
@@ -28,33 +31,21 @@ export const defaultContactPageContent = {
     "Welcome to our website. We are glad to have you around. Please feel free to reach out to us for any inquiries regarding our programs, admissions, or campus visits.",
   address: {
     title: "Campus Address",
-    name: "Millennia World School",
-    lines: [
-      "Jl. Merpati Raya No. 103, Sawah Lama, Ciputat,",
-      "Tangerang Selatan, Banten 15413, Indonesia",
-    ],
+    name: defaultSiteSettings.location.name,
+    lines: defaultSiteSettings.location.addressLines,
   },
   directContacts: {
     title: "Direct Contacts",
     heading: "Administration & Admission:",
-    phone: "+62 821-1150-7100",
-    whatsapp: "+62 821-1150-7100",
-    email: "info@millennia21.id",
+    ...defaultSiteSettings.contact,
   },
   officeHours: {
     title: "Office Hours",
-    items: [
-      { title: "Monday - Friday", text: "07:30 AM - 04:00 PM" },
-      {
-        title: "Saturday",
-        text: "08:00 AM - 12:00 PM (Admissions office only)",
-      },
-      { title: "Sunday & Public Holidays", text: "Closed" },
-    ],
+    items: defaultSiteSettings.officeHours.items,
   },
   map: {
     title: "Our Campus Location",
-    src: mapSrc,
+    src: defaultSiteSettings.location.mapEmbedSrc,
     titleAttr: "Millennia World School location map",
   },
 };
@@ -110,33 +101,7 @@ const contactPageContentSchema = z.object({
 
 export type ContactPageContent = z.infer<typeof contactPageContentSchema>;
 
-/**
- * Turns what an editor pastes (the full `<iframe>` code from Google Maps or
- * just its URL) into an embeddable Google Maps URL. Anything else, such as a
- * share link Google refuses to show inside an iframe, returns null.
- */
-export function normalizeMapEmbedSrc(input: string): string | null {
-  const trimmed = input.trim();
-  const iframeSrc = trimmed.match(/<iframe[^>]*\ssrc\s*=\s*["']([^"']+)["']/i)?.[1];
-  const candidate = (iframeSrc ?? trimmed).replace(/&amp;/g, "&");
-
-  let url: URL;
-  try {
-    url = new URL(candidate);
-  } catch {
-    return null;
-  }
-
-  const host = url.hostname.replace(/^www\./, "");
-  const isEmbedPath = host === "google.com" && url.pathname.startsWith("/maps/embed");
-  const isLegacyEmbed =
-    (host === "google.com" || host === "maps.google.com") &&
-    url.pathname === "/maps" &&
-    url.searchParams.get("output") === "embed";
-
-  if (url.protocol !== "https:" || !(isEmbedPath || isLegacyEmbed)) return null;
-  return url.toString();
-}
+export { normalizeMapEmbedSrc };
 
 function parseContent(payload: unknown): ContactPageContent {
   const result = contactPageContentSchema.safeParse(payload);
@@ -146,10 +111,7 @@ function parseContent(payload: unknown): ContactPageContent {
 
   const mapSrc = normalizeMapEmbedSrc(result.data.map.src);
   if (!mapSrc) {
-    throw new ResponseError(
-      400,
-      "Map must be a Google Maps embed. In Google Maps use Share → Embed a map → Copy HTML.",
-    );
+    throw new ResponseError(400, MAP_EMBED_ERROR);
   }
 
   return { ...result.data, map: { ...result.data.map, src: mapSrc } };
@@ -165,13 +127,43 @@ function resolveContent(payload: unknown): ContactPageContent {
   return { ...result.data, map: { ...result.data.map, src: mapSrc } };
 }
 
-function pageResponse(page: {
-  id?: string;
-  title?: string;
-  status?: string | null;
-  updatedAt?: Date;
-  body?: unknown;
-}) {
+/**
+ * Phone, WhatsApp, email, address, office hours and map are managed in Site
+ * Settings; the Contact page keeps only its own copy (titles, intro, form).
+ */
+function withSiteSettings(content: ContactPageContent, settings: SiteSettings): ContactPageContent {
+  return {
+    ...content,
+    address: {
+      ...content.address,
+      name: settings.location.name,
+      lines: settings.location.addressLines,
+    },
+    directContacts: {
+      ...content.directContacts,
+      ...settings.contact,
+    },
+    officeHours: {
+      ...content.officeHours,
+      items: settings.officeHours.items,
+    },
+    map: {
+      ...content.map,
+      src: settings.location.mapEmbedSrc,
+    },
+  };
+}
+
+function pageResponse(
+  page: {
+    id?: string;
+    title?: string;
+    status?: string | null;
+    updatedAt?: Date;
+    body?: unknown;
+  },
+  settings: SiteSettings,
+) {
   return {
     id: page.id ?? null,
     slug: CONTACT_PAGE_SLUG,
@@ -179,7 +171,7 @@ function pageResponse(page: {
     template: "contact",
     status: page.status ?? "default",
     updatedAt: page.updatedAt ?? null,
-    content: resolveContent(page.body),
+    content: withSiteSettings(resolveContent(page.body), settings),
     isDefault: !page.id,
   };
 }
@@ -195,7 +187,7 @@ export class ContactPageService {
       },
     });
 
-    return pageResponse(page ?? {});
+    return pageResponse(page ?? {}, await SiteSettingsService.getSettings());
   }
 
   static async getAdmin() {
@@ -204,7 +196,7 @@ export class ContactPageService {
       where: { slug: CONTACT_PAGE_SLUG, deletedAt: null },
     });
 
-    return pageResponse(page ?? {});
+    return pageResponse(page ?? {}, await SiteSettingsService.getSettings());
   }
 
   static async update(payload: unknown, userId: string | null) {
@@ -233,7 +225,7 @@ export class ContactPageService {
       },
     });
 
-    return pageResponse(page);
+    return pageResponse(page, await SiteSettingsService.getSettings());
   }
 
   static async delete() {

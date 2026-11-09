@@ -1,7 +1,12 @@
+import { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import { logoUrl } from '../../data/site';
+import { SOCIAL_PLATFORMS, telLink } from '@/features/site-settings/siteSettingsData';
+import { useSiteSettings } from '@/features/site-settings/useSiteSettings';
 
 export default function Footer() {
+  const { contact, location, social } = useSiteSettings();
+  const socialLinks = SOCIAL_PLATFORMS.filter((platform) => social[platform.key]);
   const footerLinkClassName =
     'text-[14.5px] text-[rgba(248,247,243,0.75)] transition-colors duration-[250ms] hover:text-[var(--gold)]';
 
@@ -30,6 +35,26 @@ export default function Footer() {
               creative young minds. We use Finnish Waldorf Framework integrated with Indonesian
               National Curriculum.
             </p>
+            {socialLinks.length ? (
+              <div className="mt-5">
+                <h2 className="mb-2 text-[13px] font-semibold uppercase tracking-[0.08em] text-[rgba(248,247,243,0.42)]">
+                  Follow Us
+                </h2>
+                <div className="flex flex-wrap gap-x-4 gap-y-2 font-normal">
+                  {socialLinks.map((platform) => (
+                    <a
+                      key={platform.key}
+                      className={footerLinkClassName}
+                      href={social[platform.key]}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {platform.label}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </div>
 
           <div className="flex flex-col items-start">
@@ -73,12 +98,18 @@ export default function Footer() {
               Contact
             </h2>
             <p className="mb-3.5 max-w-[280px] text-[14.5px] leading-[1.8] text-[rgba(248,247,243,0.55)]">
-              Jl. Merpati Raya No. 103
-              <br />
-              Sawah Lama, Ciputat, Tangerang Selatan, Banten 15413
+              {location.addressLines.map((line, index) => (
+                <Fragment key={index}>
+                  {index > 0 ? <br /> : null}
+                  {line}
+                </Fragment>
+              ))}
             </p>
-            <a className={footerLinkClassName} href="mailto:info@millennia21.id">
-              info@millennia21.id
+            <a className={footerLinkClassName} href={telLink(contact.phone)}>
+              {contact.phone}
+            </a>
+            <a className={`mt-3 ${footerLinkClassName}`} href={`mailto:${contact.email}`}>
+              {contact.email}
             </a>
             <Link
               to="/book-a-tour"

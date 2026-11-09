@@ -11,6 +11,14 @@ import {
 import { useToastState } from '@/admin/components/ui/toastContext';
 import { uploadImageForPicker } from '@/admin/features/gallery/utils/uploadImageForPicker';
 
+function serializeOurSchoolDraft(
+  content: EditableOurSchoolContent,
+  galleryId: string | null,
+  featuredImageId: string | null,
+) {
+  return JSON.stringify({ content, featuredImageId, galleryId });
+}
+
 export function useOurSchoolEditor() {
   const [pageId, setPageId] = useState<string | null>(null);
   const [content, setContent] = useState<EditableOurSchoolContent>(defaultOurSchoolContent);
@@ -24,6 +32,7 @@ export function useOurSchoolEditor() {
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [message, setMessage] = useToastState<string | null>(null);
+  const [savedSnapshot, setSavedSnapshot] = useState('');
 
   const selectedGallery = useMemo(
     () => galleries.find((gallery) => gallery.id === galleryId) ?? null,
@@ -43,11 +52,18 @@ export function useOurSchoolEditor() {
     const [items, nextGalleries] = await Promise.all([adminApi.ourSchools(), adminApi.galleries()]);
     const item = items[0] ?? null;
 
+    const loadedContent = normalizeOurSchoolContent(item);
+    const loadedGalleryId = item?.galleryId ?? null;
+    const loadedFeaturedImageId = item?.featuredImageId ?? null;
+
     setPageId(item?.id ?? null);
-    setContent(normalizeOurSchoolContent(item));
-    setGalleryId(item?.galleryId ?? null);
-    setFeaturedImageId(item?.featuredImageId ?? null);
+    setContent(loadedContent);
+    setGalleryId(loadedGalleryId);
+    setFeaturedImageId(loadedFeaturedImageId);
     setGalleries(nextGalleries);
+    setSavedSnapshot(
+      serializeOurSchoolDraft(loadedContent, loadedGalleryId, loadedFeaturedImageId),
+    );
   }
 
   useEffect(() => {
@@ -92,10 +108,14 @@ export function useOurSchoolEditor() {
         ? await adminApi.updateOurSchool(pageId, payload)
         : await adminApi.createOurSchool(payload);
 
+      const savedContent = normalizeOurSchoolContent(saved);
       setPageId(saved.id);
-      setContent(normalizeOurSchoolContent(saved));
+      setContent(savedContent);
       setGalleryId(saved.galleryId);
       setFeaturedImageId(saved.featuredImageId);
+      setSavedSnapshot(
+        serializeOurSchoolDraft(savedContent, saved.galleryId, saved.featuredImageId),
+      );
       setMessage(nextStatus === 'PUBLISHED' ? 'About MWS page published.' : 'Draft saved.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Failed to save About MWS page.');
@@ -224,6 +244,10 @@ export function useOurSchoolEditor() {
   }
 
   const isBusy = isLoading || isSaving || isUploadingImage;
+  const hasUnsavedChanges =
+    !isLoading &&
+    Boolean(savedSnapshot) &&
+    serializeOurSchoolDraft(content, galleryId, featuredImageId) !== savedSnapshot;
 
   return {
     activeImageField,
@@ -232,6 +256,7 @@ export function useOurSchoolEditor() {
     featuredImageId,
     galleries,
     galleryId,
+    hasUnsavedChanges,
     isBusy,
     isGalleryPickerOpen,
     isLoading,

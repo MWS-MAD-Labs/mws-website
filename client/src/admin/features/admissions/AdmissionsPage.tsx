@@ -7,6 +7,7 @@ import CoverImagePickerModal from '@/admin/features/news/components/layouts/Cove
 import AdmissionsProgramsForm from './components/layout/AdmissionsProgramsForm';
 import AdmissionsSidebar from './components/layout/AdmissionsSidebar';
 import { useAdmissionsEditor } from './hooks/useAdmissionsEditor';
+import { useUnsavedChangesGuard } from '@/admin/hooks/useUnsavedChangesGuard';
 
 export default function AdmissionsPage() {
   const editor = useAdmissionsEditor();
@@ -14,8 +15,10 @@ export default function AdmissionsPage() {
     activeImageTarget,
     galleries,
     galleryId,
+    hasUnsavedChanges,
     isGalleryPickerOpen,
     isLoading,
+    isSaving,
     message,
     selectGallery,
     selectImage,
@@ -23,6 +26,8 @@ export default function AdmissionsPage() {
     setIsGalleryPickerOpen,
     uploadImage,
   } = editor;
+
+  useUnsavedChangesGuard(hasUnsavedChanges && !isSaving);
 
   return (
     <AppShell title="Admissions">

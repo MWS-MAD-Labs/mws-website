@@ -9,6 +9,7 @@ import ContentPageHeader from '@/admin/components/ui/ContentPageHeader';
 import Field from '@/admin/components/ui/Field';
 import StatusMessage from '@/admin/components/ui/StatusMessage';
 import { useToastState } from '@/admin/components/ui/toastContext';
+import { useUnsavedChangesGuard } from '@/admin/hooks/useUnsavedChangesGuard';
 import { inputClass } from '@/admin/features/news/components/layouts/formStyles';
 
 const defaultContent: AdmissionGuidelinesContent = {
@@ -62,6 +63,16 @@ function linesToItems(value: string) {
     .filter(Boolean);
 }
 
+function serializeGuidelinesDraft(
+  content: AdmissionGuidelinesContent,
+  checklistText: string,
+  documentsText: string,
+) {
+  return JSON.stringify({ checklistText, content, documentsText });
+}
+
+const cardClass = 'min-w-0 overflow-hidden rounded-lg border border-[#E2E8F0] bg-white';
+
 export default function AdmissionGuidelinesPage() {
   const [content, setContent] = useState<AdmissionGuidelinesContent>(defaultContent);
   const [checklistText, setChecklistText] = useState(defaultContent.checklist.join('\n'));
@@ -70,6 +81,15 @@ export default function AdmissionGuidelinesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useToastState<string | null>(null);
+  const [savedSnapshot, setSavedSnapshot] = useState('');
+
+  const hasUnsavedChanges =
+    !isLoading &&
+    Boolean(savedSnapshot) &&
+    serializeGuidelinesDraft(content, checklistText, documentsText) !== savedSnapshot;
+  const isPublished = status === 'PUBLISHED';
+
+  useUnsavedChangesGuard(hasUnsavedChanges && !isSaving);
 
   useEffect(() => {
     let cancelled = false;
@@ -84,6 +104,13 @@ export default function AdmissionGuidelinesPage() {
           setChecklistText(nextContent.checklist.join('\n'));
           setDocumentsText(nextContent.documents.join('\n'));
           setStatus(page.status);
+          setSavedSnapshot(
+            serializeGuidelinesDraft(
+              nextContent,
+              nextContent.checklist.join('\n'),
+              nextContent.documents.join('\n'),
+            ),
+          );
         })
         .catch((error) => {
           if (!cancelled) {
@@ -121,6 +148,13 @@ export default function AdmissionGuidelinesPage() {
       setChecklistText(savedContent.checklist.join('\n'));
       setDocumentsText(savedContent.documents.join('\n'));
       setStatus(page.status);
+      setSavedSnapshot(
+        serializeGuidelinesDraft(
+          savedContent,
+          savedContent.checklist.join('\n'),
+          savedContent.documents.join('\n'),
+        ),
+      );
       setMessage(nextStatus === 'PUBLISHED' ? 'Admission guidelines published.' : 'Draft saved.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Failed to save admission guidelines.');
@@ -140,24 +174,6 @@ export default function AdmissionGuidelinesPage() {
           ]}
           title="Admission Guidelines"
           description="Edit the public admission guidelines page."
-          action={
-            <div className="flex flex-wrap gap-2">
-              <Button
-                disabled={isSaving || isLoading}
-                type="button"
-                variant="outline"
-                onClick={() => window.open('/admission/guidelines', '_blank', 'noopener,noreferrer')}
-              >
-                <Eye size={15} />
-                Preview
-              </Button>
-              {/* No Save Draft: this page has no separate published copy, so a
-                  draft would take the live content off the website. */}
-              <Button disabled={isSaving || isLoading} type="button" onClick={() => void persist('PUBLISHED')}>
-                {isSaving ? 'Saving...' : status === 'PUBLISHED' ? 'Update' : 'Publish'}
-              </Button>
-            </div>
-          }
         />
 
         {message ? (
@@ -224,18 +240,14 @@ export default function AdmissionGuidelinesPage() {
                   </Field>
                 </div>
               </section>
-            </main>
-
-            <aside className="min-w-0 space-y-5">
-              <section className="rounded-lg border border-[#E2E8F0] bg-white p-4">
-                <h2 className="text-sm font-semibold text-[#1C2434]">Publishing</h2>
-                <p className="mt-1 text-xs text-[#64748B]">
-                  Current status: {status === 'PUBLISHED' ? 'Published' : 'Draft'}
-                </p>
-              </section>
-
-              <section className="rounded-lg border border-[#E2E8F0] bg-white p-4">
-                <div className="grid gap-4">
+              <section className="rounded-lg border border-[#E2E8F0] bg-white">
+                <div className="border-b border-[#E2E8F0] px-5 py-4">
+                  <h2 className="text-base font-semibold text-[#1C2434]">Checklist & Call to Action</h2>
+                  <p className="mt-1 text-sm text-[#64748B]">
+                    Write one checklist item or document per line.
+                  </p>
+                </div>
+                <div className="grid gap-4 p-5 md:grid-cols-2">
                   <Field label="Checklist">
                     <textarea
                       className={`${inputClass} min-h-36 resize-y`}
@@ -274,6 +286,65 @@ export default function AdmissionGuidelinesPage() {
                       }
                     />
                   </Field>
+                </div>
+              </section>
+            </main>
+
+            <aside className="min-w-0 space-y-5 lg:sticky lg:top-6">
+              <section className={`${cardClass} grid gap-4 p-4`}>
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-sm font-semibold text-[#1C2434]">Publishing</h2>
+                    <p className="mt-1 text-xs text-[#64748B]">
+                      Changes go live on the public page when you update.
+                    </p>
+                  </div>
+                  <span
+                    className={[
+                      'shrink-0 rounded-md px-2 py-1 text-xs font-semibold',
+                      isPublished
+                        ? 'bg-[#10B981]/10 text-[#047857]'
+                        : 'bg-[#F59E0B]/10 text-[#D97706]',
+                    ].join(' ')}
+                  >
+                    {isPublished ? 'Published' : 'Draft'}
+                  </span>
+                </div>
+
+                <dl className="space-y-3 text-sm">
+                  <div className="flex items-center justify-between gap-3">
+                    <dt className="text-[#64748B]">Working state</dt>
+                    <dd className="font-medium text-[#1C2434]">
+                      {isSaving
+                        ? 'Saving...'
+                        : hasUnsavedChanges
+                          ? 'Unsaved changes'
+                          : 'All changes saved'}
+                    </dd>
+                  </div>
+                </dl>
+
+                <div className="grid gap-2">
+                  <Button
+                    disabled={isSaving || isLoading}
+                    type="button"
+                    onClick={() => void persist('PUBLISHED')}
+                  >
+                    {isSaving ? 'Saving...' : isPublished ? 'Update' : 'Publish'}
+                  </Button>
+                  {/* No Save Draft: this page has no separate published copy, so a
+                      draft would take the live content off the website. */}
+                  <Button
+                    disabled={isSaving || isLoading}
+                    type="button"
+                    variant="ghost"
+                    onClick={() =>
+                      window.open('/admission/guidelines', '_blank', 'noopener,noreferrer')
+                    }
+                  >
+                    <Eye size={15} />
+                    Preview Guidelines
+                  </Button>
                 </div>
               </section>
             </aside>

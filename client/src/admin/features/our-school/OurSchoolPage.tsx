@@ -6,6 +6,7 @@ import CoverImagePickerModal from '@/admin/features/news/components/layouts/Cove
 import OurSchoolMainSections from './components/layout/OurSchoolMainSections';
 import OurSchoolSidebar from './components/layout/OurSchoolSidebar';
 import { useOurSchoolEditor } from './hooks/useOurSchoolEditor';
+import { useUnsavedChangesGuard } from '@/admin/hooks/useUnsavedChangesGuard';
 
 export default function OurSchoolPage() {
   const editor = useOurSchoolEditor();
@@ -13,8 +14,10 @@ export default function OurSchoolPage() {
     activeImageField,
     galleries,
     galleryId,
+    hasUnsavedChanges,
     isGalleryPickerOpen,
     isLoading,
+    isSaving,
     message,
     selectGallery,
     selectImage,
@@ -22,6 +25,8 @@ export default function OurSchoolPage() {
     setIsGalleryPickerOpen,
     uploadImage,
   } = editor;
+
+  useUnsavedChangesGuard(hasUnsavedChanges && !isSaving);
 
   return (
     <AppShell title="About MWS">

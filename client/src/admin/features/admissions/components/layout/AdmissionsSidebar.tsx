@@ -17,6 +17,7 @@ export default function AdmissionsSidebar({ editor }: AdmissionsSidebarProps) {
   const {
     activeCount,
     content,
+    hasUnsavedChanges,
     imageCount,
     isBusy,
     isSaving,
@@ -56,7 +57,13 @@ export default function AdmissionsSidebar({ editor }: AdmissionsSidebarProps) {
           <div className="flex items-center justify-between gap-3">
             <dt className="text-[#64748B]">Working state</dt>
             <dd className="font-medium text-[#1C2434]">
-              {isUploadingImage ? 'Uploading image...' : isSaving ? 'Saving...' : 'Ready'}
+              {isUploadingImage
+                ? 'Uploading image...'
+                : isSaving
+                  ? 'Saving...'
+                  : hasUnsavedChanges
+                    ? 'Unsaved changes'
+                    : 'All changes saved'}
             </dd>
           </div>
           <div className="flex items-center justify-between gap-3">

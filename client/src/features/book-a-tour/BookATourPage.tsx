@@ -1,48 +1,20 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { ArrowUpRight, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-import { contactPageApi } from '@/api/contactPageApi';
-import {
-  defaultContactPageContent,
-  type ContactPageContent,
-  withContactPageFallback,
-} from '@/features/contact/contactPageData';
+import { whatsappLink } from '@/features/site-settings/siteSettingsData';
+import { useSiteSettings } from '@/features/site-settings/useSiteSettings';
 import { asset } from '@/data/site';
 
 const tourMessage =
   'Hello MWS Admissions Team, I would like to book a school tour. Could you please help me with the available schedule?';
 
-function whatsappNumber(value: string) {
-  return value.replace(/\D/g, '');
-}
-
 export default function BookATourPage() {
-  const [contactContent, setContactContent] = useState<ContactPageContent>(
-    defaultContactPageContent,
+  const { contact } = useSiteSettings();
+  const whatsappHref = useMemo(
+    () => whatsappLink(contact.whatsapp, tourMessage),
+    [contact.whatsapp],
   );
-
-  useEffect(() => {
-    let cancelled = false;
-
-    contactPageApi
-      .publicContactPage()
-      .then((page) => {
-        if (!cancelled) {
-          setContactContent(withContactPageFallback(page.content));
-        }
-      })
-      .catch(() => undefined);
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const whatsappHref = useMemo(() => {
-    const number = whatsappNumber(contactContent.directContacts.whatsapp);
-    return `https://wa.me/${number}?text=${encodeURIComponent(tourMessage)}`;
-  }, [contactContent.directContacts.whatsapp]);
 
   return (
     <main>

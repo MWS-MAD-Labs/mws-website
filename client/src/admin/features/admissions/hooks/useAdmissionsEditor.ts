@@ -56,6 +56,14 @@ function updateProgramField(
   return programs.map((program) => (program.id === id ? { ...program, [field]: value } : program));
 }
 
+function serializeAdmissionsDraft(
+  content: EditableAdmissionPageContent,
+  programs: AdminAdmissionProgram[],
+  galleryId: string | null,
+) {
+  return JSON.stringify({ content, galleryId, programs });
+}
+
 export function useAdmissionsEditor() {
   const [pageId, setPageId] = useState<string | null>(null);
   const [content, setContent] = useState<EditableAdmissionPageContent>(
@@ -71,6 +79,7 @@ export function useAdmissionsEditor() {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [message, setMessage] = useToastState<string | null>(null);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
+  const [savedSnapshot, setSavedSnapshot] = useState('');
 
   const selectedGallery = useMemo(
     () => galleries.find((gallery) => gallery.id === galleryId) ?? null,
@@ -87,17 +96,17 @@ export function useAdmissionsEditor() {
 
   async function loadAdmissions() {
     const data = await adminApi.admissions();
+    const loadedContent = normalizeAdmissionPageContent({
+      ...(data.page.content ?? {}),
+      status: data.page.isPublished ? 'PUBLISHED' : 'DRAFT',
+    });
     setPageId(data.page.id);
-    setContent(
-      normalizeAdmissionPageContent({
-        ...(data.page.content ?? {}),
-        status: data.page.isPublished ? 'PUBLISHED' : 'DRAFT',
-      }),
-    );
+    setContent(loadedContent);
     setGalleryId(data.page.galleryId);
     setUpdatedAt(data.page.updatedAt);
     setPrograms(data.programs);
     setGalleries(data.galleries);
+    setSavedSnapshot(serializeAdmissionsDraft(loadedContent, data.programs, data.page.galleryId));
   }
 
   useEffect(() => {
@@ -137,16 +146,16 @@ export function useAdmissionsEditor() {
         programs: serializePrograms(programs),
       });
 
+      const savedContent = normalizeAdmissionPageContent({
+        ...(data.page.content ?? {}),
+        status: data.page.isPublished ? 'PUBLISHED' : 'DRAFT',
+      });
       setPageId(data.page.id);
-      setContent(
-        normalizeAdmissionPageContent({
-          ...(data.page.content ?? {}),
-          status: data.page.isPublished ? 'PUBLISHED' : 'DRAFT',
-        }),
-      );
+      setContent(savedContent);
       setGalleryId(data.page.galleryId);
       setUpdatedAt(data.page.updatedAt);
       setPrograms(data.programs);
+      setSavedSnapshot(serializeAdmissionsDraft(savedContent, data.programs, data.page.galleryId));
       setMessage(nextStatus === 'PUBLISHED' ? 'Admissions page published.' : 'Draft saved.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Failed to save admissions.');
@@ -313,6 +322,10 @@ export function useAdmissionsEditor() {
   const activeCount = programs.filter((program) => program.isActive ?? true).length;
   const imageCount = programs.filter((program) => Boolean(program.image)).length;
   const isBusy = isLoading || isSaving || isUploadingImage;
+  const hasUnsavedChanges =
+    !isLoading &&
+    Boolean(savedSnapshot) &&
+    serializeAdmissionsDraft(content, programs, galleryId) !== savedSnapshot;
 
   return {
     activeCount,
@@ -320,6 +333,7 @@ export function useAdmissionsEditor() {
     content,
     galleries,
     galleryId,
+    hasUnsavedChanges,
     imageCount,
     isBusy,
     isGalleryPickerOpen,
