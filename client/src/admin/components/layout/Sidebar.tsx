@@ -6,7 +6,7 @@ import { SidebarMenu } from './SidebarMenu';
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
 
-  const APP_VERSION = 'V1.0.0'
+  const APP_VERSION = 'V1.0.2'
 
   return (
     <aside

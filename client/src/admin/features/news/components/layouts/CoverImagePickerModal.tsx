@@ -11,6 +11,7 @@ import Button from '@/admin/components/ui/Button';
 import Modal from '@/admin/components/ui/Modal';
 import SearchInput from '@/admin/components/ui/SearchInput';
 
+import { PICKER_VIDEO_ACCEPT } from '@/admin/features/gallery/utils/uploadVideoForPicker';
 import type {
   GalleryAssetKind,
   GalleryAssetSelection,
@@ -22,6 +23,8 @@ type CoverImagePickerModalProps = {
   galleries: GalleryItem[];
   open: boolean;
   title?: string;
+  /** Which kind of local file the Upload tab accepts. Defaults to images. */
+  uploadKind?: GalleryAssetKind;
   onClose: () => void;
   onSelect: (asset: GalleryAssetSelection) => void;
   onSelectLocalFile?: (file: File) => void;
@@ -35,6 +38,7 @@ export default function CoverImagePickerModal({
   galleries,
   open,
   title = 'Choose image',
+  uploadKind = 'IMAGE',
   onClose,
   onSelect,
   onSelectLocalFile,
@@ -45,7 +49,9 @@ export default function CoverImagePickerModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canSelectImages = allowedKinds.includes('IMAGE');
   const canSelectVideos = allowedKinds.includes('VIDEO');
-  const canUploadImages = allowUpload && canSelectImages && Boolean(onSelectLocalFile);
+  const canUpload =
+    allowUpload && allowedKinds.includes(uploadKind) && Boolean(onSelectLocalFile);
+  const isVideoUpload = uploadKind === 'VIDEO';
 
   const filteredGalleries = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -115,7 +121,7 @@ export default function CoverImagePickerModal({
               label="Gallery"
               onClick={() => setMode('GALLERY')}
             />
-            {canUploadImages ? (
+            {canUpload ? (
               <PickerTab
                 active={mode === 'UPLOAD'}
                 label="Upload"
@@ -132,7 +138,7 @@ export default function CoverImagePickerModal({
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/avif,image/webp,image/jpeg,image/png"
+                accept={isVideoUpload ? PICKER_VIDEO_ACCEPT : 'image/avif,image/webp,image/jpeg,image/png'}
                 className="sr-only"
                 onChange={selectLocalFile}
               />
@@ -161,10 +167,12 @@ export default function CoverImagePickerModal({
 
                 <span>
                   <span className="block text-sm font-semibold text-[#1C2434]">
-                    Upload an image
+                    {isVideoUpload ? 'Upload a video' : 'Upload an image'}
                   </span>
                   <span className="mt-1 block text-xs text-[#64748B]">
-                    AVIF/WebP preferred, JPEG/PNG allowed · Max 5 MB
+                    {isVideoUpload
+                      ? 'MP4/WebM/MOV · Max 50 MB'
+                      : 'AVIF/WebP preferred, JPEG/PNG allowed · Max 5 MB'}
                   </span>
                 </span>
 

@@ -30,6 +30,8 @@ import ContactPageEditor from '@/admin/features/contact/ContactPageEditor';
 import CommunityStoriesPage from '@/admin/features/community-stories/CommunityStoriesPage';
 import CommunityVoicesPage from '@/admin/features/community-voices/pages/CommunityVoicesPage';
 import HeroSlidesPage from '@/admin/features/home/HeroSlidesPage';
+import HeroSlideEditorPage from '@/admin/features/home/HeroSlideEditorPage';
+import HomeInfoSectionPage from '@/admin/features/home/HomeInfoSectionPage';
 import PageEditorPage from '@/admin/features/page/PageEditorPage';
 import PagesManagementPage from '@/admin/features/page/PagesManagementPage';
 import PopupPromotedPage from '@/admin/features/popup-promoted/PopupPromotedPage';
@@ -491,6 +493,39 @@ export default function AdminApp() {
               <RequireAuth>
                 <RequireContentPermission>
                   <HeroSlidesPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
+
+          <Route
+            path="content/home/new"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <HeroSlideEditorPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
+
+          <Route
+            path="content/home/:slideId/edit"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <HeroSlideEditorPage />
+                </RequireContentPermission>
+              </RequireAuth>
+            }
+          />
+
+          <Route
+            path="content/home/info-section"
+            element={
+              <RequireAuth>
+                <RequireContentPermission>
+                  <HomeInfoSectionPage />
                 </RequireContentPermission>
               </RequireAuth>
             }

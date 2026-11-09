@@ -1,920 +1,313 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { Eye, ImagePlus, Pencil, Plus, RotateCcw, Save, Trash2 } from 'lucide-react';
-import {
-  adminApi,
-  type GalleryItem,
-  type HeroSlideFormData,
-  type NewsCategory,
-} from '@/admin/api/adminApi';
+import { useCallback, useEffect, useState } from 'react';
+import { ImagePlus, LayoutList, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { adminApi } from '@/admin/api/adminApi';
 import AppShell from '@/admin/components/layout/AppShell';
 import Button from '@/admin/components/ui/Button';
-import Field from '@/admin/components/ui/Field';
-import StatusMessage from '@/admin/components/ui/StatusMessage';
-import { uploadImageForPicker } from '@/admin/features/gallery/utils/uploadImageForPicker';
-import CoverImagePickerModal from '@/admin/features/news/components/layouts/CoverImagePickerModal';
-import { getHeroSlideStatus, getHeroSlideStatusClasses } from './heroSlideStatus';
-import type {
-  HeroSlideMediaType,
-  HeroSlideSourceType,
-  ResolvedHeroSlide,
-} from '@/features/hero/heroData';
-import HeaderHero from './components/layouts/HeaderHero';
 import { useToastState } from '@/admin/components/ui/toastContext';
+import NewsMessageBanner from '@/admin/features/news/components/layouts/NewsMessageBanner';
+import type { ResolvedHeroSlide } from '@/features/hero/heroData';
+import HeaderHero from './components/layouts/HeaderHero';
+import {
+  HERO_SLIDE_NEW_PATH,
+  HOME_INFO_SECTION_PATH,
+  getHeroCtaLinkLabel,
+  getHeroSlideEditPath,
+  type HeroSlidesReturnState,
+} from './heroSlideForm';
 
-type FormState = {
-  caption: string;
-  ctaLabel: string;
-  ctaUrl: string;
-  description: string;
-  isActive: boolean;
-  isLooping: boolean;
-  mediaAlt: string;
-  mediaPath: string;
-  mediaType: HeroSlideMediaType;
-  posterPath: string;
-  sortOrder: string;
-  sourceType: HeroSlideSourceType;
-  title: string;
-};
+const headerCellClass =
+  'px-5 py-3.5 text-[10px] font-bold uppercase tracking-[0.08em] text-[#64748B]';
 
-type PreviewSlide = {
-  caption: string;
-  ctaLabel: string;
-  mediaAlt: string;
-  mediaPath: string;
-  mediaType: HeroSlideMediaType;
-  title: string;
-};
-
-const emptyForm: FormState = {
-  caption: '',
-  ctaLabel: '',
-  ctaUrl: '',
-  description: '',
-  isActive: true,
-  isLooping: true,
-  mediaAlt: '',
-  mediaPath: '',
-  mediaType: 'IMAGE',
-  posterPath: '',
-  sortOrder: '0',
-  sourceType: 'MANUAL',
-  title: '',
-};
-
-const heroCtaLinkOptions = [
-  { label: 'Default: Admission', value: '' },
-  { label: 'Admission', value: '/admission' },
-  { label: 'Book a Tour', value: '/book-a-tour' },
-  { label: 'Academic', value: '/academic' },
-  { label: 'About MWS', value: '/about-millennia' },
-  { label: 'News', value: '/news' },
-  { label: 'Community Stories', value: '/community-stories' },
-  { label: 'Contact', value: '/contact' },
-  { label: 'Admission FAQ', value: '/admission/faq' },
-  { label: 'Admission Guidelines', value: '/admission/guidelines' },
-];
-
-type HomeSettingsForm = {
-  infoSectionCategoryIds: string[];
-  infoSectionTitle: string;
-};
-
-function optionalText(value: string) {
-  const trimmed = value.trim();
-  return trimmed ? trimmed : null;
+function slideLabel(slide: ResolvedHeroSlide) {
+  return slide.title || 'Untitled home slide';
 }
 
-function formFromSlide(slide: ResolvedHeroSlide): FormState {
-  return {
-    caption: slide.caption ?? '',
-    ctaLabel: slide.ctaLabel ?? '',
-    ctaUrl: slide.ctaUrl ?? '',
-    description: slide.description ?? '',
-    isActive: slide.isActive,
-    isLooping: slide.isLooping,
-    mediaAlt: slide.mediaAlt ?? '',
-    mediaPath: slide.mediaPath ?? '',
-    mediaType: slide.mediaType ?? 'IMAGE',
-    posterPath: slide.posterPath ?? '',
-    sortOrder: String(slide.sortOrder),
-    sourceType: slide.sourceType,
-    title: slide.title ?? '',
-  };
-}
-
-function payloadFromForm(form: FormState): HeroSlideFormData {
-  return {
-    caption: optionalText(form.caption),
-    ctaLabel: optionalText(form.ctaLabel),
-    ctaUrl: optionalText(form.ctaUrl),
-    description: optionalText(form.description),
-    isActive: form.isActive,
-    isLooping: form.isLooping,
-    mediaAlt: optionalText(form.mediaAlt),
-    mediaPath: optionalText(form.mediaPath),
-    mediaType: form.mediaType,
-    posterPath: optionalText(form.posterPath),
-    sortOrder: Number.parseInt(form.sortOrder, 10) || 0,
-    sourceType: form.sourceType,
-    title: optionalText(form.title),
-  };
-}
-
-function previewFromForm(form: FormState): PreviewSlide {
-  return {
-    caption: form.caption.trim() || form.description.trim(),
-    ctaLabel: form.ctaLabel.trim() || 'Learn More',
-    mediaAlt: form.mediaAlt.trim() || form.title.trim() || 'Home hero slide',
-    mediaPath: form.mediaPath,
-    mediaType: form.mediaType,
-    title: form.title.trim() || 'Untitled home slide',
-  };
-}
-
-function previewFromSlide(slide: ResolvedHeroSlide): PreviewSlide {
-  return {
-    caption: slide.caption ?? slide.description ?? '',
-    ctaLabel: slide.ctaLabel ?? 'Learn More',
-    mediaAlt: slide.mediaAlt ?? slide.title ?? 'Home hero slide',
-    mediaPath: slide.mediaPath ?? '',
-    mediaType: slide.mediaType ?? 'IMAGE',
-    title: slide.title ?? 'Untitled home slide',
-  };
-}
-
-function HomeHeroPreview({
-  activeSlideCount,
-  slide,
-}: {
-  activeSlideCount: number;
-  slide: PreviewSlide;
-}) {
+function HeroMediaThumbnail({ slide }: { slide: ResolvedHeroSlide }) {
   const mediaUrl = slide.mediaPath ? adminApi.publicAssetUrl(slide.mediaPath) : '';
 
   return (
-    <div className="overflow-hidden rounded-lg border border-[#E2E8F0] bg-[#111]">
-      <div className="relative aspect-[16/9] min-h-[360px] overflow-hidden bg-[#181818]">
-        {mediaUrl ? (
-          slide.mediaType === 'VIDEO' ? (
-            <video
-              className="absolute inset-0 h-full w-full object-cover"
-              src={mediaUrl}
-              muted
-              playsInline
-            />
-          ) : (
-            <img
-              className="absolute inset-0 h-full w-full object-cover"
-              src={mediaUrl}
-              alt={slide.mediaAlt}
-            />
-          )
+    <div className="relative h-16 w-28 shrink-0 overflow-hidden rounded-md bg-[#F1F5F9]">
+      {mediaUrl ? (
+        slide.mediaType === 'VIDEO' ? (
+          <>
+            <video className="h-full w-full object-cover" src={mediaUrl} muted playsInline />
+            <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+              Video
+            </span>
+          </>
         ) : (
-          <div className="absolute inset-0 grid place-items-center bg-[#2b2525] text-sm font-semibold text-white/70">
-            No hero media selected
-          </div>
-        )}
-
-        <div className="absolute inset-0 bg-black/25" />
-
-        <button
-          aria-label="Previous slide preview"
-          className="absolute left-6 top-1/2 z-20 -translate-y-1/2 text-xl text-white/90"
-          type="button"
-        >
-          ←
-        </button>
-
-        <button
-          aria-label="Next slide preview"
-          className="absolute right-6 top-1/2 z-20 -translate-y-1/2 text-xl text-white/90"
-          type="button"
-        >
-          →
-        </button>
-
-        <div className="absolute inset-x-0 bottom-0 z-10 px-10 pb-10 text-white">
-          <div className="max-w-[560px]">
-            <h2 className="text-[44px] font-bold leading-[0.98] tracking-normal">{slide.title}</h2>
-
-            {slide.caption ? (
-              <p className="mt-5 max-w-[480px] text-sm leading-relaxed text-white/90">
-                {slide.caption}
-              </p>
-            ) : null}
-
-            <div className="mt-6 inline-flex items-center gap-3 text-sm font-medium text-white">
-              {slide.ctaLabel}
-              <span aria-hidden="true">→</span>
-            </div>
-          </div>
+          <img
+            className="h-full w-full object-cover"
+            src={mediaUrl}
+            alt={slide.mediaAlt || slideLabel(slide)}
+          />
+        )
+      ) : (
+        <div className="grid h-full place-items-center text-[#64748B]">
+          <ImagePlus size={18} />
         </div>
+      )}
+    </div>
+  );
+}
 
-        <div className="absolute bottom-7 right-8 z-20 flex items-center gap-2">
-          {Array.from({
-            length: Math.max(activeSlideCount, 1),
-          }).map((_, index) => (
-            <span
-              className={[
-                'h-1.5 rounded-full bg-white',
-                index === 0 ? 'w-8' : 'w-2 opacity-60',
-              ].join(' ')}
-              key={index}
-            />
-          ))}
-        </div>
-      </div>
+function HeroStatusBadge({ isActive }: { isActive: boolean }) {
+  return (
+    <span
+      className={[
+        'inline-flex rounded-md px-2 py-1 text-[11px] font-semibold',
+        isActive ? 'bg-[#DCFCE7] text-[#15803D]' : 'bg-[#F1F5F9] text-[#64748B]',
+      ].join(' ')}
+    >
+      {isActive ? 'Active' : 'Inactive'}
+    </span>
+  );
+}
+
+function HeroRowActions({
+  deletingId,
+  iconSize = 15,
+  slide,
+  onDelete,
+}: {
+  deletingId: string | null;
+  iconSize?: number;
+  slide: ResolvedHeroSlide;
+  onDelete: () => void;
+}) {
+  return (
+    <div className="flex shrink-0 items-center justify-end gap-1.5">
+      <Link
+        to={getHeroSlideEditPath(slide.id)}
+        aria-label={`Edit ${slideLabel(slide)}`}
+        className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#E2E8F0] text-[#64748B] transition-colors hover:border-[#3C50E0]/30 hover:bg-[#3C50E0]/5 hover:text-[#3C50E0]"
+      >
+        <Pencil size={iconSize} />
+      </Link>
+
+      <Button
+        aria-label={`Delete ${slideLabel(slide)}`}
+        className="rounded-md"
+        disabled={deletingId === slide.id}
+        iconOnly
+        size="sm"
+        type="button"
+        variant="danger"
+        onClick={onDelete}
+      >
+        <Trash2 size={iconSize} />
+      </Button>
     </div>
   );
 }
 
 export default function HeroSlidesPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [slides, setSlides] = useState<ResolvedHeroSlide[]>([]);
-  const [galleries, setGalleries] = useState<GalleryItem[]>([]);
-  const [newsCategories, setNewsCategories] = useState<NewsCategory[]>([]);
-  const [homeSettings, setHomeSettings] = useState<HomeSettingsForm>({
-    infoSectionCategoryIds: [],
-    infoSectionTitle: 'Everything you need to know about joining MWS.',
-  });
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState<FormState>(emptyForm);
-  const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
-  const [isAssetPickerOpen, setIsAssetPickerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [message, setMessage] = useToastState<string | null>(null);
 
-  const editingSlide = useMemo(
-    () => slides.find((slide) => slide.id === editingId) ?? null,
-    [editingId, slides],
-  );
-
-  const previewSlide = previewFromForm(form);
-  const activeSlideCount = slides.filter((slide) => slide.isActive).length;
-  const readySlideCount = slides.filter(
-    (slide) => getHeroSlideStatus(slide).label === 'Ready',
-  ).length;
-  const isBusy = isLoading || isSaving || isUploadingImage;
-
-  async function loadSlides() {
-    const [nextSlides, nextGalleries, homeContent] = await Promise.all([
-      adminApi.heroSlides(),
-      adminApi.galleries(),
-      adminApi.homeContent(),
-    ]);
-
-    setSlides(nextSlides);
-    setGalleries(nextGalleries);
-    setNewsCategories(homeContent.categories);
-    setHomeSettings({
-      infoSectionCategoryIds:
-        homeContent.settings.infoSectionCategoryIds ??
-        (homeContent.settings.infoSectionCategoryId ? [homeContent.settings.infoSectionCategoryId] : []),
-      infoSectionTitle: homeContent.settings.infoSectionTitle,
-    });
-
-    return nextSlides;
-  }
+  const loadSlides = useCallback(async () => {
+    setSlides(await adminApi.heroSlides());
+  }, []);
 
   useEffect(() => {
     queueMicrotask(() => {
       loadSlides()
-        .then((nextSlides) => {
-          const firstSlide = nextSlides[0];
-
-          if (!firstSlide) return;
-
-          setEditingId(firstSlide.id);
-          setForm(formFromSlide(firstSlide));
-        })
         .catch((error) =>
           setMessage(error instanceof Error ? error.message : 'Failed to load hero slides.'),
         )
         .finally(() => setIsLoading(false));
     });
-  }, [setMessage]);
+  }, [loadSlides, setMessage]);
 
-  function startNewSlide() {
-    setEditingId(null);
-    setForm({
-      ...emptyForm,
-      sortOrder: String(slides.length),
-    });
-  }
+  // Show the message passed back from the create/edit page, then clear it so a
+  // refresh does not show it again.
+  useEffect(() => {
+    const returnMessage = (location.state as HeroSlidesReturnState)?.message;
+    if (!returnMessage) return;
 
-  function editSlide(slide: ResolvedHeroSlide) {
-    setEditingId(slide.id);
-    setForm(formFromSlide(slide));
-  }
+    setMessage(returnMessage);
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.pathname, location.state, navigate, setMessage]);
 
-  async function saveSlide(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setIsSaving(true);
-    setMessage(null);
-
-    try {
-      const savedSlide = editingId
-        ? await adminApi.updateHeroSlide(editingId, payloadFromForm(form))
-        : await adminApi.createHeroSlide(payloadFromForm(form));
-
-      setEditingId(savedSlide.id);
-      setForm(formFromSlide(savedSlide));
-
-      await loadSlides();
-
-      setMessage(editingId ? 'Home hero slide updated.' : 'Home hero slide created.');
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Failed to save hero slide.');
-    } finally {
-      setIsSaving(false);
-    }
-  }
-
-  async function deleteSlide(id: string) {
-    const slide = slides.find((item) => item.id === id);
+  async function deleteSlide(slide: ResolvedHeroSlide) {
     const confirmed = window.confirm(
-      `Delete "${slide?.title || 'this home hero slide'}"? This action cannot be undone.`,
+      `Delete "${slide.title || 'this home hero slide'}"? This action cannot be undone.`,
     );
     if (!confirmed) return;
 
-    setIsSaving(true);
+    setDeletingId(slide.id);
     setMessage(null);
 
     try {
-      await adminApi.deleteHeroSlide(id);
-
-      const nextSlides = await loadSlides();
-      const nextSelected = nextSlides.find((slide) => slide.id !== id) ?? nextSlides[0];
-
-      if (nextSelected) {
-        setEditingId(nextSelected.id);
-        setForm(formFromSlide(nextSelected));
-      } else {
-        setEditingId(null);
-        setForm(emptyForm);
-      }
-
+      await adminApi.deleteHeroSlide(slide.id);
+      await loadSlides();
       setMessage('Home hero slide deleted.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Failed to delete hero slide.');
     } finally {
-      setIsSaving(false);
+      setDeletingId(null);
     }
   }
 
-  async function uploadHeroImage(file: File) {
-    setIsUploadingImage(true);
-    setMessage(null);
-
-    try {
-      const uploaded = await uploadImageForPicker({
-        caption: form.title || 'Home hero slide',
-        fallbackGalleryTitle: 'Home Hero Images',
-        file,
-        galleries,
-      });
-
-      setGalleries(uploaded.galleries);
-      setForm((current) => ({
-        ...current,
-        mediaAlt: uploaded.alt,
-        mediaPath: uploaded.path,
-        mediaType: 'IMAGE',
-        posterPath: '',
-      }));
-      setMessage('Hero image uploaded. Save slide to publish it.');
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Failed to upload hero image.');
-    } finally {
-      setIsUploadingImage(false);
-    }
-  }
-
-  async function saveHomeSettings() {
-    setIsSaving(true);
-    setMessage(null);
-
-    try {
-      const data = await adminApi.updateHomeContentSettings({
-        infoSectionTitle: homeSettings.infoSectionTitle,
-        infoSectionCategoryIds: homeSettings.infoSectionCategoryIds,
-      });
-      setNewsCategories(data.categories);
-      setHomeSettings({
-        infoSectionCategoryIds:
-          data.settings.infoSectionCategoryIds ??
-          (data.settings.infoSectionCategoryId ? [data.settings.infoSectionCategoryId] : []),
-        infoSectionTitle: data.settings.infoSectionTitle,
-      });
-      setMessage('Home info section settings saved.');
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Failed to save home settings.');
-    } finally {
-      setIsSaving(false);
-    }
-  }
+  const activeCount = slides.filter((slide) => slide.isActive).length;
 
   return (
     <AppShell title="Home Hero">
       <section className="space-y-5 p-6">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <HeaderHero />
+        <HeaderHero
+          action={
+            <div className="flex flex-wrap gap-2">
+              <Button
+                className="inline-flex items-center gap-2"
+                type="button"
+                variant="outline"
+                onClick={() => navigate(HOME_INFO_SECTION_PATH)}
+              >
+                <LayoutList size={16} />
+                Info Section
+              </Button>
 
-          <Button
-            className="inline-flex items-center gap-2"
-            disabled={isBusy}
-            type="button"
-            onClick={startNewSlide}
-          >
-            <Plus size={16} />
-            New Slide
-          </Button>
-        </div>
-
-        {message ? (
-          <div className="rounded-lg border border-[#E2E8F0] bg-white px-5 py-3">
-            <StatusMessage>{message}</StatusMessage>
-          </div>
-        ) : null}
-
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
-          <div className="space-y-5">
-            <section className="rounded-lg border border-[#E2E8F0] bg-white p-5">
-              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <div className="flex items-center gap-2 text-sm font-semibold text-[#1C2434]">
-                    <Eye size={16} />
-                    Live Preview
-                  </div>
-
-                  <p className="mt-1 text-sm text-[#64748B]">
-                    {editingSlide ? editingSlide.title || 'Selected slide' : 'Unsaved slide'}
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap gap-2 text-xs font-semibold">
-                  <span className="rounded-md bg-[#F1F5F9] px-3 py-1.5 text-[#64748B]">
-                    {activeSlideCount} Active
-                  </span>
-
-                  <span className="rounded-md bg-[#F1F5F9] px-3 py-1.5 text-[#64748B]">
-                    {readySlideCount} Ready
-                  </span>
-                </div>
-              </div>
-
-              <HomeHeroPreview activeSlideCount={activeSlideCount} slide={previewSlide} />
-            </section>
-
-            <section className="overflow-hidden rounded-lg border border-[#E2E8F0] bg-white">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-4">
-                <div>
-                  <h2 className="text-base font-semibold text-[#1C2434]">Slides</h2>
-
-                  <p className="text-sm text-[#64748B]">{slides.length} total slides</p>
-                </div>
-              </div>
-
-              <div className="p-4">
-                {isLoading ? (
-                  <div className="rounded-lg border border-[#E2E8F0] p-6 text-sm text-[#64748B]">
-                    Loading hero slides...
-                  </div>
-                ) : null}
-
-                {!isLoading && !slides.length ? (
-                  <div className="rounded-lg border border-dashed border-[#E2E8F0] p-6 text-sm text-[#64748B]">
-                    No hero slides yet.
-                  </div>
-                ) : null}
-
-                {slides.length ? (
-                  <div className="grid gap-3">
-                    {slides.map((slide) => {
-                      const isSelected = slide.id === editingId;
-                      const status = getHeroSlideStatus(slide);
-                      const preview = previewFromSlide(slide);
-
-                      return (
-                        <button
-                          className={[
-                            'grid w-full gap-3 rounded-lg border p-3 text-left transition-colors md:grid-cols-[96px_minmax(0,1fr)_auto]',
-                            isSelected
-                              ? 'border-[#3C50E0] bg-[#3C50E0]/5'
-                              : 'border-[#E2E8F0] bg-white hover:bg-[#F1F5F9]',
-                          ].join(' ')}
-                          key={slide.id}
-                          type="button"
-                          onClick={() => editSlide(slide)}
-                        >
-                          <div className="h-16 w-24 overflow-hidden rounded-md bg-[#F1F5F9]">
-                            {slide.mediaPath ? (
-                              preview.mediaType === 'VIDEO' ? (
-                                <video
-                                  className="h-full w-full object-cover"
-                                  src={adminApi.publicAssetUrl(slide.mediaPath)}
-                                  muted
-                                />
-                              ) : (
-                                <img
-                                  className="h-full w-full object-cover"
-                                  src={adminApi.publicAssetUrl(slide.mediaPath)}
-                                  alt={preview.mediaAlt}
-                                />
-                              )
-                            ) : (
-                              <div className="grid h-full place-items-center text-[#64748B]">
-                                <ImagePlus size={18} />
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="min-w-0">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <h3 className="truncate text-sm font-semibold text-[#1C2434]">
-                                {preview.title}
-                              </h3>
-
-                              <span
-                                className={[
-                                  'rounded-md px-2 py-1 text-[11px] font-semibold',
-                                  getHeroSlideStatusClasses(status),
-                                ].join(' ')}
-                              >
-                                {status.label}
-                              </span>
-                            </div>
-
-                            <p className="mt-1 truncate text-sm text-[#64748B]">
-                              {preview.caption || '-'}
-                            </p>
-
-                            <p className="mt-1 text-xs text-[#64748B]">
-                              {status.helperText}
-                            </p>
-                          </div>
-
-                          <div className="flex items-center justify-end gap-2">
-                            <Pencil size={16} className="text-[#64748B]" />
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                ) : null}
-              </div>
-            </section>
-          </div>
-
-          <form className="h-fit rounded-lg border border-[#E2E8F0] bg-white" onSubmit={saveSlide}>
-            <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#E2E8F0] px-5 py-4">
-              <div>
-                <h2 className="text-base font-semibold text-[#1C2434]">
-                  {editingSlide ? 'Edit Slide' : 'New Slide'}
-                </h2>
-
-                <p className="text-sm text-[#64748B]">
-                  {editingSlide
-                    ? 'Edit the text, media, and button that visitors see on the homepage.'
-                    : 'Add a new slide for the homepage hero carousel.'}
-                </p>
-              </div>
-
-              {editingSlide ? (
-                <Button
-                  className="inline-flex items-center gap-1.5"
-                  disabled={isSaving}
-                  size="sm"
-                  type="button"
-                  variant="danger"
-                  onClick={() => deleteSlide(editingSlide.id)}
-                >
-                  <Trash2 size={14} />
-                  Delete
-                </Button>
-              ) : null}
-            </div>
-
-            <div className="grid gap-4 p-5">
-              <div className="rounded-lg border border-[#3C50E0]/15 bg-[#F1F5F9] px-4 py-3 text-sm text-[#64748B]">
-                This form only controls content visitors can see in the Home hero.
-              </div>
-
-              <Field label="Headline">
-                <input
-                  className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
-                  value={form.title}
-                  onChange={(event) =>
-                    setForm((current) => ({
-                      ...current,
-                      title: event.target.value,
-                    }))
-                  }
-                />
-              </Field>
-
-              <Field label="Caption">
-                <textarea
-                  className="min-h-24 rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
-                  value={form.caption}
-                  onChange={(event) =>
-                    setForm((current) => ({
-                      ...current,
-                      caption: event.target.value,
-                    }))
-                  }
-                />
-              </Field>
-
-              <div className="rounded-lg border border-[#E2E8F0] p-4">
-                <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <h3 className="text-sm font-semibold text-[#1C2434]">Hero Image or Video</h3>
-
-                    <p className="text-sm text-[#64748B]">
-                      {form.mediaPath
-                        ? 'Media selected from Gallery Library.'
-                        : 'No media selected.'}
-                    </p>
-                  </div>
-
-                  <Button
-                    className="inline-flex items-center gap-2"
-                    disabled={isBusy}
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsImagePickerOpen(true)}
-                  >
-                    <ImagePlus size={15} />
-                    Choose Image
-                  </Button>
-                  <Button
-                    className="inline-flex items-center gap-2"
-                    disabled={isBusy}
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsAssetPickerOpen(true)}
-                  >
-                    Choose Video
-                  </Button>
-                </div>
-
-                {form.mediaPath ? (
-                  <div className="overflow-hidden rounded-lg bg-[#F1F5F9]">
-                    {form.mediaType === 'VIDEO' ? (
-                      <video
-                        className="aspect-video w-full object-cover"
-                        src={adminApi.publicAssetUrl(form.mediaPath)}
-                        muted
-                      />
-                    ) : (
-                      <img
-                        className="aspect-video w-full object-cover"
-                        src={adminApi.publicAssetUrl(form.mediaPath)}
-                        alt={form.mediaAlt || 'Hero media'}
-                      />
-                    )}
-                  </div>
-                ) : null}
-              </div>
-
-              <Field label="Image Description">
-                <input
-                  className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
-                  value={form.mediaAlt}
-                  onChange={(event) =>
-                    setForm((current) => ({
-                      ...current,
-                      mediaAlt: event.target.value,
-                    }))
-                  }
-                />
-              </Field>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Button Text">
-                  <input
-                    className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
-                    value={form.ctaLabel}
-                    onChange={(event) =>
-                      setForm((current) => ({
-                        ...current,
-                        ctaLabel: event.target.value,
-                      }))
-                    }
-                  />
-                </Field>
-
-                <Field label="Button Link">
-                  <select
-                    className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
-                    value={form.ctaUrl}
-                    onChange={(event) =>
-                      setForm((current) => ({
-                        ...current,
-                        ctaUrl: event.target.value,
-                      }))
-                    }
-                  >
-                    {heroCtaLinkOptions.map((option) => (
-                      <option key={option.label} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                    {form.ctaUrl &&
-                    !heroCtaLinkOptions.some((option) => option.value === form.ctaUrl) ? (
-                      <option value={form.ctaUrl}>Current custom link: {form.ctaUrl}</option>
-                    ) : null}
-                  </select>
-                </Field>
-              </div>
-
-              <div className="grid gap-3 rounded-lg border border-[#E2E8F0] p-4 text-sm text-[#1C2434]">
-                <label className="flex items-center justify-between gap-3">
-                  <span>Show this slide on website</span>
-
-                  <input
-                    checked={form.isActive}
-                    type="checkbox"
-                    onChange={(event) =>
-                      setForm((current) => ({
-                        ...current,
-                        isActive: event.target.checked,
-                      }))
-                    }
-                  />
-                </label>
-              </div>
-
-              <div className="flex justify-end gap-2">
-                <Button
-                  className="inline-flex items-center gap-2"
-                  type="button"
-                  variant="ghost"
-                  onClick={() => {
-                    if (editingSlide) {
-                      setForm(formFromSlide(editingSlide));
-                      return;
-                    }
-
-                    startNewSlide();
-                  }}
-                >
-                  <RotateCcw size={15} />
-                  Reset
-                </Button>
-
-                <Button
-                  className="inline-flex items-center gap-2"
-                  disabled={isBusy}
-                  type="submit"
-                >
-                  <Save size={15} />
-                  {isUploadingImage ? 'Uploading...' : isSaving ? 'Saving...' : 'Save'}
-                </Button>
-              </div>
-            </div>
-          </form>
-        </div>
-
-        <section className="rounded-lg border border-[#E2E8F0] bg-white">
-          <div className="border-b border-[#E2E8F0] px-5 py-4">
-            <h2 className="text-base font-semibold text-[#1C2434]">Info Section</h2>
-            <p className="mt-1 text-sm text-[#64748B]">
-              Choose the News category used by the Home information cards.
-            </p>
-          </div>
-          <div className="grid gap-4 p-5">
-            <Field label="Section title">
-              <input
-                className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
-                disabled={isBusy}
-                value={homeSettings.infoSectionTitle}
-                onChange={(event) =>
-                  setHomeSettings((current) => ({
-                    ...current,
-                    infoSectionTitle: event.target.value,
-                  }))
-                }
-              />
-            </Field>
-            <Field as="div" label="News categories">
-              <div className="grid gap-2 rounded-lg border border-[#E2E8F0] p-3">
-                <p className="text-xs text-[#64748B]">
-                  Choose up to 5 categories. Public Home will show these as Info Section tabs.
-                </p>
-                {newsCategories.map((category) => {
-                  const isSelected = homeSettings.infoSectionCategoryIds.includes(category.id);
-                  const isLimitReached =
-                    !isSelected && homeSettings.infoSectionCategoryIds.length >= 5;
-
-                  return (
-                    <label
-                      className={[
-                        'flex items-center gap-2 text-sm',
-                        isLimitReached ? 'text-[#94A3B8]' : 'text-[#1C2434]',
-                      ].join(' ')}
-                      key={category.id}
-                    >
-                      <input
-                        checked={isSelected}
-                        disabled={isBusy || isLimitReached}
-                        type="checkbox"
-                        onChange={(event) =>
-                          setHomeSettings((current) => {
-                            if (event.target.checked) {
-                              return {
-                                ...current,
-                                infoSectionCategoryIds: [
-                                  ...current.infoSectionCategoryIds,
-                                  category.id,
-                                ].slice(0, 5),
-                              };
-                            }
-
-                            return {
-                              ...current,
-                              infoSectionCategoryIds: current.infoSectionCategoryIds.filter(
-                                (categoryId) => categoryId !== category.id,
-                              ),
-                            };
-                          })
-                        }
-                      />
-                      <span className="flex min-w-0 flex-1 items-center justify-between gap-3">
-                        <span className="truncate">
-                          {category.name}
-                          {category.isActive ? '' : ' (inactive)'}
-                        </span>
-                        <span className="shrink-0 rounded-md bg-[#F1F5F9] px-2 py-0.5 text-xs font-semibold text-[#64748B]">
-                          {category._count?.posts ?? 0}
-                        </span>
-                      </span>
-                    </label>
-                  );
-                })}
-                <div className="flex items-center justify-between border-t border-[#E2E8F0] pt-2 text-xs text-[#64748B]">
-                  <span>{homeSettings.infoSectionCategoryIds.length}/5 selected</span>
-                  {homeSettings.infoSectionCategoryIds.length ? (
-                    <button
-                      className="font-semibold text-[#3C50E0]"
-                      disabled={isBusy}
-                      type="button"
-                      onClick={() =>
-                        setHomeSettings((current) => ({
-                          ...current,
-                          infoSectionCategoryIds: [],
-                        }))
-                      }
-                    >
-                      Use default cards
-                    </button>
-                  ) : null}
-                </div>
-              </div>
-            </Field>
-            <div className="flex justify-end">
-              <Button disabled={isBusy} type="button" onClick={() => void saveHomeSettings()}>
-                {isSaving ? 'Saving...' : 'Save Info Section'}
+              <Button
+                className="inline-flex items-center gap-2"
+                type="button"
+                onClick={() => navigate(HERO_SLIDE_NEW_PATH)}
+              >
+                <Plus size={16} />
+                Create Slide
               </Button>
             </div>
-          </div>
-        </section>
+          }
+        />
 
-        <CoverImagePickerModal
-          galleries={galleries}
-          open={isImagePickerOpen}
-          title="Choose Hero Image"
-          onClose={() => setIsImagePickerOpen(false)}
-          onSelect={(asset) =>
-            setForm((current) => ({
-              ...current,
-              mediaAlt: asset.alt,
-              mediaPath: asset.path,
-              mediaType: 'IMAGE',
-              posterPath: '',
-            }))
-          }
-          onSelectLocalFile={(file) => void uploadHeroImage(file)}
-        />
-        <CoverImagePickerModal
-          allowUpload={false}
-          allowedKinds={['VIDEO']}
-          galleries={galleries}
-          open={isAssetPickerOpen}
-          title="Choose Hero Video"
-          onClose={() => setIsAssetPickerOpen(false)}
-          onSelect={(asset) =>
-            setForm((current) => ({
-              ...current,
-              mediaAlt: asset.alt,
-              mediaPath: asset.path,
-              mediaType: 'VIDEO',
-            }))
-          }
-        />
+        <NewsMessageBanner message={message} />
+
+        <div className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#E2E8F0] px-5 py-4">
+            <div>
+              <h2 className="font-semibold text-[#1C2434]">Hero slides</h2>
+
+              <p className="mt-0.5 text-sm text-[#64748B]">
+                {slides.length} {slides.length === 1 ? 'slide' : 'slides'} · {activeCount} active
+              </p>
+            </div>
+          </div>
+
+          {isLoading ? (
+            <div className="p-10 text-center text-sm text-[#64748B]">Loading hero slides...</div>
+          ) : !slides.length ? (
+            <div className="p-10 text-center">
+              <p className="font-medium text-[#1C2434]">No hero slides yet.</p>
+              <p className="mt-1 text-sm text-[#64748B]">
+                Create a slide to show it in the homepage hero carousel.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="divide-y divide-[#E2E8F0] lg:hidden">
+                {slides.map((slide) => (
+                  <article className="p-4" key={slide.id}>
+                    <div className="flex min-w-0 gap-3">
+                      <HeroMediaThumbnail slide={slide} />
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-3">
+                          <h3 className="min-w-0 truncate text-sm font-semibold text-[#1C2434]">
+                            {slideLabel(slide)}
+                          </h3>
+
+                          <HeroRowActions
+                            deletingId={deletingId}
+                            iconSize={14}
+                            slide={slide}
+                            onDelete={() => void deleteSlide(slide)}
+                          />
+                        </div>
+
+                        {slide.caption ? (
+                          <p className="mt-1 line-clamp-2 text-xs text-[#64748B]">
+                            {slide.caption}
+                          </p>
+                        ) : null}
+
+                        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-[#64748B]">
+                          <HeroStatusBadge isActive={slide.isActive} />
+                          <span>{slide.ctaLabel || 'Learn More'}</span>
+                          <span>•</span>
+                          <span className="truncate">{getHeroCtaLinkLabel(slide.ctaUrl)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              <div className="hidden overflow-x-auto lg:block">
+                <table className="w-full min-w-[960px] border-collapse">
+                  <thead>
+                    <tr className="border-b border-[#E2E8F0] bg-[#F1F5F9] text-left">
+                      <th className={headerCellClass}>Hero Image or Video</th>
+                      <th className={headerCellClass}>Headline</th>
+                      <th className={headerCellClass}>Caption</th>
+                      <th className={headerCellClass}>Button Text</th>
+                      <th className={headerCellClass}>Button Link</th>
+                      <th className={headerCellClass}>Status</th>
+                      <th className={`${headerCellClass} text-right`}>Actions</th>
+                    </tr>
+                  </thead>
+
+                  <tbody className="divide-y divide-[#E2E8F0]">
+                    {slides.map((slide) => (
+                      <tr className="transition-colors hover:bg-[#F1F5F9]/50" key={slide.id}>
+                        <td className="px-5 py-4 align-middle">
+                          <HeroMediaThumbnail slide={slide} />
+                        </td>
+
+                        <td className="max-w-[220px] px-5 py-4 align-middle">
+                          <span className="line-clamp-2 text-sm font-semibold text-[#1C2434]">
+                            {slideLabel(slide)}
+                          </span>
+                        </td>
+
+                        <td className="max-w-[280px] px-5 py-4 align-middle">
+                          <span className="line-clamp-2 text-sm text-[#64748B]">
+                            {slide.caption || '-'}
+                          </span>
+                        </td>
+
+                        <td className="px-5 py-4 align-middle text-sm text-[#1C2434]">
+                          {slide.ctaLabel || (
+                            <span className="text-[#64748B]">Learn More (default)</span>
+                          )}
+                        </td>
+
+                        <td className="px-5 py-4 align-middle text-sm text-[#64748B]">
+                          {getHeroCtaLinkLabel(slide.ctaUrl)}
+                        </td>
+
+                        <td className="px-5 py-4 align-middle">
+                          <HeroStatusBadge isActive={slide.isActive} />
+                        </td>
+
+                        <td className="px-5 py-4 align-middle">
+                          <HeroRowActions
+                            deletingId={deletingId}
+                            slide={slide}
+                            onDelete={() => void deleteSlide(slide)}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+        </div>
       </section>
     </AppShell>
   );
