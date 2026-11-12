@@ -42,7 +42,6 @@ const ENTITY_TYPES: Array<[RegExp, string]> = [
   [/^\/partners/, "Partner"],
   [/^\/popup-promoted/, "PopupPromoted"],
   [/^\/contact-inquiries/, "ContactInquiry"],
-  [/^\/calendar/, "CalendarEvent"],
   [/^\/contact-page/, "ContactPage"],
 ];
 

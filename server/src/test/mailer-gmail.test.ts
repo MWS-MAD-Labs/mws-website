@@ -2,6 +2,10 @@ import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:te
 import type { ContactInquiry } from "@prisma/client";
 import { JWT } from "google-auth-library";
 import nodemailer from "nodemailer";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { serviceAccountCredentials } from "../lib/google-service-account";
 import * as mailer from "../lib/mailer";
 import {
   ContactInquiryService,
@@ -27,6 +31,10 @@ const ENV_KEYS = [
   "RECAPTCHA_MIN_SCORE",
   "CONTACT_RATE_LIMIT_PER_IP",
   "CONTACT_RATE_LIMIT_PER_EMAIL",
+  "EMAIL_PROVIDER",
+  "GMAIL_SENDER_EMAIL",
+  "GMAIL_SENDER_NAME",
+  "WEBSITE_GMAIL_CREDENTIALS_FILE",
 ];
 const originalEnv = Object.fromEntries(ENV_KEYS.map((key) => [key, process.env[key]]));
 
@@ -168,15 +176,105 @@ describe("MAIL_TRANSPORT", () => {
     expect(mailer.isMailerConfigured()).toBe(false);
   });
 
-  it("gmail never falls back to SMTP", async () => {
+  it("gmail without a service account does not fall back to SMTP", async () => {
     useSmtp();
     process.env.MAIL_TRANSPORT = "gmail";
+    const smtpSend = spyOn(nodemailer, "createTransport");
+
+    const result = await mailer.sendMail(message);
+
+    expect(result).toEqual({
+      sent: false,
+      reason:
+        "MAIL_TRANSPORT=gmail but service account credentials or GMAIL_SENDER_EMAIL / MAIL_SENDER are not set.",
+    });
+    expect(smtpSend).not.toHaveBeenCalled();
+    expect(mailer.isMailerConfigured()).toBe(false);
+  });
+});
+
+describe("EMAIL_PROVIDER and Gmail selection", () => {
+  it("does not fall back to SMTP when Google refuses the Gmail send", async () => {
+    useServiceAccount();
+    useSmtp();
+    process.env.EMAIL_PROVIDER = "gmail";
+    spyOn(console, "error").mockImplementation(() => undefined);
+    const gmailRequest = spyOn(JWT.prototype, "request").mockRejectedValue(
+      new Error("access_denied: Requested client not authorized.") as never,
+    );
     const createTransport = spyOn(nodemailer, "createTransport");
 
     const result = await mailer.sendMail(message);
 
-    expect(result.sent).toBe(false);
+    expect(result).toEqual({ sent: false, reason: "access_denied: Requested client not authorized." });
+    expect(gmailRequest).toHaveBeenCalledTimes(1);
     expect(createTransport).not.toHaveBeenCalled();
+  });
+
+  it("takes precedence over MAIL_TRANSPORT", async () => {
+    useServiceAccount();
+    useSmtp();
+    process.env.MAIL_TRANSPORT = "smtp";
+    process.env.EMAIL_PROVIDER = "gmail";
+    const gmailRequest = spyOn(JWT.prototype, "request").mockResolvedValue({ data: {} } as never);
+    const createTransport = spyOn(nodemailer, "createTransport");
+
+    const result = await mailer.sendMail(message);
+
+    expect(result).toEqual({ sent: true });
+    expect(gmailRequest).toHaveBeenCalledTimes(1);
+    expect(createTransport).not.toHaveBeenCalled();
+  });
+
+  it("sends as GMAIL_SENDER_EMAIL with GMAIL_SENDER_NAME", async () => {
+    useServiceAccount();
+    process.env.GMAIL_SENDER_EMAIL = "no-reply@millennia21.id";
+    process.env.GMAIL_SENDER_NAME = "Website Notifications";
+    let client: JWT | undefined;
+    let raw = "";
+    spyOn(JWT.prototype, "request").mockImplementation(function (this: JWT, opts) {
+      client = this;
+      raw = ((opts as { data: { raw: string } }).data).raw;
+      return Promise.resolve({ data: {} }) as never;
+    });
+
+    await mailer.sendMail(message);
+
+    expect(client?.subject).toBe("no-reply@millennia21.id");
+    const mime = decodeRaw(raw);
+    expect(mime).toContain("<no-reply@millennia21.id>");
+    expect(mime).toContain(Buffer.from("Website Notifications").toString("base64"));
+  });
+});
+
+describe("WEBSITE_GMAIL_CREDENTIALS_FILE", () => {
+  it("reads the service account from a folder holding one JSON key", () => {
+    const dir = mkdtempSync(path.join(tmpdir(), "mws-sa-"));
+    try {
+      writeFileSync(
+        path.join(dir, "key.json"),
+        JSON.stringify({
+          type: "service_account",
+          client_email: "file-mailer@mws.iam.gserviceaccount.com",
+          private_key: "-----BEGIN PRIVATE KEY-----\nxyz\n-----END PRIVATE KEY-----\n",
+        }),
+      );
+      process.env.WEBSITE_GMAIL_CREDENTIALS_FILE = dir;
+
+      expect(serviceAccountCredentials()).toEqual({
+        clientEmail: "file-mailer@mws.iam.gserviceaccount.com",
+        privateKey: "-----BEGIN PRIVATE KEY-----\nxyz\n-----END PRIVATE KEY-----",
+      });
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("returns null when the path does not exist", () => {
+    spyOn(console, "error").mockImplementation(() => undefined);
+    process.env.WEBSITE_GMAIL_CREDENTIALS_FILE = "/nonexistent/mws-key.json";
+
+    expect(serviceAccountCredentials()).toBeNull();
   });
 });
 

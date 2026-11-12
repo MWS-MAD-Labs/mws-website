@@ -9,8 +9,9 @@ import {
   createServiceAccountClient,
   serviceAccountCredentials,
 } from "../lib/google-service-account";
+import { gmailSenderEmail } from "../lib/mailer";
 
-const mailSender = process.env.MAIL_SENDER?.trim();
+const mailSender = gmailSenderEmail();
 const calendarId = process.env.GOOGLE_CALENDAR_ID?.trim();
 const calendarApiKey = process.env.GOOGLE_CALENDAR_API_KEY?.trim();
 
@@ -37,7 +38,9 @@ const hints: Record<string, string> = {
 if (checks.length) {
   const credentials = serviceAccountCredentials();
   if (!credentials) {
-    console.log("FAIL  GOOGLE_SA_CLIENT_EMAIL / GOOGLE_SA_PRIVATE_KEY are not set.");
+    console.log(
+      "FAIL  No service account: set GOOGLE_SA_CLIENT_EMAIL / GOOGLE_SA_PRIVATE_KEY or WEBSITE_GMAIL_CREDENTIALS_FILE.",
+    );
   } else {
     for (const check of checks) {
       try {

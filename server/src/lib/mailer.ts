@@ -26,23 +26,31 @@ let gmailClient: JWT | null = null;
 
 // ---------- Google service account (Gmail API) ----------
 
+/** The Workspace mailbox the service account sends as (GMAIL_SENDER_EMAIL, or legacy MAIL_SENDER). */
+export function gmailSenderEmail() {
+  return process.env.GMAIL_SENDER_EMAIL?.trim() || process.env.MAIL_SENDER?.trim() || null;
+}
+
 function gmailConfig() {
   const credentials = serviceAccountCredentials();
-  const sender = process.env.MAIL_SENDER?.trim();
+  const sender = gmailSenderEmail();
 
   if (!credentials || !sender) return null;
 
   return {
     credentials,
     sender,
-    senderName: process.env.MAIL_SENDER_NAME?.trim() || "Millennia World School",
+    senderName:
+      process.env.GMAIL_SENDER_NAME?.trim() ||
+      process.env.MAIL_SENDER_NAME?.trim() ||
+      "Millennia World School",
   };
 }
 
 type GmailConfig = NonNullable<ReturnType<typeof gmailConfig>>;
 
 function getGmailClient(config: GmailConfig) {
-  // Only gmail.send, impersonating MAIL_SENDER (a service account has no mailbox).
+  // Only gmail.send, impersonating the sender (a service account has no mailbox).
   gmailClient ??= createServiceAccountClient(config.credentials, {
     scopes: [GMAIL_SEND_SCOPE],
     subject: config.sender,
@@ -160,14 +168,18 @@ async function sendWithSmtp(
 type MailTransport = "gmail" | "smtp" | "auto";
 
 /**
- * MAIL_TRANSPORT picks how email is sent: "smtp" or "gmail" forces one,
- * empty/"auto" uses the service account when it is set, otherwise SMTP.
- * Forcing "smtp" keeps GOOGLE_SA_* in .env for other uses while Gmail
- * delegation is not approved yet.
+ * EMAIL_PROVIDER (or the older MAIL_TRANSPORT) picks how email is sent:
+ * "smtp" and "gmail" use only that transport; an empty/"auto" setting tries
+ * Gmail first and falls back to SMTP if Gmail is unavailable.
  */
 function mailTransport(): MailTransport {
-  const value = process.env.MAIL_TRANSPORT?.trim().toLowerCase();
+  const value = (process.env.EMAIL_PROVIDER?.trim() || process.env.MAIL_TRANSPORT?.trim() || "")
+    .toLowerCase();
   return value === "gmail" || value === "smtp" ? value : "auto";
+}
+
+function transportSettingName() {
+  return process.env.EMAIL_PROVIDER?.trim() ? "EMAIL_PROVIDER" : "MAIL_TRANSPORT";
 }
 
 export function isMailerConfigured() {
@@ -180,24 +192,44 @@ export function isMailerConfigured() {
 export async function sendMail(message: MailMessage): Promise<MailResult> {
   const transport = mailTransport();
 
-  if (transport !== "smtp") {
-    const gmail = gmailConfig();
-    if (gmail) return sendWithGmail(gmail, message);
-    if (transport === "gmail") {
-      return { sent: false, reason: "MAIL_TRANSPORT=gmail but GOOGLE_SA_* or MAIL_SENDER is not set." };
+  if (transport === "smtp") {
+    const smtp = smtpConfig();
+    if (smtp) return sendWithSmtp(smtp, message);
+    return {
+      sent: false,
+      reason: `${transportSettingName()}=smtp but SMTP_HOST, SMTP_USER or SMTP_PASS is not set.`,
+    };
+  }
+
+  const gmail = gmailConfig();
+  if (transport === "gmail") {
+    if (!gmail) {
+      return {
+        sent: false,
+        reason: `${transportSettingName()}=gmail but service account credentials or GMAIL_SENDER_EMAIL / MAIL_SENDER are not set.`,
+      };
     }
+    return sendWithGmail(gmail, message);
+  }
+
+  let gmailFailure: string | null = null;
+
+  if (gmail) {
+    const result = await sendWithGmail(gmail, message);
+    if (result.sent) return result;
+    gmailFailure = result.reason;
   }
 
   const smtp = smtpConfig();
-  if (smtp) return sendWithSmtp(smtp, message);
+  if (smtp) {
+    if (gmailFailure) {
+      console.warn(`[MAIL] Gmail API not used (${gmailFailure}); sending through SMTP instead.`);
+    }
+    return sendWithSmtp(smtp, message);
+  }
 
-  return {
-    sent: false,
-    reason:
-      transport === "smtp"
-        ? "MAIL_TRANSPORT=smtp but SMTP_HOST, SMTP_USER or SMTP_PASS is not set."
-        : "Email is not configured.",
-  };
+  if (gmailFailure) return { sent: false, reason: gmailFailure };
+  return { sent: false, reason: "Email is not configured." };
 }
 
 export function resetMailerForTest() {
